@@ -3,7 +3,8 @@
 # Runs only after the workflow "verify" has passed for a commit on main. The page is rebuilt from that
 # commit with the verification report of that very run (artifact "verification"), so the status line in
 # the program ("… Testreihen bestanden … – GitHub Actions …") is the result of the CI run of exactly
-# these sources (tools/build-standalone.cjs compares the file fingerprint).
+# these sources (tools/build-standalone.cjs compares the file fingerprint). The deployed URL, the status
+# line and the SHA-256 of the published files are recorded as check run "pages report" of the commit.
 name: pages
 on:
   workflow_run:
@@ -15,6 +16,7 @@ permissions:
   pages: write
   id-token: write
   actions: read
+  checks: write
 concurrency:
   group: pages
   cancel-in-progress: true
@@ -26,15 +28,15 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           ref: ${{ github.event.workflow_run.head_sha }}
           fetch-depth: 0
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: '22'
       - name: Verification report of the successful verify run
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: verification
           path: ci-verification
@@ -44,7 +46,8 @@ jobs:
         run: |
           set -e
           cp ci-verification/build/reports/VERIFICATION.json build/reports/VERIFICATION.json
-          node tools/build-standalone.cjs --version "$(git describe --tags --always)"
+          VERSION="$(sed -n -E 's/^## ([0-9]+\.[0-9]+\.[0-9]+) .*/\1/p' CHANGELOG.md | head -n 1)"
+          node tools/build-standalone.cjs --version "${VERSION}"
           grep -o '"verification":"[^"]*"' dist/BUILD_INFO.json
           grep -q 'GitHub Actions' dist/BUILD_INFO.json
           mkdir -p site
@@ -53,9 +56,28 @@ jobs:
           cp dist/BUILD_INFO.json site/BUILD_INFO.json
           cp build/STANDARDS_MANIFEST.json site/STANDARDS_MANIFEST.json
           cp build/reports/VERIFICATION.json site/VERIFICATION.json
-      - uses: actions/configure-pages@v5
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/configure-pages@v6
+      - uses: actions/upload-pages-artifact@v5
         with:
           path: site
       - id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
+      - name: Publish the deployment as check run "pages report"
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PAGE_URL: ${{ steps.deployment.outputs.page_url }}
+          HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          {
+            echo "page: ${PAGE_URL:-not deployed}"
+            echo "verify run: ${{ github.event.workflow_run.html_url }}"
+            grep -o '"version":"[^"]*"' dist/BUILD_INFO.json || true
+            grep -o '"verification":"[^"]*"' dist/BUILD_INFO.json || true
+            (cd site && sha256sum *) || true
+          } > pages-report.txt
+          rc=0
+          node .github/scripts/check-run.cjs --name "pages report" --sha "${HEAD_SHA}" \
+            --gate "${{ steps.deployment.outcome }}" --gate-label "Deployment (actions/deploy-pages)" --attach pages-report.txt > check-run.json || rc=$?
+          gh api -X POST "repos/${GITHUB_REPOSITORY}/check-runs" --input check-run.json > /dev/null || echo "::warning::check run could not be published"
+          exit "${rc}"

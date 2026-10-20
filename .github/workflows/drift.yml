@@ -2,7 +2,8 @@
 # (tools/check-drift.cjs: git ls-remote of every source in build/STANDARDS_MANIFEST.json; reviewed and
 # deliberately deferred versions are listed with their reason in build/drift-acknowledged.json).
 # A red run means: review the new version (applicability date, KoSIT configuration), then re-pin
-# (docs/BUILD-RULES.md) or acknowledge it with a reason.
+# (docs/BUILD-RULES.md) or acknowledge it with a reason. The report is also recorded as check run
+# "drift report" of the checked commit.
 name: drift
 on:
   schedule:
@@ -10,18 +11,30 @@ on:
   workflow_dispatch:
 permissions:
   contents: read
+  checks: write
 jobs:
   drift:
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: '22'
       - name: Upstream versions vs. pinned versions
+        id: drift
         run: node tools/check-drift.cjs --out build/reports/drift.txt
-      - uses: actions/upload-artifact@v4
+      - name: Publish the result as check run "drift report"
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          rc=0
+          node .github/scripts/check-run.cjs --name "drift report" --sha "${GITHUB_SHA}" \
+            --gate "${{ steps.drift.outcome }}" --gate-label "Versionsabgleich (tools/check-drift.cjs)" --attach build/reports/drift.txt > check-run.json || rc=$?
+          gh api -X POST "repos/${GITHUB_REPOSITORY}/check-runs" --input check-run.json > /dev/null || echo "::warning::check run could not be published"
+          exit "${rc}"
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: drift

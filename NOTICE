@@ -1,51 +1,640 @@
-E-Rechnung Prüfer — NOTICE (third-party components)
+E-Rechnung Prüfer — NOTICE (third-party components, licences and attributions)
 
-Own code (src/, tools/, test/, patches/): European Union Public Licence 1.2 (EUPL-1.2, see LICENSE).
+Source code of this program (EUPL-1.2, Article 5 "Provision of Source Code"):
+https://github.com/SerhiiAkhnazarov/e-rechnung-pruefer
 
-A. Contained in the program (dist/E-Rechnung-Pruefer.html)
+Own code (src/, tools/, test/, patches/, .github/): European Union Public Licence 1.2 (EUPL-1.2, see
+LICENSE). Parts of src/xsd-validator.js are derived from Apache Xerces-J (A.9). Part E of this file
+reproduces the licence texts and notices of the third-party components verbatim.
 
-- CEN eInvoicing-EN16931 validation artefacts 1.3.16 (Schematron, code lists), compiled to JSON:
-  EUPL-1.2, https://github.com/ConnectingEurope/eInvoicing-EN16931
-- KoSIT xrechnung-schematron v2.6.0 (XRechnung 3.0.2), merged with the Peppol BIS rules that KoSIT selects
-  (src/xsl/rule-list.xml) by KoSIT's own build step: Apache License 2.0,
-  https://github.com/itplr-kosit/xrechnung-schematron
-- KoSIT validator-configuration-xrechnung v2026-08-31 (scenarios, customLevel, assessment logic of
-  default-report.xsl): Apache License 2.0, https://github.com/itplr-kosit/validator-configuration-xrechnung
-- Factur-X 1.09.2 / ZUGFeRD 2.5.2 Schematron, code lists and XML schemas (FNFE-MPE / FeRD) as redistributed by
-  Mustangproject (Apache License 2.0, https://github.com/ZUGFeRD/mustangproject, validator/.../ZF_250).
-  FeRD: "For the use of the ZUGFeRD Technical Artifacts (Schemata and Schematron) the Apache 2.0 license
-  conditions apply." Statement and DIN/CEN notice: legal/FERD-FACTURX-NOTICE.txt
-- OASIS UBL 2.1 schemas (os-UBL-2.1, xsdrt), compiled to validation models: OASIS notice, legal/OASIS-NOTICE.txt
-- UN/CEFACT Cross Industry Invoice D16B schemas, compiled to validation models: UN/CEFACT notice,
-  legal/UNCEFACT-NOTICE.txt
-- fontoxpath 3.34.0 (XPath 3.1), built from source with patches/fontoxpath-pruefer.patch: MIT,
-  https://github.com/FontoXML/fontoxpath
-- xspattern (with patches/xspattern-pruefer.patch), whynot, prsc: MIT, https://github.com/bwrrp
-- Unicode Character Database 15.0.0 (general categories and blocks packed by xspattern): Unicode License v3,
-  https://www.unicode.org/license.txt
+A. Contained in the program (dist/E-Rechnung-Pruefer.html) and in this repository
 
-Statement required by DIN/CEN (FeRD rights of use): Der E-Rechnung Prüfer ist eine Anwendung der
-Veröffentlichung ZUGFeRD 2.5.2 / Factur-X 1.09.2 und der Europäischen Norm EN 16931. Die Wiedergabe von
-Inhalten der EN 16931 erfolgt mit Erlaubnis von CEN und DIN (Inhaber der Urheberrechte).
+A.1  CEN eInvoicing-EN16931 validation artefacts 1.3.16 (Schematron, code lists),
+     https://github.com/ConnectingEurope/eInvoicing-EN16931 — EUPL-1.2 (the same text as LICENSE).
+     Notice in the source files: "Licensed under European Union Public Licence (EUPL) version 1.2."
+     Modification: compiled from Schematron to JSON (build/schemas/EN16931-*.json, tools/compile-sch.cjs,
+     2026); rules, tests and messages unchanged.
+A.2  KoSIT xrechnung-schematron v2.6.0 (XRechnung 3.0.2), https://github.com/itplr-kosit/xrechnung-schematron
+     — Apache License 2.0 (E.12). KoSIT's own build step (xrechnung-schematron/src/xsl/peppol-into-xr.xsl)
+     merges the Peppol BIS Billing 3.0 rules listed in src/xsl/rule-list.xml, together with the Peppol
+     function library (u:gln, u:mod11, u:checkCodiceIPA, u:TinVerification, ...) and the variables these
+     rules use, into the XRechnung rule set; the program contains exactly this merged rule set of KoSIT's
+     Apache-2.0 release. The LICENSE file of that repository adds a statement on the rights of CEN and DIN
+     after the Apache License (E.11).
+     Modification: compiled to JSON (build/schemas/XRechnung-*.json, 2026); rules unchanged.
+A.3  KoSIT validator-configuration-xrechnung v2026-08-31,
+     https://github.com/itplr-kosit/validator-configuration-xrechnung — Apache License 2.0 (E.12) with
+     NOTICE (E.9).
+     Modification: scenarios and error levels (customLevel) compiled to build/scenarios.json; the assessment
+     of src/default-report.xsl is re-implemented in src/pruefer-core.js (2026).
+A.4  Factur-X 1.09.2 / ZUGFeRD 2.5.2 Schematron, code lists and XML schemas (FNFE-MPE / FeRD) as
+     redistributed by Mustangproject, https://github.com/ZUGFeRD/mustangproject
+     (validator/src/main/resources/schematron/ZF_250, .../schema/ZF_250) — Apache License 2.0 (E.12) with
+     the Mustangproject NOTICE (E.10). FeRD: "For the use of the ZUGFeRD Technical Artifacts (Schemata and
+     Schematron) the Apache 2.0 license conditions apply." Statement and DIN/CEN notice:
+     legal/FERD-FACTURX-NOTICE.txt.
+     Modification: compiled to JSON (build/schemas/FACTUR-X-*.json, build/xsd/FACTUR-X-*.json, 2026);
+     rules and schema content unchanged.
+A.5  OASIS UBL 2.1 schemas (os-UBL-2.1, xsdrt), compiled to validation models (build/xsd/UBL-*.json):
+     OASIS notice, legal/OASIS-NOTICE.txt.
+A.6  UN/CEFACT Cross Industry Invoice D16B schemas, compiled to a validation model (build/xsd/CII-D16B.json):
+     UN/CEFACT notice, legal/UNCEFACT-NOTICE.txt.
+A.7  fontoxpath 3.34.0 (XPath 3.1 engine), https://github.com/FontoXML/fontoxpath — MIT (E.1). Built from
+     the source (commit 7506ae0cd03d) with patches/fontoxpath-pruefer.patch into vendor/fontoxpath.iife.min.js
+     (contained in the program) and vendor/fontoxpath.cjs, vendor/fontoxpath.iife.js (Node, debugging).
+     The bundles contain these dependencies, all https://github.com/bwrrp:
+     xspattern (commit 953c958bf18f, with patches/xspattern-pruefer.patch) — MIT (E.2);
+     whynot 5.0.0 — MIT (E.3); prsc 4.0.0 — MIT (E.4).
+A.8  Unicode Character Database 15.0.0 (general categories and blocks from UnicodeData.txt and Blocks.txt,
+     "© 2022 Unicode®, Inc.", packed into the tables of xspattern) — Unicode License V3 (E.7).
+A.9  Apache Xerces-J 2.12.2 as contained in OpenJDK 21 (module java.xml, packages
+     com.sun.org.apache.xerces.internal.*) — Apache License 2.0 (E.12) with the Apache Xerces NOTICE (E.8).
+     Parts of src/xsd-validator.js are JavaScript translations of, or follow closely, these Xerces classes:
+     impl.dv.xs.DecimalDV, AbstractDateTimeDV, YearDV, YearMonthDV, MonthDV, MonthDayDV, DayDV, AnyURIDV;
+     impl.dv.util.Base64; util.URI; util.XMLChar (name character classes); impl.xs.models.CMBuilder and
+     XSDFACM (content-model construction, repeating leaves, constant-space occurrence check);
+     impl.xs.XMLSchemaValidator (order of the assessment steps and error codes).
+     Copyright of the originals: The Apache Software Foundation; Oracle and/or its affiliates (Base64,
+     CMBuilder, XSDFACM, XMLSchemaValidator).
+     Modification: translated to JavaScript and adapted to this validator (2026).
+A.10 esbuild 0.28.2: the module wrapper and helper code that esbuild inserts into the bundles of A.7
+     — MIT (E.5).
 
-B. Not contained (licence does not allow redistribution, or no licence)
+B. Contained only in this repository (not in the program)
 
-- OpenPeppol Peppol BIS Billing 3.0 rule sets PEPPOL-EN16931-UBL.sch / -CII.sch (release 3.0.21): the
-  repository https://github.com/OpenPEPPOL/peppol-bis-invoice-3 contains no licence; the BIS document says it
-  "may not be modified, re-distribute, sold or repackaged in any other way without the prior consent of
-  OpenPeppol AISBL". The program does not contain them; the user loads the official files himself
-  ("Regelwerke laden"), they are compiled and kept in that browser only. (The subset that KoSIT integrates
-  into XRechnung is part of KoSIT's Apache-2.0 release, see A.)
+B.1  slimdom 4.3.5 (DOM implementation for the Node tests), https://github.com/bwrrp/slimdom.js, bundled
+     with prsc into vendor/slimdom.cjs — MIT (E.6, E.4).
+B.2  KoSIT validator 1.6.3, https://github.com/itplr-kosit/validator — Apache License 2.0 (E.12) with NOTICE
+     (E.13): test/kosit-reference/KositReference.java re-implements its processing pipeline step by step
+     after the classes de.kosit.validationtool.* (test tool, not part of the program).
+     Modification: re-implemented as one Java program on JDK 21 + Saxon HE (2026).
 
-C. Used only for building and verification (not contained in the program)
+C. Not contained (licence does not allow redistribution, or no licence)
+
+C.1  OpenPeppol Peppol BIS Billing 3.0 rule sets PEPPOL-EN16931-UBL.sch / -CII.sch (release 3.0.21): the
+     repository https://github.com/OpenPEPPOL/peppol-bis-invoice-3 contains no licence; the BIS document says
+     it "may not be modified, re-distribute, sold or repackaged in any other way without the prior consent
+     of OpenPeppol AISBL". The program does not contain them; the user loads the official files himself
+     ("Regelwerke laden"), they are compiled and kept in that browser only. (The subset that KoSIT
+     integrates into XRechnung is part of KoSIT's Apache-2.0 release, see A.2.)
+
+D. Used only for building and verification (fetched by tools/fetch-sources.cjs or installed by the CI; not
+   contained in the program or in this repository)
 
 - Saxon HE 12.8: Mozilla Public License 2.0, https://github.com/Saxonica/Saxon-HE
 - KoSIT validator 1.6.3 (standalone JAR, reference): Apache License 2.0, https://github.com/itplr-kosit/validator
 - ISO Schematron XSLT2 skeleton 2010-07-10 (via phax/ph-schematron): MIT-style licence of the skeleton,
   ph-schematron Apache License 2.0
-- slimdom (DOM for the Node tests): MIT, https://github.com/bwrrp/slimdom.js
-- esbuild 0.28.2: MIT; Playwright 1.56.0: Apache License 2.0; pdf.js (pdfjs-dist 6.2.108): Apache License 2.0
+- Playwright 1.56.0: Apache License 2.0; the browser builds it installs from the Playwright CDN (Chromium,
+  WebKit, Firefox) are used under their own licences and are not redistributed
+- pdf.js (pdfjs-dist 6.2.108): Apache License 2.0; esbuild 0.28.2 (the build tool): MIT
 - veraPDF 1.30.3 (CI only, org.verapdf:validation-model-jakarta): GPL-3.0-or-later / MPL-2.0 (dual)
-- OpenJDK 21 (javax.xml.validation / Xerces as XSD reference): GPL-2.0 with Classpath Exception
+- OpenJDK 21 (javax.xml.validation / Xerces as XSD reference): GPL-2.0 with Classpath Exception; its Xerces
+  code: Apache License 2.0
 - Test corpora: KoSIT xrechnung-testsuite (Apache 2.0), ZUGFeRD/corpus (Apache 2.0), CEN test files (EUPL-1.2),
   Peppol examples and unit tests (used as test input only, not redistributed)
+
+Statement required by DIN/CEN (FeRD rights of use): Der E-Rechnung Prüfer ist eine Anwendung der
+Veröffentlichung ZUGFeRD 2.5.2 / Factur-X 1.09.2 und der Europäischen Norm EN 16931. Die Wiedergabe von
+Inhalten der EN 16931 erfolgt mit Erlaubnis von CEN und DIN (Inhaber der Urheberrechte).
+
+E. Licence texts and notices (verbatim copies of the files named in each heading)
+
+====================================================================================================
+E.1  fontoxpath — MIT License
+Source: https://github.com/FontoXML/fontoxpath, file LICENSE.md at commit 7506ae0cd03dab66f49091ad5a9690eee3b33ce5 (SHA-256 10ed5264d900d4fc84c1ed3c55f26e7449f34c5261d76786ee324b444df83062)
+====================================================================================================
+
+MIT License
+
+Copyright (c) 2017 Fonto Group BV, Martin Middel
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+====================================================================================================
+E.2  xspattern — MIT License
+Source: https://github.com/bwrrp/xspattern.js, file LICENSE at commit 953c958bf18f44efb5c46b0a0d5113a4f6b97640 (SHA-256 2226a93ef2cb85a1d8295d4b19db4761c1758c27c28e6d9f473c7f923812dc53)
+====================================================================================================
+
+The MIT License (MIT)
+
+Copyright (c) 2019 Stef Busking
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software is furnished to do so,
+subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+====================================================================================================
+E.3  whynot — MIT License
+Source: https://github.com/bwrrp/whynot.js, file LICENSE at commit 62d794307828c06e01f9e42a42b8171c3c3b08b1 (SHA-256 b829045e3092ccbc7885f660a003e897dd2a06462cbc5358cae9957e453f1ad0)
+====================================================================================================
+
+The MIT License (MIT)
+
+Copyright (c) 2017 Stef Busking
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software is furnished to do so,
+subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+====================================================================================================
+E.4  prsc — MIT License
+Source: https://github.com/bwrrp/prsc.js, file LICENSE at commit 9058f114cdfc970386457f8ba6671b40c8b51e8c (SHA-256 2226a93ef2cb85a1d8295d4b19db4761c1758c27c28e6d9f473c7f923812dc53)
+====================================================================================================
+
+The MIT License (MIT)
+
+Copyright (c) 2019 Stef Busking
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software is furnished to do so,
+subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+====================================================================================================
+E.5  esbuild — MIT License
+Source: npm package esbuild@0.28.2, file LICENSE.md (SHA-256 b40ec5baec7bb34fa5b1c09521fa3cd52d5fad7adafed74932a2010d3612a681); https://github.com/evanw/esbuild
+====================================================================================================
+
+MIT License
+
+Copyright (c) 2020 Evan Wallace
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+====================================================================================================
+E.6  slimdom — MIT License
+Source: https://github.com/bwrrp/slimdom.js, file LICENSE at commit 54255b440c5b13469985ae9af7c748bb682f58aa (SHA-256 b604a22c98080314dfda4dd7cafcd960ad5a32fa9c0218585c32d33faa77b4b9)
+====================================================================================================
+
+The MIT License (MIT)
+
+Copyright (c) 2017 Stef Busking
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software is furnished to do so,
+subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+====================================================================================================
+E.7  Unicode License V3 (Unicode Character Database 15.0.0)
+Source: https://github.com/unicode-org/unicodetools, file LICENSE at commit 578f6c0516f5f268292ebda50b51848407a06478 (SHA-256 fe5c62b543e287981db198f2acfa0ca732d12591a1024536dc8fd85dacd77104)
+====================================================================================================
+
+UNICODE LICENSE V3
+
+COPYRIGHT AND PERMISSION NOTICE
+
+Copyright © 2001-2024 Unicode, Inc.
+
+NOTICE TO USER: Carefully read the following legal agreement. BY
+DOWNLOADING, INSTALLING, COPYING OR OTHERWISE USING DATA FILES, AND/OR
+SOFTWARE, YOU UNEQUIVOCALLY ACCEPT, AND AGREE TO BE BOUND BY, ALL OF THE
+TERMS AND CONDITIONS OF THIS AGREEMENT. IF YOU DO NOT AGREE, DO NOT
+DOWNLOAD, INSTALL, COPY, DISTRIBUTE OR USE THE DATA FILES OR SOFTWARE.
+
+Permission is hereby granted, free of charge, to any person obtaining a
+copy of data files and any associated documentation (the "Data Files") or
+software and any associated documentation (the "Software") to deal in the
+Data Files or Software without restriction, including without limitation
+the rights to use, copy, modify, merge, publish, distribute, and/or sell
+copies of the Data Files or Software, and to permit persons to whom the
+Data Files or Software are furnished to do so, provided that either (a)
+this copyright and permission notice appear with all copies of the Data
+Files or Software, or (b) this copyright and permission notice appear in
+associated Documentation.
+
+THE DATA FILES AND SOFTWARE ARE PROVIDED "AS IS", WITHOUT WARRANTY OF ANY
+KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT OF
+THIRD PARTY RIGHTS.
+
+IN NO EVENT SHALL THE COPYRIGHT HOLDER OR HOLDERS INCLUDED IN THIS NOTICE
+BE LIABLE FOR ANY CLAIM, OR ANY SPECIAL INDIRECT OR CONSEQUENTIAL DAMAGES,
+OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS,
+WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION,
+ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THE DATA
+FILES OR SOFTWARE.
+
+Except as contained in this notice, the name of a copyright holder shall
+not be used in advertising or otherwise to promote the sale, use or other
+dealings in these Data Files or Software without prior written
+authorization of the copyright holder.
+
+SPDX-License-Identifier: Unicode-3.0
+
+====================================================================================================
+E.8  Apache Xerces Java — NOTICE
+Source: https://github.com/openjdk/jdk21u, file src/java.xml/share/legal/xerces.md ("Apache Xerces v2.12.2", section "Apache Xerces Notice") at tag jdk-21.0.13+8 (SHA-256 of xerces.md 4a6bf6b367193ee68681cb2d9fed30ffc5d62dd2d477bd62e0271707d71b3244)
+====================================================================================================
+
+    =========================================================================
+    == NOTICE file corresponding to section 4(d) of the Apache License,    ==
+    == Version 2.0, in this case for the Apache Xerces Java distribution.  ==
+    =========================================================================
+
+    Apache Xerces Java
+    Copyright 1999-2022 The Apache Software Foundation
+
+    This product includes software developed at
+    The Apache Software Foundation (http://www.apache.org/).
+
+    Portions of this software were originally based on the following:
+    - software copyright (c) 1999, IBM Corporation., http://www.ibm.com.
+    - software copyright (c) 1999, Sun Microsystems., http://www.sun.com.
+    - voluntary contributions made by Paul Eng on behalf of the
+    Apache Software Foundation that were originally developed at iClick, Inc.,
+    software copyright (c) 1999.
+
+====================================================================================================
+E.9  KoSIT validator-configuration-xrechnung — NOTICE
+Source: https://github.com/itplr-kosit/validator-configuration-xrechnung, file NOTICE at commit b436fc4bf05ad501ab5cbb4a53fdffee3d4e18be (SHA-256 aaba5a88c905a8d421877698396755abb3b9563b7655bfb02b76d634c9e861e4)
+====================================================================================================
+
+KoSIT XML-Validator Configuration for XRechnung
+Copyright 2020 Koordinierungsstelle für IT-Standards
+
+This product includes software developed by
+Coordination Office for IT-Standards (http://www.xoev.de/).
+
+====================================================================================================
+E.10  Mustangproject — NOTICE
+Source: https://github.com/ZUGFeRD/mustangproject, file NOTICE at commit c1618af86e687eb8c55f476d7b17575c6f99e3ca (SHA-256 9225d07c21aa4a404ac53372f04c9945b8e1e0d47f466036d27a09527373c6cf)
+====================================================================================================
+
+Mustangproject
+Copyright 2014 Jochen Staerk <jstaerk@usegroup.de>
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+
+Based on Apache PDFBox developed at
+The Apache Software Foundation (http://www.apache.org/).
+
+Apache PDFBox was based on source code originally developed in the PDFBox, JempBox and FontBox projects.
+Copyright (c) 2002-2007, www.pdfbox.org
+Copyright (c) 2006-2007, www.jempbox.org
+
+Apache PDFBox was based on source code originally developed in the PaDaF project.
+Copyright (c) 2010 Atos Worldline SAS
+
+Based on VeraPDF-library https://github.com/veraPDF/veraPDF-library licensed under the MPL 2.0
+Based on PH-Schematron https://github.com/phax/ph-schematron licensed under the APL2.0
+Based on CII2UBL https://github.com/phax/en16931-cii2ubl licensed under the APL2.0
+Based on https://github.com/itplr-kosit/xrechnung-schematron licensed under the APL2.0
+Based on https://github.com/itplr-kosit/xrechnung-visualization licensed under the APL2.0
+Based on https://jcthiele.github.io/xrechnung-visualization-codelist-resolve/ under the APL2.0
+Based on Saxon-HE https://sourceforge.net/projects/saxon/ licensed under the MPL 2.0
+Based on DOM4j https://dom4j.github.io/ licensed under the BSD license
+Based on EN16931 validation artefacts https://github.com/ConnectingEurope/eInvoicing-EN16931 licensed under the EUPL 1.2
+Based on https://xmlgraphics.apache.org/fop under the APL2.0
+Based on https://github.com/saucecontrol/Compact-ICC-Profiles/ under the Public Domain
+http://ftp.gnu.org/gnu/freefont/
+
+====================================================================================================
+E.11  KoSIT xrechnung-schematron — statement on the rights of CEN and DIN (end of its LICENSE file, after the Apache License)
+Source: https://github.com/itplr-kosit/xrechnung-schematron, file LICENSE at commit 217c6cbf8ac9a99d780cefb4f044b2c2778d4744 (SHA-256 of the whole file 57e93bb611b8aeb93ff0f23b271a23291217b0016f6e66297dfd5e9467538a5f), lines after the Apache License text
+====================================================================================================
+
+---------
+Der Standard XRechnung steht unter dem Lizenzabkommen (englischsprachige Originalquelle: https://ec.europa.eu/cefdigital/wiki/display/CEFDIGITAL/Obtaining+a+copy+of+the+European+standard+on+eInvoicing) der Europäischen Kommission (EK) und dem Europäischen Komitee für Normung (CEN):
+
+Der europäische Standard zur elektronischen Rechnungsstellung (EN 16931) wird vom CEN durch Beauftragung der EK entwickelt und veröffentlicht. Die Urheberrechte am Standard liegen beim CEN, Kopien des Standards werden über die nationalen Standardisierungsorganisationen vertrieben.
+Das Abkommen zwischen EK und CEN besagt, dass im Rahmen der geistigen Eigentumsrechte (IPR) am Standard das semantische Datenmodell der Kernelemente einer elektronischen Rechnung (EN 16931-1:2017) und den zwei mandatorischen Syntaxen (CEN/TS 16931-2:2017) unentgeltlich über das Deutsche Institut für Normung (DIN) in ihrer Rolle als nationale Standardisierungsorganisation zu beziehen sind.
+Der Standard XRechnung ist eine Implementierung dieses Datenmodelles und der zwei mandatorischen Syntaxen und die Vervielfältigung ist durch die Genehmigung von CEN und DIN als Urheberrechtsträger gestattet.
+CEN und DIN übernehmen keine Garantie für den Inhalt und die Implementierung dieser Derivate und im Zweifelsfalle ist immer auf die offiziell autorisierten Dokumente des semantischen Datenmodells und der zwei mandatorischen Syntaxen zurückzugreifen, welche durch das DIN zur Verfügung gestellt werden.
+
+====================================================================================================
+E.12  Apache License, Version 2.0
+Source: canonical text https://www.apache.org/licenses/LICENSE-2.0.txt (SHA-256 cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30). The licence copies in the LICENSE files of A.2, A.3, A.4 and in xerces.md (A.9) have the same terms and conditions; they differ from this text only in whitespace, in the example boilerplate of the appendix, or by additions after the licence (A.2: E.11; A.4: notices of Apache PDFBox components, which are not contained here)
+====================================================================================================
+
+
+                                 Apache License
+                           Version 2.0, January 2004
+                        http://www.apache.org/licenses/
+
+   TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION
+
+   1. Definitions.
+
+      "License" shall mean the terms and conditions for use, reproduction,
+      and distribution as defined by Sections 1 through 9 of this document.
+
+      "Licensor" shall mean the copyright owner or entity authorized by
+      the copyright owner that is granting the License.
+
+      "Legal Entity" shall mean the union of the acting entity and all
+      other entities that control, are controlled by, or are under common
+      control with that entity. For the purposes of this definition,
+      "control" means (i) the power, direct or indirect, to cause the
+      direction or management of such entity, whether by contract or
+      otherwise, or (ii) ownership of fifty percent (50%) or more of the
+      outstanding shares, or (iii) beneficial ownership of such entity.
+
+      "You" (or "Your") shall mean an individual or Legal Entity
+      exercising permissions granted by this License.
+
+      "Source" form shall mean the preferred form for making modifications,
+      including but not limited to software source code, documentation
+      source, and configuration files.
+
+      "Object" form shall mean any form resulting from mechanical
+      transformation or translation of a Source form, including but
+      not limited to compiled object code, generated documentation,
+      and conversions to other media types.
+
+      "Work" shall mean the work of authorship, whether in Source or
+      Object form, made available under the License, as indicated by a
+      copyright notice that is included in or attached to the work
+      (an example is provided in the Appendix below).
+
+      "Derivative Works" shall mean any work, whether in Source or Object
+      form, that is based on (or derived from) the Work and for which the
+      editorial revisions, annotations, elaborations, or other modifications
+      represent, as a whole, an original work of authorship. For the purposes
+      of this License, Derivative Works shall not include works that remain
+      separable from, or merely link (or bind by name) to the interfaces of,
+      the Work and Derivative Works thereof.
+
+      "Contribution" shall mean any work of authorship, including
+      the original version of the Work and any modifications or additions
+      to that Work or Derivative Works thereof, that is intentionally
+      submitted to Licensor for inclusion in the Work by the copyright owner
+      or by an individual or Legal Entity authorized to submit on behalf of
+      the copyright owner. For the purposes of this definition, "submitted"
+      means any form of electronic, verbal, or written communication sent
+      to the Licensor or its representatives, including but not limited to
+      communication on electronic mailing lists, source code control systems,
+      and issue tracking systems that are managed by, or on behalf of, the
+      Licensor for the purpose of discussing and improving the Work, but
+      excluding communication that is conspicuously marked or otherwise
+      designated in writing by the copyright owner as "Not a Contribution."
+
+      "Contributor" shall mean Licensor and any individual or Legal Entity
+      on behalf of whom a Contribution has been received by Licensor and
+      subsequently incorporated within the Work.
+
+   2. Grant of Copyright License. Subject to the terms and conditions of
+      this License, each Contributor hereby grants to You a perpetual,
+      worldwide, non-exclusive, no-charge, royalty-free, irrevocable
+      copyright license to reproduce, prepare Derivative Works of,
+      publicly display, publicly perform, sublicense, and distribute the
+      Work and such Derivative Works in Source or Object form.
+
+   3. Grant of Patent License. Subject to the terms and conditions of
+      this License, each Contributor hereby grants to You a perpetual,
+      worldwide, non-exclusive, no-charge, royalty-free, irrevocable
+      (except as stated in this section) patent license to make, have made,
+      use, offer to sell, sell, import, and otherwise transfer the Work,
+      where such license applies only to those patent claims licensable
+      by such Contributor that are necessarily infringed by their
+      Contribution(s) alone or by combination of their Contribution(s)
+      with the Work to which such Contribution(s) was submitted. If You
+      institute patent litigation against any entity (including a
+      cross-claim or counterclaim in a lawsuit) alleging that the Work
+      or a Contribution incorporated within the Work constitutes direct
+      or contributory patent infringement, then any patent licenses
+      granted to You under this License for that Work shall terminate
+      as of the date such litigation is filed.
+
+   4. Redistribution. You may reproduce and distribute copies of the
+      Work or Derivative Works thereof in any medium, with or without
+      modifications, and in Source or Object form, provided that You
+      meet the following conditions:
+
+      (a) You must give any other recipients of the Work or
+          Derivative Works a copy of this License; and
+
+      (b) You must cause any modified files to carry prominent notices
+          stating that You changed the files; and
+
+      (c) You must retain, in the Source form of any Derivative Works
+          that You distribute, all copyright, patent, trademark, and
+          attribution notices from the Source form of the Work,
+          excluding those notices that do not pertain to any part of
+          the Derivative Works; and
+
+      (d) If the Work includes a "NOTICE" text file as part of its
+          distribution, then any Derivative Works that You distribute must
+          include a readable copy of the attribution notices contained
+          within such NOTICE file, excluding those notices that do not
+          pertain to any part of the Derivative Works, in at least one
+          of the following places: within a NOTICE text file distributed
+          as part of the Derivative Works; within the Source form or
+          documentation, if provided along with the Derivative Works; or,
+          within a display generated by the Derivative Works, if and
+          wherever such third-party notices normally appear. The contents
+          of the NOTICE file are for informational purposes only and
+          do not modify the License. You may add Your own attribution
+          notices within Derivative Works that You distribute, alongside
+          or as an addendum to the NOTICE text from the Work, provided
+          that such additional attribution notices cannot be construed
+          as modifying the License.
+
+      You may add Your own copyright statement to Your modifications and
+      may provide additional or different license terms and conditions
+      for use, reproduction, or distribution of Your modifications, or
+      for any such Derivative Works as a whole, provided Your use,
+      reproduction, and distribution of the Work otherwise complies with
+      the conditions stated in this License.
+
+   5. Submission of Contributions. Unless You explicitly state otherwise,
+      any Contribution intentionally submitted for inclusion in the Work
+      by You to the Licensor shall be under the terms and conditions of
+      this License, without any additional terms or conditions.
+      Notwithstanding the above, nothing herein shall supersede or modify
+      the terms of any separate license agreement you may have executed
+      with Licensor regarding such Contributions.
+
+   6. Trademarks. This License does not grant permission to use the trade
+      names, trademarks, service marks, or product names of the Licensor,
+      except as required for reasonable and customary use in describing the
+      origin of the Work and reproducing the content of the NOTICE file.
+
+   7. Disclaimer of Warranty. Unless required by applicable law or
+      agreed to in writing, Licensor provides the Work (and each
+      Contributor provides its Contributions) on an "AS IS" BASIS,
+      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+      implied, including, without limitation, any warranties or conditions
+      of TITLE, NON-INFRINGEMENT, MERCHANTABILITY, or FITNESS FOR A
+      PARTICULAR PURPOSE. You are solely responsible for determining the
+      appropriateness of using or redistributing the Work and assume any
+      risks associated with Your exercise of permissions under this License.
+
+   8. Limitation of Liability. In no event and under no legal theory,
+      whether in tort (including negligence), contract, or otherwise,
+      unless required by applicable law (such as deliberate and grossly
+      negligent acts) or agreed to in writing, shall any Contributor be
+      liable to You for damages, including any direct, indirect, special,
+      incidental, or consequential damages of any character arising as a
+      result of this License or out of the use or inability to use the
+      Work (including but not limited to damages for loss of goodwill,
+      work stoppage, computer failure or malfunction, or any and all
+      other commercial damages or losses), even if such Contributor
+      has been advised of the possibility of such damages.
+
+   9. Accepting Warranty or Additional Liability. While redistributing
+      the Work or Derivative Works thereof, You may choose to offer,
+      and charge a fee for, acceptance of support, warranty, indemnity,
+      or other liability obligations and/or rights consistent with this
+      License. However, in accepting such obligations, You may act only
+      on Your own behalf and on Your sole responsibility, not on behalf
+      of any other Contributor, and only if You agree to indemnify,
+      defend, and hold each Contributor harmless for any liability
+      incurred by, or claims asserted against, such Contributor by reason
+      of your accepting any such warranty or additional liability.
+
+   END OF TERMS AND CONDITIONS
+
+   APPENDIX: How to apply the Apache License to your work.
+
+      To apply the Apache License to your work, attach the following
+      boilerplate notice, with the fields enclosed by brackets "[]"
+      replaced with your own identifying information. (Don't include
+      the brackets!)  The text should be enclosed in the appropriate
+      comment syntax for the file format. We also recommend that a
+      file or class name and description of purpose be included on the
+      same "printed page" as the copyright notice for easier
+      identification within third-party archives.
+
+   Copyright [yyyy] [name of copyright owner]
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+
+====================================================================================================
+E.13  KoSIT validator — NOTICE
+Source: https://github.com/itplr-kosit/validator, file NOTICE at commit 6ac5167f2acad27df31263867e61d6698815c043 (SHA-256 56e0cd9ecfcf7cc5c8e9542e4f21364cdcb3b761b82213b6d5fff694c7fe0483)
+====================================================================================================
+
+KoSIT XML Validator
+Copyright 2017-2026 Koordinierungsstelle für IT-Standards (KoSIT)
+
+This product includes software developed by
+Koordinierungsstelle für IT-Standards (<https://xeinkauf.de/>).
+
+This product includes software developed at
+The Apache Software Foundation (http://www.apache.org/).
+Licensed under Apache 2.0
+
+This product includes software developed at
+Fusesource (http://fusesource.github.io/jansi/).
+Licensed under Apache 2.0
+
+This product includes software developed at
+Remko Popma (https://picocli.info/).
+Licensed under Apache 2.0
+
+This product includes software developed at
+Saxonica (https://github.com/Saxonica/Saxon-HE).
+Licensed under MPL 2.0
+
+This product includes software developed at
+Eclipse Foundation (https://github.com/eclipse-ee4j/jaxb-ri).
+Licensed under EDL 1.0
+
+This product includes software developed at
+QOS.ch (https://www.slf4j.org/).
+Licensed under MIT

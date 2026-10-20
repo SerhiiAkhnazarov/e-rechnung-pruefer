@@ -99,10 +99,13 @@ Neue Versionen der Regelwerke: `docs/BUILD-RULES.md`.
 
 ## Lizenz
 
-Eigener Code: **EUPL-1.2** (`LICENSE`). Enthaltene Fremdbestandteile und ihre Lizenzen: `NOTICE` und
-`legal/` (CEN EUPL-1.2; KoSIT Apache-2.0; FeRD/FNFE Apache-2.0 mit Hinweis nach DIN/CEN; OASIS- und
-UN/CEFACT-Hinweise; fontoxpath, xspattern, whynot, prsc MIT; Unicode License). Die Peppol-Regelwerke
-sind mangels Weitergabelizenz nicht enthalten.
+Eigener Code: **EUPL-1.2** (`LICENSE`). Enthaltene Fremdbestandteile, ihre Lizenzen und Änderungen:
+`NOTICE` – mit dem vollständigen Wortlaut aller Lizenztexte und NOTICE-Dateien (Teil E) – und `legal/`
+(CEN EUPL-1.2; KoSIT Apache-2.0; FeRD/FNFE Apache-2.0 mit Hinweis nach DIN/CEN; OASIS- und
+UN/CEFACT-Hinweise; fontoxpath, xspattern, whynot, prsc, slimdom, esbuild-Hilfscode MIT; Unicode License V3;
+Teile von `src/xsd-validator.js` aus Apache Xerces-J, Apache-2.0). `NOTICE` und `legal/` sind wörtlich auch
+im Programm enthalten (Abschnitt „Lizenzen und Hinweise der Rechteinhaber“). Die Peppol-Regelwerke sind
+mangels Weitergabelizenz nicht enthalten.
 
 Der E-Rechnung Prüfer ist eine Anwendung der Veröffentlichung ZUGFeRD 2.5.2 / Factur-X 1.09.2 und der
 Europäischen Norm EN 16931. Die Wiedergabe von Inhalten der EN 16931 erfolgt mit Erlaubnis von CEN und

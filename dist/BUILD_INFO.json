@@ -221,8 +221,8 @@
   },
   "manifestSha256": "015bbbcc0df3a9a11b84aebbe1062a7fe96795258af306bb177469544b6c7ecd",
   "file": "E-Rechnung-Pruefer.html",
-  "bytes": 4139379,
-  "sha256": "c694ef9480586aab4bf9bc6683ef1b1c41fe6cd1466f998a14033f13655181d0",
+  "bytes": 4175442,
+  "sha256": "e4d3afac4c7f80a5efa632ab30cafd5ae9f368149ed3d17b2e255efc494cab06",
   "embeddedRuleSets": [
     "EN16931-CII",
     "EN16931-UBL",

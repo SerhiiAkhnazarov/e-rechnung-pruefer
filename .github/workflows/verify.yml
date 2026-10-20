@@ -15,6 +15,9 @@
 #   org.verapdf:validation-model-jakarta from Maven Central via tools/verapdf/VeraMrr.java, strict
 #   checksums; = the veraPDF version of Mustangproject), compared with the container checks
 #   (src/pdfa3-checks.js). Procedure and rule mapping: docs/PDFA3-CHECKS.md.
+# Every job publishes its result as a check run of the commit ("verification report", "KoSIT JAR vs. Maven
+# Central", "veraPDF report"; .github/scripts/check-run.cjs): per suite status and summary, and the end of
+# the report of every suite that did not pass — readable with GET /repos/{owner}/{repo}/commits/{sha}/check-runs.
 name: verify
 on:
   push:
@@ -25,16 +28,19 @@ jobs:
   verify:
     runs-on: ubuntu-24.04
     timeout-minutes: 240
+    permissions:
+      contents: read
+      checks: write
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: '22'
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v6
         with:
           distribution: temurin
           java-version: '21'
-      - name: Test tools (exact versions of the development environment)
+      - name: Test tools (exact versions; browsers from the official Playwright CDN)
         run: |
           npm install --no-save --no-audit --no-fund playwright@1.56.0 pdfjs-dist@6.2.108 esbuild@0.28.2
           npx playwright install --with-deps chromium webkit firefox
@@ -47,14 +53,27 @@ jobs:
           sh tools/compile-rules.sh ext
           git diff --exit-code --stat -- build/schemas   # shipped rule sets reproduced byte-identically
       - name: Build the standalone page
-        run: node tools/build-standalone.cjs --version "${GITHUB_REF_NAME}"
+        run: node tools/build-standalone.cjs --version "$(sed -n -E 's/^## ([0-9]+\.[0-9]+\.[0-9]+) .*/\1/p' CHANGELOG.md | head -n 1)"
       - name: Full verification (references, reproducibility, all suites, official KoSIT validator, 3 browsers)
+        id: verification
         env:
           ESBUILD_BINARY: ${{ github.workspace }}/node_modules/.bin/esbuild
         run: node tools/verify-all.cjs --ext ext --skip pdfa-verapdf
       - name: Release gate (every suite run and passed with the current fingerprint)
+        id: gate
         run: node tools/verify-manifest.cjs ext --reports --strict
-      - uses: actions/upload-artifact@v4
+      - name: Publish the result as check run "verification report"
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          rc=0
+          node .github/scripts/check-run.cjs --name "verification report" --sha "${GITHUB_SHA}" \
+            --verification build/reports/VERIFICATION.json \
+            --gate "${{ steps.gate.outcome }}" --gate-label "Freigabe (verify-manifest --reports --strict)" > check-run.json || rc=$?
+          gh api -X POST "repos/${GITHUB_REPOSITORY}/check-runs" --input check-run.json > /dev/null || echo "::warning::check run could not be published"
+          echo "check run published (payload exit code ${rc})"
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: verification
@@ -69,9 +88,16 @@ jobs:
   kosit-jar-maven:
     runs-on: ubuntu-24.04
     timeout-minutes: 15
+    permissions:
+      contents: read
+      checks: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '22'
       - name: GitHub release asset vs. Maven Central
+        id: compare
         run: |
           set -e
           node tools/fetch-sources.cjs ext --only kosit-official
@@ -79,19 +105,37 @@ jobs:
           curl -sSfL -o maven.jar.sha1 https://repo1.maven.org/maven2/org/kosit/validator/1.6.3/validator-1.6.3-standalone.jar.sha1
           echo "$(cut -c1-40 maven.jar.sha1)  maven.jar" | sha1sum -c -
           cmp maven.jar ext/kosit-official/validator-1.6.3-standalone.jar
-          sha256sum maven.jar ext/kosit-official/validator-1.6.3-standalone.jar
+          {
+            echo "Maven Central org.kosit:validator:1.6.3:standalone, published .sha1: $(cut -c1-40 maven.jar.sha1)"
+            sha1sum maven.jar
+            sha256sum maven.jar ext/kosit-official/validator-1.6.3-standalone.jar
+            echo "cmp maven.jar ext/kosit-official/validator-1.6.3-standalone.jar: identical"
+          } | tee jar-compare.txt
+      - name: Publish the result as check run "KoSIT JAR vs. Maven Central"
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          rc=0
+          node .github/scripts/check-run.cjs --name "KoSIT JAR vs. Maven Central" --sha "${GITHUB_SHA}" \
+            --gate "${{ steps.compare.outcome }}" --gate-label "Vergleich (sha1sum -c, cmp)" --attach jar-compare.txt > check-run.json || rc=$?
+          gh api -X POST "repos/${GITHUB_REPOSITORY}/check-runs" --input check-run.json > /dev/null || echo "::warning::check run could not be published"
+          exit "${rc}"
 
   pdfa-verapdf:
     runs-on: ubuntu-24.04
     timeout-minutes: 60
+    permissions:
+      contents: read
+      checks: write
     env:
       VERAPDF_VERSION: '1.30.3'
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: '22'
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v6
         with:
           distribution: temurin
           java-version: '21'
@@ -135,7 +179,18 @@ jobs:
           grep -c -E '^PASS' build/reports/verapdf.txt || true
       - name: Compare veraPDF with the container checks (overlapping rules)
         run: node tools/verify-all.cjs --ext ext --only pdfa-verapdf
-      - uses: actions/upload-artifact@v4
+      - name: Publish the result as check run "veraPDF report" (fails unless all three suites passed)
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          rc=0
+          node .github/scripts/check-run.cjs --name "veraPDF report" --sha "${GITHUB_SHA}" \
+            --verification build/reports/VERIFICATION.json --require pdfa3-container-checks,verapdf-compare-selftest,pdfa-verapdf \
+            --attach build/reports/verapdf-compare.txt --attach build/reports/verapdf-artifacts.txt > check-run.json || rc=$?
+          gh api -X POST "repos/${GITHUB_REPOSITORY}/check-runs" --input check-run.json > /dev/null || echo "::warning::check run could not be published"
+          exit "${rc}"
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: pdfa-verapdf
