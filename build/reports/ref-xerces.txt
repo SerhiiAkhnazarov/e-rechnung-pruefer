@@ -1,0 +1,68 @@
+# suite        ref-xerces
+# fingerprint  85a3e2aa4dd6506cccb529b438b49e0a3281842a34706035354d6ecc68d7a879
+# git          a6a3ec9b062bf651ab595bfa27d160f0d73db947
+# command      sh -c set -e; sh test/xsd-oracle/run-xsd-oracle.sh; /opt/node22/bin/node test/build-xsd-mutations.cjs; sh test/xsd-oracle/run-xsd-oracle.sh xsd-mutations build/corpus/xsd-mutations; sh test/xsd-oracle/run-facturx-xsd-oracle.sh; echo "Xerces reference: $(cat build/oracle/xsd/*.jsonl | wc -l) documents, Factur-X: $(cat build/oracle/xsd-facturx/*.jsonl | wc -l) validations"
+# exit code    0
+# duration     44956 ms
+# date         2026-10-20T07:22:35.188Z
+Xerces: xr-ubl
+SchemaFactory: com.sun.org.apache.xerces.internal.jaxp.validation.XMLSchemaFactory
+schemas loaded in 863 ms
+files: 1050  valid: 976  invalid: 74  validation time: 1656 ms
+Xerces: xr-cii
+SchemaFactory: com.sun.org.apache.xerces.internal.jaxp.validation.XMLSchemaFactory
+schemas loaded in 602 ms
+files: 581  valid: 568  invalid: 13  validation time: 1096 ms
+Xerces: cen-ubl
+SchemaFactory: com.sun.org.apache.xerces.internal.jaxp.validation.XMLSchemaFactory
+schemas loaded in 606 ms
+files: 1131  valid: 0  invalid: 1131  validation time: 915 ms
+Xerces: cen-cii
+SchemaFactory: com.sun.org.apache.xerces.internal.jaxp.validation.XMLSchemaFactory
+schemas loaded in 628 ms
+files: 9  valid: 0  invalid: 9  validation time: 27 ms
+Xerces: extra-ubl
+SchemaFactory: com.sun.org.apache.xerces.internal.jaxp.validation.XMLSchemaFactory
+schemas loaded in 632 ms
+files: 68  valid: 67  invalid: 1  validation time: 359 ms
+Xerces: extra-cii
+SchemaFactory: com.sun.org.apache.xerces.internal.jaxp.validation.XMLSchemaFactory
+schemas loaded in 651 ms
+files: 73  valid: 73  invalid: 0  validation time: 556 ms
+Xerces: zugferd
+SchemaFactory: com.sun.org.apache.xerces.internal.jaxp.validation.XMLSchemaFactory
+schemas loaded in 724 ms
+files: 89  valid: 74  invalid: 15  validation time: 4140 ms
+oracle output in /home/claude/erechnung-pruefer/build/oracle/xsd
+build-xsd-mutations: 150 base documents -> 3607 files in build/corpus/xsd-mutations
+  kinds: base 150, remove-required 150, duplicate-max1 150, swap-siblings 150, insert-unknown-element 150, insert-unknown-attribute 150, letters-in-decimal 150, wrong-date-format 150, empty-mandatory 150, xsi-nil 150, remove-required-attribute 150, nsless-element 150, foreign-ns-element 150, text-in-element-only 150, xsi-type-wrong 150, xsi-type-same 150, unknown-root 150, extension-foreign-lax 65, extension-empty 65, extension-known-invalid 65, extension-known-valid 65, extension-nsless 65, extension-own-ns 65, extension-two-children 65, wrong-fixed-attribute 85, fixed-attribute-ok 85, probe 432
+Xerces: xsd-mutations
+SchemaFactory: com.sun.org.apache.xerces.internal.jaxp.validation.XMLSchemaFactory
+schemas loaded in 653 ms
+files: 3607  valid: 973  invalid: 2634  validation time: 3792 ms
+Xerces: FACTUR-X-MINIMUM (/home/claude/ext-fresh/mustangproject/validator/src/main/resources/schema/ZF_250/MINIMUM/FACTUR-X_MINIMUM.xsd)
+SchemaFactory: com.sun.org.apache.xerces.internal.jaxp.validation.XMLSchemaFactory
+schemas loaded in 88 ms
+files: 1181  valid: 3  invalid: 1178  validation time: 1529 ms
+Xerces: FACTUR-X-BASIC-WL (/home/claude/ext-fresh/mustangproject/validator/src/main/resources/schema/ZF_250/BASIC-WL/FACTUR-X_BASICWL.xsd)
+SchemaFactory: com.sun.org.apache.xerces.internal.jaxp.validation.XMLSchemaFactory
+schemas loaded in 116 ms
+files: 1181  valid: 6  invalid: 1175  validation time: 1534 ms
+Xerces: FACTUR-X-BASIC (/home/claude/ext-fresh/mustangproject/validator/src/main/resources/schema/ZF_250/BASIC/FACTUR-X_BASIC.xsd)
+SchemaFactory: com.sun.org.apache.xerces.internal.jaxp.validation.XMLSchemaFactory
+schemas loaded in 111 ms
+files: 1181  valid: 20  invalid: 1161  validation time: 1578 ms
+Xerces: FACTUR-X-EN16931 (/home/claude/ext-fresh/mustangproject/validator/src/main/resources/schema/ZF_250/EN16931/FACTUR-X_EN16931.xsd)
+SchemaFactory: com.sun.org.apache.xerces.internal.jaxp.validation.XMLSchemaFactory
+schemas loaded in 144 ms
+files: 1181  valid: 774  invalid: 407  validation time: 1618 ms
+Xerces: FACTUR-X-EXTENDED (/home/claude/ext-fresh/mustangproject/validator/src/main/resources/schema/ZF_250/EXTENDED/FACTUR-X_EXTENDED.xsd)
+SchemaFactory: com.sun.org.apache.xerces.internal.jaxp.validation.XMLSchemaFactory
+schemas loaded in 131 ms
+files: 1181  valid: 791  invalid: 390  validation time: 2163 ms
+oracle output in /home/claude/erechnung-pruefer/build/oracle/xsd-facturx
+Xerces reference: 6608 documents, Factur-X: 5905 validations
+
+Picked up JAVA_TOOL_OPTIONS: -Djavax.net.ssl.trustStore=/etc/ssl/certs/java/cacerts -Djavax.net.ssl.trustStoreType=JKS -Dhttps.proxyHost=127.0.0.1 -Dhttps.proxyPort=37599 -Dhttp.nonProxyHosts=localhost|127.0.0.1|::1|127.*|0.*|::|169.254.*|api.anthropic.com|api-staging.anthropic.com|api-pr-preview.anthropic.com|mcp-proxy.anthropic.com|mcp-proxy-staging.anthropic.com|registry.npmjs.org|jsr.io|npm.jsr.io|pypi.org|files.pythonhosted.org|index.crates.io|proxy.golang.org|host.docker.internal|10.*|172.16.*|172.17.*|172.18.*|172.19.*|172.20.*|172.21.*|172.22.*|172.23.*|172.24.*|172.25.*|172.26.*|172.27.*|172.28.*|172.29.*|172.30.*|172.31.*|192.168.*|100.64.0.0/10|*.svc.cluster.local|*.svc.cluster.local -Djdk.http.auth.tunneling.disabledSchemes= -Djdk.http.auth.proxying.disabledSchemes=
+Picked up JAVA_TOOL_OPTIONS: -Djavax.net.ssl.trustStore=/etc/ssl/certs/java/cacerts -Djavax.net.ssl.trustStoreType=JKS -Dhttps.proxyHost=127.0.0.1 -Dhttps.proxyPort=37599 -Dhttp.nonProxyHosts=localhost|127.0.0.1|::1|127.*|0.*|::|169.254.*|api.anthropic.com|api-staging.anthropic.com|api-pr-preview.anthropic.com|mcp-proxy.anthropic.com|mcp-proxy-staging.anthropic.com|registry.npmjs.org|jsr.io|npm.jsr.io|pypi.org|files.pythonhosted.org|index.crates.io|proxy.golang.org|host.docker.internal|10.*|172.16.*|172.17.*|172.18.*|172.19.*|172.20.*|172.21.*|172.22.*|172.23.*|172.24.*|172.25.*|172.26.*|172.27.*|172.28.*|172.29.*|172.30.*|172.31.*|192.168.*|100.64.0.0/10|*.svc.cluster.local|*.svc.cluster.local -Djdk.http.auth.tunneling.disabledSchemes= -Djdk.http.auth.proxying.disabledSchemes=
+Picked up JAVA_TOOL_OPTIONS: -Djavax.net.ssl.trustStore=/etc/ssl/certs/java/cacerts -Djavax.net.ssl.trustStoreType=JKS -Dhttps.proxyHost=127.0.0.1 -Dhttps.proxyPort=37599 -Dhttp.nonProxyHosts=localhost|127.0.0.1|::1|127.*|0.*|::|169.254.*|api.anthropic.com|api-staging.anthropic.com|api-pr-preview.anthropic.com|mcp-proxy.anthropic.com|mcp-proxy-staging.anthropic.com|registry.npmjs.org|jsr.io|npm.jsr.io|pypi.org|files.pythonhosted.org|index.crates.io|proxy.golang.org|host.docker.internal|10.*|172.16.*|172.17.*|172.18.*|172.19.*|172.20.*|172.21.*|172.22.*|172.23.*|172.24.*|172.25.*|172.26.*|172.27.*|172.28.*|172.29.*|172.30.*|172.31.*|192.168.*|100.64.0.0/10|*.svc.cluster.local|*.svc.cluster.local -Djdk.http.auth.tunneling.disabledSchemes= -Djdk.http.auth.proxying.disabledSchemes=

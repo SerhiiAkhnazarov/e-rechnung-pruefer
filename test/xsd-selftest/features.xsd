@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  features.xsd — synthetic schema for test/xsd-selftest.cjs: exercises the XSD constructs that
+  src/xsd-validator.js implements but the invoice schemas (UBL 2.1, CII D16B, xmldsig, XAdES) do
+  not use, so that these code paths are proven against Xerces as well:
+  pattern (incl. \d \p{L} \i \c and class subtraction), list, union, IDREF/IDREFS, gYear,
+  gYearMonth, gMonth, gMonthDay, gDay, duration, float, double, hexBinary, QName, NMTOKEN(S),
+  Name/NCName, int/short/byte/positiveInteger ranges, totalDigits/fractionDigits,
+  min/max(In|Ex)clusive, length, whiteSpace, attributeGroup, group, substitutionGroup with an
+  abstract head, nillable, fixed/default element and attribute values, bounded occurrences,
+  anyAttribute lax/skip, xs:any skip, mixed content with complexContent extension, default
+  attributes, xs:include of a chameleon document.
+-->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:f="urn:erechnung-pruefer:xsd-selftest" xmlns:o="urn:erechnung-pruefer:xsd-selftest:other"
+           targetNamespace="urn:erechnung-pruefer:xsd-selftest" elementFormDefault="qualified" attributeFormDefault="unqualified">
+  <xs:import namespace="urn:erechnung-pruefer:xsd-selftest:other" schemaLocation="features-other.xsd"/>
+  <xs:include schemaLocation="features-chameleon.xsd"/>
+
+  <xs:simpleType name="Code"><xs:restriction base="xs:string"><xs:pattern value="[A-Z]{2}\d{3}"/></xs:restriction></xs:simpleType>
+  <xs:simpleType name="Word"><xs:restriction base="xs:token"><xs:pattern value="\p{L}+"/><xs:pattern value="\i\c*"/></xs:restriction></xs:simpleType>
+  <xs:simpleType name="Consonants"><xs:restriction base="xs:string"><xs:pattern value="[a-z-[aeiou]]+"/></xs:restriction></xs:simpleType>
+  <xs:simpleType name="Money"><xs:restriction base="xs:decimal"><xs:totalDigits value="6"/><xs:fractionDigits value="2"/><xs:minInclusive value="0"/><xs:maxExclusive value="1000"/></xs:restriction></xs:simpleType>
+  <xs:simpleType name="Percent"><xs:restriction base="xs:integer"><xs:minExclusive value="0"/><xs:maxInclusive value="100"/></xs:restriction></xs:simpleType>
+  <xs:simpleType name="Rating"><xs:restriction base="xs:decimal"><xs:enumeration value="1"/><xs:enumeration value="2.5"/><xs:enumeration value="3.0"/></xs:restriction></xs:simpleType>
+  <xs:simpleType name="Fixed3"><xs:restriction base="xs:string"><xs:length value="3"/><xs:whiteSpace value="collapse"/></xs:restriction></xs:simpleType>
+  <xs:simpleType name="IntList"><xs:list itemType="xs:int"/></xs:simpleType>
+  <xs:simpleType name="ShortList"><xs:restriction base="f:IntList"><xs:maxLength value="3"/></xs:restriction></xs:simpleType>
+  <xs:simpleType name="IntOrWord"><xs:union memberTypes="xs:int f:Word"/></xs:simpleType>
+  <xs:simpleType name="Colour"><xs:restriction base="xs:NMTOKEN"><xs:enumeration value="red"/><xs:enumeration value="green"/></xs:restriction></xs:simpleType>
+
+  <xs:attributeGroup name="common">
+    <xs:attribute name="id" type="xs:ID"/>
+    <xs:attribute name="ref" type="xs:IDREF"/>
+    <xs:attribute name="refs" type="xs:IDREFS"/>
+    <xs:attribute name="lang" type="xs:language" default="de"/>
+    <xs:attribute name="version" type="xs:string" fixed="1.0"/>
+  </xs:attributeGroup>
+
+  <xs:group name="dates">
+    <xs:sequence>
+      <xs:element name="year" type="xs:gYear" minOccurs="0"/>
+      <xs:element name="yearMonth" type="xs:gYearMonth" minOccurs="0"/>
+      <xs:element name="month" type="xs:gMonth" minOccurs="0"/>
+      <xs:element name="monthDay" type="xs:gMonthDay" minOccurs="0"/>
+      <xs:element name="day" type="xs:gDay" minOccurs="0"/>
+      <xs:element name="duration" type="xs:duration" minOccurs="0"/>
+    </xs:sequence>
+  </xs:group>
+
+  <xs:element name="shape" abstract="true" type="f:ShapeType"/>
+  <xs:complexType name="ShapeType"><xs:attribute name="name" type="xs:NCName" use="required"/></xs:complexType>
+  <xs:element name="circle" substitutionGroup="f:shape" type="f:CircleType"/>
+  <xs:complexType name="CircleType"><xs:complexContent><xs:extension base="f:ShapeType"><xs:sequence><xs:element name="radius" type="f:Money"/></xs:sequence></xs:extension></xs:complexContent></xs:complexType>
+  <xs:element name="square" substitutionGroup="f:shape"><xs:complexType><xs:complexContent><xs:extension base="f:ShapeType"><xs:attribute name="side" type="xs:positiveInteger" use="required"/></xs:extension></xs:complexContent></xs:complexType></xs:element>
+
+  <xs:complexType name="Para" mixed="true">
+    <xs:sequence><xs:element name="b" type="xs:string" minOccurs="0" maxOccurs="unbounded"/></xs:sequence>
+    <xs:anyAttribute namespace="##other" processContents="lax"/>
+  </xs:complexType>
+  <xs:complexType name="RichPara" mixed="true">
+    <xs:complexContent><xs:extension base="f:Para"><xs:sequence><xs:element name="i" type="xs:string" minOccurs="0" maxOccurs="2"/></xs:sequence></xs:extension></xs:complexContent>
+  </xs:complexType>
+
+  <xs:element name="root">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="code" type="f:Code" maxOccurs="3"/>
+        <xs:element name="word" type="f:Word" minOccurs="0"/>
+        <xs:element name="consonants" type="f:Consonants" minOccurs="0"/>
+        <xs:element name="money" type="f:Money" minOccurs="0" maxOccurs="unbounded"/>
+        <xs:element name="percent" type="f:Percent" minOccurs="0"/>
+        <xs:element name="rating" type="f:Rating" minOccurs="0"/>
+        <xs:element name="fixed3" type="f:Fixed3" minOccurs="0"/>
+        <xs:element name="ints" type="f:ShortList" minOccurs="0"/>
+        <xs:element name="intOrWord" type="f:IntOrWord" minOccurs="0"/>
+        <xs:element name="colour" type="f:Colour" minOccurs="0"/>
+        <xs:element name="tokens" type="xs:NMTOKENS" minOccurs="0"/>
+        <xs:element name="qname" type="xs:QName" minOccurs="0"/>
+        <xs:element name="float" type="xs:float" minOccurs="0"/>
+        <xs:element name="double" type="xs:double" minOccurs="0"/>
+        <xs:element name="hex" type="xs:hexBinary" minOccurs="0"/>
+        <xs:element name="short" type="xs:short" minOccurs="0"/>
+        <xs:element name="byte" type="xs:byte" minOccurs="0"/>
+        <xs:element name="uint" type="xs:unsignedInt" minOccurs="0"/>
+        <xs:element name="name" type="xs:Name" minOccurs="0"/>
+        <xs:group ref="f:dates"/>
+        <xs:choice minOccurs="0" maxOccurs="2">
+          <xs:element name="a" type="xs:string"/>
+          <xs:sequence><xs:element name="b1" type="xs:string"/><xs:element name="b2" type="xs:string" minOccurs="0"/></xs:sequence>
+        </xs:choice>
+        <xs:element ref="f:shape" minOccurs="0" maxOccurs="unbounded"/>
+        <xs:element name="para" type="f:RichPara" minOccurs="0"/>
+        <xs:element name="nil" type="xs:int" nillable="true" minOccurs="0"/>
+        <xs:element name="fixedEl" type="xs:string" fixed="constant" minOccurs="0"/>
+        <xs:element name="defaultEl" type="xs:int" default="42" minOccurs="0"/>
+        <xs:element name="skipper" minOccurs="0"><xs:complexType><xs:sequence><xs:any namespace="##any" processContents="skip" minOccurs="0" maxOccurs="unbounded"/></xs:sequence><xs:anyAttribute processContents="skip"/></xs:complexType></xs:element>
+        <xs:element name="strictAttr" minOccurs="0"><xs:complexType><xs:anyAttribute namespace="##other" processContents="strict"/></xs:complexType></xs:element>
+        <xs:element ref="o:other" minOccurs="0"/>
+        <xs:element ref="f:chameleon" minOccurs="0"/>
+        <xs:element name="inline" minOccurs="0"><xs:simpleType><xs:restriction base="xs:string"><xs:maxLength value="2"/></xs:restriction></xs:simpleType></xs:element>
+        <xs:element name="emptyWithAttrs" minOccurs="0"><xs:complexType><xs:attribute name="n" type="xs:nonNegativeInteger" use="required"/><xs:attribute name="q" type="xs:QName"/></xs:complexType></xs:element>
+        <!-- occurrence counting (Xerces repeating leaves): codes cvc-complex-type.2.4.e/f/i/j -->
+        <xs:element name="counts" minOccurs="0"><xs:complexType><xs:sequence>
+          <xs:element name="two3" type="xs:string" minOccurs="2" maxOccurs="3"/>
+          <xs:element name="after" type="xs:string" minOccurs="0"/>
+        </xs:sequence></xs:complexType></xs:element>
+        <xs:element name="countsEnd" minOccurs="0"><xs:complexType><xs:sequence>
+          <xs:element name="upTo2" type="xs:string" maxOccurs="2"/>
+        </xs:sequence></xs:complexType></xs:element>
+        <xs:element name="countsMin3" minOccurs="0"><xs:complexType><xs:sequence>
+          <xs:element name="atLeast3" type="xs:string" minOccurs="3" maxOccurs="unbounded"/>
+          <xs:element name="tail" type="xs:string"/>
+        </xs:sequence></xs:complexType></xs:element>
+      </xs:sequence>
+      <xs:attributeGroup ref="f:common"/>
+      <xs:attribute name="flag" type="xs:boolean" default="false"/>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>

@@ -1,0 +1,28 @@
+# drift.yml — weekly check whether the standards this build is pinned to have new upstream versions
+# (tools/check-drift.cjs: git ls-remote of every source in build/STANDARDS_MANIFEST.json; reviewed and
+# deliberately deferred versions are listed with their reason in build/drift-acknowledged.json).
+# A red run means: review the new version (applicability date, KoSIT configuration), then re-pin
+# (docs/BUILD-RULES.md) or acknowledge it with a reason.
+name: drift
+on:
+  schedule:
+    - cron: '17 5 * * 1'   # Mondays 05:17 UTC
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  drift:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Upstream versions vs. pinned versions
+        run: node tools/check-drift.cjs --out build/reports/drift.txt
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: drift
+          path: build/reports/drift.txt

@@ -1,0 +1,2426 @@
+diff --git a/src/expressions/DynamicContext.ts b/src/expressions/DynamicContext.ts
+index 5f0db3d..d80bfbf 100644
+--- a/src/expressions/DynamicContext.ts
++++ b/src/expressions/DynamicContext.ts
+@@ -72,8 +72,7 @@ class DynamicContext {
+ 		if (!this._temporalContext.isInitialized) {
+ 			this._temporalContext.isInitialized = true;
+ 
+-			this._temporalContext.currentDateTime = DateTime.fromString(new Date().toISOString());
+-			this._temporalContext.implicitTimezone = DayTimeDuration.fromString('PT0S');
++			this._initTemporalContext();
+ 		}
+ 		return this._temporalContext.currentDateTime;
+ 	}
+@@ -82,12 +81,30 @@ class DynamicContext {
+ 		if (!this._temporalContext.isInitialized) {
+ 			this._temporalContext.isInitialized = true;
+ 
+-			this._temporalContext.currentDateTime = DateTime.fromString(new Date().toISOString());
+-			this._temporalContext.implicitTimezone = DayTimeDuration.fromString('PT0S');
++			this._initTemporalContext();
+ 		}
+ 		return this._temporalContext.implicitTimezone;
+ 	}
+ 
++	/**
++	 * E-Rechnung Prüfer patch: the implicit timezone is the local timezone of the environment
++	 * (as in Saxon, which uses the JVM default), and current-dateTime() carries it.
++	 */
++	private _initTemporalContext() {
++		const now = new Date();
++		const offsetMinutes = -now.getTimezoneOffset();
++		const sign = offsetMinutes < 0 ? '-' : '';
++		const abs = Math.abs(offsetMinutes);
++		const tz = sign + 'PT' + Math.floor(abs / 60) + 'H' + (abs % 60) + 'M';
++		const pad = (v: number) => String(v).padStart(2, '0');
++		const local =
++			now.getFullYear() + '-' + pad(now.getMonth() + 1) + '-' + pad(now.getDate()) + 'T' +
++			pad(now.getHours()) + ':' + pad(now.getMinutes()) + ':' + pad(now.getSeconds()) +
++			(offsetMinutes === 0 ? 'Z' : (offsetMinutes < 0 ? '-' : '+') + pad(Math.floor(abs / 60)) + ':' + pad(abs % 60));
++		this._temporalContext.currentDateTime = DateTime.fromString(local);
++		this._temporalContext.implicitTimezone = DayTimeDuration.fromString(tz);
++	}
++
+ 	/**
+ 	 * Returns a pseudo-random integer and a decimal based on the passed seed
+ 	 */
+diff --git a/src/expressions/axes/ChildAxis.ts b/src/expressions/axes/ChildAxis.ts
+index a97515a..edfdae2 100644
+--- a/src/expressions/axes/ChildAxis.ts
++++ b/src/expressions/axes/ChildAxis.ts
+@@ -1,4 +1,5 @@
+-import { ChildNodePointer, ParentNodePointer } from '../../domClone/Pointer';
++import { ChildNodePointer, isTinyNode, ParentNodePointer } from '../../domClone/Pointer';
++import { findChildrenByLocalName, isDescendantIndexEnabled } from './descendantIndex';
+ import { NODE_TYPES } from '../../domFacade/ConcreteNode';
+ import createPointerValue from '../dataTypes/createPointerValue';
+ import sequenceFactory from '../dataTypes/sequenceFactory';
+@@ -14,6 +15,7 @@ import validateContextNode from './validateContextNode';
+ class ChildAxis extends Expression {
+ 	private readonly _childExpression: TestAbstractExpression;
+ 	private readonly _filterBucket: Bucket;
++	private readonly _indexedLocalName: string | null;
+ 	constructor(childExpression: TestAbstractExpression, filterBucket: Bucket) {
+ 		super(childExpression.specificity, [childExpression], {
+ 			resultOrder: RESULT_ORDERINGS.SORTED,
+@@ -24,6 +26,8 @@ class ChildAxis extends Expression {
+ 
+ 		this._childExpression = childExpression;
+ 		this._filterBucket = intersectBuckets(filterBucket, childExpression.getBucket());
++		const testBucket = childExpression.getBucket();
++		this._indexedLocalName = testBucket && testBucket.startsWith('name-') ? testBucket.slice('name-'.length) : null;
+ 	}
+ 
+ 	public evaluate(dynamicContext: DynamicContext, executionParameters: ExecutionParameters) {
+@@ -34,6 +38,15 @@ class ChildAxis extends Expression {
+ 			return sequenceFactory.empty();
+ 		}
+ 
++		// E-Rechnung Prüfer patch: children by local name from the per-element cache
++		if (isDescendantIndexEnabled() && this._indexedLocalName !== null && !contextNode.graftAncestor && !isTinyNode(contextNode.node)) {
++			const nodes = findChildrenByLocalName(contextNode.node, this._indexedLocalName);
++			const values = nodes.map((n) => createPointerValue({ node: n, graftAncestor: null } as ChildNodePointer, domFacade));
++			return sequenceFactory.create(values).filter((item) => {
++				return this._childExpression.evaluateToBoolean(dynamicContext, item, executionParameters);
++			});
++		}
++
+ 		let node: ChildNodePointer = null;
+ 		let isDone = false;
+ 		return sequenceFactory
+diff --git a/src/expressions/axes/DescendantAttributeAxis.ts b/src/expressions/axes/DescendantAttributeAxis.ts
+new file mode 100644
+index 0000000..7d32fe7
+--- /dev/null
++++ b/src/expressions/axes/DescendantAttributeAxis.ts
+@@ -0,0 +1,108 @@
++/**
++ * E-Rechnung Prüfer patch: the step `descendant-or-self::node()/attribute::name` (`//@name`) as a
++ * single axis. With the per-document index enabled it is answered from the attribute table;
++ * otherwise it walks the element descendants and their attributes in document order, which is
++ * exactly what the two-step path yields.
++ */
++import { AttributeNodePointer, ChildNodePointer, ElementNodePointer, isTinyNode } from '../../domClone/Pointer';
++import { NODE_TYPES } from '../../domFacade/ConcreteNode';
++import createPointerValue from '../dataTypes/createPointerValue';
++import ISequence from '../dataTypes/ISequence';
++import sequenceFactory from '../dataTypes/sequenceFactory';
++import Value from '../dataTypes/Value';
++import DynamicContext from '../DynamicContext';
++import ExecutionParameters from '../ExecutionParameters';
++import Expression, { RESULT_ORDERINGS } from '../Expression';
++import Specificity from '../Specificity';
++import { BUILT_IN_NAMESPACE_URIS } from '../staticallyKnownNamespaces';
++import TestAbstractExpression from '../tests/TestAbstractExpression';
++import { Bucket, intersectBuckets } from '../util/Bucket';
++import { DONE_TOKEN, IIterator, IterationHint, ready } from '../util/iterators';
++import { createInclusiveDescendantGenerator } from './DescendantAxis';
++import { findDescendantAttributesByLocalName, isDescendantIndexEnabled } from './descendantIndex';
++import validateContextNode from './validateContextNode';
++
++class DescendantAttributeAxis extends Expression {
++	private readonly _attributeTestExpression: TestAbstractExpression;
++	private readonly _filterBucket: Bucket;
++	private readonly _indexedLocalName: string | null;
++
++	constructor(attributeTestExpression: TestAbstractExpression, filterBucket: Bucket) {
++		super(
++			new Specificity({
++				[Specificity.ATTRIBUTE_KIND]: 1,
++			}),
++			[attributeTestExpression],
++			{
++				canBeStaticallyEvaluated: false,
++				peer: false,
++				resultOrder: RESULT_ORDERINGS.SORTED,
++				subtree: true,
++			},
++		);
++		this._attributeTestExpression = attributeTestExpression;
++		this._filterBucket = intersectBuckets(attributeTestExpression.getBucket(), filterBucket);
++		const testBucket = attributeTestExpression.getBucket();
++		this._indexedLocalName =
++			testBucket && testBucket.startsWith('name-') ? testBucket.slice('name-'.length) : null;
++	}
++
++	public evaluate(dynamicContext: DynamicContext, executionParameters: ExecutionParameters): ISequence {
++		const domFacade = executionParameters.domFacade;
++		const contextPointer = validateContextNode(dynamicContext.contextItem) as ChildNodePointer;
++		const test = (item: Value) =>
++			this._attributeTestExpression.evaluateToBoolean(dynamicContext, item, executionParameters);
++
++		if (
++			isDescendantIndexEnabled() &&
++			this._indexedLocalName !== null &&
++			!contextPointer.graftAncestor &&
++			!isTinyNode(contextPointer.node)
++		) {
++			const nodes = findDescendantAttributesByLocalName(contextPointer.node, this._indexedLocalName);
++			if (nodes !== null) {
++				const values = nodes.map((node) =>
++					createPointerValue({ node, graftAncestor: null } as AttributeNodePointer, domFacade),
++				);
++				return sequenceFactory.create(values).filter(test);
++			}
++		}
++
++		// Fallback: every element descendant-or-self in document order, then its attributes
++		const elements: IIterator<Value> = createInclusiveDescendantGenerator(domFacade, contextPointer, 'type-1');
++		let pending: Value[] = [];
++		let pendingIndex = 0;
++		const iterator: IIterator<Value> = {
++			next: (_hint: IterationHint) => {
++				for (;;) {
++					if (pendingIndex < pending.length) {
++						return ready(pending[pendingIndex++]);
++					}
++					const element = elements.next(IterationHint.NONE);
++					if (element.done) {
++						return DONE_TOKEN;
++					}
++					const pointer = element.value.value as ElementNodePointer;
++					if (domFacade.getNodeType(pointer) !== NODE_TYPES.ELEMENT_NODE) {
++						continue;
++					}
++					pending = domFacade
++						.getAllAttributePointers(pointer, this._filterBucket)
++						.filter(
++							(attr) =>
++								domFacade.getNamespaceURI(attr) !== BUILT_IN_NAMESPACE_URIS.XMLNS_NAMESPACE_URI,
++						)
++						.map((attribute) => createPointerValue(attribute, domFacade))
++						.filter(test);
++					pendingIndex = 0;
++				}
++			},
++		};
++		return sequenceFactory.create(iterator);
++	}
++
++	public override getBucket(): Bucket {
++		return null;
++	}
++}
++export default DescendantAttributeAxis;
+diff --git a/src/expressions/axes/DescendantAxis.ts b/src/expressions/axes/DescendantAxis.ts
+index 1a460d7..91513f2 100644
+--- a/src/expressions/axes/DescendantAxis.ts
++++ b/src/expressions/axes/DescendantAxis.ts
+@@ -1,4 +1,5 @@
+-import { ChildNodePointer } from '../../domClone/Pointer';
++import { ChildNodePointer, isTinyNode } from '../../domClone/Pointer';
++import { findDescendantsByLocalName, isDescendantIndexEnabled } from './descendantIndex';
+ import DomFacade from '../../domFacade/DomFacade';
+ import createPointerValue from '../dataTypes/createPointerValue';
+ import ISequence from '../dataTypes/ISequence';
+@@ -14,7 +15,7 @@ import createSingleValueIterator from '../util/createSingleValueIterator';
+ import { DONE_TOKEN, IIterator, IterationHint, ready } from '../util/iterators';
+ import validateContextNode from './validateContextNode';
+ 
+-function createInclusiveDescendantGenerator(
++export function createInclusiveDescendantGenerator(
+ 	domFacade: DomFacade,
+ 	node: ChildNodePointer,
+ 	bucket: Bucket | null,
+@@ -53,6 +54,7 @@ function createInclusiveDescendantGenerator(
+ class DescendantAxis extends Expression {
+ 	private _descendantBucket: Bucket;
+ 	private _descendantExpression: TestAbstractExpression;
++	private _indexedLocalName: string | null;
+ 	private _isInclusive: boolean;
+ 
+ 	constructor(
+@@ -82,6 +84,7 @@ class DescendantAxis extends Expression {
+ 			(testBucket && (testBucket.startsWith('name-') || testBucket === 'type-1')) ||
+ 			testBucket === 'type-1-or-type-2';
+ 		this._descendantBucket = onlyElementDescendants ? 'type-1' : null;
++		this._indexedLocalName = testBucket && testBucket.startsWith('name-') ? testBucket.slice('name-'.length) : null;
+ 	}
+ 
+ 	public evaluate(
+@@ -93,6 +96,20 @@ class DescendantAxis extends Expression {
+ 
+ 		const inclusive = this._isInclusive;
+ 
++		// E-Rechnung Prüfer patch: answer descendant::name steps from the per-document index
++		if (isDescendantIndexEnabled() && this._indexedLocalName !== null) {
++			const pointer = contextPointer as ChildNodePointer;
++			if (!pointer.graftAncestor && !isTinyNode(pointer.node)) {
++				const nodes = findDescendantsByLocalName(pointer.node, this._indexedLocalName, inclusive);
++				if (nodes !== null) {
++					const values = nodes.map((node) => createPointerValue({ node, graftAncestor: null } as ChildNodePointer, domFacade));
++					return sequenceFactory.create(values).filter((item) => {
++						return this._descendantExpression.evaluateToBoolean(dynamicContext, item, executionParameters);
++					});
++				}
++			}
++		}
++
+ 		const iterator = createInclusiveDescendantGenerator(
+ 			domFacade,
+ 			contextPointer as ChildNodePointer,
+diff --git a/src/expressions/axes/descendantIndex.ts b/src/expressions/axes/descendantIndex.ts
+new file mode 100644
+index 0000000..1522d3d
+--- /dev/null
++++ b/src/expressions/axes/descendantIndex.ts
+@@ -0,0 +1,259 @@
++/**
++ * E-Rechnung Prüfer patch: an opt-in per-document index for the descendant axis.
++ *
++ * Validation rules such as `//cac:TaxCategory[...]` traverse the whole document for every
++ * evaluation; with the index enabled, descendant::name steps are answered from a per-document
++ * table (elements by local name in document order with pre-/post-order numbers), so a step costs
++ * O(log n + results) instead of O(n).
++ *
++ * The index is built lazily on first use, kept in a WeakMap keyed by the document (or detached
++ * root) node, and assumes the document is NOT mutated while enabled and that the DOM is accessed
++ * directly (no custom IDomFacade). It is disabled by default; callers enable it explicitly with
++ * fontoxpath.setDescendantIndexEnabled(true) and may drop an index with
++ * fontoxpath.invalidateDescendantIndex(node).
++ */
++import { ConcreteNode, NODE_TYPES } from '../../domFacade/ConcreteNode';
++
++type IndexEntry = { node: ConcreteNode; pre: number };
++type DocumentIndex = {
++	attributesByLocalName: Map<string, IndexEntry[]>;
++	byLocalName: Map<string, IndexEntry[]>;
++	post: Map<ConcreteNode, number>;
++	pre: Map<ConcreteNode, number>;
++};
++
++const XMLNS_NAMESPACE_URI = 'http://www.w3.org/2000/xmlns/';
++
++let enabled = false;
++const indexes = new WeakMap<ConcreteNode, DocumentIndex>();
++// every numbered node (and every indexed attribute) -> the index of its tree
++const nodeToIndex = new WeakMap<ConcreteNode, DocumentIndex>();
++const childIndexes = new WeakMap<ConcreteNode, Map<string, ConcreteNode[]>>();
++
++/**
++ * Element children of `parent` with local name `localName`, in document order (cached per parent).
++ */
++export function findChildrenByLocalName(parent: ConcreteNode, localName: string): ConcreteNode[] {
++	let byName = childIndexes.get(parent);
++	if (!byName) {
++		byName = new Map<string, ConcreteNode[]>();
++		for (let c: any = (parent as any).firstChild; c; c = c.nextSibling) {
++			if (c.nodeType !== NODE_TYPES.ELEMENT_NODE) {
++				continue;
++			}
++			let list = byName.get(c.localName);
++			if (!list) {
++				list = [];
++				byName.set(c.localName, list);
++			}
++			list.push(c);
++		}
++		childIndexes.set(parent, byName);
++	}
++	return byName.get(localName) || [];
++}
++
++export function setDescendantIndexEnabled(value: boolean): void {
++	enabled = value;
++}
++
++export function isDescendantIndexEnabled(): boolean {
++	return enabled;
++}
++
++export function invalidateDescendantIndex(node: ConcreteNode): void {
++	indexes.delete(rootOf(node));
++	childIndexes.delete(node);
++}
++
++function rootOf(node: ConcreteNode): ConcreteNode {
++	let n: any = node;
++	if (n.nodeType === NODE_TYPES.ATTRIBUTE_NODE) {
++		n = n.ownerElement;
++	}
++	while (n && n.parentNode) {
++		n = n.parentNode;
++	}
++	return n as ConcreteNode;
++}
++
++function build(root: ConcreteNode): DocumentIndex {
++	const byLocalName = new Map<string, IndexEntry[]>();
++	const attributesByLocalName = new Map<string, IndexEntry[]>();
++	const pre = new Map<ConcreteNode, number>();
++	const post = new Map<ConcreteNode, number>();
++	const index: DocumentIndex = { attributesByLocalName, byLocalName, pre, post };
++	let counter = 0;
++	// Iterative depth-first traversal over ALL nodes (elements, text, comments, processing
++	// instructions): every node gets a pre-order number, which is its document-order key. The
++	// attributes of an element get fractional keys between the element and its first child, in the
++	// order the DOM reports them (the XDM leaves attribute order implementation-dependent).
++	// Use an explicit (node, state) stack so that post numbers are assigned when a subtree is done.
++	type Frame = { node: ConcreteNode; child: ConcreteNode | null; started: boolean };
++	const frames: Frame[] = [{ node: root, child: null, started: false }];
++	while (frames.length) {
++		const frame = frames[frames.length - 1];
++		const n: any = frame.node;
++		if (!frame.started) {
++			frame.started = true;
++			const number = counter++;
++			pre.set(n, number);
++			nodeToIndex.set(n, index);
++			if (n.nodeType === NODE_TYPES.ELEMENT_NODE) {
++				const name = n.localName as string;
++				let list = byLocalName.get(name);
++				if (!list) {
++					list = [];
++					byLocalName.set(name, list);
++				}
++				list.push({ node: n, pre: number });
++				const attrs: any = n.attributes;
++				if (attrs && attrs.length) {
++					const count = attrs.length;
++					for (let i = 0; i < count; i++) {
++						const attr: any = attrs[i];
++						if (attr.namespaceURI === XMLNS_NAMESPACE_URI) {
++							// namespace declarations are not attributes in the XDM
++							continue;
++						}
++						const key = number + (i + 1) / (count + 1);
++						pre.set(attr, key);
++						nodeToIndex.set(attr, index);
++						let alist = attributesByLocalName.get(attr.localName);
++						if (!alist) {
++							alist = [];
++							attributesByLocalName.set(attr.localName, alist);
++						}
++						alist.push({ node: attr, pre: key });
++					}
++				}
++			}
++			frame.child = n.firstChild;
++		} else if (frame.child) {
++			frame.child = frame.child.nextSibling;
++		}
++		if (frame.child) {
++			frames.push({ node: frame.child, child: null, started: false });
++		} else {
++			post.set(n, counter - 1);
++			frames.pop();
++		}
++	}
++	return index;
++}
++
++/**
++ * Document-order comparison through the index: negative when a precedes b, positive when b
++ * precedes a, 0 for the same node. Returns undefined when the nodes are not both in one indexed
++ * tree (the caller then falls back to the DOM).
++ */
++export function compareIndexedNodes(a: ConcreteNode, b: ConcreteNode): number | undefined {
++	const ia = nodeToIndex.get(a);
++	if (!ia) {
++		return undefined;
++	}
++	const ib = nodeToIndex.get(b);
++	if (ib !== ia) {
++		return undefined;
++	}
++	const ka = ia.pre.get(a);
++	const kb = ia.pre.get(b);
++	if (ka === undefined || kb === undefined) {
++		return undefined;
++	}
++	return ka < kb ? -1 : ka > kb ? 1 : 0;
++}
++
++/**
++ * All attributes with local name `localName` on the context node or its element descendants, in
++ * document order (what `//@localName` selects). Returns null when the context node is unknown to
++ * the index.
++ */
++export function findDescendantAttributesByLocalName(
++	contextNode: ConcreteNode,
++	localName: string,
++): ConcreteNode[] | null {
++	const n: any = contextNode;
++	if (n.nodeType === NODE_TYPES.ATTRIBUTE_NODE) {
++		return [];
++	}
++	const index = getIndex(contextNode);
++	const pre = index.pre.get(contextNode);
++	const post = index.post.get(contextNode);
++	if (pre === undefined || post === undefined) {
++		return null;
++	}
++	const list = index.attributesByLocalName.get(localName);
++	if (!list || !list.length) {
++		return [];
++	}
++	let lo = 0;
++	let hi = list.length;
++	while (lo < hi) {
++		const mid = (lo + hi) >> 1;
++		if (list[mid].pre < pre) {
++			lo = mid + 1;
++		} else {
++			hi = mid;
++		}
++	}
++	const out: ConcreteNode[] = [];
++	// attributes of the last descendant have keys < post + 1
++	for (let i = lo; i < list.length && list[i].pre < post + 1; i++) {
++		out.push(list[i].node);
++	}
++	return out;
++}
++
++function getIndex(node: ConcreteNode): DocumentIndex {
++	const root = rootOf(node);
++	let index = indexes.get(root);
++	if (!index) {
++		index = build(root);
++		indexes.set(root, index);
++	}
++	return index;
++}
++
++/**
++ * All element descendants (or descendants-or-self) of `contextNode` whose local name is
++ * `localName`, in document order. Returns null when the context node is unknown to the index
++ * (for instance a node created after the index was built).
++ */
++export function findDescendantsByLocalName(
++	contextNode: ConcreteNode,
++	localName: string,
++	inclusive: boolean,
++): ConcreteNode[] | null {
++	const n: any = contextNode;
++	if (n.nodeType === NODE_TYPES.ATTRIBUTE_NODE) {
++		return [];
++	}
++	const index = getIndex(contextNode);
++	const pre = index.pre.get(contextNode);
++	const post = index.post.get(contextNode);
++	if (pre === undefined || post === undefined) {
++		return null;
++	}
++	const list = index.byLocalName.get(localName);
++	if (!list || !list.length) {
++		return [];
++	}
++	const lower = inclusive ? pre : pre + 1;
++	// binary search for the first entry with entry.pre >= lower
++	let lo = 0;
++	let hi = list.length;
++	while (lo < hi) {
++		const mid = (lo + hi) >> 1;
++		if (list[mid].pre < lower) {
++			lo = mid + 1;
++		} else {
++			hi = mid;
++		}
++	}
++	const out: ConcreteNode[] = [];
++	for (let i = lo; i < list.length && list[i].pre <= post; i++) {
++		out.push(list[i].node);
++	}
++	return out;
++}
+diff --git a/src/expressions/dataTypes/builtins/dataTypeValidatorByType.ts b/src/expressions/dataTypes/builtins/dataTypeValidatorByType.ts
+index 56f36b5..9e22b57 100644
+--- a/src/expressions/dataTypes/builtins/dataTypeValidatorByType.ts
++++ b/src/expressions/dataTypes/builtins/dataTypeValidatorByType.ts
+@@ -37,9 +37,30 @@ function isValidDuration(value: string): boolean {
+ 	return /^(-)?P(\d+Y)?(\d+M)?(\d+D)?(T(\d+H)?(\d+M)?(\d+(\.\d*)?S)?)?$/.test(value);
+ }
+ 
++// XML Schema Part 2 §3.2.7 / §3.2.9 / §3.2.12 (and XSD 1.1): the day must exist in the given month;
++// 29 February only in leap years (proleptic Gregorian calendar, astronomical year numbering, so
++// year 0000 is a leap year). Without a year (xs:gMonthDay) 29 February is allowed.
++function isValidDayOfMonth(year: number | null, month: number, day: number): boolean {
++	if (month === 2) {
++		if (year === null) {
++			return day <= 29;
++		}
++		const isLeapYear = year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0);
++		return day <= (isLeapYear ? 29 : 28);
++	}
++	if (month === 4 || month === 6 || month === 9 || month === 11) {
++		return day <= 30;
++	}
++	return day <= 31;
++}
++
+ function isValidDateTime(value: string): boolean {
+-	return /^-?([1-9][0-9]{3,}|0[0-9]{3})-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])T(([01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9](\.[0-9]+)?|(24:00:00(\.0+)?))(Z|(\+|-)((0[0-9]|1[0-3]):[0-5][0-9]|14:00))?$/.test(
+-		value,
++	const match =
++		/^(-?(?:[1-9][0-9]{3,}|0[0-9]{3}))-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])T(([01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9](\.[0-9]+)?|(24:00:00(\.0+)?))(Z|(\+|-)((0[0-9]|1[0-3]):[0-5][0-9]|14:00))?$/.exec(
++			value,
++		);
++	return (
++		match !== null && isValidDayOfMonth(parseInt(match[1], 10), parseInt(match[2], 10), parseInt(match[3], 10))
+ 	);
+ }
+ 
+@@ -50,8 +71,12 @@ function isValidTime(value: string): boolean {
+ }
+ 
+ function isValidDate(value: string): boolean {
+-	return /^-?([1-9][0-9]{3,}|0[0-9]{3})-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])(Z|(\+|-)((0[0-9]|1[0-3]):[0-5][0-9]|14:00))?$/.test(
+-		value,
++	const match =
++		/^(-?(?:[1-9][0-9]{3,}|0[0-9]{3}))-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])(Z|(\+|-)((0[0-9]|1[0-3]):[0-5][0-9]|14:00))?$/.exec(
++			value,
++		);
++	return (
++		match !== null && isValidDayOfMonth(parseInt(match[1], 10), parseInt(match[2], 10), parseInt(match[3], 10))
+ 	);
+ }
+ 
+@@ -70,9 +95,10 @@ function isValidGYear(value: string): boolean {
+ }
+ 
+ function isValidGMonthDay(value: string): boolean {
+-	return /^--(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])(Z|(\+|-)((0[0-9]|1[0-3]):[0-5][0-9]|14:00))?$/.test(
++	const match = /^--(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])(Z|(\+|-)((0[0-9]|1[0-3]):[0-5][0-9]|14:00))?$/.exec(
+ 		value,
+ 	);
++	return match !== null && isValidDayOfMonth(null, parseInt(match[1], 10), parseInt(match[2], 10));
+ }
+ 
+ function isValidGDay(value: string): boolean {
+diff --git a/src/expressions/dataTypes/canonicalNumber.ts b/src/expressions/dataTypes/canonicalNumber.ts
+new file mode 100644
+index 0000000..b0926f6
+--- /dev/null
++++ b/src/expressions/dataTypes/canonicalNumber.ts
+@@ -0,0 +1,86 @@
++/**
++ * E-Rechnung Prüfer patch: canonical lexical representation of xs:double and xs:float
++ * (XPath Functions and Operators 3.1, casting to xs:string): values with 1e-6 <= |v| < 1e6 are
++ * written in decimal notation with the shortest digits that round-trip, all other values in
++ * scientific notation "d.dddE[-]n" with at least one digit after the point ("1.0E21").
++ * xs:float uses the shortest digits that round-trip through float32 (Saxon: "0.33333334").
++ */
++export function shortestFloat32Digits(value: number): string {
++	// value is already a float32-representable number
++	for (let p = 1; p <= 9; p++) {
++		const s = value.toPrecision(p);
++		if (Math.fround(parseFloat(s)) === value) {
++			return s;
++		}
++	}
++	return value.toPrecision(9);
++}
++
++function splitScientific(s: string): { mantissa: string; exponent: number; negative: boolean } {
++	// s like "-1.2345e+19" or "123.45" or "1e-7"
++	let negative = false;
++	if (s.startsWith('-')) {
++		negative = true;
++		s = s.slice(1);
++	}
++	let exponent = 0;
++	const ei = s.search(/[eE]/);
++	if (ei >= 0) {
++		exponent = parseInt(s.slice(ei + 1), 10);
++		s = s.slice(0, ei);
++	}
++	// normalise mantissa to digits without point
++	let digits: string;
++	let pointPos: number;
++	const dot = s.indexOf('.');
++	if (dot >= 0) {
++		digits = s.slice(0, dot) + s.slice(dot + 1);
++		pointPos = dot;
++	} else {
++		digits = s;
++		pointPos = s.length;
++	}
++	// strip leading zeros
++	while (digits.length > 1 && digits[0] === '0') {
++		digits = digits.slice(1);
++		pointPos -= 1;
++	}
++	// strip trailing zeros
++	digits = digits.replace(/0+$/, '');
++	if (digits === '') {
++		digits = '0';
++	}
++	// value = 0.digits * 10^(pointPos + exponent)
++	return { mantissa: digits, exponent: pointPos + exponent, negative };
++}
++
++export function canonicalFloatingPoint(value: number, isFloat: boolean): string {
++	if (Number.isNaN(value)) {
++		return 'NaN';
++	}
++	if (!Number.isFinite(value)) {
++		return value < 0 ? '-INF' : 'INF';
++	}
++	if (value === 0) {
++		return Object.is(value, -0) ? '-0' : '0';
++	}
++	const shortest = isFloat ? shortestFloat32Digits(value) : String(value);
++	const { mantissa, exponent, negative } = splitScientific(shortest);
++	const abs = Math.abs(value);
++	let out: string;
++	if (abs >= 1e-6 && abs < 1e6) {
++		// decimal notation: mantissa digits with the point at `exponent`
++		if (exponent <= 0) {
++			out = '0.' + '0'.repeat(-exponent) + mantissa;
++		} else if (exponent >= mantissa.length) {
++			out = mantissa + '0'.repeat(exponent - mantissa.length);
++		} else {
++			out = mantissa.slice(0, exponent) + '.' + mantissa.slice(exponent);
++		}
++	} else {
++		const first = mantissa[0];
++		const rest = mantissa.slice(1) || '0';
++		out = first + '.' + rest + 'E' + (exponent - 1);
++	}
++	return (negative ? '-' : '') + out;
++}
+diff --git a/src/expressions/dataTypes/casting/castToFloat.ts b/src/expressions/dataTypes/casting/castToFloat.ts
+index b113a0c..5b69f21 100644
+--- a/src/expressions/dataTypes/casting/castToFloat.ts
++++ b/src/expressions/dataTypes/casting/castToFloat.ts
+@@ -14,7 +14,8 @@ export default function castToFloat(
+ 		}
+ 		return {
+ 			successful: true,
+-			value: createAtomicValue(castResult.value, ValueType.XSFLOAT),
++			// E-Rechnung Prüfer patch: xs:float is single precision
++			value: createAtomicValue(Math.fround(castResult.value), ValueType.XSFLOAT),
+ 		};
+ 	};
+ }
+diff --git a/src/expressions/dataTypes/casting/castToStringLikeType.ts b/src/expressions/dataTypes/casting/castToStringLikeType.ts
+index 575b2c5..1d28795 100644
+--- a/src/expressions/dataTypes/casting/castToStringLikeType.ts
++++ b/src/expressions/dataTypes/casting/castToStringLikeType.ts
+@@ -1,3 +1,4 @@
++import { canonicalFloatingPoint } from '../canonicalNumber';
+ import { ValueType } from '../Value';
+ import QName from '../valueTypes/QName';
+ 
+@@ -38,6 +39,10 @@ export default function castToStringLikeType(
+ 			});
+ 		}
+ 		if (instanceOf(ValueType.XSFLOAT) || instanceOf(ValueType.XSDOUBLE)) {
++			const isFloat = instanceOf(ValueType.XSFLOAT);
++			// E-Rechnung Prüfer patch: canonical representation as in the XPath specification / Saxon
++			return (value) => ({ successful: true, value: canonicalFloatingPoint(value, isFloat) });
++			// eslint-disable-next-line no-unreachable
+ 			return (value) => {
+ 				if (isNaN(value)) {
+ 					return {
+diff --git a/src/expressions/dataTypes/casting/tryCastToType.ts b/src/expressions/dataTypes/casting/tryCastToType.ts
+index a2865b0..cf3a2b8 100644
+--- a/src/expressions/dataTypes/casting/tryCastToType.ts
++++ b/src/expressions/dataTypes/casting/tryCastToType.ts
+@@ -9,6 +9,8 @@ import {
+ 	validateRestrictions,
+ } from '../typeHelpers';
+ import Value, { ValueType, valueTypeToString } from '../Value';
++import { createExactValue, exactOf, ExactAtomicValue } from '../exactNumeric';
++import Decimal from '../valueTypes/Decimal';
+ import CastResult from './CastResult';
+ import castToAnyURI from './castToAnyURI';
+ import castToBase64Binary from './castToBase64Binary';
+@@ -254,7 +256,67 @@ function createCastingFunction(from: ValueType, to: ValueType): (value: Value) =
+ 	};
+ }
+ 
++// E-Rechnung Prüfer patch: exact handling of casts involving xs:decimal / xs:integer.
++function tryCastExact(valueTuple: ExactAtomicValue, type: ValueType): CastResult | null {
++	const from = valueTuple.type;
++	const toDecimal = isSubtypeOf(type, ValueType.XSDECIMAL);
++	const toInteger = isSubtypeOf(type, ValueType.XSINTEGER);
++	const fromDecimal = isSubtypeOf(from, ValueType.XSDECIMAL);
++	if (toDecimal) {
++		let exact: Decimal | null = null;
++		if (fromDecimal) {
++			exact = exactOf(valueTuple);
++		} else if (isSubtypeOf(from, ValueType.XSSTRING) || isSubtypeOf(from, ValueType.XSUNTYPEDATOMIC)) {
++			const text = normalizeWhitespace(valueTuple.value as string, type);
++			exact = toInteger ? Decimal.fromIntegerString(text) : Decimal.fromString(text);
++			if (!exact) {
++				return { successful: false, error: errFORG0001(valueTuple.value, type, 'pattern validation failed.') };
++			}
++		} else if (isSubtypeOf(from, ValueType.XSFLOAT) || isSubtypeOf(from, ValueType.XSDOUBLE)) {
++			const n = valueTuple.value as number;
++			if (Number.isNaN(n) || !Number.isFinite(n)) {
++				return { successful: false, error: new Error(`FOCA0002: Can not cast ${n} to ${valueTypeToString(type)}`) };
++			}
++			exact = Decimal.fromDouble(n);
++		} else if (isSubtypeOf(from, ValueType.XSBOOLEAN)) {
++			exact = valueTuple.value ? Decimal.ONE : Decimal.ZERO;
++		} else {
++			return null; // other sources: generic path
++		}
++		if (toInteger && !exact.isInteger()) {
++			exact = Decimal.fromBigInt(exact.toBigInt()); // truncation towards zero
++		}
++		if (type !== ValueType.XSDECIMAL && type !== ValueType.XSINTEGER) {
++			// derived types (xs:short, xs:positiveInteger, ...): check facets on the canonical string
++			if (!validateRestrictions(exact.toString(), type)) {
++				return { successful: false, error: errFORG0001(valueTuple.value, type, 'pattern validation failed.') };
++			}
++		}
++		return { successful: true, value: createExactValue(exact, type) };
++	}
++	if (fromDecimal && (type === ValueType.XSSTRING || type === ValueType.XSUNTYPEDATOMIC || isSubtypeOf(type, ValueType.XSSTRING))) {
++		const str = exactOf(valueTuple).toString();
++		if (type !== ValueType.XSSTRING && type !== ValueType.XSUNTYPEDATOMIC && !validatePattern(str, type)) {
++			return { successful: false, error: errFORG0001(str, type, 'pattern validation failed.') };
++		}
++		return { successful: true, value: createAtomicValue(str, type) };
++	}
++	if (fromDecimal && (type === ValueType.XSDOUBLE || type === ValueType.XSFLOAT)) {
++		const n = exactOf(valueTuple).toNumber();
++		return { successful: true, value: createAtomicValue(type === ValueType.XSFLOAT ? Math.fround(n) : n, type) };
++	}
++	return null;
++}
++
+ export default function tryCastToType(valueTuple: AtomicValue, type: ValueType): CastResult {
++	if (valueTuple.type !== type) {
++		const exactResult = tryCastExact(valueTuple as ExactAtomicValue, type);
++		if (exactResult) {
++			return exactResult;
++		}
++	} else if (isSubtypeOf(type, ValueType.XSDECIMAL)) {
++		return { successful: true, value: valueTuple };
++	}
+ 	const index = (valueTuple.type as number) + (type as number) * 10000;
+ 	let prefabConverter = precomputedCastFunctorsByTypeString[index];
+ 
+diff --git a/src/expressions/dataTypes/documentOrderUtils.ts b/src/expressions/dataTypes/documentOrderUtils.ts
+index 41831ae..818ed82 100644
+--- a/src/expressions/dataTypes/documentOrderUtils.ts
++++ b/src/expressions/dataTypes/documentOrderUtils.ts
+@@ -1,3 +1,4 @@
++import { compareIndexedNodes, isDescendantIndexEnabled } from '../axes/descendantIndex';
+ import {
+ 	AttributeNodePointer,
+ 	ChildNodePointer,
+@@ -107,6 +108,35 @@ function compareElements(
+ 			return 0;
+ 		}
+ 
++		// E-Rechnung Prüfer patch: O(1) comparison through the per-document index when enabled
++		if (isDescendantIndexEnabled()) {
++			const indexed = compareIndexedNodes(actualNodeA, actualNodeB);
++			if (indexed !== undefined) {
++				return indexed;
++			}
++		}
++
++		// E-Rechnung Prüfer patch: real DOM implementations (browsers, slimdom) know their
++		// document order natively; this avoids the O(n) sibling scan per comparison, which made
++		// sorting the result of (cac:InvoiceLine|cac:CreditNoteLine) quadratic on large invoices.
++		if (typeof (actualNodeA as any).compareDocumentPosition === 'function') {
++			const pos = (actualNodeA as any).compareDocumentPosition(actualNodeB) as number;
++			if (!(pos & 1 /* DISCONNECTED */)) {
++				if (pos & 8 /* CONTAINS: B is an ancestor of A */) {
++					return 1;
++				}
++				if (pos & 16 /* CONTAINED_BY: B is a descendant of A */) {
++					return -1;
++				}
++				if (pos & 2 /* PRECEDING: B precedes A */) {
++					return 1;
++				}
++				if (pos & 4 /* FOLLOWING: B follows A */) {
++					return -1;
++				}
++			}
++		}
++
+ 		const actualAncestorsA = findAllAncestors(domFacade, actualNodeA);
+ 		const actualAncestorsB = findAllAncestors(domFacade, actualNodeB);
+ 
+@@ -229,6 +259,33 @@ function compareNodePositionsWithTieBreaker(
+ 				domFacade.getParentNodePointer(node1.value),
+ 			)
+ 		) {
++			// E-Rechnung Prüfer patch: attributes of one element are ordered as the DOM reports
++			// them (source order, which is what Saxon and the browsers' DOMParser use); the
++			// alphabetical order is kept only for tiny (constructed) nodes.
++			const attr1 = node1.value as NodePointer;
++			const attr2 = node2.value as NodePointer;
++			if (
++				!attr1.graftAncestor &&
++				!attr2.graftAncestor &&
++				!isTinyNode(attr1.node) &&
++				!isTinyNode(attr2.node)
++			) {
++				if (attr1.node === attr2.node) {
++					return 0;
++				}
++				const owner: any = (attr1.node as any).ownerElement;
++				const attributes: any = owner ? owner.attributes : null;
++				if (attributes) {
++					for (let i = 0, l = attributes.length; i < l; i++) {
++						if (attributes[i] === attr1.node) {
++							return -1;
++						}
++						if (attributes[i] === attr2.node) {
++							return 1;
++						}
++					}
++				}
++			}
+ 			// Sort on attributes name
+ 			return domFacade.getLocalName(node1.value) > domFacade.getLocalName(node2.value)
+ 				? 1
+diff --git a/src/expressions/dataTypes/exactNumeric.ts b/src/expressions/dataTypes/exactNumeric.ts
+new file mode 100644
+index 0000000..af5789d
+--- /dev/null
++++ b/src/expressions/dataTypes/exactNumeric.ts
+@@ -0,0 +1,49 @@
++/**
++ * E-Rechnung Prüfer patch: helpers for exact xs:decimal / xs:integer values.
++ *
++ * An AtomicValue of a decimal type keeps `value` as a JavaScript number (so that every consumer
++ * that only needs an approximation keeps working) and may carry `exact`, the exact Decimal.
++ * Arithmetic, comparisons, rounding, aggregation and string conversion use `exact`; when a value
++ * has no `exact` (for instance a decimal created from a JavaScript number), the exact value is
++ * derived from the number the way Saxon derives it (exact binary expansion for decimals,
++ * exact integer for safe integers).
++ */
++import AtomicValue from './AtomicValue';
++import isSubtypeOf from './isSubtypeOf';
++import { ValueType } from './Value';
++import Decimal from './valueTypes/Decimal';
++
++export type ExactAtomicValue = AtomicValue & { exact?: Decimal };
++
++export function isDecimalType(type: ValueType): boolean {
++	return isSubtypeOf(type, ValueType.XSDECIMAL);
++}
++
++export function isIntegerType(type: ValueType): boolean {
++	return isSubtypeOf(type, ValueType.XSINTEGER);
++}
++
++export function exactOf(value: ExactAtomicValue): Decimal {
++	if (value.exact) {
++		return value.exact;
++	}
++	const n = value.value as number;
++	if (isIntegerType(value.type) && Number.isSafeInteger(n)) {
++		return Decimal.fromBigInt(BigInt(n));
++	}
++	return Decimal.fromDouble(n);
++}
++
++export function createExactValue(exact: Decimal, type: ValueType): ExactAtomicValue {
++	const v: ExactAtomicValue = { type, value: exact.toNumber() };
++	v.exact = exact;
++	return v;
++}
++
++export function exactString(value: ExactAtomicValue): string {
++	return exactOf(value).toString();
++}
++
++export function compareExact(a: ExactAtomicValue, b: ExactAtomicValue): number {
++	return exactOf(a).compare(exactOf(b));
++}
+diff --git a/src/expressions/dataTypes/valueTypes/DateTime.ts b/src/expressions/dataTypes/valueTypes/DateTime.ts
+index 148a653..a056fe3 100644
+--- a/src/expressions/dataTypes/valueTypes/DateTime.ts
++++ b/src/expressions/dataTypes/valueTypes/DateTime.ts
+@@ -68,8 +68,27 @@ class DateTime {
+ 	) {
+ 		this._years = years;
+ 		this._months = months;
+-		this._days = days + (hours === 24 ? 1 : 0);
+-		this._hours = hours === 24 ? 0 : hours;
++		this._days = days;
++		this._hours = hours;
++		if (hours === 24) {
++			// E-Rechnung Prüfer patch: 24:00:00 is 00:00:00 of the NEXT day, with month and year carry
++			// (2017-12-31T24:00:00 = 2018-01-01T00:00:00), as XML Schema 1.0 §3.2.7 and Saxon define it
++			this._hours = 0;
++			this._days = days + 1;
++			if (years !== null && months !== null && days !== null) {
++				const y = years;
++				const leap = (y % 4 === 0 && y % 100 !== 0) || y % 400 === 0;
++				const lengths = [31, leap ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
++				if (this._days > lengths[months - 1]) {
++					this._days = 1;
++					this._months = months + 1;
++					if (this._months > 12) {
++						this._months = 1;
++						this._years = y + 1;
++					}
++				}
++			}
++		}
+ 		this._minutes = minutes;
+ 		this._seconds = seconds;
+ 		this.secondFraction = secondFraction;
+diff --git a/src/expressions/dataTypes/valueTypes/Decimal.ts b/src/expressions/dataTypes/valueTypes/Decimal.ts
+new file mode 100644
+index 0000000..2125ad2
+--- /dev/null
++++ b/src/expressions/dataTypes/valueTypes/Decimal.ts
+@@ -0,0 +1,305 @@
++/**
++ * E-Rechnung Prüfer patch: exact xs:decimal / xs:integer arithmetic.
++ *
++ * Values are kept as `unscaled * 10^-scale` with a BigInt mantissa, exactly like java.math.BigDecimal,
++ * which is what Saxon uses for xs:decimal. Trailing zeros are stripped (Saxon's BigDecimalValue
++ * does the same), so the scale can be negative for values such as 1E+19.
++ *
++ * Division follows Saxon HE (net.sf.saxon.value.BigDecimalValue.DIVIDE_PRECISION = 18):
++ *   scale = max(18, scale(A) - scale(B) + 18), RoundingMode.HALF_DOWN
++ * verified against Saxon HE 12.8 by test/xpath-conformance (e.g. 158 div 14 = 11.285714285714285714,
++ * 1.5 div 7 = 0.2142857142857142857, 15 div 1E19 = 0.0000000000000000015).
++ */
++export default class Decimal {
++	public static readonly DIVIDE_PRECISION = 18;
++	public static readonly ZERO = new Decimal(0n, 0);
++	public static readonly ONE = new Decimal(1n, 0);
++
++	public readonly unscaled: bigint;
++	public readonly scale: number;
++
++	private constructor(unscaled: bigint, scale: number) {
++		// strip trailing zeros
++		if (unscaled === 0n) {
++			this.unscaled = 0n;
++			this.scale = 0;
++			return;
++		}
++		while (unscaled % 10n === 0n) {
++			unscaled /= 10n;
++			scale -= 1;
++		}
++		this.unscaled = unscaled;
++		this.scale = scale;
++	}
++
++	public static of(unscaled: bigint, scale: number): Decimal {
++		return new Decimal(unscaled, scale);
++	}
++
++	public static fromBigInt(value: bigint): Decimal {
++		return new Decimal(value, 0);
++	}
++
++	/** XML Schema decimal lexical form: optional sign, digits, optional fraction ('.5' and '5.' allowed). */
++	public static fromString(text: string): Decimal | null {
++		const s = text.trim();
++		const m = /^([+-])?(\d*)(?:\.(\d*))?$/.exec(s);
++		if (!m || (m[2] === '' && (m[3] === undefined || m[3] === ''))) {
++			return null;
++		}
++		const intPart = m[2] || '';
++		const fracPart = m[3] || '';
++		let unscaled = BigInt(intPart + fracPart || '0');
++		if (m[1] === '-') {
++			unscaled = -unscaled;
++		}
++		return new Decimal(unscaled, fracPart.length);
++	}
++
++	/** XML Schema integer lexical form. */
++	public static fromIntegerString(text: string): Decimal | null {
++		const s = text.trim();
++		if (!/^[+-]?\d+$/.test(s)) {
++			return null;
++		}
++		return new Decimal(BigInt(s), 0);
++	}
++
++	/**
++	 * Exact value of a double (java.math.BigDecimal(double) semantics, as Saxon uses when
++	 * casting xs:double to xs:decimal): the binary value is expanded exactly.
++	 */
++	public static fromDouble(value: number): Decimal {
++		if (!Number.isFinite(value)) {
++			throw new Error('FOCA0002: cannot convert ' + value + ' to xs:decimal');
++		}
++		if (value === 0) {
++			return Decimal.ZERO;
++		}
++		if (Number.isSafeInteger(value)) {
++			return new Decimal(BigInt(value), 0);
++		}
++		const buffer = new DataView(new ArrayBuffer(8));
++		buffer.setFloat64(0, value);
++		const hi = buffer.getUint32(0);
++		const lo = buffer.getUint32(4);
++		const sign = hi >>> 31 ? -1n : 1n;
++		const exponent = (hi >>> 20) & 0x7ff;
++		let mantissa = (BigInt(hi & 0xfffff) << 32n) | BigInt(lo);
++		let exp: number;
++		if (exponent === 0) {
++			exp = -1074; // subnormal
++		} else {
++			mantissa |= 1n << 52n;
++			exp = exponent - 1075;
++		}
++		// value = sign * mantissa * 2^exp
++		if (exp >= 0) {
++			return new Decimal(sign * (mantissa << BigInt(exp)), 0);
++		}
++		// mantissa * 2^exp = mantissa * 5^-exp / 10^-exp
++		const n = -exp;
++		return new Decimal(sign * mantissa * 5n ** BigInt(n), n);
++	}
++
++	public static fromNumber(value: number): Decimal {
++		return Decimal.fromDouble(value);
++	}
++
++	public isZero(): boolean {
++		return this.unscaled === 0n;
++	}
++
++	public isInteger(): boolean {
++		return this.scale <= 0;
++	}
++
++	public sign(): number {
++		return this.unscaled === 0n ? 0 : this.unscaled < 0n ? -1 : 1;
++	}
++
++	public negate(): Decimal {
++		return new Decimal(-this.unscaled, this.scale);
++	}
++
++	public abs(): Decimal {
++		return this.unscaled < 0n ? this.negate() : this;
++	}
++
++	private static align(a: Decimal, b: Decimal): [bigint, bigint, number] {
++		const scale = Math.max(a.scale, b.scale);
++		const ua = a.unscaled * 10n ** BigInt(scale - a.scale);
++		const ub = b.unscaled * 10n ** BigInt(scale - b.scale);
++		return [ua, ub, scale];
++	}
++
++	public add(other: Decimal): Decimal {
++		const [ua, ub, scale] = Decimal.align(this, other);
++		return new Decimal(ua + ub, scale);
++	}
++
++	public subtract(other: Decimal): Decimal {
++		const [ua, ub, scale] = Decimal.align(this, other);
++		return new Decimal(ua - ub, scale);
++	}
++
++	public multiply(other: Decimal): Decimal {
++		return new Decimal(this.unscaled * other.unscaled, this.scale + other.scale);
++	}
++
++	/** Saxon decimal division: scale = max(18, scaleA - scaleB + 18), HALF_DOWN. */
++	public divide(other: Decimal): Decimal {
++		if (other.unscaled === 0n) {
++			throw new Error('FOAR0001: Division by zero');
++		}
++		const scale = Math.max(
++			Decimal.DIVIDE_PRECISION,
++			this.scale - other.scale + Decimal.DIVIDE_PRECISION,
++		);
++		return this.divideToScale(other, scale, 'HALF_DOWN');
++	}
++
++	public divideToScale(other: Decimal, scale: number, mode: 'HALF_DOWN' | 'HALF_UP' | 'HALF_EVEN'): Decimal {
++		// result = this / other with `scale` fractional digits
++		// numerator = unscaledA * 10^(scale + scaleB - scaleA) ; divide by unscaledB
++		const shift = scale + other.scale - this.scale;
++		let num = this.unscaled;
++		let den = other.unscaled;
++		if (shift >= 0) {
++			num = num * 10n ** BigInt(shift);
++		} else {
++			den = den * 10n ** BigInt(-shift);
++		}
++		const negative = num < 0n !== den < 0n;
++		const an = num < 0n ? -num : num;
++		const ad = den < 0n ? -den : den;
++		let q = an / ad;
++		const r = an % ad;
++		const twice = r * 2n;
++		if (twice > ad || (twice === ad && (mode === 'HALF_UP' || (mode === 'HALF_EVEN' && q % 2n === 1n)))) {
++			q += 1n;
++		}
++		return new Decimal(negative ? -q : q, scale);
++	}
++
++	/** Truncating integer division (XPath idiv). */
++	public idiv(other: Decimal): bigint {
++		if (other.unscaled === 0n) {
++			throw new Error('FOAR0001: Division by zero');
++		}
++		const [ua, ub] = Decimal.align(this, other);
++		return ua / ub; // BigInt division truncates towards zero
++	}
++
++	/** XPath mod: this - other * idiv(this, other), sign follows the dividend. */
++	public mod(other: Decimal): Decimal {
++		if (other.unscaled === 0n) {
++			throw new Error('FOAR0001: Division by zero');
++		}
++		const [ua, ub, scale] = Decimal.align(this, other);
++		return new Decimal(ua % ub, scale);
++	}
++
++	public compare(other: Decimal): number {
++		const [ua, ub] = Decimal.align(this, other);
++		return ua < ub ? -1 : ua > ub ? 1 : 0;
++	}
++
++	public equals(other: Decimal): boolean {
++		return this.compare(other) === 0;
++	}
++
++	public floor(): Decimal {
++		if (this.scale <= 0) {
++			return this;
++		}
++		const p = 10n ** BigInt(this.scale);
++		let q = this.unscaled / p;
++		if (this.unscaled < 0n && this.unscaled % p !== 0n) {
++			q -= 1n;
++		}
++		return new Decimal(q, 0);
++	}
++
++	public ceiling(): Decimal {
++		if (this.scale <= 0) {
++			return this;
++		}
++		const p = 10n ** BigInt(this.scale);
++		let q = this.unscaled / p;
++		if (this.unscaled > 0n && this.unscaled % p !== 0n) {
++			q += 1n;
++		}
++		return new Decimal(q, 0);
++	}
++
++	/**
++	 * fn:round / fn:round-half-to-even with precision (digits after the decimal point; negative
++	 * precision rounds to tens, hundreds, ...). fn:round rounds halves towards positive infinity.
++	 */
++	public round(precision: number, halfToEven: boolean): Decimal {
++		if (this.scale <= precision) {
++			return this;
++		}
++		// shift so that `precision` digits remain
++		const drop = this.scale - precision; // > 0
++		const p = 10n ** BigInt(drop);
++		const neg = this.unscaled < 0n;
++		const a = neg ? -this.unscaled : this.unscaled;
++		let q = a / p;
++		const r = a % p;
++		const twice = r * 2n;
++		if (twice > p) {
++			q += 1n;
++		} else if (twice === p) {
++			if (halfToEven) {
++				if (q % 2n === 1n) {
++					q += 1n;
++				}
++			} else if (!neg) {
++				q += 1n; // towards positive infinity: 2.5 -> 3, -2.5 -> -2
++			}
++		}
++		return new Decimal(neg ? -q : q, precision);
++	}
++
++	/** Canonical XPath string: no exponent, no trailing zeros, no leading '+', '-0' never produced. */
++	public toString(): string {
++		if (this.unscaled === 0n) {
++			return '0';
++		}
++		const neg = this.unscaled < 0n;
++		let digits = (neg ? -this.unscaled : this.unscaled).toString();
++		let out: string;
++		if (this.scale <= 0) {
++			out = digits + '0'.repeat(-this.scale);
++		} else {
++			if (digits.length <= this.scale) {
++				digits = '0'.repeat(this.scale - digits.length + 1) + digits;
++			}
++			out = digits.slice(0, digits.length - this.scale) + '.' + digits.slice(digits.length - this.scale);
++		}
++		return (neg ? '-' : '') + out;
++	}
++
++	public toNumber(): number {
++		return Number(this.toString());
++	}
++
++	public toBigInt(): bigint {
++		// truncates towards zero
++		if (this.scale <= 0) {
++			return this.unscaled * 10n ** BigInt(-this.scale);
++		}
++		return this.unscaled / 10n ** BigInt(this.scale);
++	}
++
++	public isSafeInteger(): boolean {
++		if (!this.isInteger()) {
++			return false;
++		}
++		const b = this.toBigInt();
++		return b <= BigInt(Number.MAX_SAFE_INTEGER) && b >= BigInt(Number.MIN_SAFE_INTEGER);
++	}
++}
+diff --git a/src/expressions/functions/builtInFunctions_numeric.ts b/src/expressions/functions/builtInFunctions_numeric.ts
+index f73de98..1ce67f5 100644
+--- a/src/expressions/functions/builtInFunctions_numeric.ts
++++ b/src/expressions/functions/builtInFunctions_numeric.ts
+@@ -2,6 +2,8 @@ import atomize from '../dataTypes/atomize';
+ import tryCastToType from '../dataTypes/casting/tryCastToType';
+ import castToType from '../dataTypes/castToType';
+ import createAtomicValue from '../dataTypes/createAtomicValue';
++import { createExactValue, exactOf, isDecimalType } from '../dataTypes/exactNumeric';
++import Decimal from '../dataTypes/valueTypes/Decimal';
+ import FunctionValue from '../dataTypes/FunctionValue';
+ import type ISequence from '../dataTypes/ISequence';
+ import isSubtypeOf from '../dataTypes/isSubtypeOf';
+@@ -474,7 +476,9 @@ const fnAbs: FunctionDefinitionType = (
+ 	sequence,
+ ) => {
+ 	return sequence.map((onlyValue) =>
+-		createValidNumericType(onlyValue.type, Math.abs(onlyValue.value)),
++		isDecimalType(onlyValue.type)
++			? createExactValue(exactOf(onlyValue).abs(), isSubtypeOf(onlyValue.type, ValueType.XSINTEGER) ? ValueType.XSINTEGER : ValueType.XSDECIMAL)
++			: createValidNumericType(onlyValue.type, Math.abs(onlyValue.value)),
+ 	);
+ };
+ 
+@@ -514,6 +518,111 @@ const integerConverters = new Map([
+ 	['\u06f9', convertIntegerToPersianNumeral],
+ ]);
+ 
++/**
++ * E-Rechnung Prüfer patch: fn:format-number($value, $picture) with the default decimal format
++ * (XSLT 3.0 §4.7.3 / XPath F&O 3.1 §4.7.2): decimal separator '.', grouping separator ',',
++ * digits '#' and '0', optional negative sub-picture after ';', percent '%' and per-mille '‰'.
++ * Rounding is round-half-to-even on the exact value, as in Saxon (format-number(0.125, '0.00') = 0.12).
++ */
++function formatNumberDefault(value: number, exact: Decimal | null, picture: string): string {
++	if (Number.isNaN(value)) {
++		return 'NaN';
++	}
++	const subPictures = picture.split(';');
++	if (subPictures.length > 2) {
++		throw new Error('FODF1310: Invalid picture string ' + picture);
++	}
++	const negative = value < 0 || (exact && exact.sign() < 0);
++	let sub = negative && subPictures.length === 2 ? subPictures[1] : subPictures[0];
++	const explicitNegative = negative && subPictures.length === 2;
++	// split prefix / number part / suffix
++	const m = /^([^#0,.%‰]*)([#0,.]*)([^#0,.]*)$/.exec(sub);
++	if (!m) {
++		throw new Error('FODF1310: Invalid picture string ' + picture);
++	}
++	const prefix = m[1];
++	const numberPart = m[2];
++	let suffix = m[3];
++	let scaled = exact ? exact : Decimal.fromDouble(value);
++	if (suffix.includes('%')) {
++		scaled = scaled.multiply(Decimal.fromBigInt(100n));
++	} else if (suffix.includes('‰')) {
++		scaled = scaled.multiply(Decimal.fromBigInt(1000n));
++	}
++	if (!Number.isFinite(value)) {
++		return (negative && !explicitNegative ? '-' : '') + prefix + 'Infinity' + suffix;
++	}
++	const dot = numberPart.indexOf('.');
++	const intPicture = dot >= 0 ? numberPart.slice(0, dot) : numberPart;
++	const fracPicture = dot >= 0 ? numberPart.slice(dot + 1) : '';
++	const minInt = (intPicture.match(/0/g) || []).length;
++	const minFrac = (fracPicture.match(/0/g) || []).length;
++	const maxFrac = (fracPicture.match(/[0#]/g) || []).length;
++	// grouping: positions of ',' counted from the right of the integer picture
++	const groupPositions: number[] = [];
++	let digitsSeen = 0;
++	for (let i = intPicture.length - 1; i >= 0; i--) {
++		if (intPicture[i] === ',') {
++			groupPositions.push(digitsSeen);
++		} else {
++			digitsSeen++;
++		}
++	}
++	const rounded = scaled.abs().round(maxFrac, true);
++	let str = rounded.toString();
++	let intDigits = str;
++	let fracDigits = '';
++	const dp = str.indexOf('.');
++	if (dp >= 0) {
++		intDigits = str.slice(0, dp);
++		fracDigits = str.slice(dp + 1);
++	}
++	if (intDigits === '0' && minInt === 0 && (fracDigits !== '' || maxFrac > 0)) {
++		intDigits = '';
++	}
++	while (intDigits.length < minInt) {
++		intDigits = '0' + intDigits;
++	}
++	while (fracDigits.length < minFrac) {
++		fracDigits += '0';
++	}
++	// apply grouping (regular grouping if all positions are equally spaced)
++	if (groupPositions.length) {
++		const regular = groupPositions.every((p, i) => p === groupPositions[0] * (i + 1));
++		const interval = groupPositions[0];
++		let out = '';
++		let count = 0;
++		for (let i = intDigits.length - 1; i >= 0; i--) {
++			out = intDigits[i] + out;
++			count++;
++			const insert = regular ? count % interval === 0 : groupPositions.includes(count);
++			if (insert && i > 0) {
++				out = ',' + out;
++			}
++		}
++		intDigits = out;
++	}
++	const number = fracDigits !== '' ? intDigits + '.' + fracDigits : intDigits;
++	const sign = negative && !explicitNegative && !(rounded.isZero()) ? '-' : '';
++	return sign + prefix + number + suffix;
++}
++
++const fnFormatNumber: FunctionDefinitionType = (
++	_dynamicContext,
++	_executionParameters,
++	_staticContext,
++	sequence,
++	pictureSequence,
++) => {
++	const pictureValue = pictureSequence.first();
++	if (sequence.isEmpty()) {
++		return sequenceFactory.singleton(createAtomicValue(formatNumberDefault(NaN, null, pictureValue.value as string), ValueType.XSSTRING));
++	}
++	const v = sequence.first();
++	const exact = isDecimalType(v.type) ? exactOf(v) : null;
++	return sequenceFactory.singleton(createAtomicValue(formatNumberDefault(v.value as number, exact, pictureValue.value as string), ValueType.XSSTRING));
++};
++
+ const fnFormatInteger: FunctionDefinitionType = (
+ 	_dynamicContext,
+ 	_executionParameters,
+@@ -547,7 +656,9 @@ const fnCeiling: FunctionDefinitionType = (
+ 	sequence,
+ ) => {
+ 	return sequence.map((onlyValue) =>
+-		createValidNumericType(onlyValue.type, Math.ceil(onlyValue.value)),
++		isDecimalType(onlyValue.type)
++			? createExactValue(exactOf(onlyValue).ceiling(), isSubtypeOf(onlyValue.type, ValueType.XSINTEGER) ? ValueType.XSINTEGER : ValueType.XSDECIMAL)
++			: createValidNumericType(onlyValue.type, Math.ceil(onlyValue.value)),
+ 	);
+ };
+ 
+@@ -558,7 +669,9 @@ const fnFloor: FunctionDefinitionType = (
+ 	sequence,
+ ) => {
+ 	return sequence.map((onlyValue) =>
+-		createValidNumericType(onlyValue.type, Math.floor(onlyValue.value)),
++		isDecimalType(onlyValue.type)
++			? createExactValue(exactOf(onlyValue).floor(), isSubtypeOf(onlyValue.type, ValueType.XSINTEGER) ? ValueType.XSINTEGER : ValueType.XSDECIMAL)
++			: createValidNumericType(onlyValue.type, Math.floor(onlyValue.value)),
+ 	);
+ };
+ 
+@@ -635,6 +748,19 @@ function fnRound(
+ 			}
+ 			done = true;
+ 
++			if (isDecimalType(firstValue.type)) {
++				// E-Rechnung Prüfer patch: exact rounding of xs:decimal / xs:integer
++				const rounded = exactOf(firstValue).round(scalingPrecision as number, halfToEven);
++				return ready(createExactValue(rounded, isSubtypeOf(firstValue.type, ValueType.XSINTEGER) ? ValueType.XSINTEGER : ValueType.XSDECIMAL));
++			}
++			{
++				// E-Rechnung Prüfer patch: doubles and floats are rounded on their exact binary value
++				// (Saxon converts to BigDecimal), e.g. round(2.675e0, 2) = 2.67
++				const isFloat = isSubtypeOf(firstValue.type, ValueType.XSFLOAT);
++				const rounded = Decimal.fromDouble(firstValue.value as number).round(scalingPrecision as number, halfToEven).toNumber();
++				return ready(createAtomicValue(isFloat ? Math.fround(rounded) : rounded, isFloat ? ValueType.XSFLOAT : ValueType.XSDOUBLE));
++			}
++
+ 			if (getNumberOfDecimalDigits(firstValue.value as number) < scalingPrecision) {
+ 				return ready(firstValue);
+ 			}
+@@ -808,6 +934,17 @@ const declarations: BuiltinDeclarationType[] = [
+ 		callFunction: fnAbs,
+ 	},
+ 
++	{
++		namespaceURI: BUILT_IN_NAMESPACE_URIS.FUNCTIONS_NAMESPACE_URI,
++		localName: 'format-number',
++		argumentTypes: [
++			{ type: ValueType.XSNUMERIC, mult: SequenceMultiplicity.ZERO_OR_ONE },
++			{ type: ValueType.XSSTRING, mult: SequenceMultiplicity.EXACTLY_ONE },
++		],
++		returnType: { type: ValueType.XSSTRING, mult: SequenceMultiplicity.EXACTLY_ONE },
++		callFunction: fnFormatNumber,
++	},
++
+ 	{
+ 		namespaceURI: BUILT_IN_NAMESPACE_URIS.FUNCTIONS_NAMESPACE_URI,
+ 		localName: 'format-integer',
+diff --git a/src/expressions/functions/builtInFunctions_sequences.ts b/src/expressions/functions/builtInFunctions_sequences.ts
+index 96ff37a..256e90b 100644
+--- a/src/expressions/functions/builtInFunctions_sequences.ts
++++ b/src/expressions/functions/builtInFunctions_sequences.ts
+@@ -3,6 +3,8 @@ import realizeDom from '../../domClone/realizeDom';
+ import atomize from '../dataTypes/atomize';
+ import castToType from '../dataTypes/castToType';
+ import createAtomicValue from '../dataTypes/createAtomicValue';
++import { compareExact, createExactValue, exactOf, isDecimalType } from '../dataTypes/exactNumeric';
++import Decimal from '../dataTypes/valueTypes/Decimal';
+ import FunctionValue from '../dataTypes/FunctionValue';
+ import ISequence from '../dataTypes/ISequence';
+ import isSubtypeOf from '../dataTypes/isSubtypeOf';
+@@ -338,6 +340,12 @@ const fnAvg: FunctionDefinitionType = (
+ 		throw new Error('FORG0006: items passed to fn:avg are not all numeric.');
+ 	}
+ 
++	if (items.every((item) => isDecimalType(item.type))) {
++		// E-Rechnung Prüfer patch: exact average (sum div count, Saxon division rule)
++		const total = items.reduce((acc, item) => acc.add(exactOf(item)), Decimal.ZERO);
++		return sequenceFactory.singleton(createExactValue(total.divide(Decimal.fromBigInt(BigInt(items.length))), ValueType.XSDECIMAL));
++	}
++
+ 	const resultValue =
+ 		items.reduce((sum, item) => {
+ 			return sum + item.value;
+@@ -378,6 +386,9 @@ const fnMax: FunctionDefinitionType = (
+ 	const items = castItemsForMinMax(sequence.getAllValues());
+ 
+ 	// Use first element in array as initial value
++	if (items.every((item) => isDecimalType(item.type))) {
++		return sequenceFactory.singleton(items.reduce((max, item) => (compareExact(max, item) < 0 ? item : max)));
++	}
+ 	return sequenceFactory.singleton(
+ 		items.reduce((max, item) => {
+ 			return max.value < item.value ? item : max;
+@@ -398,6 +409,9 @@ const fnMin: FunctionDefinitionType = (
+ 	const items = castItemsForMinMax(sequence.getAllValues());
+ 
+ 	// Use first element in array as initial value
++	if (items.every((item) => isDecimalType(item.type))) {
++		return sequenceFactory.singleton(items.reduce((min, item) => (compareExact(min, item) > 0 ? item : min)));
++	}
+ 	return sequenceFactory.singleton(
+ 		items.reduce((min, item) => {
+ 			return min.value > item.value ? item : min;
+@@ -427,6 +441,12 @@ const fnSum: FunctionDefinitionType = (
+ 		throw new Error('FORG0006: items passed to fn:sum are not all numeric.');
+ 	}
+ 
++	if (items.every((item) => isDecimalType(item.type))) {
++		// E-Rechnung Prüfer patch: exact sum
++		const total = items.reduce((acc, item) => acc.add(exactOf(item)), Decimal.ZERO);
++		return sequenceFactory.singleton(createExactValue(total, items.every((item) => isSubtypeOf(item.type, ValueType.XSINTEGER)) ? ValueType.XSINTEGER : ValueType.XSDECIMAL));
++	}
++
+ 	const resultValue = items.reduce((sum, item) => {
+ 		return sum + item.value;
+ 	}, 0);
+diff --git a/src/expressions/functions/builtInFunctions_string.ts b/src/expressions/functions/builtInFunctions_string.ts
+index 5e7d4f8..cb56d38 100644
+--- a/src/expressions/functions/builtInFunctions_string.ts
++++ b/src/expressions/functions/builtInFunctions_string.ts
+@@ -329,14 +329,20 @@ const fnTokenize: FunctionDefinitionType = (
+ 	_staticContext,
+ 	input,
+ 	pattern,
++	flagsSequence?: ISequence,
+ ) => {
+ 	if (input.isEmpty() || input.first().value.length === 0) {
+ 		return sequenceFactory.empty();
+ 	}
+ 	const inputString: string = input.first().value;
+ 	const patternString: string = pattern.first().value;
++	const flags: string = flagsSequence && !flagsSequence.isEmpty() ? flagsSequence.first().value : '';
+ 
+-	const regex = compileJSRegex(patternString);
++	// E-Rechnung Prüfer patch: XPath regex dialect + flags
++	const regex = compileXPathRegex(patternString, flags, true);
++	if (regex.test('')) {
++		throw new Error(`FORX0003: the pattern ${patternString} matches the zero length string`);
++	}
+ 	regex.lastIndex = 0;
+ 	const results = [];
+ 	let result = regex.exec(inputString);
+@@ -561,8 +567,30 @@ const fnCodepointEqual: FunctionDefinitionType = (
+ 	});
+ };
+ 
++import { compileXPathRegex } from './xpathRegex';
++
+ const cachedPatterns: Map<string, MatchFn> = new Map();
+ 
++// E-Rechnung Prüfer patch: fn:matches with flags
++const fnMatchesWithFlags: FunctionDefinitionType = (
++	_dynamicContext,
++	_executionParameters,
++	_staticContext,
++	inputSequence: ISequence,
++	patternSequence: ISequence,
++	flagsSequence: ISequence,
++) => {
++	return zipSingleton([inputSequence, patternSequence, flagsSequence], ([inputValue, patternValue, flagsValue]) => {
++		const input: string = inputValue ? inputValue.value : '';
++		const flags: string = flagsValue ? flagsValue.value : '';
++		if (flags === '') {
++			return fnMatches(_dynamicContext, _executionParameters, _staticContext, sequenceFactory.singleton(createAtomicValue(input, ValueType.XSSTRING)), patternSequence);
++		}
++		const regex = compileXPathRegex(patternValue.value, flags, false);
++		return regex.test(input) ? sequenceFactory.singletonTrueSequence() : sequenceFactory.singletonFalseSequence();
++	});
++};
++
+ const fnMatches: FunctionDefinitionType = (
+ 	_dynamicContext,
+ 	_executionParameters,
+@@ -617,12 +645,14 @@ const fnReplace: FunctionDefinitionType = (
+ 	inputSequence: ISequence,
+ 	patternSequence: ISequence,
+ 	replacementSequence: ISequence,
++	flagsSequence?: ISequence,
+ ) => {
+ 	return zipSingleton(
+-		[inputSequence, patternSequence, replacementSequence],
+-		([inputValue, patternValue, replacementValue]) => {
++		[inputSequence, patternSequence, replacementSequence, flagsSequence || sequenceFactory.singleton(createAtomicValue('', ValueType.XSSTRING))],
++		([inputValue, patternValue, replacementValue, flagsValue]) => {
+ 			const input = inputValue ? inputValue.value : '';
+ 			const pattern = patternValue.value;
++			const flags: string = flagsValue ? flagsValue.value : '';
+ 			let replacement: string = replacementValue.value;
+ 			if (replacement.includes('$0')) {
+ 				throw new Error(
+@@ -646,7 +676,12 @@ const fnReplace: FunctionDefinitionType = (
+ 					}
+ 				})
+ 				.join('');
+-			const regex = compileJSRegex(pattern);
++			// E-Rechnung Prüfer patch: XPath regex dialect + flags
++			const regex = compileXPathRegex(pattern, flags, true);
++			if (regex.test('')) {
++				throw new Error(`FORX0003: the pattern ${pattern} matches the zero length string`);
++			}
++			regex.lastIndex = 0;
+ 			const result = input.replace(regex, replacement);
+ 
+ 			return sequenceFactory.singleton(createAtomicValue(result, ValueType.XSSTRING));
+@@ -941,16 +976,7 @@ const declarations: BuiltinDeclarationType[] = [
+ 			type: ValueType.XSSTRING,
+ 			mult: SequenceMultiplicity.ZERO_OR_MORE,
+ 		},
+-		callFunction(
+-			_dynamicContext,
+-			_executionParameters,
+-			_staticContext,
+-			_input,
+-			_pattern,
+-			_flags,
+-		) {
+-			throw new Error('Not implemented: Using flags in tokenize is not supported');
+-		},
++		callFunction: fnTokenize,
+ 	},
+ 
+ 	{
+@@ -1075,6 +1101,18 @@ const declarations: BuiltinDeclarationType[] = [
+ 		returnType: { type: ValueType.XSSTRING, mult: SequenceMultiplicity.EXACTLY_ONE },
+ 	},
+ 
++	{
++		argumentTypes: [
++			{ type: ValueType.XSSTRING, mult: SequenceMultiplicity.ZERO_OR_ONE },
++			{ type: ValueType.XSSTRING, mult: SequenceMultiplicity.EXACTLY_ONE },
++			{ type: ValueType.XSSTRING, mult: SequenceMultiplicity.EXACTLY_ONE },
++		],
++		callFunction: fnMatchesWithFlags,
++		localName: 'matches',
++		namespaceURI: BUILT_IN_NAMESPACE_URIS.FUNCTIONS_NAMESPACE_URI,
++		returnType: { type: ValueType.XSBOOLEAN, mult: SequenceMultiplicity.EXACTLY_ONE },
++	},
++
+ 	{
+ 		argumentTypes: [
+ 			{ type: ValueType.XSSTRING, mult: SequenceMultiplicity.ZERO_OR_ONE },
+@@ -1085,16 +1123,7 @@ const declarations: BuiltinDeclarationType[] = [
+ 		localName: 'replace',
+ 		namespaceURI: BUILT_IN_NAMESPACE_URIS.FUNCTIONS_NAMESPACE_URI,
+ 		returnType: { type: ValueType.XSSTRING, mult: SequenceMultiplicity.EXACTLY_ONE },
+-		callFunction(
+-			_dynamicContext,
+-			_executionParameters,
+-			_staticContext,
+-			_input,
+-			_pattern,
+-			_flags,
+-		) {
+-			throw new Error('Not implemented: Using flags in replace is not supported');
+-		},
++		callFunction: fnReplace,
+ 	},
+ ];
+ 
+diff --git a/src/expressions/functions/xpathRegex.ts b/src/expressions/functions/xpathRegex.ts
+new file mode 100644
+index 0000000..ec5ac5f
+--- /dev/null
++++ b/src/expressions/functions/xpathRegex.ts
+@@ -0,0 +1,206 @@
++/**
++ * E-Rechnung Prüfer patch: XPath regular expressions (F&O 3.1 §5.6) on top of JavaScript RegExp,
++ * with the flags i, s, m, x and q, used by fn:matches (3 arguments), fn:replace and fn:tokenize.
++ *
++ * Translated constructs: \i \I \c \C (XML name characters), character class subtraction
++ * [...-[...]] (rewritten as a negative lookahead), the x flag (whitespace removal outside
++ * character classes) and the q flag (literal pattern). Unicode categories (\p{Lu}) are passed
++ * through to JavaScript's 'u' mode, which uses the same names; Unicode block escapes
++ * (\p{IsBasicLatin}) are not supported and raise FORX0002.
++ */
++const NAME_START = '[:A-Z_a-z\\u00C0-\\u00D6\\u00D8-\\u00F6\\u00F8-\\u02FF\\u0370-\\u037D\\u037F-\\u1FFF\\u200C-\\u200D\\u2070-\\u218F\\u2C00-\\u2FEF\\u3001-\\uD7FF\\uF900-\\uFDCF\\uFDF0-\\uFFFD\\u{10000}-\\u{EFFFF}]';
++const NAME_CHAR = '[:A-Z_a-z\\u00C0-\\u00D6\\u00D8-\\u00F6\\u00F8-\\u02FF\\u0370-\\u037D\\u037F-\\u1FFF\\u200C-\\u200D\\u2070-\\u218F\\u2C00-\\u2FEF\\u3001-\\uD7FF\\uF900-\\uFDCF\\uFDF0-\\uFFFD\\u{10000}-\\u{EFFFF}\\-.0-9\\u00B7\\u0300-\\u036F\\u203F-\\u2040]';
++
++function escapeLiteral(s: string): string {
++	return s.replace(/[.*+?^${}()|[\]\\\/]/g, '\\$&');
++}
++
++/** Translate one XPath regex (possibly inside a character class) to JavaScript syntax. */
++function translate(pattern: string, flags: string): string {
++	if (flags.includes('q')) {
++		return escapeLiteral(pattern);
++	}
++	const stripWhitespace = flags.includes('x');
++	let out = '';
++	let i = 0;
++	const n = pattern.length;
++	let inClass = 0; // nesting depth of [ ]
++	while (i < n) {
++		const ch = pattern[i];
++		if (ch === '\\') {
++			const next = pattern[i + 1];
++			if (next === undefined) {
++				throw new Error('FORX0002: trailing backslash in regular expression');
++			}
++			if (next === 'i') {
++				out += inClass ? NAME_START.slice(1, -1) : NAME_START;
++				i += 2;
++				continue;
++			}
++			if (next === 'c') {
++				out += inClass ? NAME_CHAR.slice(1, -1) : NAME_CHAR;
++				i += 2;
++				continue;
++			}
++			if (next === 'I' || next === 'C') {
++				const body = (next === 'I' ? NAME_START : NAME_CHAR).slice(1, -1);
++				if (inClass) {
++					throw new Error('FORX0002: \\I and \\C are not supported inside a character class');
++				}
++				out += '[^' + body + ']';
++				i += 2;
++				continue;
++			}
++			if (next === 'p' || next === 'P') {
++				const m = /^\\[pP]\{([^}]*)\}/.exec(pattern.slice(i));
++				if (!m) {
++					throw new Error('FORX0002: invalid category escape');
++				}
++				if (m[1].startsWith('Is')) {
++					throw new Error('FORX0002: Unicode block escapes (' + m[0] + ') are not supported');
++				}
++				out += m[0];
++				i += m[0].length;
++				continue;
++			}
++			out += ch + next;
++			i += 2;
++			continue;
++		}
++		if (ch === '[') {
++			// character class; handle subtraction [A-[B]]
++			const end = findClassEnd(pattern, i);
++			const cls = pattern.slice(i, end + 1);
++			out += translateClass(cls, flags);
++			i = end + 1;
++			continue;
++		}
++		if (stripWhitespace && /\s/.test(ch)) {
++			i++;
++			continue;
++		}
++		if (ch === '.' && !flags.includes('s')) {
++			// XPath: '.' matches any character except \n and \r
++			out += '[^\\n\\r]';
++			i++;
++			continue;
++		}
++		out += ch;
++		i++;
++	}
++	return out;
++}
++
++function findClassEnd(pattern: string, start: number): number {
++	let depth = 0;
++	for (let i = start; i < pattern.length; i++) {
++		const ch = pattern[i];
++		if (ch === '\\') {
++			i++;
++			continue;
++		}
++		if (ch === '[') {
++			depth++;
++		} else if (ch === ']') {
++			depth--;
++			if (depth === 0) {
++				return i;
++			}
++		}
++	}
++	throw new Error('FORX0002: unterminated character class');
++}
++
++function translateClass(cls: string, flags: string): string {
++	// cls = "[...]" possibly with "-[...]" subtraction at the end
++	const inner = cls.slice(1, -1);
++	// find a top-level "-[" subtraction
++	let depth = 0;
++	for (let i = 0; i < inner.length; i++) {
++		const ch = inner[i];
++		if (ch === '\\') {
++			i++;
++			continue;
++		}
++		if (ch === '[') {
++			depth++;
++		} else if (ch === ']') {
++			depth--;
++		} else if (ch === '-' && depth === 0 && inner[i + 1] === '[') {
++			const main = inner.slice(0, i);
++			const sub = inner.slice(i + 1);
++			const negated = main.startsWith('^');
++			const mainClass = translateClass('[' + main + ']', flags);
++			const subClass = translateClass(sub, flags);
++			return '(?:(?!' + subClass + ')' + mainClass + ')';
++		}
++	}
++	// translate escapes inside the class
++	let out = '[';
++	let i = 0;
++	let body = inner;
++	if (body.startsWith('^')) {
++		out += '^';
++		body = body.slice(1);
++	}
++	while (i < body.length) {
++		const ch = body[i];
++		if (ch === '\\') {
++			const next = body[i + 1];
++			if (next === 'i') {
++				out += NAME_START.slice(1, -1);
++				i += 2;
++				continue;
++			}
++			if (next === 'c') {
++				out += NAME_CHAR.slice(1, -1);
++				i += 2;
++				continue;
++			}
++			out += ch + next;
++			i += 2;
++			continue;
++		}
++		if (ch === '[') {
++			throw new Error('FORX0002: nested character class without subtraction');
++		}
++		out += ch;
++		i++;
++	}
++	return out + ']';
++}
++
++const cache = new Map<string, RegExp>();
++
++export function compileXPathRegex(pattern: string, flags: string, global: boolean): RegExp {
++	const key = (global ? 'g' : '') + flags + '/' + pattern;
++	let regex = cache.get(key);
++	if (regex) {
++		regex.lastIndex = 0;
++		return regex;
++	}
++	for (const f of flags) {
++		if (!'ismxq'.includes(f)) {
++			throw new Error('FORX0001: invalid regular expression flag ' + f);
++		}
++	}
++	let jsFlags = 'u' + (global ? 'g' : '');
++	if (flags.includes('i')) {
++		jsFlags += 'i';
++	}
++	if (flags.includes('m')) {
++		jsFlags += 'm';
++	}
++	if (flags.includes('s')) {
++		jsFlags += 's';
++	}
++	let source;
++	try {
++		source = translate(pattern, flags);
++		regex = new RegExp(source, jsFlags);
++	} catch (error) {
++		throw new Error('FORX0002: ' + error);
++	}
++	cache.set(key, regex);
++	return regex;
++}
+diff --git a/src/expressions/literals/Literal.ts b/src/expressions/literals/Literal.ts
+index 99e8b22..f602531 100644
+--- a/src/expressions/literals/Literal.ts
++++ b/src/expressions/literals/Literal.ts
+@@ -1,5 +1,7 @@
+ import AtomicValue from '../dataTypes/AtomicValue';
+ import createAtomicValue from '../dataTypes/createAtomicValue';
++import { createExactValue } from '../dataTypes/exactNumeric';
++import Decimal from '../dataTypes/valueTypes/Decimal';
+ import ISequence from '../dataTypes/ISequence';
+ import sequenceFactory from '../dataTypes/sequenceFactory';
+ import { SequenceType, ValueType } from '../dataTypes/Value';
+@@ -23,13 +25,20 @@ class Literal extends Expression {
+ 
+ 		let value: AtomicValue;
+ 		switch (type.type) {
+-			case ValueType.XSINTEGER:
+-				value = createAtomicValue(parseInt(jsValue, 10), type.type);
++			case ValueType.XSINTEGER: {
++				// E-Rechnung Prüfer patch: keep the exact value of the literal
++				const exact = Decimal.fromIntegerString(jsValue);
++				value = exact ? createExactValue(exact, type.type) : createAtomicValue(parseInt(jsValue, 10), type.type);
+ 				break;
++			}
+ 			case ValueType.XSSTRING:
+ 				value = createAtomicValue(jsValue + '', type.type);
+ 				break;
+-			case ValueType.XSDECIMAL:
++			case ValueType.XSDECIMAL: {
++				const exact = Decimal.fromString(jsValue);
++				value = exact ? createExactValue(exact, type.type) : createAtomicValue(parseFloat(jsValue), type.type);
++				break;
++			}
+ 			case ValueType.XSDOUBLE:
+ 				value = createAtomicValue(parseFloat(jsValue), type.type);
+ 				break;
+diff --git a/src/expressions/operators/Union.ts b/src/expressions/operators/Union.ts
+index d2469c0..9b61566 100644
+--- a/src/expressions/operators/Union.ts
++++ b/src/expressions/operators/Union.ts
+@@ -30,6 +30,14 @@ class Union extends Expression {
+ 				canBeStaticallyEvaluated: expressions.every(
+ 					(expression) => expression.canBeStaticallyEvaluated,
+ 				),
++				// E-Rechnung Prüfer patch: merging locally sorted operands yields a sorted result;
++				// the union of subtree sequences stays within the subtree
++				resultOrder: expressions.every(
++					(expression) => expression.expectedResultOrder === RESULT_ORDERINGS.SORTED,
++				)
++					? RESULT_ORDERINGS.SORTED
++					: RESULT_ORDERINGS.UNSORTED,
++				subtree: expressions.every((expression) => expression.subtree),
+ 			},
+ 			false,
+ 			type,
+diff --git a/src/expressions/operators/arithmetic/BinaryOperator.ts b/src/expressions/operators/arithmetic/BinaryOperator.ts
+index 9d1aa1a..968d064 100644
+--- a/src/expressions/operators/arithmetic/BinaryOperator.ts
++++ b/src/expressions/operators/arithmetic/BinaryOperator.ts
+@@ -9,8 +9,29 @@ import sequenceFactory from '../../dataTypes/sequenceFactory';
+ import { SequenceType } from '../../dataTypes/Value';
+ import DynamicContext from '../../DynamicContext';
+ import Expression from '../../Expression';
++import { createExactValue, exactOf } from '../../dataTypes/exactNumeric';
++import Decimal from '../../dataTypes/valueTypes/Decimal';
+ import { hash, operationMap, returnTypeMap } from './BinaryEvaluationFunctionMap';
+ 
++// E-Rechnung Prüfer patch: exact decimal arithmetic (java.math.BigDecimal semantics as in Saxon)
++function exactOperation(operator: string, a: Decimal, b: Decimal, retType: ValueType): AtomicValue {
++	switch (operator) {
++		case 'addOp':
++			return createExactValue(a.add(b), retType);
++		case 'subtractOp':
++			return createExactValue(a.subtract(b), retType);
++		case 'multiplyOp':
++			return createExactValue(a.multiply(b), retType);
++		case 'divOp':
++			return createExactValue(a.divide(b), ValueType.XSDECIMAL);
++		case 'modOp':
++			return createExactValue(a.mod(b), retType);
++		case 'idivOp':
++			return createExactValue(Decimal.fromBigInt(a.idiv(b)), ValueType.XSINTEGER);
++	}
++	return null;
++}
++
+ /**
+  * Lambda helper function to the binary operator
+  */
+@@ -26,6 +47,13 @@ function determineReturnType(typeA: ValueType, typeB: ValueType): ValueType {
+ 	if (isSubtypeOf(typeA, ValueType.XSFLOAT) && isSubtypeOf(typeB, ValueType.XSFLOAT)) {
+ 		return ValueType.XSFLOAT;
+ 	}
++	// E-Rechnung Prüfer patch: xs:float with xs:decimal/xs:integer -> the decimal is promoted to xs:float
++	if (
++		(isSubtypeOf(typeA, ValueType.XSFLOAT) && isSubtypeOf(typeB, ValueType.XSDECIMAL)) ||
++		(isSubtypeOf(typeB, ValueType.XSFLOAT) && isSubtypeOf(typeA, ValueType.XSDECIMAL))
++	) {
++		return ValueType.XSFLOAT;
++	}
+ 	return ValueType.XSDOUBLE;
+ }
+ 
+@@ -86,7 +114,21 @@ export function generateBinaryOperatorFunction(
+ 		let retType = returnTypeMap[hash(ValueType.XSNUMERIC, ValueType.XSNUMERIC, operator)];
+ 		if (!retType) retType = determineReturnType(typeA, typeB);
+ 		if (operator === 'divOp' && retType === ValueType.XSINTEGER) retType = ValueType.XSDECIMAL;
++		if (retType === ValueType.XSDECIMAL || retType === ValueType.XSINTEGER) {
++			// E-Rechnung Prüfer patch: both operands are xs:decimal / xs:integer -> exact arithmetic
++			return (a, b) => {
++				const { castA, castB } = applyCastFunctions(a, b);
++				return exactOperation(operator, exactOf(castA), exactOf(castB), retType);
++			};
++		}
+ 		if (operator === 'idivOp') return iDivOpChecksFunction(applyCastFunctions, fun)[0];
++		if (retType === ValueType.XSFLOAT) {
++			// E-Rechnung Prüfer patch: xs:float arithmetic is single precision
++			return (a, b) => {
++				const { castA, castB } = applyCastFunctions(a, b);
++				return createAtomicValue(Math.fround(fun(castA.value, castB.value) as number), retType);
++			};
++		}
+ 		return (a, b) => {
+ 			const { castA, castB } = applyCastFunctions(a, b);
+ 			return createAtomicValue(fun(castA.value, castB.value), retType);
+diff --git a/src/expressions/operators/arithmetic/Unary.ts b/src/expressions/operators/arithmetic/Unary.ts
+index 529c29c..7d2659e 100644
+--- a/src/expressions/operators/arithmetic/Unary.ts
++++ b/src/expressions/operators/arithmetic/Unary.ts
+@@ -1,6 +1,7 @@
+ import atomize from '../../dataTypes/atomize';
+ import castToType from '../../dataTypes/castToType';
+ import createAtomicValue from '../../dataTypes/createAtomicValue';
++import { createExactValue, exactOf, isDecimalType } from '../../dataTypes/exactNumeric';
+ import isSubtypeOf from '../../dataTypes/isSubtypeOf';
+ import sequenceFactory from '../../dataTypes/sequenceFactory';
+ import { SequenceType, ValueType } from '../../dataTypes/Value';
+@@ -58,6 +59,11 @@ class Unary extends Expression {
+ 
+ 			// We could infer the return type during annotation so we can early return here
+ 			if (this.type) {
++				if (isDecimalType(value.type) && isDecimalType(this.type.type)) {
++					// E-Rechnung Prüfer patch: exact negation
++					const exact = exactOf(value);
++					return sequenceFactory.singleton(createExactValue(this._kind === '+' ? exact : exact.negate(), this.type.type));
++				}
+ 				let finalValue = this._kind === '+' ? +value.value : -value.value;
+ 				if (value.type === ValueType.XSBOOLEAN) finalValue = Number.NaN;
+ 				return sequenceFactory.singleton(createAtomicValue(finalValue, this.type.type));
+@@ -83,6 +89,10 @@ class Unary extends Expression {
+ 				if (this._kind === '+') {
+ 					return sequenceFactory.singleton(value);
+ 				}
++				if (isDecimalType(value.type)) {
++					// E-Rechnung Prüfer patch: exact negation
++					return sequenceFactory.singleton(createExactValue(exactOf(value).negate(), UNARY_LOOKUP[value.type]));
++				}
+ 				return sequenceFactory.singleton(
+ 					createAtomicValue((value.value as number) * -1, UNARY_LOOKUP[value.type]),
+ 				);
+diff --git a/src/expressions/operators/compares/ValueCompare.ts b/src/expressions/operators/compares/ValueCompare.ts
+index 74a7b17..026a454 100644
+--- a/src/expressions/operators/compares/ValueCompare.ts
++++ b/src/expressions/operators/compares/ValueCompare.ts
+@@ -21,6 +21,30 @@ import DynamicContext from '../../DynamicContext';
+ import ExecutionParameters from '../../ExecutionParameters';
+ import Expression from '../../Expression';
+ import atomizeSequence from '../../util/atomizeSequence';
++import { compareExact } from '../../dataTypes/exactNumeric';
++
++// E-Rechnung Prüfer patch: exact comparison of xs:decimal / xs:integer values
++function handleExactDecimal(
++	operator: string,
++	applyCastFunctions: (valA: AtomicValue, valB: AtomicValue) => any,
++): (valA: any, valB: any, dynamicContext: DynamicContext) => boolean {
++	const test: { [op: string]: (c: number) => boolean } = {
++		eqOp: (c) => c === 0,
++		neOp: (c) => c !== 0,
++		ltOp: (c) => c < 0,
++		leOp: (c) => c <= 0,
++		gtOp: (c) => c > 0,
++		geOp: (c) => c >= 0,
++	};
++	const t = test[operator];
++	if (!t) {
++		return undefined;
++	}
++	return (a, b, _dynamicContext) => {
++		const { castA, castB } = applyCastFunctions(a, b);
++		return t(compareExact(castA, castB));
++	};
++}
+ 
+ function handleQName(
+ 	operator: string,
+@@ -313,6 +337,13 @@ function generateCompareFunction(
+ 		return handleQName(operator, applyCastFunctions);
+ 	}
+ 
++	if (isSubtypeOf(typeA, ValueType.XSDECIMAL) && isSubtypeOf(typeB, ValueType.XSDECIMAL)) {
++		const exactResult = handleExactDecimal(operator, applyCastFunctions);
++		if (exactResult !== undefined) {
++			return exactResult;
++		}
++	}
++
+ 	function areBothSubtypeOf(type: ValueType) {
+ 		return isSubtypeOf(typeA, type) && isSubtypeOf(typeB, type);
+ 	}
+diff --git a/src/index.ts b/src/index.ts
+index eb4e525..f6ba584 100644
+--- a/src/index.ts
++++ b/src/index.ts
+@@ -4,6 +4,7 @@ import type IDomFacade from './domFacade/IDomFacade';
+ import evaluateUpdatingExpression, { type UpdatingOptions } from './evaluateUpdatingExpression';
+ import evaluateUpdatingExpressionSync from './evaluateUpdatingExpressionSync';
+ import evaluateXPath, { type EvaluableExpression, type EvaluateXPath } from './evaluateXPath';
++import { invalidateDescendantIndex, setDescendantIndexEnabled } from './expressions/axes/descendantIndex';
+ import evaluateXPathToArray from './evaluateXPathToArray';
+ import evaluateXPathToAsyncIterator from './evaluateXPathToAsyncIterator';
+ import evaluateXPathToBoolean from './evaluateXPathToBoolean';
+@@ -255,6 +256,8 @@ export {
+ 	evaluateXPathToStrings,
+ 	executeJavaScriptCompiledXPath,
+ 	executePendingUpdateList,
++	invalidateDescendantIndex,
++	setDescendantIndexEnabled,
+ 	getBucketForSelector,
+ 	getBucketsForNode,
+ 	parseScript,
+diff --git a/src/parsing/compileAstToExpression.ts b/src/parsing/compileAstToExpression.ts
+index 311adb4..d7f2420 100644
+--- a/src/parsing/compileAstToExpression.ts
++++ b/src/parsing/compileAstToExpression.ts
+@@ -5,6 +5,7 @@ import SquareArrayConstructor from '../expressions/arrays/SquareArrayConstructor
+ import AncestorAxis from '../expressions/axes/AncestorAxis';
+ import AttributeAxis from '../expressions/axes/AttributeAxis';
+ import ChildAxis from '../expressions/axes/ChildAxis';
++import DescendantAttributeAxis from '../expressions/axes/DescendantAttributeAxis';
+ import DescendantAxis from '../expressions/axes/DescendantAxis';
+ import FollowingAxis from '../expressions/axes/FollowingAxis';
+ import FollowingSiblingAxis from '../expressions/axes/FollowingSiblingAxis';
+@@ -832,9 +833,284 @@ function unionNodeTest(ast: IAST, compilationOptions: CompilationOptions) {
+ 	return new UnionNodeTest(subTests);
+ }
+ 
++/**
++ * E-Rechnung Prüfer patch: `//name` is parsed as `descendant-or-self::node()/child::name`; when the
++ * child step carries no positional predicates, this is equivalent to `descendant::name`, which the
++ * descendant axis can answer from the per-document index (see axes/descendantIndex.ts).
++ * A predicate is known to be non-positional when its statically inferred type is xs:boolean or a
++ * node type (effective boolean value); numeric or unknown predicate types keep the original steps.
++ */
++const BOOLEAN_BUILTIN_FUNCTIONS = new Set([
++	'not',
++	'exists',
++	'empty',
++	'boolean',
++	'true',
++	'false',
++	'matches',
++	'contains',
++	'starts-with',
++	'ends-with',
++	'deep-equal',
++	'lang',
++	'nilled',
++	'has-children',
++	'contains-token',
++	'codepoint-equal',
++]);
++
++/**
++ * A predicate whose value can never be numeric is applied as a boolean filter, so it is not
++ * affected by the context position: `descendant-or-self::node()/child::x[pred]` then equals
++ * `descendant::x[pred]`. Decided from the static type annotation when the parser provides one,
++ * otherwise from the shape of the expression (comparisons, and/or, quantified expressions,
++ * boolean built-in functions, paths ending in an axis step, string literals).
++ */
++/** Does the expression mention fn:position() or fn:last() anywhere (conservatively, at any depth)? */
++function referencesContextPosition(ast: IAST): boolean {
++	if (ast[0] === 'functionCallExpr') {
++		const functionName = astHelper.getFirstChild(ast, 'functionName');
++		if (functionName) {
++			const prefix = astHelper.getAttribute(functionName, 'prefix') as string | null;
++			const localName = astHelper.getTextContent(functionName);
++			if ((!prefix || prefix === 'fn') && (localName === 'position' || localName === 'last')) {
++				return true;
++			}
++		}
++	}
++	for (let i = 1; i < ast.length; i++) {
++		const part = ast[i];
++		if (Array.isArray(part) && referencesContextPosition(part as IAST)) {
++			return true;
++		}
++	}
++	return false;
++}
++
++function isNonPositionalPredicate(predicateAst: IAST): boolean {
++	if (referencesContextPosition(predicateAst)) {
++		return false;
++	}
++	const t = astHelper.getAttribute(predicateAst, 'type') as { type: ValueType } | null;
++	if (t) {
++		if (t.type === ValueType.XSBOOLEAN) {
++			return true;
++		}
++		if (
++			t.type === ValueType.NODE ||
++			t.type === ValueType.ELEMENT ||
++			t.type === ValueType.ATTRIBUTE ||
++			t.type === ValueType.TEXT ||
++			t.type === ValueType.DOCUMENTNODE
++		) {
++			return true;
++		}
++	}
++	switch (predicateAst[0]) {
++		case 'andOp':
++		case 'orOp':
++		case 'eqOp':
++		case 'neOp':
++		case 'ltOp':
++		case 'leOp':
++		case 'gtOp':
++		case 'geOp':
++		case 'equalOp':
++		case 'notEqualOp':
++		case 'lessThanOp':
++		case 'lessThanOrEqualOp':
++		case 'greaterThanOp':
++		case 'greaterThanOrEqualOp':
++		case 'isOp':
++		case 'nodeBeforeOp':
++		case 'nodeAfterOp':
++		case 'quantifiedExpr':
++		case 'instanceOfExpr':
++		case 'castableExpr':
++		case 'stringConstantExpr':
++			return true;
++		case 'functionCallExpr': {
++			const functionName = astHelper.getFirstChild(predicateAst, 'functionName');
++			if (!functionName) {
++				return false;
++			}
++			const prefix = astHelper.getAttribute(functionName, 'prefix') as string | null;
++			const localName = astHelper.getTextContent(functionName);
++			return (!prefix || prefix === 'fn') && BOOLEAN_BUILTIN_FUNCTIONS.has(localName);
++		}
++		case 'pathExpr': {
++			// a path ending in an axis step yields nodes (untyped content is never numeric)
++			const steps = astHelper.getChildren(predicateAst, '*');
++			const last = steps[steps.length - 1];
++			return !!last && last[0] === 'stepExpr' && !!astHelper.getFirstChild(last, 'xpathAxis');
++		}
++		case 'sequenceExpr': {
++			const parts = astHelper.getChildren(predicateAst, '*');
++			return parts.length === 1 && isNonPositionalPredicate(parts[0]);
++		}
++		default:
++			return false;
++	}
++}
++
++/**
++ * Is `ast` a single relative child step with a name test and only non-positional predicates
++ * (the shape `child::name[pred]`)?
++ */
++function isSimpleChildNameStep(stepAst: IAST): boolean {
++	const axis = astHelper.getFirstChild(stepAst, 'xpathAxis');
++	const predicates = astHelper.getFirstChild(stepAst, 'predicates');
++	const predicateAsts = predicates ? astHelper.getChildren(predicates, '*') : [];
++	return (
++		!!axis &&
++		astHelper.getTextContent(axis) === 'child' &&
++		!astHelper.getFirstChild(stepAst, 'lookup') &&
++		predicateAsts.every(isNonPositionalPredicate)
++	);
++}
++
++/**
++ * For a step of the shape `(child::a | child::b | ...)` (a filterExpr around a union of single
++ * child steps), return the same union with the child axes replaced by descendant axes, or null
++ * when the step has another shape. `descendant-or-self::node()/(child::a | child::b)` equals
++ * `(descendant::a | descendant::b)` because the path operator distributes over the union.
++ */
++function rewriteUnionOfChildSteps(stepAst: IAST): IAST | null {
++	const filterExpr = astHelper.getFirstChild(stepAst, 'filterExpr');
++	if (!filterExpr || astHelper.getFirstChild(stepAst, 'lookup')) {
++		return null;
++	}
++	const sequenceExpr = astHelper.getFirstChild(filterExpr, 'sequenceExpr');
++	const inner = sequenceExpr ? astHelper.getFirstChild(sequenceExpr, '*') : astHelper.getFirstChild(filterExpr, '*');
++	if (!inner || (sequenceExpr && astHelper.getChildren(sequenceExpr, '*').length !== 1)) {
++		return null;
++	}
++	const unionOp = inner[0] === 'unionOp' ? inner : null;
++	const rewriteOperand = (operandAst: IAST): IAST | null => {
++		// operandAst is firstOperand/secondOperand with one child
++		const inner = astHelper.getFirstChild(operandAst, '*');
++		if (!inner) {
++			return null;
++		}
++		if (inner[0] === 'unionOp') {
++			const rewrittenUnion = rewriteUnion(inner);
++			return rewrittenUnion ? ([operandAst[0], rewrittenUnion] as IAST) : null;
++		}
++		if (inner[0] !== 'pathExpr') {
++			return null;
++		}
++		const steps = astHelper.getChildren(inner, '*');
++		if (steps.length >= 1 && steps[0][0] === 'rootExpr') {
++			// an absolute path does not depend on the context node: `descendant-or-self::node()/(/a)`
++			// is `/a` for every node of the tree
++			return operandAst;
++		}
++		// `descendant-or-self::node()/(child::a/rest)` equals `descendant::a/rest`: only the first
++		// step of the operand changes, the remaining steps keep their context
++		if (steps.length < 1 || steps[0][0] !== 'stepExpr' || !isSimpleChildNameStep(steps[0])) {
++			return null;
++		}
++		const rewrittenStep = steps[0].map((part) =>
++			Array.isArray(part) && part[0] === 'xpathAxis' ? ['xpathAxis', 'descendant'] : part,
++		) as IAST;
++		const rewrittenPath = inner.map((part) => (part === steps[0] ? rewrittenStep : part)) as IAST;
++		return [operandAst[0], rewrittenPath] as IAST;
++	};
++	const rewriteUnion = (unionAst: IAST): IAST | null => {
++		const first = astHelper.getFirstChild(unionAst, 'firstOperand');
++		const second = astHelper.getFirstChild(unionAst, 'secondOperand');
++		if (!first || !second) {
++			return null;
++		}
++		const newFirst = rewriteOperand(first);
++		const newSecond = rewriteOperand(second);
++		if (!newFirst || !newSecond) {
++			return null;
++		}
++		return unionAst.map((part) =>
++			part === first ? newFirst : part === second ? newSecond : part,
++		) as IAST;
++	};
++	let newInner: IAST | null;
++	if (unionOp) {
++		newInner = rewriteUnion(unionOp);
++	} else if (inner[0] === 'pathExpr') {
++		const rewrittenOperand = rewriteOperand(['operand', inner] as IAST);
++		newInner = rewrittenOperand ? (astHelper.getFirstChild(rewrittenOperand, '*') as IAST) : null;
++	} else {
++		newInner = null;
++	}
++	if (!newInner) {
++		return null;
++	}
++	const newUnion = newInner;
++	const replaceDeep = (ast: IAST): IAST =>
++		ast.map((part) => {
++			if (part === inner) {
++				return newUnion;
++			}
++			if (Array.isArray(part)) {
++				return replaceDeep(part as IAST);
++			}
++			return part;
++		}) as IAST;
++	return replaceDeep(stepAst);
++}
++
++function mergeDescendantSteps(rawSteps: IAST[]): IAST[] {
++	const out: IAST[] = [];
++	for (let i = 0; i < rawSteps.length; i++) {
++		const step = rawSteps[i];
++		const next = rawSteps[i + 1];
++		const axis = astHelper.getFirstChild(step, 'xpathAxis');
++		if (
++			next &&
++			axis &&
++			astHelper.getTextContent(axis) === 'descendant-or-self' &&
++			astHelper.getFirstChild(step, 'anyKindTest') &&
++			!astHelper.getFirstChild(step, 'predicates') &&
++			!astHelper.getFirstChild(step, 'predicate') &&
++			!astHelper.getFirstChild(step, 'lookup')
++		) {
++			const nextPredicates = astHelper.getFirstChild(next, 'predicates');
++			const nextPredicateAsts = nextPredicates ? astHelper.getChildren(nextPredicates, '*') : [];
++			if (nextPredicateAsts.every(isNonPositionalPredicate)) {
++				const unionStep = rewriteUnionOfChildSteps(next);
++				if (unionStep) {
++					out.push(unionStep);
++					i++;
++					continue;
++				}
++			}
++			const nextAxis = astHelper.getFirstChild(next, 'xpathAxis');
++			const predicates = astHelper.getFirstChild(next, 'predicates');
++			const hasLookup = astHelper.getFirstChild(next, 'lookup');
++			const predicateAsts = predicates ? astHelper.getChildren(predicates, '*') : [];
++			if (
++				nextAxis &&
++				(astHelper.getTextContent(nextAxis) === 'child' ||
++					astHelper.getTextContent(nextAxis) === 'attribute') &&
++				!hasLookup &&
++				predicateAsts.every(isNonPositionalPredicate)
++			) {
++				const mergedAxis =
++					astHelper.getTextContent(nextAxis) === 'child' ? 'descendant' : 'descendant-attribute';
++				const merged = next.map((part) =>
++					Array.isArray(part) && part[0] === 'xpathAxis' ? ['xpathAxis', mergedAxis] : part,
++				) as IAST;
++				out.push(merged);
++				i++;
++				continue;
++			}
++		}
++		out.push(step);
++	}
++	return out;
++}
++
+ function pathExpr(ast: IAST, compilationOptions: CompilationOptions) {
+ 	const type = astHelper.getAttribute(ast, 'type');
+-	const rawSteps = astHelper.getChildren(ast, 'stepExpr');
++	const rawSteps = mergeDescendantSteps(astHelper.getChildren(ast, 'stepExpr'));
+ 	let hasAxisStep = false;
+ 	const steps = rawSteps.map((step) => {
+ 		const axis = astHelper.getFirstChild(step, 'xpathAxis');
+@@ -923,6 +1199,10 @@ function pathExpr(ast: IAST, compilationOptions: CompilationOptions) {
+ 				case 'descendant-or-self':
+ 					stepExpression = new DescendantAxis(testExpressions, { inclusive: true });
+ 					break;
++				case 'descendant-attribute':
++					// E-Rechnung Prüfer patch: merged `descendant-or-self::node()/attribute::x`
++					stepExpression = new DescendantAttributeAxis(testExpressions, intersectingBucket);
++					break;
+ 				case 'parent':
+ 					stepExpression = new ParentAxis(testExpressions, intersectingBucket);
+ 					break;

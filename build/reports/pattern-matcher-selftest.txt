@@ -1,0 +1,488 @@
+# suite        pattern-matcher-selftest
+# fingerprint  85a3e2aa4dd6506cccb529b438b49e0a3281842a34706035354d6ecc68d7a879
+# git          a6a3ec9b062bf651ab595bfa27d160f0d73db947
+# command      node test/selftest-pattern-matcher.cjs build/corpus/xr-ubl/ubl-cn-br-de-1-test.xml build/corpus/xr-ubl/ubl-cn-br-de-1-test__m001_ubl-cn-mandatory-BG-16-2_remove.xml build/corpus/xr-ubl/ubl-cn-br-de-10-test.xml build/corpus/xr-ubl/ubl-cn-br-de-10-test__m001_ubl-cn-mandatory-BT-77-removed_remove.xml build/corpus/xr-ubl/ubl-cn-br-de-11-test.xml build/corpus/xr-ubl/ubl-cn-br-de-11-test__m001_ubl-cn-mandatory-BT-78-removed_remove.xml build/corpus/xr-ubl/ubl-cn-br-de-14-test.xml build/corpus/xr-ubl/ubl-cn-br-de-14-test__m001_ubl-cn-mandatory-BT-119-removed_remove.xml build/corpus/xr-ubl/ubl-cn-br-de-15-test.xml build/corpus/xr-ubl/ubl-cn-br-de-15-test__m001_ubl-cn-mandatory-BT-10-removed_remove.xml build/corpus/xr-ubl/ubl-cn-br-de-16-negative-test-bt-102.xml build/corpus/xr-ubl/ubl-cn-br-de-16-negative-test-bt-102__m001_ubl-cn-mandatory-companyID-with-some-tax-category-BT-102-invalid_code0_Z.xml build/corpus/xr-ubl/ubl-cn-br-de-16-negative-test-bt-102__m002_ubl-cn-mandatory-companyID-with-some-tax-category-BT-102-invalid_code1_E.xml build/corpus/xr-ubl/ubl-cn-br-de-16-negative-test-bt-102__m003_ubl-cn-mandatory-companyID-with-some-tax-category-BT-102-invalid_code2_AE.xml build/corpus/xr-ubl/ubl-cn-br-de-16-negative-test-bt-102__m004_ubl-cn-mandatory-companyID-with-some-tax-category-BT-102-invalid_code3_K.xml build/corpus/xr-ubl/ubl-cn-br-de-16-negative-test-bt-102__m005_ubl-cn-mandatory-companyID-with-some-tax-category-BT-102-invalid_code4_G.xml build/corpus/xr-ubl/ubl-cn-br-de-16-negative-test-bt-102__m006_ubl-cn-mandatory-companyID-with-some-tax-category-BT-102-invalid_code5_L.xml build/corpus/xr-ubl/ubl-cn-br-de-16-negative-test-bt-102__m007_ubl-cn-mandatory-companyID-with-some-tax-category-BT-102-invalid_code6_M.xml build/corpus/xr-ubl/ubl-cn-br-de-16-negative-test-bt-151.xml build/corpus/xr-ubl/ubl-cn-br-de-16-negative-test-bt-151__m001_ubl-cn-mandatory-companyID-with-some-tax-category-BT-151-invalid_code0_Z.xml build/corpus/xr-ubl/ubl-cn-br-de-16-negative-test-bt-15
+# exit code    0
+# duration     96114 ms
+# date         2026-10-20T07:31:48.945Z
+warnings [
+  {
+    context: '//cac:InvoiceLine/cac:AllowanceCharge[cbc:ChargeIndicator = false()] | //cac:CreditNoteLine/cac:AllowanceCharge[cbc:ChargeIndicator = false()]',
+    location: '/CreditNote[1]/cac:AllowanceCharge[1]',
+    message: 'FORG0001: Cannot cast value to xs:boolean, pattern validation failed.'
+  },
+  {
+    context: '//cac:InvoiceLine/cac:AllowanceCharge[cbc:ChargeIndicator = false()] | //cac:CreditNoteLine/cac:AllowanceCharge[cbc:ChargeIndicator = false()]',
+    location: '/CreditNote[1]/cac:AllowanceCharge[1]',
+    message: 'FORG0001: Cannot cast value to xs:boolean, pattern validation failed.'
+  }
+]
+warnings [
+  {
+    context: '//cac:InvoiceLine/cac:AllowanceCharge[cbc:ChargeIndicator = true()] | //cac:CreditNoteLine/cac:AllowanceCharge[cbc:ChargeIndicator = true()]',
+    location: '/CreditNote[1]/cac:AllowanceCharge[1]',
+    message: 'FORG0001: Cannot cast value to xs:boolean, pattern validation failed.'
+  },
+  {
+    context: '//cac:InvoiceLine/cac:AllowanceCharge[cbc:ChargeIndicator = true()] | //cac:CreditNoteLine/cac:AllowanceCharge[cbc:ChargeIndicator = true()]',
+    location: '/CreditNote[1]/cac:AllowanceCharge[1]',
+    message: 'FORG0001: Cannot cast value to xs:boolean, pattern validation failed.'
+  }
+]
+warnings [
+  {
+    context: '//cac:InvoiceLine/cac:AllowanceCharge[cbc:ChargeIndicator = false()] | //cac:CreditNoteLine/cac:AllowanceCharge[cbc:ChargeIndicator = false()]',
+    location: '/CreditNote[1]/cac:AllowanceCharge[1]',
+    message: 'FORG0001: Cannot cast 1234 to xs:boolean, pattern validation failed.'
+  },
+  {
+    context: '//cac:InvoiceLine/cac:AllowanceCharge[cbc:ChargeIndicator = false()] | //cac:CreditNoteLine/cac:AllowanceCharge[cbc:ChargeIndicator = false()]',
+    location: '/CreditNote[1]/cac:AllowanceCharge[1]',
+    message: 'FORG0001: Cannot cast 1234 to xs:boolean, pattern validation failed.'
+  }
+]
+warnings [
+  {
+    context: '//cac:InvoiceLine/cac:AllowanceCharge[cbc:ChargeIndicator = true()] | //cac:CreditNoteLine/cac:AllowanceCharge[cbc:ChargeIndicator = true()]',
+    location: '/CreditNote[1]/cac:AllowanceCharge[1]',
+    message: 'FORG0001: Cannot cast 1234 to xs:boolean, pattern validation failed.'
+  },
+  {
+    context: '//cac:InvoiceLine/cac:AllowanceCharge[cbc:ChargeIndicator = true()] | //cac:CreditNoteLine/cac:AllowanceCharge[cbc:ChargeIndicator = true()]',
+    location: '/CreditNote[1]/cac:AllowanceCharge[1]',
+    message: 'FORG0001: Cannot cast 1234 to xs:boolean, pattern validation failed.'
+  }
+]
+warnings [
+  {
+    context: '//cac:InvoiceLine/cac:AllowanceCharge[cbc:ChargeIndicator = false()] | //cac:CreditNoteLine/cac:AllowanceCharge[cbc:ChargeIndicator = false()]',
+    location: '/CreditNote[1]/cac:AllowanceCharge[1]',
+    message: 'FORG0001: Cannot cast  to xs:boolean, pattern validation failed.'
+  },
+  {
+    context: '//cac:InvoiceLine/cac:AllowanceCharge[cbc:ChargeIndicator = false()] | //cac:CreditNoteLine/cac:AllowanceCharge[cbc:ChargeIndicator = false()]',
+    location: '/CreditNote[1]/cac:AllowanceCharge[1]',
+    message: 'FORG0001: Cannot cast  to xs:boolean, pattern validation failed.'
+  }
+]
+warnings [
+  {
+    context: '//cac:InvoiceLine/cac:AllowanceCharge[cbc:ChargeIndicator = true()] | //cac:CreditNoteLine/cac:AllowanceCharge[cbc:ChargeIndicator = true()]',
+    location: '/CreditNote[1]/cac:AllowanceCharge[1]',
+    message: 'FORG0001: Cannot cast  to xs:boolean, pattern validation failed.'
+  },
+  {
+    context: '//cac:InvoiceLine/cac:AllowanceCharge[cbc:ChargeIndicator = true()] | //cac:CreditNoteLine/cac:AllowanceCharge[cbc:ChargeIndicator = true()]',
+    location: '/CreditNote[1]/cac:AllowanceCharge[1]',
+    message: 'FORG0001: Cannot cast  to xs:boolean, pattern validation failed.'
+  }
+]
+warnings [
+  {
+    context: '/ubl:Invoice/cac:AllowanceCharge[cbc:ChargeIndicator = false()] | /cn:CreditNote/cac:AllowanceCharge[cbc:ChargeIndicator = false()]',
+    location: '/CreditNote[1]/cac:CreditNoteLine[1]/cac:AllowanceCharge[1]',
+    message: 'FORG0001: Cannot cast value to xs:boolean, pattern validation failed.'
+  },
+  {
+    context: '/ubl:Invoice/cac:AllowanceCharge[cbc:ChargeIndicator = false()] | /cn:CreditNote/cac:AllowanceCharge[cbc:ChargeIndicator = false()]',
+    location: '/CreditNote[1]/cac:CreditNoteLine[1]/cac:AllowanceCharge[1]',
+    message: 'FORG0001: Cannot cast value to xs:boolean, pattern validation failed.'
+  }
+]
+warnings [
+  {
+    context: '/ubl:Invoice/cac:AllowanceCharge[cbc:ChargeIndicator = true()] | /cn:CreditNote/cac:AllowanceCharge[cbc:ChargeIndicator = true()]',
+    location: '/CreditNote[1]/cac:CreditNoteLine[1]/cac:AllowanceCharge[1]',
+    message: 'FORG0001: Cannot cast value to xs:boolean, pattern validation failed.'
+  },
+  {
+    context: '/ubl:Invoice/cac:AllowanceCharge[cbc:ChargeIndicator = true()] | /cn:CreditNote/cac:AllowanceCharge[cbc:ChargeIndicator = true()]',
+    location: '/CreditNote[1]/cac:CreditNoteLine[1]/cac:AllowanceCharge[1]',
+    message: 'FORG0001: Cannot cast value to xs:boolean, pattern validation failed.'
+  }
+]
+warnings [
+  {
+    context: '/ubl:Invoice/cac:AllowanceCharge[cbc:ChargeIndicator = false()] | /cn:CreditNote/cac:AllowanceCharge[cbc:ChargeIndicator = false()]',
+    location: '/CreditNote[1]/cac:CreditNoteLine[1]/cac:AllowanceCharge[1]',
+    message: 'FORG0001: Cannot cast 1234 to xs:boolean, pattern validation failed.'
+  },
+  {
+    context: '/ubl:Invoice/cac:AllowanceCharge[cbc:ChargeIndicator = false()] | /cn:CreditNote/cac:AllowanceCharge[cbc:ChargeIndicator = false()]',
+    location: '/CreditNote[1]/cac:CreditNoteLine[1]/cac:AllowanceCharge[1]',
+    message: 'FORG0001: Cannot cast 1234 to xs:boolean, pattern validation failed.'
+  }
+]
+warnings [
+  {
+    context: '/ubl:Invoice/cac:AllowanceCharge[cbc:ChargeIndicator = true()] | /cn:CreditNote/cac:AllowanceCharge[cbc:ChargeIndicator = true()]',
+    location: '/CreditNote[1]/cac:CreditNoteLine[1]/cac:AllowanceCharge[1]',
+    message: 'FORG0001: Cannot cast 1234 to xs:boolean, pattern validation failed.'
+  },
+  {
+    context: '/ubl:Invoice/cac:AllowanceCharge[cbc:ChargeIndicator = true()] | /cn:CreditNote/cac:AllowanceCharge[cbc:ChargeIndicator = true()]',
+    location: '/CreditNote[1]/cac:CreditNoteLine[1]/cac:AllowanceCharge[1]',
+    message: 'FORG0001: Cannot cast 1234 to xs:boolean, pattern validation failed.'
+  }
+]
+warnings [
+  {
+    context: '/ubl:Invoice/cac:AllowanceCharge[cbc:ChargeIndicator = false()] | /cn:CreditNote/cac:AllowanceCharge[cbc:ChargeIndicator = false()]',
+    location: '/CreditNote[1]/cac:CreditNoteLine[1]/cac:AllowanceCharge[1]',
+    message: 'FORG0001: Cannot cast  to xs:boolean, pattern validation failed.'
+  },
+  {
+    context: '/ubl:Invoice/cac:AllowanceCharge[cbc:ChargeIndicator = false()] | /cn:CreditNote/cac:AllowanceCharge[cbc:ChargeIndicator = false()]',
+    location: '/CreditNote[1]/cac:CreditNoteLine[1]/cac:AllowanceCharge[1]',
+    message: 'FORG0001: Cannot cast  to xs:boolean, pattern validation failed.'
+  }
+]
+warnings [
+  {
+    context: '/ubl:Invoice/cac:AllowanceCharge[cbc:ChargeIndicator = true()] | /cn:CreditNote/cac:AllowanceCharge[cbc:ChargeIndicator = true()]',
+    location: '/CreditNote[1]/cac:CreditNoteLine[1]/cac:AllowanceCharge[1]',
+    message: 'FORG0001: Cannot cast  to xs:boolean, pattern validation failed.'
+  },
+  {
+    context: '/ubl:Invoice/cac:AllowanceCharge[cbc:ChargeIndicator = true()] | /cn:CreditNote/cac:AllowanceCharge[cbc:ChargeIndicator = true()]',
+    location: '/CreditNote[1]/cac:CreditNoteLine[1]/cac:AllowanceCharge[1]',
+    message: 'FORG0001: Cannot cast  to xs:boolean, pattern validation failed.'
+  }
+]
+warnings [
+  {
+    context: '/ubl:Invoice/cac:AllowanceCharge[cbc:ChargeIndicator = false()] | /cn:CreditNote/cac:AllowanceCharge[cbc:ChargeIndicator = false()]',
+    location: '/CreditNote[1]/cac:CreditNoteLine[1]/cac:Price[1]/cac:AllowanceCharge[1]',
+    message: 'FORG0001: Cannot cast 123 to xs:boolean, pattern validation failed.'
+  },
+  {
+    context: '/ubl:Invoice/cac:AllowanceCharge[cbc:ChargeIndicator = false()] | /cn:CreditNote/cac:AllowanceCharge[cbc:ChargeIndicator = false()]',
+    location: '/CreditNote[1]/cac:CreditNoteLine[1]/cac:Price[1]/cac:AllowanceCharge[1]',
+    message: 'FORG0001: Cannot cast 123 to xs:boolean, pattern validation failed.'
+  }
+]
+warnings [
+  {
+    context: '/ubl:Invoice/cac:AllowanceCharge[cbc:ChargeIndicator = true()] | /cn:CreditNote/cac:AllowanceCharge[cbc:ChargeIndicator = true()]',
+    location: '/CreditNote[1]/cac:CreditNoteLine[1]/cac:Price[1]/cac:AllowanceCharge[1]',
+    message: 'FORG0001: Cannot cast 123 to xs:boolean, pattern validation failed.'
+  },
+  {
+    context: '/ubl:Invoice/cac:AllowanceCharge[cbc:ChargeIndicator = true()] | /cn:CreditNote/cac:AllowanceCharge[cbc:ChargeIndicator = true()]',
+    location: '/CreditNote[1]/cac:CreditNoteLine[1]/cac:Price[1]/cac:AllowanceCharge[1]',
+    message: 'FORG0001: Cannot cast 123 to xs:boolean, pattern validation failed.'
+  }
+]
+warnings [
+  {
+    context: '//cac:InvoiceLine/cac:AllowanceCharge[cbc:ChargeIndicator = false()] | //cac:CreditNoteLine/cac:AllowanceCharge[cbc:ChargeIndicator = false()]',
+    location: '/CreditNote[1]/cac:CreditNoteLine[1]/cac:Price[1]/cac:AllowanceCharge[1]',
+    message: 'FORG0001: Cannot cast 123 to xs:boolean, pattern validation failed.'
+  },
+  {
+    context: '//cac:InvoiceLine/cac:AllowanceCharge[cbc:ChargeIndicator = false()] | //cac:CreditNoteLine/cac:AllowanceCharge[cbc:ChargeIndicator = false()]',
+    location: '/CreditNote[1]/cac:CreditNoteLine[1]/cac:Price[1]/cac:AllowanceCharge[1]',
+    message: 'FORG0001: Cannot cast 123 to xs:boolean, pattern validation failed.'
+  }
+]
+warnings [
+  {
+    context: '//cac:InvoiceLine/cac:AllowanceCharge[cbc:ChargeIndicator = true()] | //cac:CreditNoteLine/cac:AllowanceCharge[cbc:ChargeIndicator = true()]',
+    location: '/CreditNote[1]/cac:CreditNoteLine[1]/cac:Price[1]/cac:AllowanceCharge[1]',
+    message: 'FORG0001: Cannot cast 123 to xs:boolean, pattern validation failed.'
+  },
+  {
+    context: '//cac:InvoiceLine/cac:AllowanceCharge[cbc:ChargeIndicator = true()] | //cac:CreditNoteLine/cac:AllowanceCharge[cbc:ChargeIndicator = true()]',
+    location: '/CreditNote[1]/cac:CreditNoteLine[1]/cac:Price[1]/cac:AllowanceCharge[1]',
+    message: 'FORG0001: Cannot cast 123 to xs:boolean, pattern validation failed.'
+  }
+]
+warnings [
+  {
+    context: '/ubl:Invoice/cac:AllowanceCharge[cbc:ChargeIndicator = false()] | /cn:CreditNote/cac:AllowanceCharge[cbc:ChargeIndicator = false()]',
+    location: '/CreditNote[1]/cac:CreditNoteLine[1]/cac:Price[1]/cac:AllowanceCharge[1]',
+    message: 'FORG0001: Cannot cast no to xs:boolean, pattern validation failed.'
+  },
+  {
+    context: '/ubl:Invoice/cac:AllowanceCharge[cbc:ChargeIndicator = false()] | /cn:CreditNote/cac:AllowanceCharge[cbc:ChargeIndicator = false()]',
+    location: '/CreditNote[1]/cac:CreditNoteLine[1]/cac:Price[1]/cac:AllowanceCharge[1]',
+    message: 'FORG0001: Cannot cast no to xs:boolean, pattern validation failed.'
+  }
+]
+warnings [
+  {
+    context: '/ubl:Invoice/cac:AllowanceCharge[cbc:ChargeIndicator = true()] | /cn:CreditNote/cac:AllowanceCharge[cbc:ChargeIndicator = true()]',
+    location: '/CreditNote[1]/cac:CreditNoteLine[1]/cac:Price[1]/cac:AllowanceCharge[1]',
+    message: 'FORG0001: Cannot cast no to xs:boolean, pattern validation failed.'
+  },
+  {
+    context: '/ubl:Invoice/cac:AllowanceCharge[cbc:ChargeIndicator = true()] | /cn:CreditNote/cac:AllowanceCharge[cbc:ChargeIndicator = true()]',
+    location: '/CreditNote[1]/cac:CreditNoteLine[1]/cac:Price[1]/cac:AllowanceCharge[1]',
+    message: 'FORG0001: Cannot cast no to xs:boolean, pattern validation failed.'
+  }
+]
+warnings [
+  {
+    context: '//cac:InvoiceLine/cac:AllowanceCharge[cbc:ChargeIndicator = false()] | //cac:CreditNoteLine/cac:AllowanceCharge[cbc:ChargeIndicator = false()]',
+    location: '/CreditNote[1]/cac:CreditNoteLine[1]/cac:Price[1]/cac:AllowanceCharge[1]',
+    message: 'FORG0001: Cannot cast no to xs:boolean, pattern validation failed.'
+  },
+  {
+    context: '//cac:InvoiceLine/cac:AllowanceCharge[cbc:ChargeIndicator = false()] | //cac:CreditNoteLine/cac:AllowanceCharge[cbc:ChargeIndicator = false()]',
+    location: '/CreditNote[1]/cac:CreditNoteLine[1]/cac:Price[1]/cac:AllowanceCharge[1]',
+    message: 'FORG0001: Cannot cast no to xs:boolean, pattern validation failed.'
+  }
+]
+warnings [
+  {
+    context: '//cac:InvoiceLine/cac:AllowanceCharge[cbc:ChargeIndicator = true()] | //cac:CreditNoteLine/cac:AllowanceCharge[cbc:ChargeIndicator = true()]',
+    location: '/CreditNote[1]/cac:CreditNoteLine[1]/cac:Price[1]/cac:AllowanceCharge[1]',
+    message: 'FORG0001: Cannot cast no to xs:boolean, pattern validation failed.'
+  },
+  {
+    context: '//cac:InvoiceLine/cac:AllowanceCharge[cbc:ChargeIndicator = true()] | //cac:CreditNoteLine/cac:AllowanceCharge[cbc:ChargeIndicator = true()]',
+    location: '/CreditNote[1]/cac:CreditNoteLine[1]/cac:Price[1]/cac:AllowanceCharge[1]',
+    message: 'FORG0001: Cannot cast no to xs:boolean, pattern validation failed.'
+  }
+]
+warnings [
+  {
+    context: '//cac:InvoiceLine/cac:AllowanceCharge[cbc:ChargeIndicator = false()] | //cac:CreditNoteLine/cac:AllowanceCharge[cbc:ChargeIndicator = false()]',
+    location: '/Invoice[1]/cac:AllowanceCharge[1]',
+    message: 'FORG0001: Cannot cast value to xs:boolean, pattern validation failed.'
+  },
+  {
+    context: '//cac:InvoiceLine/cac:AllowanceCharge[cbc:ChargeIndicator = false()] | //cac:CreditNoteLine/cac:AllowanceCharge[cbc:ChargeIndicator = false()]',
+    location: '/Invoice[1]/cac:AllowanceCharge[1]',
+    message: 'FORG0001: Cannot cast value to xs:boolean, pattern validation failed.'
+  }
+]
+warnings [
+  {
+    context: '//cac:InvoiceLine/cac:AllowanceCharge[cbc:ChargeIndicator = true()] | //cac:CreditNoteLine/cac:AllowanceCharge[cbc:ChargeIndicator = true()]',
+    location: '/Invoice[1]/cac:AllowanceCharge[1]',
+    message: 'FORG0001: Cannot cast value to xs:boolean, pattern validation failed.'
+  },
+  {
+    context: '//cac:InvoiceLine/cac:AllowanceCharge[cbc:ChargeIndicator = true()] | //cac:CreditNoteLine/cac:AllowanceCharge[cbc:ChargeIndicator = true()]',
+    location: '/Invoice[1]/cac:AllowanceCharge[1]',
+    message: 'FORG0001: Cannot cast value to xs:boolean, pattern validation failed.'
+  }
+]
+warnings [
+  {
+    context: '//cac:InvoiceLine/cac:AllowanceCharge[cbc:ChargeIndicator = false()] | //cac:CreditNoteLine/cac:AllowanceCharge[cbc:ChargeIndicator = false()]',
+    location: '/Invoice[1]/cac:AllowanceCharge[1]',
+    message: 'FORG0001: Cannot cast 1234 to xs:boolean, pattern validation failed.'
+  },
+  {
+    context: '//cac:InvoiceLine/cac:AllowanceCharge[cbc:ChargeIndicator = false()] | //cac:CreditNoteLine/cac:AllowanceCharge[cbc:ChargeIndicator = false()]',
+    location: '/Invoice[1]/cac:AllowanceCharge[1]',
+    message: 'FORG0001: Cannot cast 1234 to xs:boolean, pattern validation failed.'
+  }
+]
+warnings [
+  {
+    context: '//cac:InvoiceLine/cac:AllowanceCharge[cbc:ChargeIndicator = true()] | //cac:CreditNoteLine/cac:AllowanceCharge[cbc:ChargeIndicator = true()]',
+    location: '/Invoice[1]/cac:AllowanceCharge[1]',
+    message: 'FORG0001: Cannot cast 1234 to xs:boolean, pattern validation failed.'
+  },
+  {
+    context: '//cac:InvoiceLine/cac:AllowanceCharge[cbc:ChargeIndicator = true()] | //cac:CreditNoteLine/cac:AllowanceCharge[cbc:ChargeIndicator = true()]',
+    location: '/Invoice[1]/cac:AllowanceCharge[1]',
+    message: 'FORG0001: Cannot cast 1234 to xs:boolean, pattern validation failed.'
+  }
+]
+warnings [
+  {
+    context: '//cac:InvoiceLine/cac:AllowanceCharge[cbc:ChargeIndicator = false()] | //cac:CreditNoteLine/cac:AllowanceCharge[cbc:ChargeIndicator = false()]',
+    location: '/Invoice[1]/cac:AllowanceCharge[1]',
+    message: 'FORG0001: Cannot cast  to xs:boolean, pattern validation failed.'
+  },
+  {
+    context: '//cac:InvoiceLine/cac:AllowanceCharge[cbc:ChargeIndicator = false()] | //cac:CreditNoteLine/cac:AllowanceCharge[cbc:ChargeIndicator = false()]',
+    location: '/Invoice[1]/cac:AllowanceCharge[1]',
+    message: 'FORG0001: Cannot cast  to xs:boolean, pattern validation failed.'
+  }
+]
+warnings [
+  {
+    context: '//cac:InvoiceLine/cac:AllowanceCharge[cbc:ChargeIndicator = true()] | //cac:CreditNoteLine/cac:AllowanceCharge[cbc:ChargeIndicator = true()]',
+    location: '/Invoice[1]/cac:AllowanceCharge[1]',
+    message: 'FORG0001: Cannot cast  to xs:boolean, pattern validation failed.'
+  },
+  {
+    context: '//cac:InvoiceLine/cac:AllowanceCharge[cbc:ChargeIndicator = true()] | //cac:CreditNoteLine/cac:AllowanceCharge[cbc:ChargeIndicator = true()]',
+    location: '/Invoice[1]/cac:AllowanceCharge[1]',
+    message: 'FORG0001: Cannot cast  to xs:boolean, pattern validation failed.'
+  }
+]
+warnings [
+  {
+    context: '/ubl:Invoice/cac:AllowanceCharge[cbc:ChargeIndicator = false()] | /cn:CreditNote/cac:AllowanceCharge[cbc:ChargeIndicator = false()]',
+    location: '/Invoice[1]/cac:InvoiceLine[1]/cac:AllowanceCharge[1]',
+    message: 'FORG0001: Cannot cast value to xs:boolean, pattern validation failed.'
+  },
+  {
+    context: '/ubl:Invoice/cac:AllowanceCharge[cbc:ChargeIndicator = false()] | /cn:CreditNote/cac:AllowanceCharge[cbc:ChargeIndicator = false()]',
+    location: '/Invoice[1]/cac:InvoiceLine[1]/cac:AllowanceCharge[1]',
+    message: 'FORG0001: Cannot cast value to xs:boolean, pattern validation failed.'
+  }
+]
+warnings [
+  {
+    context: '/ubl:Invoice/cac:AllowanceCharge[cbc:ChargeIndicator = true()] | /cn:CreditNote/cac:AllowanceCharge[cbc:ChargeIndicator = true()]',
+    location: '/Invoice[1]/cac:InvoiceLine[1]/cac:AllowanceCharge[1]',
+    message: 'FORG0001: Cannot cast value to xs:boolean, pattern validation failed.'
+  },
+  {
+    context: '/ubl:Invoice/cac:AllowanceCharge[cbc:ChargeIndicator = true()] | /cn:CreditNote/cac:AllowanceCharge[cbc:ChargeIndicator = true()]',
+    location: '/Invoice[1]/cac:InvoiceLine[1]/cac:AllowanceCharge[1]',
+    message: 'FORG0001: Cannot cast value to xs:boolean, pattern validation failed.'
+  }
+]
+warnings [
+  {
+    context: '/ubl:Invoice/cac:AllowanceCharge[cbc:ChargeIndicator = false()] | /cn:CreditNote/cac:AllowanceCharge[cbc:ChargeIndicator = false()]',
+    location: '/Invoice[1]/cac:InvoiceLine[1]/cac:AllowanceCharge[1]',
+    message: 'FORG0001: Cannot cast 1234 to xs:boolean, pattern validation failed.'
+  },
+  {
+    context: '/ubl:Invoice/cac:AllowanceCharge[cbc:ChargeIndicator = false()] | /cn:CreditNote/cac:AllowanceCharge[cbc:ChargeIndicator = false()]',
+    location: '/Invoice[1]/cac:InvoiceLine[1]/cac:AllowanceCharge[1]',
+    message: 'FORG0001: Cannot cast 1234 to xs:boolean, pattern validation failed.'
+  }
+]
+warnings [
+  {
+    context: '/ubl:Invoice/cac:AllowanceCharge[cbc:ChargeIndicator = true()] | /cn:CreditNote/cac:AllowanceCharge[cbc:ChargeIndicator = true()]',
+    location: '/Invoice[1]/cac:InvoiceLine[1]/cac:AllowanceCharge[1]',
+    message: 'FORG0001: Cannot cast 1234 to xs:boolean, pattern validation failed.'
+  },
+  {
+    context: '/ubl:Invoice/cac:AllowanceCharge[cbc:ChargeIndicator = true()] | /cn:CreditNote/cac:AllowanceCharge[cbc:ChargeIndicator = true()]',
+    location: '/Invoice[1]/cac:InvoiceLine[1]/cac:AllowanceCharge[1]',
+    message: 'FORG0001: Cannot cast 1234 to xs:boolean, pattern validation failed.'
+  }
+]
+warnings [
+  {
+    context: '/ubl:Invoice/cac:AllowanceCharge[cbc:ChargeIndicator = false()] | /cn:CreditNote/cac:AllowanceCharge[cbc:ChargeIndicator = false()]',
+    location: '/Invoice[1]/cac:InvoiceLine[1]/cac:AllowanceCharge[1]',
+    message: 'FORG0001: Cannot cast  to xs:boolean, pattern validation failed.'
+  },
+  {
+    context: '/ubl:Invoice/cac:AllowanceCharge[cbc:ChargeIndicator = false()] | /cn:CreditNote/cac:AllowanceCharge[cbc:ChargeIndicator = false()]',
+    location: '/Invoice[1]/cac:InvoiceLine[1]/cac:AllowanceCharge[1]',
+    message: 'FORG0001: Cannot cast  to xs:boolean, pattern validation failed.'
+  }
+]
+warnings [
+  {
+    context: '/ubl:Invoice/cac:AllowanceCharge[cbc:ChargeIndicator = true()] | /cn:CreditNote/cac:AllowanceCharge[cbc:ChargeIndicator = true()]',
+    location: '/Invoice[1]/cac:InvoiceLine[1]/cac:AllowanceCharge[1]',
+    message: 'FORG0001: Cannot cast  to xs:boolean, pattern validation failed.'
+  },
+  {
+    context: '/ubl:Invoice/cac:AllowanceCharge[cbc:ChargeIndicator = true()] | /cn:CreditNote/cac:AllowanceCharge[cbc:ChargeIndicator = true()]',
+    location: '/Invoice[1]/cac:InvoiceLine[1]/cac:AllowanceCharge[1]',
+    message: 'FORG0001: Cannot cast  to xs:boolean, pattern validation failed.'
+  }
+]
+warnings [
+  {
+    context: '/ubl:Invoice/cac:AllowanceCharge[cbc:ChargeIndicator = false()] | /cn:CreditNote/cac:AllowanceCharge[cbc:ChargeIndicator = false()]',
+    location: '/Invoice[1]/cac:InvoiceLine[1]/cac:Price[1]/cac:AllowanceCharge[1]',
+    message: 'FORG0001: Cannot cast 123 to xs:boolean, pattern validation failed.'
+  },
+  {
+    context: '/ubl:Invoice/cac:AllowanceCharge[cbc:ChargeIndicator = false()] | /cn:CreditNote/cac:AllowanceCharge[cbc:ChargeIndicator = false()]',
+    location: '/Invoice[1]/cac:InvoiceLine[1]/cac:Price[1]/cac:AllowanceCharge[1]',
+    message: 'FORG0001: Cannot cast 123 to xs:boolean, pattern validation failed.'
+  }
+]
+warnings [
+  {
+    context: '/ubl:Invoice/cac:AllowanceCharge[cbc:ChargeIndicator = true()] | /cn:CreditNote/cac:AllowanceCharge[cbc:ChargeIndicator = true()]',
+    location: '/Invoice[1]/cac:InvoiceLine[1]/cac:Price[1]/cac:AllowanceCharge[1]',
+    message: 'FORG0001: Cannot cast 123 to xs:boolean, pattern validation failed.'
+  },
+  {
+    context: '/ubl:Invoice/cac:AllowanceCharge[cbc:ChargeIndicator = true()] | /cn:CreditNote/cac:AllowanceCharge[cbc:ChargeIndicator = true()]',
+    location: '/Invoice[1]/cac:InvoiceLine[1]/cac:Price[1]/cac:AllowanceCharge[1]',
+    message: 'FORG0001: Cannot cast 123 to xs:boolean, pattern validation failed.'
+  }
+]
+warnings [
+  {
+    context: '//cac:InvoiceLine/cac:AllowanceCharge[cbc:ChargeIndicator = false()] | //cac:CreditNoteLine/cac:AllowanceCharge[cbc:ChargeIndicator = false()]',
+    location: '/Invoice[1]/cac:InvoiceLine[1]/cac:Price[1]/cac:AllowanceCharge[1]',
+    message: 'FORG0001: Cannot cast 123 to xs:boolean, pattern validation failed.'
+  },
+  {
+    context: '//cac:InvoiceLine/cac:AllowanceCharge[cbc:ChargeIndicator = false()] | //cac:CreditNoteLine/cac:AllowanceCharge[cbc:ChargeIndicator = false()]',
+    location: '/Invoice[1]/cac:InvoiceLine[1]/cac:Price[1]/cac:AllowanceCharge[1]',
+    message: 'FORG0001: Cannot cast 123 to xs:boolean, pattern validation failed.'
+  }
+]
+warnings [
+  {
+    context: '//cac:InvoiceLine/cac:AllowanceCharge[cbc:ChargeIndicator = true()] | //cac:CreditNoteLine/cac:AllowanceCharge[cbc:ChargeIndicator = true()]',
+    location: '/Invoice[1]/cac:InvoiceLine[1]/cac:Price[1]/cac:AllowanceCharge[1]',
+    message: 'FORG0001: Cannot cast 123 to xs:boolean, pattern validation failed.'
+  },
+  {
+    context: '//cac:InvoiceLine/cac:AllowanceCharge[cbc:ChargeIndicator = true()] | //cac:CreditNoteLine/cac:AllowanceCharge[cbc:ChargeIndicator = true()]',
+    location: '/Invoice[1]/cac:InvoiceLine[1]/cac:Price[1]/cac:AllowanceCharge[1]',
+    message: 'FORG0001: Cannot cast 123 to xs:boolean, pattern validation failed.'
+  }
+]
+warnings [
+  {
+    context: '/ubl:Invoice/cac:AllowanceCharge[cbc:ChargeIndicator = false()] | /cn:CreditNote/cac:AllowanceCharge[cbc:ChargeIndicator = false()]',
+    location: '/Invoice[1]/cac:InvoiceLine[1]/cac:Price[1]/cac:AllowanceCharge[1]',
+    message: 'FORG0001: Cannot cast no to xs:boolean, pattern validation failed.'
+  },
+  {
+    context: '/ubl:Invoice/cac:AllowanceCharge[cbc:ChargeIndicator = false()] | /cn:CreditNote/cac:AllowanceCharge[cbc:ChargeIndicator = false()]',
+    location: '/Invoice[1]/cac:InvoiceLine[1]/cac:Price[1]/cac:AllowanceCharge[1]',
+    message: 'FORG0001: Cannot cast no to xs:boolean, pattern validation failed.'
+  }
+]
+warnings [
+  {
+    context: '/ubl:Invoice/cac:AllowanceCharge[cbc:ChargeIndicator = true()] | /cn:CreditNote/cac:AllowanceCharge[cbc:ChargeIndicator = true()]',
+    location: '/Invoice[1]/cac:InvoiceLine[1]/cac:Price[1]/cac:AllowanceCharge[1]',
+    message: 'FORG0001: Cannot cast no to xs:boolean, pattern validation failed.'
+  },
+  {
+    context: '/ubl:Invoice/cac:AllowanceCharge[cbc:ChargeIndicator = true()] | /cn:CreditNote/cac:AllowanceCharge[cbc:ChargeIndicator = true()]',
+    location: '/Invoice[1]/cac:InvoiceLine[1]/cac:Price[1]/cac:AllowanceCharge[1]',
+    message: 'FORG0001: Cannot cast no to xs:boolean, pattern validation failed.'
+  }
+]
+warnings [
+  {
+    context: '//cac:InvoiceLine/cac:AllowanceCharge[cbc:ChargeIndicator = false()] | //cac:CreditNoteLine/cac:AllowanceCharge[cbc:ChargeIndicator = false()]',
+    location: '/Invoice[1]/cac:InvoiceLine[1]/cac:Price[1]/cac:AllowanceCharge[1]',
+    message: 'FORG0001: Cannot cast no to xs:boolean, pattern validation failed.'
+  },
+  {
+    context: '//cac:InvoiceLine/cac:AllowanceCharge[cbc:ChargeIndicator = false()] | //cac:CreditNoteLine/cac:AllowanceCharge[cbc:ChargeIndicator = false()]',
+    location: '/Invoice[1]/cac:InvoiceLine[1]/cac:Price[1]/cac:AllowanceCharge[1]',
+    message: 'FORG0001: Cannot cast no to xs:boolean, pattern validation failed.'
+  }
+]
+warnings [
+  {
+    context: '//cac:InvoiceLine/cac:AllowanceCharge[cbc:ChargeIndicator = true()] | //cac:CreditNoteLine/cac:AllowanceCharge[cbc:ChargeIndicator = true()]',
+    location: '/Invoice[1]/cac:InvoiceLine[1]/cac:Price[1]/cac:AllowanceCharge[1]',
+    message: 'FORG0001: Cannot cast no to xs:boolean, pattern validation failed.'
+  },
+  {
+    context: '//cac:InvoiceLine/cac:AllowanceCharge[cbc:ChargeIndicator = true()] | //cac:CreditNoteLine/cac:AllowanceCharge[cbc:ChargeIndicator = true()]',
+    location: '/Invoice[1]/cac:InvoiceLine[1]/cac:Price[1]/cac:AllowanceCharge[1]',
+    message: 'FORG0001: Cannot cast no to xs:boolean, pattern validation failed.'
+  }
+]
+pattern matcher self-test: 51783946 node×rule checks, 0 differences, 536 rule×document pairs skipped (dynamic error in the pattern itself), 1772 documents

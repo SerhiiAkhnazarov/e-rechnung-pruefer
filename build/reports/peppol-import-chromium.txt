@@ -1,0 +1,21 @@
+# suite        peppol-import-chromium
+# fingerprint  85a3e2aa4dd6506cccb529b438b49e0a3281842a34706035354d6ecc68d7a879
+# git          a6a3ec9b062bf651ab595bfa27d160f0d73db947
+# command      node test/peppol-import-browser.cjs --browser chromium <ext>/peppol-bis-invoice-3 <ext>/peppol-bis-invoice-3/rules/examples/base-example.xml <ext>/peppol-bis-invoice-3/rules/examples/Allowance-example.xml <ext>/peppol-bis-invoice-3/rules/examples/vat-category-E.xml <ext>/peppol-bis-invoice-3/rules/examples/base-creditnote-correction.xml
+# exit code    0
+# duration     6814 ms
+# date         2026-10-20T07:43:58.497Z
+chromium: Peppol import test
+  ok   PEPPOL-UBL: compiled in the browser = Node build (165 asserts)
+  ok   PEPPOL-UBL: SHA-256 over bytes = manifest (62e5b67892f12755…)
+  ok   PEPPOL-CII: compiled in the browser = Node build (91 asserts)
+  ok   PEPPOL-CII: SHA-256 over bytes = manifest (7678c3cd4a219095…)
+  ok   status line shows the verified version
+  ok   modified file reported as deviating version
+  info persisted after reload: PEPPOL-CII,PEPPOL-UBL
+  ok   base-example.xml: 0 findings, identical to Node with all rule sets, route "peppol"
+  ok   Allowance-example.xml: 0 findings, identical to Node with all rule sets, route "peppol"
+  ok   vat-category-E.xml: 0 findings, identical to Node with all rule sets, route "peppol"
+  ok   base-creditnote-correction.xml: 0 findings, identical to Node with all rule sets, route "peppol"
+  ok   no page errors
+PEPPOL IMPORT chromium: OK

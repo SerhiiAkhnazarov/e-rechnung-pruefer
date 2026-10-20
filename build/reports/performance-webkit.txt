@@ -1,0 +1,13 @@
+# suite        performance-webkit
+# fingerprint  85a3e2aa4dd6506cccb529b438b49e0a3281842a34706035354d6ecc68d7a879
+# git          a6a3ec9b062bf651ab595bfa27d160f0d73db947
+# command      node test/perf.cjs <ext>/xrechnung-testsuite --browser webkit
+# exit code    0
+# duration     19660 ms
+# date         2026-10-20T07:44:44.317Z
+# machine: Intel(R) Xeon(R) Processor @ 2.80GHz × 2, 8 GiB, Node v22.22.0, webkit 26.0
+cold start (1 line, first document): webkit 2042 ms, node 2296 ms
+  100 lines, 151 KiB: node 608 ms · webkit 448 ms (analysis 393 ms, XSD 11 ms, rules {"EN16931-UBL":276,"XRechnung-UBL":78}) · budget 3000 ms ok · findings identical (3)
+  500 lines, 736 KiB: node 1322 ms · webkit 1704 ms (analysis 1638 ms, XSD 36 ms, rules {"EN16931-UBL":1126,"XRechnung-UBL":297}) · budget 8000 ms ok · findings identical (3)
+ 2000 lines, 2927 KiB: node 4594 ms · webkit 4953 ms (analysis 4868 ms, XSD 114 ms, rules {"EN16931-UBL":3374,"XRechnung-UBL":904}) · budget 30000 ms ok · findings identical (3)
+performance webkit: OK

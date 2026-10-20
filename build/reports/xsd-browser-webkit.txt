@@ -1,0 +1,10 @@
+# suite        xsd-browser-webkit
+# fingerprint  85a3e2aa4dd6506cccb529b438b49e0a3281842a34706035354d6ecc68d7a879
+# git          a6a3ec9b062bf651ab595bfa27d160f0d73db947
+# command      node test/xsd-browser.cjs --browser webkit
+# exit code    0
+# duration     22798 ms
+# date         2026-10-20T07:33:02.807Z
+xsd-validator in webkit (Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.0 Safari/605.1.15)
+documents 1053   identical (verdict + error codes + locations) 1053   differences 0   parse differences 0   browser validation time 2301 ms
+big2000.xml in webkit: DOMParser 97 ms, validate 78 ms (first) / 56 ms (second), valid=true

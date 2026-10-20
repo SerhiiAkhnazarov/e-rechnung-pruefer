@@ -1,0 +1,9 @@
+# suite        kosit-xmute-tests
+# fingerprint  85a3e2aa4dd6506cccb529b438b49e0a3281842a34706035354d6ecc68d7a879
+# git          a6a3ec9b062bf651ab595bfa27d160f0d73db947
+# command      node test/run-xmute-tests.cjs <ext>/xrechnung-schematron
+# exit code    0
+# duration     17321 ms
+# date         2026-10-20T07:23:26.160Z
+
+XRechnung xmute tests: 1754 passed, 0 failed, 0 known deviations (documented), 0 skipped, 1754 mutations in 17177 ms

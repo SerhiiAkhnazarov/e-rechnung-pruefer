@@ -1,0 +1,20 @@
+Factur-X 1.09.2 / ZUGFeRD 2.5.2 technical artefacts (XML schemas, Schematron, code lists)
+Publishers: FNFE-MPE (Forum National de la Facture Électronique et des Marchés Publics Électroniques) and
+FeRD (Forum elektronische Rechnung Deutschland, AWV e.V.); files as redistributed by Mustangproject
+(https://github.com/ZUGFeRD/mustangproject, validator/src/main/resources/{schema,schematron}/ZF_250).
+
+Rights of use (FeRD, "Disclaimer and rights of use ZUGFeRD",
+https://www.ferd-net.de/en/ueber-uns/ressourcen-1/veroeffentlichungen/disclaimer-and-rights-of-use-zugferd):
+"For the use of the ZUGFeRD Technical Artifacts (Schemata and Schematron) the Apache 2.0 license
+conditions apply." The licence of the ZUGFeRD format itself is free of charge and includes the right to
+further development; it does not include essential patents of FeRD members.
+
+Statement required by the DIN provision of the same page (applications that use the publication must say
+so visibly and state that reproduction is permitted with the permission of CEN and DIN):
+
+  Der E-Rechnung Prüfer ist eine Anwendung der Veröffentlichung ZUGFeRD 2.5.2 / Factur-X 1.09.2 und der
+  Europäischen Norm EN 16931. Die Wiedergabe von Inhalten der EN 16931 erfolgt mit Erlaubnis von CEN und
+  DIN (Inhaber der Urheberrechte).
+
+The XML schemas are derived from the UN/CEFACT Cross Industry Invoice D16B; the UN/CEFACT notice in
+legal/UNCEFACT-NOTICE.txt applies to them as well.

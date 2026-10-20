@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?pi-before data?>
+<!-- comment before root -->
+<inv:Invoice xmlns:inv="urn:test:inv" xmlns:cac="urn:test:cac" xmlns:cbc="urn:test:cbc" xmlns:x="urn:test:x" cbc:version="2" id="root" x:flag="1">
+  <cbc:ID schemeID="A" name="n1">INV-1</cbc:ID>
+  <!-- c1 -->
+  <cbc:Note>first</cbc:Note>
+  <cbc:Note name="n2">second <b>bold</b> tail</cbc:Note>
+  <cac:Party id="p1">
+    <cbc:Name name="n3">Seller</cbc:Name>
+    <cac:Party id="p1a" name="inner">
+      <cbc:Name>Nested</cbc:Name>
+      <cac:TaxCategory><cbc:ID>S</cbc:ID><cac:TaxScheme><cbc:ID>vat</cbc:ID></cac:TaxScheme></cac:TaxCategory>
+    </cac:Party>
+  </cac:Party>
+  <cac:TaxTotal currencyID="EUR" name="n4">
+    <cbc:TaxAmount currencyID="EUR">19.00</cbc:TaxAmount>
+    <cac:TaxSubtotal><cbc:TaxableAmount currencyID="EUR">100.00</cbc:TaxableAmount><cac:TaxCategory><cbc:ID> s </cbc:ID><cbc:Percent>19</cbc:Percent><cac:TaxScheme><cbc:ID>VAT</cbc:ID></cac:TaxScheme></cac:TaxCategory></cac:TaxSubtotal>
+    <cac:TaxSubtotal><cbc:TaxableAmount currencyID="EUR">50.00</cbc:TaxableAmount><cac:TaxCategory><cbc:ID>E</cbc:ID><cbc:Percent>0</cbc:Percent><cac:TaxScheme><cbc:ID>VAT</cbc:ID></cac:TaxScheme></cac:TaxCategory></cac:TaxSubtotal>
+  </cac:TaxTotal>
+  <cac:InvoiceLine id="l1"><cbc:ID>1</cbc:ID><cbc:LineExtensionAmount currencyID="EUR">0.1</cbc:LineExtensionAmount><cac:Item><cbc:Name>A</cbc:Name><cac:ClassifiedTaxCategory><cbc:ID>S</cbc:ID><cac:TaxScheme><cbc:ID>VAT</cbc:ID></cac:TaxScheme></cac:ClassifiedTaxCategory></cac:Item></cac:InvoiceLine>
+  <cac:InvoiceLine id="l2"><cbc:ID>2</cbc:ID><cbc:LineExtensionAmount currencyID="EUR">0.2</cbc:LineExtensionAmount><cac:Item><cbc:Name>B</cbc:Name><cac:ClassifiedTaxCategory><cbc:ID>E</cbc:ID><cac:TaxScheme><cbc:ID>vat</cbc:ID></cac:TaxScheme></cac:ClassifiedTaxCategory></cac:Item><cac:InvoiceLine id="l2sub"><cbc:ID>2.1</cbc:ID></cac:InvoiceLine></cac:InvoiceLine>
+  <cac:CreditNoteLine id="c1"><cbc:ID>3</cbc:ID><cbc:LineExtensionAmount currencyID="EUR">0.3</cbc:LineExtensionAmount></cac:CreditNoteLine>
+  <cac:InvoiceLine id="l3"><cbc:ID>4</cbc:ID><cbc:LineExtensionAmount currencyID="EUR">1000000000000.05</cbc:LineExtensionAmount></cac:InvoiceLine>
+  <?pi-inside x="1"?>
+  text tail
+</inv:Invoice>
+<!-- comment after root -->

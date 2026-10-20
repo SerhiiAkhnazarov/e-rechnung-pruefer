@@ -1,0 +1,30 @@
+# suite        build-reproducible
+# fingerprint  85a3e2aa4dd6506cccb529b438b49e0a3281842a34706035354d6ecc68d7a879
+# git          a6a3ec9b062bf651ab595bfa27d160f0d73db947
+# command      node tools/check-reproducible.cjs <ext>
+# exit code    0
+# duration     7010 ms
+# date         2026-10-20T07:22:46.907Z
+  same     xrechnung-schematron/build/schematron/ubl/XRechnung-UBL-validation.sch (merge step, sha256 e143facbe9e6)
+  same     xrechnung-schematron/build/schematron/cii/XRechnung-CII-validation.sch (merge step, sha256 53bb5c0664fc)
+  same     build/schemas/EN16931-CII.json
+  same     build/schemas/EN16931-UBL.json
+  same     build/schemas/FACTUR-X-BASIC-WL.json
+  same     build/schemas/FACTUR-X-BASIC.json
+  same     build/schemas/FACTUR-X-EN16931.json
+  same     build/schemas/FACTUR-X-EXTENDED.json
+  same     build/schemas/FACTUR-X-MINIMUM.json
+  local    build/schemas/PEPPOL-CII.json (not shipped: no redistribution licence, docs/RULESETS.md)
+  local    build/schemas/PEPPOL-UBL.json (not shipped: no redistribution licence, docs/RULESETS.md)
+  same     build/schemas/XRechnung-CII.json
+  same     build/schemas/XRechnung-UBL.json
+  same     build/xsd/CII-D16B.json
+  same     build/xsd/FACTUR-X-BASIC-WL.json
+  same     build/xsd/FACTUR-X-BASIC.json
+  same     build/xsd/FACTUR-X-EN16931.json
+  same     build/xsd/FACTUR-X-EXTENDED.json
+  same     build/xsd/FACTUR-X-MINIMUM.json
+  same     build/xsd/UBL-CreditNote-2.1.json
+  same     build/xsd/UBL-Invoice-2.1.json
+  same     build/scenarios.json
+reproducible build: 20 artefacts byte-identical, 0 differences

@@ -1,0 +1,15 @@
+# suite        facturx-xsd-vs-xerces
+# fingerprint  85a3e2aa4dd6506cccb529b438b49e0a3281842a34706035354d6ecc68d7a879
+# git          a6a3ec9b062bf651ab595bfa27d160f0d73db947
+# command      node test/run-facturx-xsd-tests.cjs
+# exit code    0
+# duration     5528 ms
+# date         2026-10-20T07:23:57.876Z
+Factur-X/ZUGFeRD ZF_250 XSD models: src/xsd-validator.js vs JDK Xerces — verdict and error-code comparison
+FACTUR-X-MINIMUM     documents  1181   xerces valid    3   verdict mismatches 0   identical verdicts+codes  1181   code-only differences 0   our time 122 ms   model 7934 bytes
+FACTUR-X-BASIC-WL    documents  1181   xerces valid    6   verdict mismatches 0   identical verdicts+codes  1181   code-only differences 0   our time 162 ms   model 11809 bytes
+FACTUR-X-BASIC       documents  1181   xerces valid   20   verdict mismatches 0   identical verdicts+codes  1181   code-only differences 0   our time 211 ms   model 13169 bytes
+FACTUR-X-EN16931     documents  1181   xerces valid  774   verdict mismatches 0   identical verdicts+codes  1181   code-only differences 0   our time 1567 ms   model 15463 bytes
+FACTUR-X-EXTENDED    documents  1181   xerces valid  791   verdict mismatches 0   identical verdicts+codes  1181   code-only differences 0   our time 1593 ms   model 21678 bytes
+
+Factur-X XSD vs Xerces: 5905 document×profile verdicts, 5905 identical verdicts, 0 verdict mismatches; error codes identical 5905, code differences 0; our time 3655 ms

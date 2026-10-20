@@ -1,0 +1,9 @@
+# suite        ref-corpus
+# fingerprint  85a3e2aa4dd6506cccb529b438b49e0a3281842a34706035354d6ecc68d7a879
+# git          a6a3ec9b062bf651ab595bfa27d160f0d73db947
+# command      node test/build-corpus.cjs --xr <ext>/xrechnung-schematron --cen <ext>/einvoicing-en16931 --extra <ext>/xrechnung-testsuite/src/test --extra <ext>/validator-configuration-xrechnung/src/test --peppol <ext>/peppol-bis-invoice-3 --zugferd <ext>/zugferd-corpus
+# exit code    0
+# duration     11768 ms
+# date         2026-10-20T07:15:45.456Z
+ZUGFeRD corpus: 151 PDFs read, 1 without extractable invoice XML, skipped (> 5 MB): PEPPOL/Valid/Qvalia/Large_Invoice_sample1.xml, PEPPOL/Valid/Qvalia/Large_Invoice_sample2.xml
+corpus written to /home/claude/erechnung-pruefer/build/corpus: {"xr-ubl":1050,"xr-cii":581,"cen-ubl":1131,"cen-cii":9,"extra-ubl":68,"extra-cii":73,"peppol-ubl":698,"peppol-cii":351,"zugferd-cii":167,"zugferd-ubl":30}

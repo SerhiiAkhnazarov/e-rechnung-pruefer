@@ -1,0 +1,41 @@
+# suite        xml-encoding
+# fingerprint  85a3e2aa4dd6506cccb529b438b49e0a3281842a34706035354d6ecc68d7a879
+# git          a6a3ec9b062bf651ab595bfa27d160f0d73db947
+# command      node test/run-encoding-tests.cjs
+# exit code    0
+# duration     1277 ms
+# date         2026-10-20T07:32:20.524Z
+XML encoding detection (src/xml-encoding.js) vs JDK XML parser (Xerces)
+  ok    utf8-nodecl                xerces=ok UTF-8  ours=ok UTF-8   (UTF-8, no declaration)
+  ok    utf8-decl-noenc            xerces=ok UTF-8  ours=ok UTF-8   (UTF-8, declaration without encoding)
+  ok    utf8-decl-utf8             xerces=ok UTF-8  ours=ok UTF-8   (UTF-8 declared)
+  ok    utf8-decl-lower            xerces=ok UTF-8  ours=ok UTF-8   (utf-8 declared (lower case))
+  ok    utf8-bom                   xerces=ok UTF-8  ours=ok UTF-8   (UTF-8 BOM + declaration)
+  ok    utf8-bom-nodecl            xerces=ok UTF-8  ours=ok UTF-8   (UTF-8 BOM, no declaration)
+  spec  utf8-bom-decl-latin1       xerces=ok (lenient)  ours=fatal XML-ENC-MISMATCH   (UTF-8 BOM but ISO-8859-1 declared) — XML 1.0 §4.3.3: "it is a fatal error for an entity including an encoding declaration to be presented to the XML processor in an encoding other than that named in the declaration" — the UTF-8 BOM presents the entity in UTF-8
+  ok    latin1-decl                xerces=ok UTF-8  ours=ok ISO-8859-1   (ISO-8859-1 declared and used)
+  ok    latin15-decl               xerces=ok UTF-8  ours=ok ISO-8859-15   (ISO-8859-15 (euro sign 0xA4))
+  ok    cp1252-decl                xerces=ok UTF-8  ours=ok WINDOWS-1252   (windows-1252 declared and used)
+  ok    latin1-undeclared          xerces=fatal  ours=fatal XML-ENC-INVALID-BYTES   (ISO-8859-1 bytes without declaration (= UTF-8 → illegal bytes))
+  ok    latin1-declared-utf8       xerces=fatal  ours=fatal XML-ENC-INVALID-BYTES   (ISO-8859-1 bytes declared as UTF-8)
+  ok    utf8-declared-latin1       xerces=ok UTF-8  ours=ok ISO-8859-1   (UTF-8 bytes declared as ISO-8859-1 (mojibake, but legal))
+  ok    utf16le-bom                xerces=ok UTF-16LE  ours=ok UTF-16LE   (UTF-16LE with BOM)
+  ok    utf16be-bom                xerces=ok UTF-16BE  ours=ok UTF-16BE   (UTF-16BE with BOM)
+  ok    utf16le-bom-nodecl         xerces=ok UTF-16LE  ours=ok UTF-16LE   (UTF-16LE BOM, no declaration)
+  spec  utf16le-nobom              xerces=ok (lenient)  ours=fatal XML-ENC-UTF16-NOBOM   (UTF-16LE without BOM) — XML 1.0 §4.3.3: "Entities encoded in UTF-16 MUST and entities encoded in UTF-8 MAY begin with the Byte Order Mark"
+  spec  utf16be-nobom              xerces=ok (lenient)  ours=fatal XML-ENC-UTF16-NOBOM   (UTF-16BE without BOM) — XML 1.0 §4.3.3: "Entities encoded in UTF-16 MUST and entities encoded in UTF-8 MAY begin with the Byte Order Mark"
+  ok    utf16le-bom-decl-utf8      xerces=fatal  ours=fatal XML-ENC-MISMATCH   (UTF-16LE BOM but UTF-8 declared)
+  ok    utf8-decl-utf16            xerces=fatal  ours=fatal XML-ENC-MISMATCH   (UTF-8 bytes declared as UTF-16)
+  ok    utf8-truncated-seq         xerces=fatal  ours=fatal XML-ENC-INVALID-BYTES   (truncated 2-byte sequence)
+  ok    utf8-overlong              xerces=fatal  ours=fatal XML-ENC-INVALID-BYTES   (overlong encoding)
+  ok    utf8-surrogate             xerces=fatal  ours=fatal XML-ENC-INVALID-BYTES   (encoded surrogate)
+  ok    utf8-4byte                 xerces=ok UTF-8  ours=ok UTF-8   (supplementary characters)
+  ok    ascii-decl                 xerces=ok UTF-8  ours=ok US-ASCII   (US-ASCII declared, ASCII bytes)
+  ok    unknown-enc                xerces=fatal  ours=fatal XML-ENC-UNSUPPORTED   (unknown encoding name)
+  ok    ucs4                       xerces=fatal  ours=fatal XML-ENC-UNSUPPORTED   (UCS-4 BOM)
+  ok    ascii-decl-nonascii        xerces=fatal  ours=fatal XML-ENC-INVALID-BYTES   (US-ASCII declared, byte 0xFC)
+  ok    cp1252-undefined-81        xerces=ok UTF-8  ours=ok WINDOWS-1252   (windows-1252 undefined byte 0x81)
+  ok    latin1-c1                  xerces=ok UTF-8  ours=ok ISO-8859-1   (ISO-8859-1 bytes 0x80/0x96 (C1 controls, not windows-1252))
+  ok    utf8-decl-single-quotes    xerces=ok UTF-8  ours=ok UTF-8   (single-quoted declaration)
+
+XML encoding tests: 31 cases, 28 identical verdicts and text, 3 fatal as required by XML 1.0 §4.3.3 where the JDK parser is lenient, 0 different

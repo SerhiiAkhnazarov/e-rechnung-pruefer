@@ -1,0 +1,60 @@
+# suite        xsd-vs-xerces
+# fingerprint  85a3e2aa4dd6506cccb529b438b49e0a3281842a34706035354d6ecc68d7a879
+# git          a6a3ec9b062bf651ab595bfa27d160f0d73db947
+# command      node test/run-xsd-tests.cjs
+# exit code    0
+# duration     30300 ms
+# date         2026-10-20T07:32:19.246Z
+XSD validation: src/xsd-validator.js vs JDK Xerces (javax.xml.validation) — verdict and error-code comparison
+date: 2026-10-20T07:31:49.006Z
+
+cen-cii          documents     9   xerces valid     0   invalid     9   identical verdicts+codes     9   mismatches   0   our time     15 ms
+cen-ubl          documents  1131   xerces valid     0   invalid  1131   identical verdicts+codes  1131   mismatches   0   our time     61 ms
+extra-cii        documents    73   xerces valid    73   invalid     0   identical verdicts+codes    73   mismatches   0   our time    386 ms
+extra-ubl        documents    68   xerces valid    67   invalid     1   identical verdicts+codes    68   mismatches   0   our time    294 ms
+xr-cii           documents   581   xerces valid   568   invalid    13   identical verdicts+codes   581   mismatches   0   our time    212 ms
+xr-ubl           documents  1050   xerces valid   976   invalid    74   identical verdicts+codes  1050   mismatches   0   our time    289 ms
+xsd-mutations    documents  3607   xerces valid   973   invalid  2634   identical verdicts+codes  3607   mismatches   0   our time   5561 ms
+zugferd          documents    89   xerces valid    74   invalid    15   identical verdicts+codes    89   mismatches   0   our time   3044 ms
+
+TOTAL            documents  6608   xerces valid  2731   invalid  3876   identical verdicts+codes  6608   mismatches   0   our time   9862 ms
+error-code multisets identical to Xerces: 6608 of 6608 documents
+documents slimdom could not parse: 1
+model load time (parse JSON + create): CII-D16B 3 ms, UBL-CreditNote-2.1 4 ms, UBL-Invoice-2.1 9 ms
+
+MODELS (build/xsd)
+  UBL-Invoice-2.1.json: 218298 bytes, 1222 types, 1621 global elements, roots UBL-Invoice-2.1.xsd
+      3a5aacd823f0e5b8f25ae7b5191c2002d5333ba351d87de9371ed62dca2b2b0c  UBL-Invoice-2.1.xsd (8948 bytes)
+      580b5af6f68f7f556bd15945ba0e819cbf561442c81694f9b9468036ebedec4d  ../common/UBL-CommonAggregateComponents-2.1.xsd (256745 bytes)
+      a3b349bf92e5cff26e303d2f05b7e00c884dcafcfd9e12755fb80289abf5e22e  ../common/UBL-CommonBasicComponents-2.1.xsd (219704 bytes)
+      7dcb156e610239c97ae70940cf4653b88e48c3595bf5f56a2204a32e2893e6cf  ../common/UBL-QualifiedDataTypes-2.1.xsd (3590 bytes)
+      09052d406b4293e2a5f9c2bfee6df10ad4d8d5f0b36e24a6349d7f7936d89eb6  ../common/UBL-UnqualifiedDataTypes-2.1.xsd (27300 bytes)
+      dd546e4809df86b6445589f69f0d6c9df162840ae386574ddfc1da7638103e15  ../common/CCTS_CCT_SchemaModule-2.1.xsd (45268 bytes)
+      ad7a4e490978adfbcfc5ec0bb20941cf11ac960ccf0c4de8791a7c731a8dbe87  ../common/UBL-CommonExtensionComponents-2.1.xsd (9491 bytes)
+      fcee77a11870208e6377ea6311b9f2a050bca24bdad8606ea02d71e9f9e72f8d  ../common/UBL-ExtensionContentDataType-2.1.xsd (4314 bytes)
+      4fa9e2370100040fe14c43e135ef77e2eb66b21cb8dbfc2ffb8d82ae991fe92e  ../common/UBL-CommonSignatureComponents-2.1.xsd (3824 bytes)
+      9234c2ca48dbfa9a22a786112bb075c5922a305170920eaab1e3c04fa0b7344b  ../common/UBL-SignatureAggregateComponents-2.1.xsd (5059 bytes)
+      0fbe2d7afff0c1e11164b8ec83e13f18801021c3c87e390a9d76f9cf862f6a64  ../common/UBL-SignatureBasicComponents-2.1.xsd (4016 bytes)
+      101909c9f06456d61ddcc4fb982f1d40dc357b439f393b1a2eb46e42acd60809  ../common/UBL-xmldsig-core-schema-2.1.xsd (10750 bytes)
+      a4f726bcf8cc3f7d9ffa4dab99e005535a8e8b60dced1e5d94578d2e05afa96e  ../common/UBL-XAdESv132-2.1.xsd (21664 bytes)
+      1fa4625e9cefcb7a9abb5ac1b64315547450031eece8a55bd584e4ba4b79dbc1  ../common/UBL-XAdESv141-2.1.xsd (1316 bytes)
+  UBL-CreditNote-2.1.json: 218242 bytes, 1222 types, 1621 global elements, roots UBL-CreditNote-2.1.xsd
+      1e117b6c1ab713604b29b0d685442a81a0c78a82575445ee8c43e6050cda7454  UBL-CreditNote-2.1.xsd (8738 bytes)
+      580b5af6f68f7f556bd15945ba0e819cbf561442c81694f9b9468036ebedec4d  ../common/UBL-CommonAggregateComponents-2.1.xsd (256745 bytes)
+      a3b349bf92e5cff26e303d2f05b7e00c884dcafcfd9e12755fb80289abf5e22e  ../common/UBL-CommonBasicComponents-2.1.xsd (219704 bytes)
+      7dcb156e610239c97ae70940cf4653b88e48c3595bf5f56a2204a32e2893e6cf  ../common/UBL-QualifiedDataTypes-2.1.xsd (3590 bytes)
+      09052d406b4293e2a5f9c2bfee6df10ad4d8d5f0b36e24a6349d7f7936d89eb6  ../common/UBL-UnqualifiedDataTypes-2.1.xsd (27300 bytes)
+      dd546e4809df86b6445589f69f0d6c9df162840ae386574ddfc1da7638103e15  ../common/CCTS_CCT_SchemaModule-2.1.xsd (45268 bytes)
+      ad7a4e490978adfbcfc5ec0bb20941cf11ac960ccf0c4de8791a7c731a8dbe87  ../common/UBL-CommonExtensionComponents-2.1.xsd (9491 bytes)
+      fcee77a11870208e6377ea6311b9f2a050bca24bdad8606ea02d71e9f9e72f8d  ../common/UBL-ExtensionContentDataType-2.1.xsd (4314 bytes)
+      4fa9e2370100040fe14c43e135ef77e2eb66b21cb8dbfc2ffb8d82ae991fe92e  ../common/UBL-CommonSignatureComponents-2.1.xsd (3824 bytes)
+      9234c2ca48dbfa9a22a786112bb075c5922a305170920eaab1e3c04fa0b7344b  ../common/UBL-SignatureAggregateComponents-2.1.xsd (5059 bytes)
+      0fbe2d7afff0c1e11164b8ec83e13f18801021c3c87e390a9d76f9cf862f6a64  ../common/UBL-SignatureBasicComponents-2.1.xsd (4016 bytes)
+      101909c9f06456d61ddcc4fb982f1d40dc357b439f393b1a2eb46e42acd60809  ../common/UBL-xmldsig-core-schema-2.1.xsd (10750 bytes)
+      a4f726bcf8cc3f7d9ffa4dab99e005535a8e8b60dced1e5d94578d2e05afa96e  ../common/UBL-XAdESv132-2.1.xsd (21664 bytes)
+      1fa4625e9cefcb7a9abb5ac1b64315547450031eece8a55bd584e4ba4b79dbc1  ../common/UBL-XAdESv141-2.1.xsd (1316 bytes)
+  CII-D16B.json: 64647 bytes, 250 types, 1 global elements, roots CrossIndustryInvoice_100pD16B.xsd
+      b9798aafcba039d0630f0015ffae5092a1758bf924d19d97b6bf0bf9d95f22a0  CrossIndustryInvoice_100pD16B.xsd (3050 bytes)
+      a39e0662c31fbdca22237118d6b6bbfa16f69efbd1ee5b23787366349c5b924d  CrossIndustryInvoice_QualifiedDataType_100pD16B.xsd (36024 bytes)
+      5d4ce8a6445caa4b7691f6fba6ad08e312e6a853cd3a422666d121ee2d13ef8c  CrossIndustryInvoice_UnqualifiedDataType_100pD16B.xsd (6807 bytes)
+      cc682d67791ffe16c45320619ff089a1c8f3ad22691fc426e4056f2e67909fe0  CrossIndustryInvoice_ReusableAggregateBusinessInformationEntity_100pD16B.xsd (98061 bytes)

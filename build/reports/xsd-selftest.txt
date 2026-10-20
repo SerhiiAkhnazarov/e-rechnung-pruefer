@@ -1,0 +1,14 @@
+# suite        xsd-selftest
+# fingerprint  85a3e2aa4dd6506cccb529b438b49e0a3281842a34706035354d6ecc68d7a879
+# git          a6a3ec9b062bf651ab595bfa27d160f0d73db947
+# command      node test/xsd-selftest.cjs
+# exit code    0
+# duration     2305 ms
+# date         2026-10-20T07:32:22.830Z
+compile-xsd: features.xsd -> /home/claude/erechnung-pruefer/build/oracle/xsd-selftest/features-model.json
+  documents: 3, namespaces: 2, global elements: 6, global attributes: 1, types: 25 (named 15, anonymous 10 after de-duplication)
+  particles: elements 50, groups 11, wildcards 1, substitution groups: 1, bytes: 4679
+  verified: 8 content models compiled to deterministic automata (69 states, 973 transitions), all types resolved
+XSD feature self-test (test/xsd-selftest/features.xsd) vs Xerces
+instances 255   identical verdicts+codes 255   mismatches 0   (expectation notes: 0)
+oracle: files: 255  valid: 119  invalid: 136  validation time: 418 ms

@@ -1,0 +1,145 @@
+# verify.yml — complete, independent verification of the E-Rechnung Prüfer on GitHub Actions.
+#
+# Every source is fetched by tools/fetch-sources.cjs at the commits / SHA-256 recorded in
+# build/STANDARDS_MANIFEST.json (single source of truth, the same script as in local runs).
+#
+# Job "verify": the whole pipeline tools/verify-all.cjs — reference results regenerated from the pinned
+#   sources (Saxon HE 12.8, JDK 21 Xerces), reproducibility of every shipped artefact (engine bundles,
+#   rule sets, XSD models, scenarios), all test suites, the OFFICIAL KoSIT validator 1.6.3 with the
+#   released XRechnung configuration, and the browser tests in Chromium, WebKit and Firefox. The
+#   release gate tools/verify-manifest.cjs --reports --strict requires every suite to have run and
+#   passed with the fingerprint of the current inputs.
+# Job "kosit-jar-maven": the KoSIT validator JAR used above (GitHub release asset) must be byte-identical
+#   to the copy on Maven Central (org.kosit:validator:1.6.3:standalone, checked with the repository .sha1).
+# Job "pdfa-verapdf": full PDF/A-3 validation of the ZUGFeRD corpus with veraPDF 1.30.3 (library
+#   org.verapdf:validation-model-jakarta from Maven Central via tools/verapdf/VeraMrr.java, strict
+#   checksums; = the veraPDF version of Mustangproject), compared with the container checks
+#   (src/pdfa3-checks.js). Procedure and rule mapping: docs/PDFA3-CHECKS.md.
+name: verify
+on:
+  push:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 240
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Test tools (exact versions of the development environment)
+        run: |
+          npm install --no-save --no-audit --no-fund playwright@1.56.0 pdfjs-dist@6.2.108 esbuild@0.28.2
+          npx playwright install --with-deps chromium webkit firefox
+      - name: Fetch all pinned sources and release artefacts (SHA-256 checked)
+        run: node tools/fetch-sources.cjs ext
+      - name: KoSIT merge step (XRechnung + whitelisted Peppol rules) and rule compilation
+        run: |
+          set -e
+          sh tools/merge-xrechnung-sch.sh ext
+          sh tools/compile-rules.sh ext
+          git diff --exit-code --stat -- build/schemas   # shipped rule sets reproduced byte-identically
+      - name: Build the standalone page
+        run: node tools/build-standalone.cjs --version "${GITHUB_REF_NAME}"
+      - name: Full verification (references, reproducibility, all suites, official KoSIT validator, 3 browsers)
+        env:
+          ESBUILD_BINARY: ${{ github.workspace }}/node_modules/.bin/esbuild
+        run: node tools/verify-all.cjs --ext ext --skip pdfa-verapdf
+      - name: Release gate (every suite run and passed with the current fingerprint)
+        run: node tools/verify-manifest.cjs ext --reports --strict
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: verification
+          path: |
+            build/reports/
+            build/kosit-official/compare.txt
+            build/kosit-reference/compare.txt
+            build/shots/
+            ext/DOWNLOADS.txt
+            dist/
+
+  kosit-jar-maven:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: GitHub release asset vs. Maven Central
+        run: |
+          set -e
+          node tools/fetch-sources.cjs ext --only kosit-official
+          curl -sSfL -o maven.jar https://repo1.maven.org/maven2/org/kosit/validator/1.6.3/validator-1.6.3-standalone.jar
+          curl -sSfL -o maven.jar.sha1 https://repo1.maven.org/maven2/org/kosit/validator/1.6.3/validator-1.6.3-standalone.jar.sha1
+          echo "$(cut -c1-40 maven.jar.sha1)  maven.jar" | sha1sum -c -
+          cmp maven.jar ext/kosit-official/validator-1.6.3-standalone.jar
+          sha256sum maven.jar ext/kosit-official/validator-1.6.3-standalone.jar
+
+  pdfa-verapdf:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    env:
+      VERAPDF_VERSION: '1.30.3'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Fetch the pinned ZUGFeRD corpus and Mustangproject
+        run: node tools/fetch-sources.cjs ext --only zugferd-corpus,mustangproject
+      - name: Resolve veraPDF ${{ env.VERAPDF_VERSION }} (validation-model-jakarta, as used by Mustangproject) and build the runner
+        # tools/verapdf/pom.xml: org.verapdf:validation-model-jakarta:${VERAPDF_VERSION}; mvn -C fails on any checksum mismatch.
+        run: |
+          set -e
+          mvn -B -q -C -f tools/verapdf/pom.xml -Dverapdf.version=${VERAPDF_VERSION} \
+            org.apache.maven.plugins:maven-dependency-plugin:3.8.1:copy-dependencies \
+            -DoutputDirectory="$PWD/verapdf/lib" -DincludeScope=runtime
+          JAR=verapdf/lib/validation-model-jakarta-${VERAPDF_VERSION}.jar
+          curl -sSfL -o "$JAR.sha1" "https://repo1.maven.org/maven2/org/verapdf/validation-model-jakarta/${VERAPDF_VERSION}/validation-model-jakarta-${VERAPDF_VERSION}.jar.sha1"
+          echo "$(cut -c1-40 "$JAR.sha1")  $JAR" | sha1sum -c -
+          mkdir -p build/reports verapdf/classes
+          (cd verapdf/lib && sha256sum *.jar) > build/reports/verapdf-artifacts.txt
+          javac -d verapdf/classes -cp "verapdf/lib/*" tools/verapdf/VeraMrr.java
+          printf '#!/bin/sh\nexec java -Xmx3g -cp "%s/lib/*:%s/classes" VeraMrr "$@"\n' "$PWD/verapdf" "$PWD/verapdf" > verapdf/vera-mrr
+          chmod +x verapdf/vera-mrr
+      - name: Container checks over the corpus (writes build/pdfa3-results.json) and flavour lists
+        run: |
+          set -e
+          node tools/verify-all.cjs --ext ext --only pdfa3-container-checks,verapdf-compare-selftest
+          node test/compare-verapdf.cjs --flavour-lists build/verapdf --ours build/pdfa3-results.json --root ext/zugferd-corpus
+      - name: veraPDF over the corpus (3b = all PDFs; 3u / 3a = PDFs whose XMP claims it), MRR + text
+        run: |
+          set -e
+          for fl in 3b 3u 3a; do
+            mapfile -d '' files < build/verapdf/$fl.list
+            if [ ${#files[@]} -eq 0 ]; then echo "$fl: no PDFs"; continue; fi
+            rc=0; verapdf/vera-mrr $fl build/verapdf/mrr-$fl.xml "${files[@]}" > build/verapdf/text-$fl.txt 2> build/verapdf/mrr-$fl.log || rc=$?
+            echo "veraPDF $fl: ${#files[@]} PDFs, exit code $rc"
+            grep -q '</report>' build/verapdf/mrr-$fl.xml || { echo "no complete MRR for $fl"; tail -n 30 build/verapdf/mrr-$fl.log; exit 1; }
+          done
+          {
+            echo "# veraPDF ${VERAPDF_VERSION} (org.verapdf:validation-model-jakarta via tools/verapdf/VeraMrr.java, Maven Central) over the pinned ZUGFeRD corpus"
+            echo "# artefacts: build/reports/verapdf-artifacts.txt; commit ${GITHUB_SHA}; $(date -u +%FT%TZ)"
+            for fl in 3b 3u 3a; do [ -f build/verapdf/text-$fl.txt ] || continue; echo; echo "## --flavour $fl"; cat build/verapdf/text-$fl.txt; done
+          } > build/reports/verapdf.txt
+          grep -c -E '^PASS' build/reports/verapdf.txt || true
+      - name: Compare veraPDF with the container checks (overlapping rules)
+        run: node tools/verify-all.cjs --ext ext --only pdfa-verapdf
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pdfa-verapdf
+          path: |
+            build/reports/
+            build/pdfa3-results.json
+            build/verapdf/

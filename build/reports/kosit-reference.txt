@@ -1,0 +1,48 @@
+# suite        kosit-reference
+# fingerprint  85a3e2aa4dd6506cccb529b438b49e0a3281842a34706035354d6ecc68d7a879
+# git          a6a3ec9b062bf651ab595bfa27d160f0d73db947
+# command      node test/kosit-reference/verify.cjs
+# exit code    0
+# duration     325608 ms
+# date         2026-10-20T07:38:28.416Z
+configuration self-tests: Assertions run: 229, Assertions failed: 0 | Assertions run: 55, Assertions failed: 0 | Assertions run: 41, Assertions failed: 0 | test-processing-error: 12 checks, 0 failed
+KoSIT parity — varl reports vs tools/pruefer-cli.cjs
+reports: 4158 in /home/claude/erechnung-pruefer/build/kosit-reference/reports; JSON: 4158 in /home/claude/erechnung-pruefer/build/kosit-reference/pruefer; paired: 4158; JSON without report: 0
+
+per directory:
+  cen-cii: 9 documents, 9 without KoSIT scenario, 0 schema-invalid, 0 with mismatches
+  cen-ubl: 1131 documents, 1131 without KoSIT scenario, 0 schema-invalid, 0 with mismatches
+  extra-cii: 73 documents, 1 without KoSIT scenario, 0 schema-invalid, 0 with mismatches
+  extra-ubl: 68 documents, 7 without KoSIT scenario, 0 schema-invalid, 0 with mismatches
+  peppol-cii: 351 documents, 351 without KoSIT scenario, 0 schema-invalid, 0 with mismatches
+  peppol-ubl: 698 documents, 693 without KoSIT scenario, 0 schema-invalid, 0 with mismatches
+  xr-cii: 581 documents, 0 without KoSIT scenario, 13 schema-invalid, 0 with mismatches
+  xr-ubl: 1050 documents, 2 without KoSIT scenario, 74 schema-invalid, 0 with mismatches
+  zugferd-cii: 167 documents, 50 without KoSIT scenario, 2 schema-invalid, 0 with mismatches
+  zugferd-ubl: 30 documents, 23 without KoSIT scenario, 0 schema-invalid, 0 with mismatches
+
+KoSIT scenarios matched:
+   2267  (no scenario)
+    590  EN16931 XRechnung (CII)
+    526  EN16931 XRechnung (UBL Invoice)
+    417  EN16931 XRechnung (UBL CreditNote)
+    120  EN16931 XRechnung Extension (UBL Invoice)
+    111  EN16931 (CII)
+     38  EN16931 XRechnung Extension (CII)
+     31  EN16931 XRechnung CVD (CII)
+     29  EN16931 XRechnung CVD (UBL Invoice)
+     27  EN16931 XRechnung CVD (UBL CreditNote)
+      1  EN16931 (UBL CreditNote)
+      1  EN16931 (UBL Invoice)
+
+comparable fields:
+  scenario:    4158 identical, 0 different (of 4158)
+  xsd verdict: 1891 identical, 0 different (of 1891 with matched scenario)
+  xsd errors:  89 identical code sequences, 0 different (of 89 schema-invalid documents)
+  messages:    1802 identical multisets, 0 different (of 1802 schema-valid documents with Schematron; code | level after customLevel | location)
+  configuration verdict (accept under a KoSIT scenario, all documents): 4158 identical, 0 different
+  assessment:  1891 identical, 0 different (of 1891 with matched scenario); 2267 not comparable (no scenario: KoSIT fallback reject vs informative check)
+  processing errors: 0 on both sides, 0 on one side only
+
+MISMATCHES: 0 document(s)
+kosit reference (fresh run): 326 s

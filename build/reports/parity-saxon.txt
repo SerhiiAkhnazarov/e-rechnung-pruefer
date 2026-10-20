@@ -1,0 +1,66 @@
+# suite        parity-saxon
+# fingerprint  85a3e2aa4dd6506cccb529b438b49e0a3281842a34706035354d6ecc68d7a879
+# git          a6a3ec9b062bf651ab595bfa27d160f0d73db947
+# command      node test/compare-oracle.cjs
+# exit code    0
+# duration     374938 ms
+# date         2026-10-20T07:30:12.815Z
+
+Parity summary (documents × schema):
+  cen-cii × EN16931-CII        docs=    9 identical=    9 both-dynamic-error=  0 known-deviation= 0 MISMATCH=0 oracle-error-only=0 ours-error-only=0
+  cen-cii × FACTUR-X-BASIC     docs=    9 identical=    9 both-dynamic-error=  0 known-deviation= 0 MISMATCH=0 oracle-error-only=0 ours-error-only=0
+  cen-cii × FACTUR-X-BASIC-WL  docs=    9 identical=    9 both-dynamic-error=  0 known-deviation= 0 MISMATCH=0 oracle-error-only=0 ours-error-only=0
+  cen-cii × FACTUR-X-EN16931   docs=    9 identical=    9 both-dynamic-error=  0 known-deviation= 0 MISMATCH=0 oracle-error-only=0 ours-error-only=0
+  cen-cii × FACTUR-X-EXTENDED  docs=    9 identical=    8 both-dynamic-error=  1 known-deviation= 0 MISMATCH=0 oracle-error-only=0 ours-error-only=0
+  cen-cii × FACTUR-X-MINIMUM   docs=    9 identical=    9 both-dynamic-error=  0 known-deviation= 0 MISMATCH=0 oracle-error-only=0 ours-error-only=0
+  cen-cii × PEPPOL-CII         docs=    9 identical=    9 both-dynamic-error=  0 known-deviation= 0 MISMATCH=0 oracle-error-only=0 ours-error-only=0
+  cen-cii × XRechnung-CII      docs=    9 identical=    9 both-dynamic-error=  0 known-deviation= 0 MISMATCH=0 oracle-error-only=0 ours-error-only=0
+  cen-ubl × EN16931-UBL        docs= 1131 identical= 1131 both-dynamic-error=  0 known-deviation= 0 MISMATCH=0 oracle-error-only=0 ours-error-only=0
+  cen-ubl × PEPPOL-UBL         docs= 1131 identical= 1129 both-dynamic-error=  2 known-deviation= 0 MISMATCH=0 oracle-error-only=0 ours-error-only=0
+  cen-ubl × XRechnung-UBL      docs= 1131 identical= 1129 both-dynamic-error=  2 known-deviation= 0 MISMATCH=0 oracle-error-only=0 ours-error-only=0
+  extra-cii × EN16931-CII      docs=   73 identical=   73 both-dynamic-error=  0 known-deviation= 0 MISMATCH=0 oracle-error-only=0 ours-error-only=0
+  extra-cii × FACTUR-X-BASIC   docs=   73 identical=   73 both-dynamic-error=  0 known-deviation= 0 MISMATCH=0 oracle-error-only=0 ours-error-only=0
+  extra-cii × FACTUR-X-BASIC-WL docs=   73 identical=   73 both-dynamic-error=  0 known-deviation= 0 MISMATCH=0 oracle-error-only=0 ours-error-only=0
+  extra-cii × FACTUR-X-EN16931 docs=   73 identical=   73 both-dynamic-error=  0 known-deviation= 0 MISMATCH=0 oracle-error-only=0 ours-error-only=0
+  extra-cii × FACTUR-X-EXTENDED docs=   73 identical=   73 both-dynamic-error=  0 known-deviation= 0 MISMATCH=0 oracle-error-only=0 ours-error-only=0
+  extra-cii × FACTUR-X-MINIMUM docs=   73 identical=   73 both-dynamic-error=  0 known-deviation= 0 MISMATCH=0 oracle-error-only=0 ours-error-only=0
+  extra-cii × PEPPOL-CII       docs=   73 identical=   73 both-dynamic-error=  0 known-deviation= 0 MISMATCH=0 oracle-error-only=0 ours-error-only=0
+  extra-cii × XRechnung-CII    docs=   73 identical=   73 both-dynamic-error=  0 known-deviation= 0 MISMATCH=0 oracle-error-only=0 ours-error-only=0
+  extra-ubl × EN16931-UBL      docs=   68 identical=   68 both-dynamic-error=  0 known-deviation= 0 MISMATCH=0 oracle-error-only=0 ours-error-only=0
+  extra-ubl × PEPPOL-UBL       docs=   68 identical=   68 both-dynamic-error=  0 known-deviation= 0 MISMATCH=0 oracle-error-only=0 ours-error-only=0
+  extra-ubl × XRechnung-UBL    docs=   68 identical=   68 both-dynamic-error=  0 known-deviation= 0 MISMATCH=0 oracle-error-only=0 ours-error-only=0
+  peppol-cii × EN16931-CII     docs=  351 identical=  349 both-dynamic-error=  2 known-deviation= 0 MISMATCH=0 oracle-error-only=0 ours-error-only=0
+  peppol-cii × FACTUR-X-BASIC  docs=  351 identical=  350 both-dynamic-error=  1 known-deviation= 0 MISMATCH=0 oracle-error-only=0 ours-error-only=0
+  peppol-cii × FACTUR-X-BASIC-WL docs=  351 identical=  350 both-dynamic-error=  1 known-deviation= 0 MISMATCH=0 oracle-error-only=0 ours-error-only=0
+  peppol-cii × FACTUR-X-EN16931 docs=  351 identical=  350 both-dynamic-error=  1 known-deviation= 0 MISMATCH=0 oracle-error-only=0 ours-error-only=0
+  peppol-cii × FACTUR-X-EXTENDED docs=  351 identical=  350 both-dynamic-error=  1 known-deviation= 0 MISMATCH=0 oracle-error-only=0 ours-error-only=0
+  peppol-cii × FACTUR-X-MINIMUM docs=  351 identical=  350 both-dynamic-error=  1 known-deviation= 0 MISMATCH=0 oracle-error-only=0 ours-error-only=0
+  peppol-cii × PEPPOL-CII      docs=  351 identical=  351 both-dynamic-error=  0 known-deviation= 0 MISMATCH=0 oracle-error-only=0 ours-error-only=0
+  peppol-cii × XRechnung-CII   docs=  351 identical=  351 both-dynamic-error=  0 known-deviation= 0 MISMATCH=0 oracle-error-only=0 ours-error-only=0
+  peppol-ubl × EN16931-UBL     docs=  698 identical=  698 both-dynamic-error=  0 known-deviation= 0 MISMATCH=0 oracle-error-only=0 ours-error-only=0
+  peppol-ubl × PEPPOL-UBL      docs=  698 identical=  698 both-dynamic-error=  0 known-deviation= 0 MISMATCH=0 oracle-error-only=0 ours-error-only=0
+  peppol-ubl × XRechnung-UBL   docs=  698 identical=  698 both-dynamic-error=  0 known-deviation= 0 MISMATCH=0 oracle-error-only=0 ours-error-only=0
+  xr-cii × EN16931-CII         docs=  581 identical=  572 both-dynamic-error=  9 known-deviation= 0 MISMATCH=0 oracle-error-only=0 ours-error-only=0
+  xr-cii × FACTUR-X-BASIC      docs=  581 identical=  576 both-dynamic-error=  5 known-deviation= 0 MISMATCH=0 oracle-error-only=0 ours-error-only=0
+  xr-cii × FACTUR-X-BASIC-WL   docs=  581 identical=  580 both-dynamic-error=  1 known-deviation= 0 MISMATCH=0 oracle-error-only=0 ours-error-only=0
+  xr-cii × FACTUR-X-EN16931    docs=  581 identical=  576 both-dynamic-error=  5 known-deviation= 0 MISMATCH=0 oracle-error-only=0 ours-error-only=0
+  xr-cii × FACTUR-X-EXTENDED   docs=  581 identical=  575 both-dynamic-error=  6 known-deviation= 0 MISMATCH=0 oracle-error-only=0 ours-error-only=0
+  xr-cii × FACTUR-X-MINIMUM    docs=  581 identical=  581 both-dynamic-error=  0 known-deviation= 0 MISMATCH=0 oracle-error-only=0 ours-error-only=0
+  xr-cii × PEPPOL-CII          docs=  581 identical=  581 both-dynamic-error=  0 known-deviation= 0 MISMATCH=0 oracle-error-only=0 ours-error-only=0
+  xr-cii × XRechnung-CII       docs=  581 identical=  581 both-dynamic-error=  0 known-deviation= 0 MISMATCH=0 oracle-error-only=0 ours-error-only=0
+  xr-ubl × EN16931-UBL         docs= 1050 identical= 1034 both-dynamic-error= 16 known-deviation= 0 MISMATCH=0 oracle-error-only=0 ours-error-only=0
+  xr-ubl × PEPPOL-UBL          docs= 1050 identical= 1050 both-dynamic-error=  0 known-deviation= 0 MISMATCH=0 oracle-error-only=0 ours-error-only=0
+  xr-ubl × XRechnung-UBL       docs= 1050 identical= 1050 both-dynamic-error=  0 known-deviation= 0 MISMATCH=0 oracle-error-only=0 ours-error-only=0
+  zugferd-cii × EN16931-CII    docs=  167 identical=  167 both-dynamic-error=  0 known-deviation= 0 MISMATCH=0 oracle-error-only=0 ours-error-only=0
+  zugferd-cii × FACTUR-X-BASIC docs=  167 identical=  167 both-dynamic-error=  0 known-deviation= 0 MISMATCH=0 oracle-error-only=0 ours-error-only=0
+  zugferd-cii × FACTUR-X-BASIC-WL docs=  167 identical=  167 both-dynamic-error=  0 known-deviation= 0 MISMATCH=0 oracle-error-only=0 ours-error-only=0
+  zugferd-cii × FACTUR-X-EN16931 docs=  167 identical=  167 both-dynamic-error=  0 known-deviation= 0 MISMATCH=0 oracle-error-only=0 ours-error-only=0
+  zugferd-cii × FACTUR-X-EXTENDED docs=  167 identical=  167 both-dynamic-error=  0 known-deviation= 0 MISMATCH=0 oracle-error-only=0 ours-error-only=0
+  zugferd-cii × FACTUR-X-MINIMUM docs=  167 identical=  167 both-dynamic-error=  0 known-deviation= 0 MISMATCH=0 oracle-error-only=0 ours-error-only=0
+  zugferd-cii × PEPPOL-CII     docs=  167 identical=  167 both-dynamic-error=  0 known-deviation= 0 MISMATCH=0 oracle-error-only=0 ours-error-only=0
+  zugferd-cii × XRechnung-CII  docs=  167 identical=  162 both-dynamic-error=  5 known-deviation= 0 MISMATCH=0 oracle-error-only=0 ours-error-only=0
+  zugferd-ubl × EN16931-UBL    docs=   30 identical=   30 both-dynamic-error=  0 known-deviation= 0 MISMATCH=0 oracle-error-only=0 ours-error-only=0
+  zugferd-ubl × PEPPOL-UBL     docs=   30 identical=   30 both-dynamic-error=  0 known-deviation= 0 MISMATCH=0 oracle-error-only=0 ours-error-only=0
+  zugferd-ubl × XRechnung-UBL  docs=   30 identical=   30 both-dynamic-error=  0 known-deviation= 0 MISMATCH=0 oracle-error-only=0 ours-error-only=0
+
+18379 document×schema comparisons in 374789 ms; mismatches: 0

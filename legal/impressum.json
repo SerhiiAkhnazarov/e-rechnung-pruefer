@@ -1,0 +1,12 @@
+{
+  "_comment": "Anbieterkennzeichnung für die öffentliche Seite (GitHub Pages). Österreich: § 5 E-Commerce-Gesetz (ECG) und § 25 Mediengesetz (Offenlegung); Deutschland (ausgerichtet auf deutsche Nutzer): § 5 Digitale-Dienste-Gesetz (DDG). Leere Felder werden nicht angezeigt; solange 'name' leer ist, enthält das Programm kein Impressum. Ausfüllen durch den Anbieter (Lizenzgeber) – die Angaben sind seine Entscheidung.",
+  "name": "",
+  "address": "",
+  "email": "",
+  "phone": "",
+  "uid": "",
+  "business": "",
+  "authority": "",
+  "chamber": "",
+  "mediaOwnerPurpose": "Information über die Prüfung elektronischer Rechnungen (XRechnung, ZUGFeRD/Factur-X, EN 16931); kostenloses Prüfwerkzeug."
+}

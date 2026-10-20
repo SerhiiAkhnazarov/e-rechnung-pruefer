@@ -1,0 +1,127 @@
+# suite        pdfa3-container-checks
+# fingerprint  85a3e2aa4dd6506cccb529b438b49e0a3281842a34706035354d6ecc68d7a879
+# git          a6a3ec9b062bf651ab595bfa27d160f0d73db947
+# command      node test/run-pdfa3-tests.cjs <ext>/zugferd-corpus --mustang <ext>/mustangproject --json build/pdfa3-results.json
+# exit code    0
+# duration     18736 ms
+# date         2026-10-20T07:43:25.936Z
+
+Part 1 — ZUGFeRD corpus: 151 PDFs (correct 125, fail 25, other 1)
+worst finding per PDF and check; columns correct | fail | other, each pass/error/warning/info/n.a.
+  PDFA3-HEADER               error   125/  0/  0/  0/  0 |  25/  0/  0/  0/  0 |   1/  0/  0/  0/  0
+  PDFA3-HEADER-BINARY        error   125/  0/  0/  0/  0 |  24/  1/  0/  0/  0 |   1/  0/  0/  0/  0
+  PDFA3-TRAILER-ID           error   125/  0/  0/  0/  0 |  24/  1/  0/  0/  0 |   1/  0/  0/  0/  0
+  PDFA3-ENCRYPT              error   125/  0/  0/  0/  0 |  25/  0/  0/  0/  0 |   1/  0/  0/  0/  0
+  PDFA3-XMP-CATALOG          error   125/  0/  0/  0/  0 |  25/  0/  0/  0/  0 |   1/  0/  0/  0/  0
+  PDFA3-PDFAID-PART          error   125/  0/  0/  0/  0 |  25/  0/  0/  0/  0 |   0/  1/  0/  0/  0
+  PDFA3-PDFAID-CONFORMANCE   error   125/  0/  0/  0/  0 |  25/  0/  0/  0/  0 |   0/  1/  0/  0/  0
+  FX-XMP-NAMESPACE           error   122/  0/  3/  0/  0 |  25/  0/  0/  0/  0 |   0/  1/  0/  0/  0
+  FX-XMP-DOCUMENTTYPE        error   125/  0/  0/  0/  0 |  25/  0/  0/  0/  0 |   0/  0/  0/  0/  1
+  FX-XMP-DOCUMENTFILENAME    error   125/  0/  0/  0/  0 |  24/  1/  0/  0/  0 |   0/  0/  0/  0/  1
+  FX-XMP-VERSION             error   122/  3/  0/  0/  0 |  25/  0/  0/  0/  0 |   0/  0/  0/  0/  1
+  FX-XMP-CONFORMANCELEVEL    error   124/  1/  0/  0/  0 |  24/  1/  0/  0/  0 |   0/  0/  0/  0/  1
+  FX-XMP-EXTENSION-SCHEMA    error   125/  0/  0/  0/  0 |  25/  0/  0/  0/  0 |   0/  0/  0/  0/  1
+  FX-ATTACHMENT-PRESENT      error   125/  0/  0/  0/  0 |  25/  0/  0/  0/  0 |   0/  1/  0/  0/  0
+  FX-ATTACHMENT-UNIQUE       warning 125/  0/  0/  0/  0 |  24/  0/  1/  0/  0 |   0/  0/  0/  0/  1
+  FX-ATTACHMENT-NAME         error   104/  0/  0/ 21/  0 |  21/  1/  0/  3/  0 |   0/  0/  0/  0/  1
+  FX-FILENAME-MATCH          error   125/  0/  0/  0/  0 |  25/  0/  0/  0/  0 |   0/  0/  0/  0/  1
+  FX-LEVEL-PROFILE           error   118/  3/  3/  0/  1 |  22/  1/  1/  0/  1 |   0/  0/  0/  0/  1
+  PDFA3-NAMETREE             error   125/  0/  0/  0/  0 |  25/  0/  0/  0/  0 |   0/  0/  0/  0/  1
+  PDFA3-AF-CATALOG           error   125/  0/  0/  0/  0 |  24/  0/  1/  0/  0 |   0/  0/  0/  0/  1
+  PDFA3-FILESPEC-F-UF        error   125/  0/  0/  0/  0 |  25/  0/  0/  0/  0 |   0/  0/  0/  0/  1
+  PDFA3-AFRELATIONSHIP       error   125/  0/  0/  0/  0 |  25/  0/  0/  0/  0 |   0/  0/  0/  0/  1
+  FX-AFRELATIONSHIP-PROFILE  info     88/  0/  0/ 37/  0 |  13/  0/  0/ 11/  1 |   0/  0/  0/  0/  1
+  PDFA3-DESC                 info    121/  0/  0/  4/  0 |  25/  0/  0/  0/  0 |   0/  0/  0/  0/  1
+  PDFA3-EF-SUBTYPE           error   125/  0/  0/  0/  0 |  24/  0/  1/  0/  0 |   0/  0/  0/  0/  1
+  PDFA3-EF-PARAMS-MODDATE    warning 125/  0/  0/  0/  0 |  25/  0/  0/  0/  0 |   0/  0/  0/  0/  1
+  PDFA3-FULL-VALIDATION      info      0/  0/  0/125/  0 |   0/  0/  0/ 25/  0 |   0/  0/  0/  1/  0
+  error/warning findings per file:
+    ZUGFeRDv1/correct/Mustangproject/MustangGnuaccountingBeispielRE-20140519_499.pdf: warning FX-XMP-NAMESPACE, error FX-XMP-VERSION, error FX-LEVEL-PROFILE
+      — ZUGFeRD 1.0 release-candidate sample (XMP namespace urn:ferd:pdfa:invoice:rc#, zf:Version "RC", XML profile urn:ferd:invoice:rc:comfort, zf:ConformanceLevel BASIC). by the value list of Mustang PDFValidator.java l. 272 (section 16, l. 278-282) "RC" is invalid as well
+    ZUGFeRDv1/correct/Mustangproject/MustangGnuaccountingBeispielRE-20140522_501.pdf: warning FX-XMP-NAMESPACE, error FX-XMP-VERSION, error FX-LEVEL-PROFILE
+      — ZUGFeRD 1.0 release-candidate sample (XMP namespace urn:ferd:pdfa:invoice:rc#, zf:Version "RC", XML profile urn:ferd:invoice:rc:comfort, zf:ConformanceLevel BASIC). by the value list of Mustang PDFValidator.java l. 272 (section 16, l. 278-282) "RC" is invalid as well
+    ZUGFeRDv1/correct/Mustangproject/MustangGnuaccountingBeispielRE-20140703_502.pdf: warning FX-XMP-NAMESPACE, error FX-XMP-VERSION, error FX-LEVEL-PROFILE
+      — ZUGFeRD 1.0 release-candidate sample (XMP namespace urn:ferd:pdfa:invoice:rc#, zf:Version "RC", XML profile urn:ferd:invoice:rc:comfort, zf:ConformanceLevel BASIC). by the value list of Mustang PDFValidator.java l. 272 (section 16, l. 278-282) "RC" is invalid as well
+    ZUGFeRDv1/correct/Mustangproject/MustangGnuaccountingBeispielRE-20170509_505.pdf: error FX-XMP-CONFORMANCELEVEL
+      — XMP has zf:DocumentType, zf:DocumentFileName, zf:Version but no zf:ConformanceLevel (the extension schema declares it); by the code of Mustang PDFValidator.java l. 179-187 this is section 11 (ConformanceLevel not found) as well
+    ZUGFeRDv1/fail/Mustangproject/fail1.pdf: warning FX-LEVEL-PROFILE
+      — XML profile id urn:ferd:CrossIndustryDocument:invoice:1p0:komfort (typo, the artificial error of this file) maps to no profile
+    ZUGFeRDv1/fail/Mustangproject/fail3.pdf: error FX-XMP-CONFORMANCELEVEL
+      — XMP without zf:ConformanceLevel (same XMP as RE-20170509_505)
+    ZUGFeRDv2/correct/symtrax/Beispiele/EN16931/zugferd_2p1_EN16931_Betriebskostenabrechnung_XRechnung_embedded.pdf: warning FX-LEVEL-PROFILE
+      — XRechnung 1.2 (urn:...:xrechnung_1.2) with ConformanceLevel "EN 16931": ZUGFeRD 2.1 predates the level XRECHNUNG of ZUGFeRD 2.1.1 (tolerated, warning)
+    ZUGFeRDv2/correct/symtrax/Beispiele/EN16931/zugferd_2p1_EN16931_Elektron_XRechnung.pdf: warning FX-LEVEL-PROFILE
+      — as above
+    ZUGFeRDv2/correct/symtrax/Beispiele/EN16931/zugferd_2p1_EN16931_Reisekostenabrechnung_XRechnung_embedded.pdf: warning FX-LEVEL-PROFILE
+      — as above
+    ZUGFeRDv2/fail/FX-With-UBL-REC50304330.pdf: error FX-LEVEL-PROFILE, warning PDFA3-EF-SUBTYPE
+      — factur-x.xml contains a UBL Invoice (CustomizationID urn:cen.eu:en16931:2017) — the artificial error of this file; EmbeddedFile /Subtype /application#2Fxml
+    ZUGFeRDv2/fail/MustangRE-20171118_506_ZUGFeRD1and2.pdf: warning FX-ATTACHMENT-UNIQUE
+      — two invoice XMLs: ZUGFeRD-invoice.xml (ZUGFeRD 1.0, object 9) and factur-x.xml (object 8), both /AFRelationship /Alternative, both in /AF [8 0 R 9 0 R]; XMP names factur-x.xml
+    ZUGFeRDv2/fail/Mustangproject/wrongFilename.pdf: error FX-XMP-DOCUMENTFILENAME, error FX-ATTACHMENT-NAME
+      — attachment and fx:DocumentFileName are "factur-y.xml" (the artificial error); Mustang: section 19 (PDFValidator.java l. 253-256) + notice 17, the XML is not extracted (ZUGFeRDInvoiceImporter.java l. 286-298)
+    ZUGFeRDv2/fail/python-factur-x/python-factur-x.pdf: error PDFA3-HEADER-BINARY, error PDFA3-TRAILER-ID, warning PDFA3-AF-CATALOG
+      — PyPDF2 output: "%PDF-1.3\n1 0 obj" (no binary comment), trailer << /Size /Root /Info >> without /ID, catalog /AF [7 0 R] while the name tree lists 5 0 R — two identical /Filespec objects (5 and 7) both with /EF << /F 4 0 R /UF 4 0 R >>
+    unstructured/RE-E-974-Hetzner_2016-01-19_R0005532486.pdf: error PDFA3-PDFAID-PART, error PDFA3-PDFAID-CONFORMANCE, error FX-XMP-NAMESPACE, error FX-ATTACHMENT-PRESENT
+      — ordinary PDF (no PDF/A identification, no Factur-X XMP, no attachment) — not a hybrid invoice
+
+Part 2 — Mustang parity (/home/claude/ext-fresh/mustangproject/validator/src/test/resources)
+  ok invalidXMP.pdf: error FX-LEVEL-PROFILE, error FX-XMP-CONFORMANCELEVEL, warning FX-ATTACHMENT-UNIQUE
+      Mustang: PDFValidatorTest.java l. 163-171: <error type="12">XMP Metadata: ConformanceLevel contains invalid value
+  ok invalidXMP-ParseError.pdf: error PDFA3-XMP-CATALOG, warning FX-ATTACHMENT-UNIQUE
+      Mustang: PDFValidatorTest.java l. 183-191: <error type="28">XMP Metadata: Could not parse XMP metadata (XML invalid)
+  ok attributeBasedXMP_zugferd_2p0_EN16931_Einfach.pdf: no error/warning
+      Mustang: PDFValidatorTest.java l. 173-180: no <error> (attribute-form XMP, issue 18)
+  ok Facture_F20180027.pdf: no error/warning
+      Mustang: PDFValidatorTest.java l. 68-73: PDF summary valid
+  ok validV2PDF.pdf: warning FX-ATTACHMENT-UNIQUE
+      Mustang: PDFValidatorTest.java l. 95-108: PDF valid, no <error> (our only finding is the warning about the second invoice XML ZUGFeRD-invoice.xml)
+  ok XMLinvalidV2PDF.pdf: no error/warning
+      Mustang: PDFValidatorTest.java l. 122-134: PDF part valid (only the XML is invalid)
+  ok validV1WithAdditionalData.pdf: no error/warning
+      Mustang: PDFValidatorTest.java l. 138-149: PDF valid
+  ok zugferd_2p1_EXTENDED_PDFA-3A.pdf: no error/warning
+      Mustang: ZUGFeRDValidatorTest.java l. 143-149: PDF summary valid (PDF/A-3A)
+  ok validAvoir_FR_type380_BASICWL.pdf: no error/warning
+      Mustang: ZUGFeRDValidatorTest.java l. 42-53: overall valid
+  ok validXRechnung.pdf: no error/warning
+      Mustang: ZUGFeRDValidatorTest.java l. 56-60, 322-334: overall valid, count(//error) = 0
+  ok invalidXRechnung.pdf: no error/warning
+      Mustang: ZUGFeRDValidatorTest.java l. 74-78: invalid because of the XML (container not concerned)
+  ok corruptedV2PDF.pdf: error PDFA3-NAMETREE, warning FX-ATTACHMENT-UNIQUE
+      Mustang: ZUGFeRDValidatorTest.java l. 362-366: count(/validation/xml) = 0 — Mustang extracts no XML, because it reads attachments only from /Names /EmbeddedFiles (ZUGFeRDInvoiceImporter.java l. 200-222)
+  ok invalidPDF.pdf: no error/warning
+      Mustang: ZUGFeRDValidatorTest.java l. 16-33: PDF invalid by veraPDF (font rule, comment l. 17-27) — not decidable without a PDF/A validator; container checks find nothing
+  ok (documented deviation) 103767-Invoice-2026-03-24-1.pdf: error PDFA3-AFRELATIONSHIP, warning PDFA3-EF-SUBTYPE
+      Mustang: PDFValidatorTest.java l. 193-200: no <error>. DEVIATION: Mustang's validator does not check /AFRelationship; the file has /AFRelationship /Unspecified and /Subtype /application#2Foctet-stream for factur-x.xml — Unspecified is a legal PDF/A-3 value but not one of Data/Alternative/Source allowed for the invoice (Mustang FileAttachment.java l. 93)
+  ok ORDER-X_EX01_ORDER_FULL_DATA-COMFORT.pdf: error FX-ATTACHMENT-NAME, error FX-XMP-DOCUMENTTYPE, error FX-XMP-NAMESPACE, warning FX-LEVEL-PROFILE
+      Mustang: Order-X document (not an invoice; fx:DocumentType ORDER, namespace urn:factur-x:pdfa:CrossIndustryDocument:1p0#, order-x.xml); used by Mustang for Order-X tests
+
+Part 3 — mutations (same-length edits of corpus PDFs; xref offsets stay valid)
+  ok   PDFA3-HEADER               header %PDF-2.0:                                               151/151 mutated PDFs detected
+  ok   PDFA3-HEADER-BINARY        binary comment -> ASCII:                                       150/150 mutated PDFs detected
+  ok   PDFA3-TRAILER-ID           trailer /ID -> /IX:                                            150/150 mutated PDFs detected
+  ok   PDFA3-XMP-CATALOG          catalog /Metadata -> /Metadatx:                                151/151 mutated PDFs detected
+  ok   PDFA3-PDFAID-PART          pdfaid:part 3 -> 2:                                            150/150 mutated PDFs detected
+  ok   PDFA3-PDFAID-CONFORMANCE   pdfaid:conformance -> X:                                       150/150 mutated PDFs detected
+  ok   FX-XMP-NAMESPACE           fx namespace URI -> urn:factur-y::                             147/147 mutated PDFs detected
+  ok   FX-XMP-DOCUMENTTYPE        DocumentType INVOICE -> INVOICX:                               150/150 mutated PDFs detected
+  ok   FX-XMP-DOCUMENTFILENAME    DocumentFileName -> ...-q.xml:                                 149/149 mutated PDFs detected
+  ok   FX-FILENAME-MATCH          DocumentFileName zugferd-invoice.xml <-> ZUGFeRD-invoice.xml:  56/56 mutated PDFs detected
+  ok   FX-XMP-VERSION             Version -> 9.9:                                                143/143 mutated PDFs detected
+  ok   FX-XMP-CONFORMANCELEVEL    ConformanceLevel -> invalid:                                   148/148 mutated PDFs detected
+  ok   FX-LEVEL-PROFILE           ConformanceLevel EN 16931 <-> EXTENDED:                        97/97 mutated PDFs detected
+  ok   FX-XMP-EXTENSION-SCHEMA    pdfaExtension:schemas -> schemaz:                              150/150 mutated PDFs detected
+  ok   FX-ATTACHMENT-NAME         attachment name factur-x.xml -> factur-y.xml:                  68/68 mutated PDFs detected
+  ok   PDFA3-NAMETREE             catalog /Names /EmbeddedFiles -> /EmbeddedFilez:               150/150 mutated PDFs detected
+  ok   PDFA3-AF-CATALOG           catalog /AF -> /AX:                                            149/149 mutated PDFs detected
+  ok   PDFA3-FILESPEC-F-UF        filespec /UF -> /UX:                                           148/148 mutated PDFs detected
+  ok   PDFA3-AFRELATIONSHIP       filespec /AFRelationship key removed:                          149/149 mutated PDFs detected
+  ok   PDFA3-AFRELATIONSHIP       filespec /AFRelationship /Alternative -> /Unspecified:         85/85 mutated PDFs detected
+  ok   PDFA3-DESC                 filespec /Desc removed:                                        145/145 mutated PDFs detected
+  ok   PDFA3-EF-SUBTYPE           EmbeddedFile /Subtype removed:                                 149/149 mutated PDFs detected
+  ok   PDFA3-EF-SUBTYPE           EmbeddedFile /Subtype text/xml -> text/xmx:                    109/109 mutated PDFs detected
+  ok   PDFA3-EF-PARAMS-MODDATE    EmbeddedFile /Params /ModDate removed:                         150/150 mutated PDFs detected
+  ok   PDFA3-ENCRYPT              trailer /Encrypt inserted:                                     150/150 mutated PDFs detected
+
+PDF/A-3 container checks: 151 corpus PDFs, expectations met (14 PDFs with error/warning findings as expected); Mustang parity 15/15 (1 documented deviation); mutations 3394/3394 detected in 25 mutation types; 0 failures in 18670 ms

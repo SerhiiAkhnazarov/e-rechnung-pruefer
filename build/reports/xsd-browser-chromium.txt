@@ -1,0 +1,10 @@
+# suite        xsd-browser-chromium
+# fingerprint  85a3e2aa4dd6506cccb529b438b49e0a3281842a34706035354d6ecc68d7a879
+# git          a6a3ec9b062bf651ab595bfa27d160f0d73db947
+# command      node test/xsd-browser.cjs --browser chromium
+# exit code    0
+# duration     16841 ms
+# date         2026-10-20T07:32:40.008Z
+xsd-validator in chromium (Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/141.0.7390.37 Safari/537.36)
+documents 1053   identical (verdict + error codes + locations) 1053   differences 0   parse differences 0   browser validation time 1871 ms
+big2000.xml in chromium: DOMParser 81 ms, validate 90 ms (first) / 68 ms (second), valid=true

@@ -1,0 +1,397 @@
+{
+ "source": {
+  "file": "scenarios.xml",
+  "sha256": "2dd336257cf2ff5f756457a594a399969691233f7e2b667f7455f7dbb339aa1c"
+ },
+ "configurationName": "Validator Configuration XRechnung 3.0.2",
+ "properties": {
+  "xrechnung.version": "3.0.2",
+  "xrechnung.spec.id": "urn:cen.eu:en16931:2017#compliant#urn:xeinkauf.de:kosit:xrechnung_3.0",
+  "xrechnung.extension.id": "urn:cen.eu:en16931:2017#compliant#urn:xeinkauf.de:kosit:xrechnung_3.0#conformant#urn:xeinkauf.de:kosit:extension:xrechnung_3.0",
+  "xrechnung.cvd.id": "urn:cen.eu:en16931:2017#compliant#urn:xeinkauf.de:kosit:xrechnung_3.0#compliant#urn:xeinkauf.de:kosit:xrechnung:cvd_0.9",
+  "cen.spec.id": "urn:cen.eu:en16931:2017",
+  "xr.schematron.version.full": "2.6.0",
+  "validator.configuration.version.full": "2026-08-31"
+ },
+ "scenarios": [
+  {
+   "name": "EN16931 XRechnung (UBL Invoice)",
+   "description": "Validates UBL Invoice in version 2.1\n      Uses UBL Invoice 2.1 XML Schema,\n                Schematron rules from EN16931:2017, and XRechnung\n                3.0.2 \n      Download of UBL XML Schema on @build.date@ from\n                https://docs.oasis-open.org/ubl/os-UBL-2.1/UBL-2.1.zip\n      Download of UBL Schematron rules on @build.date@ from\n                https://github.com/ConnectingEurope/eInvoicing-EN16931/releases/download/validation-1.3.16/en16931-ubl-1.3.16.zip\n      Download of XRechnung Schematron rules on @build.date@ from\n                @xrechnung.download.url@",
+   "namespaces": {
+    "cbc": "urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2",
+    "invoice": "urn:oasis:names:specification:ubl:schema:xsd:Invoice-2",
+    "rep": "http://www.xoev.de/de/validator/varl/1"
+   },
+   "match": "exists(/invoice:Invoice/cbc:CustomizationID[ . = 'urn:cen.eu:en16931:2017#compliant#urn:xeinkauf.de:kosit:xrechnung_3.0'])",
+   "xsd": [
+    {
+     "name": "XML Schema for UBL 2.1 Invoice",
+     "location": "resources/ubl/2.1/xsd/maindoc/UBL-Invoice-2.1.xsd"
+    }
+   ],
+   "schematron": [
+    {
+     "name": "Schematron rules for EN16931 (UBL)",
+     "location": "resources/ubl/2.1/xsl/EN16931-UBL-validation.xsl",
+     "schemaId": "EN16931-UBL"
+    },
+    {
+     "name": "Schematron rules for Invoice - CIUS XRechnung (UBL)",
+     "location": "resources/xrechnung/3.0.2/xsl/XRechnung-UBL-validation.xsl",
+     "schemaId": "XRechnung-UBL"
+    }
+   ],
+   "customLevels": {
+    "BR-CL-23": "warning",
+    "BR-CL-21": "warning",
+    "UBL-CR-646": "error"
+   },
+   "acceptMatch": "/rep:report/rep:assessment[1]/rep:accept[1]"
+  },
+  {
+   "name": "EN16931 XRechnung Extension (UBL Invoice)",
+   "description": "Validates UBL Invoice in version 2.1\n      Uses UBL Invoice 2.1 XML Schema,\n        Schematron rules from EN16931:2017, and XRechnung\n        3.0.2 \n      Download of UBL XML Schema on @build.date@ from\n        https://docs.oasis-open.org/ubl/os-UBL-2.1/UBL-2.1.zip\n      Download of UBL Schematron rules on @build.date@ from\n        https://github.com/ConnectingEurope/eInvoicing-EN16931/releases/download/validation-1.3.16/en16931-ubl-1.3.16.zip\n      Download of XRechnung Schematron rules on @build.date@ from\n        @xrechnung.download.url@",
+   "namespaces": {
+    "cbc": "urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2",
+    "invoice": "urn:oasis:names:specification:ubl:schema:xsd:Invoice-2",
+    "rep": "http://www.xoev.de/de/validator/varl/1"
+   },
+   "match": "exists(/invoice:Invoice/cbc:CustomizationID[ . = 'urn:cen.eu:en16931:2017#compliant#urn:xeinkauf.de:kosit:xrechnung_3.0#conformant#urn:xeinkauf.de:kosit:extension:xrechnung_3.0'])",
+   "xsd": [
+    {
+     "name": "XML Schema for UBL 2.1 Invoice",
+     "location": "resources/ubl/2.1/xsd/maindoc/UBL-Invoice-2.1.xsd"
+    }
+   ],
+   "schematron": [
+    {
+     "name": "Schematron rules for EN16931 (UBL)",
+     "location": "resources/ubl/2.1/xsl/EN16931-UBL-validation.xsl",
+     "schemaId": "EN16931-UBL"
+    },
+    {
+     "name": "Schematron rules for Invoice - XRechnung (UBL)",
+     "location": "resources/xrechnung/3.0.2/xsl/XRechnung-UBL-validation.xsl",
+     "schemaId": "XRechnung-UBL"
+    }
+   ],
+   "customLevels": {
+    "BR-CL-21": "information",
+    "BR-CL-23": "warning",
+    "BR-CL-24": "information",
+    "BR-CL-10": "information",
+    "BR-CL-11": "information",
+    "BR-CL-25": "information",
+    "BR-CL-26": "information",
+    "BR-CO-16": "information",
+    "UBL-CR-470": "information",
+    "UBL-CR-646": "information"
+   },
+   "acceptMatch": "/rep:report/rep:assessment[1]/rep:accept[1]"
+  },
+  {
+   "name": "EN16931 XRechnung CVD (UBL Invoice)",
+   "description": "Validates UBL Invoice (CVD) in version 2.1\n      Uses UBL Invoice 2.1 XML Schema,\n        Schematron rules from EN16931:2017, XRechnung\n        3.0.2, and XRechnung CVD 0.9\n      Download of UBL XML Schema on @build.date@ from\n        https://docs.oasis-open.org/ubl/os-UBL-2.1/UBL-2.1.zip\n      Download of UBL Schematron rules on @build.date@ from\n        https://github.com/ConnectingEurope/eInvoicing-EN16931/releases/download/validation-1.3.16/en16931-ubl-1.3.16.zip\n      Download of XRechnung Schematron rules on @build.date@ from\n        @xrechnung.download.url@",
+   "namespaces": {
+    "cbc": "urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2",
+    "invoice": "urn:oasis:names:specification:ubl:schema:xsd:Invoice-2",
+    "rep": "http://www.xoev.de/de/validator/varl/1"
+   },
+   "match": "exists(/invoice:Invoice/cbc:CustomizationID[ . = 'urn:cen.eu:en16931:2017#compliant#urn:xeinkauf.de:kosit:xrechnung_3.0#compliant#urn:xeinkauf.de:kosit:xrechnung:cvd_0.9'])",
+   "xsd": [
+    {
+     "name": "XML Schema for UBL 2.1 Invoice",
+     "location": "resources/ubl/2.1/xsd/maindoc/UBL-Invoice-2.1.xsd"
+    }
+   ],
+   "schematron": [
+    {
+     "name": "Schematron rules for EN16931 (UBL)",
+     "location": "resources/ubl/2.1/xsl/EN16931-UBL-validation.xsl",
+     "schemaId": "EN16931-UBL"
+    },
+    {
+     "name": "Schematron rules for Invoice - CIUS XRechnung (UBL)",
+     "location": "resources/xrechnung/3.0.2/xsl/XRechnung-UBL-validation.xsl",
+     "schemaId": "XRechnung-UBL"
+    }
+   ],
+   "customLevels": {
+    "BR-CL-13": "information",
+    "BR-CL-23": "warning",
+    "BR-CL-21": "warning",
+    "UBL-CR-646": "error"
+   },
+   "acceptMatch": "/rep:report/rep:assessment[1]/rep:accept[1]"
+  },
+  {
+   "name": "EN16931 XRechnung (UBL CreditNote)",
+   "description": "Validates UBL CrediteNote version 2.1\n      Uses UBL CreditNote 2.1 XML Schema, \n                Schematron rules from EN16931:2017, and XRechnung\n                3.0.2 \n      Download of UBL XML Schema on @build.date@ from\n                https://docs.oasis-open.org/ubl/os-UBL-2.1/UBL-2.1.zip\n      Download of UBL Schematron rules on @build.date@ from\n                https://github.com/ConnectingEurope/eInvoicing-EN16931/releases/download/validation-1.3.16/en16931-ubl-1.3.16.zip\n      Download of XRechnung Schematron rules on @build.date@ from\n                @xrechnung.download.url@",
+   "namespaces": {
+    "cbc": "urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2",
+    "creditnote": "urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2",
+    "rep": "http://www.xoev.de/de/validator/varl/1"
+   },
+   "match": "exists(/creditnote:CreditNote[ cbc:CustomizationID/text() = 'urn:cen.eu:en16931:2017#compliant#urn:xeinkauf.de:kosit:xrechnung_3.0'])",
+   "xsd": [
+    {
+     "name": "XML Schema for UBL 2.1 CreditNote",
+     "location": "resources/ubl/2.1/xsd/maindoc/UBL-CreditNote-2.1.xsd"
+    }
+   ],
+   "schematron": [
+    {
+     "name": "Schematron rules for EN16931 (UBL)",
+     "location": "resources/ubl/2.1/xsl/EN16931-UBL-validation.xsl",
+     "schemaId": "EN16931-UBL"
+    },
+    {
+     "name": "Schematron rules for CreditNote - CIUS XRechnung (UBL)",
+     "location": "resources/xrechnung/3.0.2/xsl/XRechnung-UBL-validation.xsl",
+     "schemaId": "XRechnung-UBL"
+    }
+   ],
+   "customLevels": {
+    "BR-CL-23": "warning",
+    "BR-CL-21": "warning"
+   },
+   "acceptMatch": "/rep:report/rep:assessment[1]/rep:accept[1]"
+  },
+  {
+   "name": "EN16931 XRechnung CVD (UBL CreditNote)",
+   "description": "Validates UBL CrediteNote version 2.1\n      Uses UBL CreditNote 2.1 XML Schema, \n        Schematron rules from EN16931:2017, XRechnung\n        3.0.2, and XRechnung CVD 0.9\n      Download of UBL XML Schema on @build.date@ from\n        https://docs.oasis-open.org/ubl/os-UBL-2.1/UBL-2.1.zip\n      Download of UBL Schematron rules on @build.date@ from\n        https://github.com/ConnectingEurope/eInvoicing-EN16931/releases/download/validation-1.3.16/en16931-ubl-1.3.16.zip\n      Download of XRechnung Schematron rules on @build.date@ from\n        @xrechnung.download.url@",
+   "namespaces": {
+    "cbc": "urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2",
+    "creditnote": "urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2",
+    "rep": "http://www.xoev.de/de/validator/varl/1"
+   },
+   "match": "exists(/creditnote:CreditNote[ cbc:CustomizationID/text() = 'urn:cen.eu:en16931:2017#compliant#urn:xeinkauf.de:kosit:xrechnung_3.0#compliant#urn:xeinkauf.de:kosit:xrechnung:cvd_0.9'])",
+   "xsd": [
+    {
+     "name": "XML Schema for UBL 2.1 CreditNote",
+     "location": "resources/ubl/2.1/xsd/maindoc/UBL-CreditNote-2.1.xsd"
+    }
+   ],
+   "schematron": [
+    {
+     "name": "Schematron rules for EN16931 (UBL)",
+     "location": "resources/ubl/2.1/xsl/EN16931-UBL-validation.xsl",
+     "schemaId": "EN16931-UBL"
+    },
+    {
+     "name": "Schematron rules for CreditNote - CIUS XRechnung (UBL)",
+     "location": "resources/xrechnung/3.0.2/xsl/XRechnung-UBL-validation.xsl",
+     "schemaId": "XRechnung-UBL"
+    }
+   ],
+   "customLevels": {
+    "BR-CL-13": "information",
+    "BR-CL-23": "warning",
+    "BR-CL-21": "warning",
+    "UBL-CR-646": "error"
+   },
+   "acceptMatch": "/rep:report/rep:assessment[1]/rep:accept[1]"
+  },
+  {
+   "name": "EN16931 XRechnung (CII)",
+   "description": "Validates UN/CEFACT XML (SCRDM - CII uncoupled) version\n                D16B\n      Uses UN/CEFACT (SCRDM - CII uncoupled) version\n                D16B XML Schema, Schematron rules from EN16931:2017,\n                and XRechnung Schematron rules version 3.0.2 \n      Download of CII uncoupled XML Schema on @build.date@ from\n                https://projekte.kosit.org/api/v4/projects/356/packages/maven/de/xeinkauf/D16B_SCRDM__Subset__CII/D16B/D16B_SCRDM__Subset__CII-D16B.zip\n      Download of CII Schematron rules on @build.date@ from\n                https://github.com/ConnectingEurope/eInvoicing-EN16931/releases/download/validation-1.3.16/en16931-cii-1.3.16.zip \n      Download of XRechnung Schematron rules on @build.date@ from\n                @xrechnung.download.url@",
+   "namespaces": {
+    "rsm": "urn:un:unece:uncefact:data:standard:CrossIndustryInvoice:100",
+    "ram": "urn:un:unece:uncefact:data:standard:ReusableAggregateBusinessInformationEntity:100",
+    "rep": "http://www.xoev.de/de/validator/varl/1"
+   },
+   "match": "exists(/rsm:CrossIndustryInvoice[rsm:ExchangedDocumentContext/ram:GuidelineSpecifiedDocumentContextParameter/ram:ID/text() = 'urn:cen.eu:en16931:2017#compliant#urn:xeinkauf.de:kosit:xrechnung_3.0'])",
+   "xsd": [
+    {
+     "name": "XML Schema for UN/CEFACT XML (SCRDM - CII\n                    uncoupled)",
+     "location": "resources/cii/16b/xsd/CrossIndustryInvoice_100pD16B.xsd"
+    }
+   ],
+   "schematron": [
+    {
+     "name": "Schematron rules for EN16931 (CII)",
+     "location": "resources/cii/16b/xsl/EN16931-CII-validation.xsl",
+     "schemaId": "EN16931-CII"
+    },
+    {
+     "name": "Schematron rules for CIUS XRechnung (CII)",
+     "location": "resources/xrechnung/3.0.2/xsl/XRechnung-CII-validation.xsl",
+     "schemaId": "XRechnung-CII"
+    }
+   ],
+   "customLevels": {
+    "BR-CL-23": "warning",
+    "BR-CL-21": "warning",
+    "CII-SR-452": "error",
+    "CII-SR-453": "error",
+    "CII-SR-454": "error",
+    "CII-SR-465": "error",
+    "CII-SR-466": "error",
+    "CII-SR-475": "information",
+    "CII-SR-476": "information"
+   },
+   "acceptMatch": "/rep:report/rep:assessment[1]/rep:accept[1]"
+  },
+  {
+   "name": "EN16931 XRechnung Extension (CII)",
+   "description": "Validates UN/CEFACT XML (SCRDM - CII uncoupled) version\n        D16B\n      Uses UN/CEFACT (SCRDM - CII uncoupled) version\n        D16B XML Schema, Schematron rules from EN16931:2017,\n        and XRechnung Schematron rules version 3.0.2 \n      Download of CII uncoupled XML Schema on @build.date@ from\n        https://projekte.kosit.org/api/v4/projects/356/packages/maven/de/xeinkauf/D16B_SCRDM__Subset__CII/D16B/D16B_SCRDM__Subset__CII-D16B.zip\n      Download of CII Schematron rules on @build.date@ from\n        https://github.com/ConnectingEurope/eInvoicing-EN16931/releases/download/validation-1.3.16/en16931-cii-1.3.16.zip \n      Download of XRechnung Schematron rules on @build.date@ from\n        @xrechnung.download.url@",
+   "namespaces": {
+    "rsm": "urn:un:unece:uncefact:data:standard:CrossIndustryInvoice:100",
+    "ram": "urn:un:unece:uncefact:data:standard:ReusableAggregateBusinessInformationEntity:100",
+    "rep": "http://www.xoev.de/de/validator/varl/1"
+   },
+   "match": "exists(/rsm:CrossIndustryInvoice[rsm:ExchangedDocumentContext/ram:GuidelineSpecifiedDocumentContextParameter/ram:ID/text() = 'urn:cen.eu:en16931:2017#compliant#urn:xeinkauf.de:kosit:xrechnung_3.0#conformant#urn:xeinkauf.de:kosit:extension:xrechnung_3.0'])",
+   "xsd": [
+    {
+     "name": "XML Schema for UN/CEFACT XML (SCRDM - CII\n          uncoupled)",
+     "location": "resources/cii/16b/xsd/CrossIndustryInvoice_100pD16B.xsd"
+    }
+   ],
+   "schematron": [
+    {
+     "name": "Schematron rules for EN16931 (CII)",
+     "location": "resources/cii/16b/xsl/EN16931-CII-validation.xsl",
+     "schemaId": "EN16931-CII"
+    },
+    {
+     "name": "Schematron rules for CIUS XRechnung (CII)",
+     "location": "resources/xrechnung/3.0.2/xsl/XRechnung-CII-validation.xsl",
+     "schemaId": "XRechnung-CII"
+    }
+   ],
+   "customLevels": {
+    "BR-CL-23": "warning",
+    "BR-CL-21": "information",
+    "BR-CL-11": "information",
+    "BR-CL-10": "information",
+    "BR-CL-24": "information",
+    "BR-CL-25": "information",
+    "BR-CL-26": "information",
+    "CII-SR-452": "error",
+    "CII-SR-453": "error",
+    "CII-SR-454": "error",
+    "CII-SR-465": "error",
+    "CII-SR-466": "error",
+    "CII-SR-475": "information",
+    "CII-SR-476": "information"
+   },
+   "acceptMatch": "/rep:report/rep:assessment[1]/rep:accept[1]"
+  },
+  {
+   "name": "EN16931 XRechnung CVD (CII)",
+   "description": "Validates UN/CEFACT XML (SCRDM - CII uncoupled) version\n        D16B\n      Uses UN/CEFACT (SCRDM - CII uncoupled) version\n        D16B XML Schema, Schematron rules from EN16931:2017,\n        XRechnung 3.0.2, and XRechnung CVD 0.9 \n      Download of CII uncoupled XML Schema on @build.date@ from\n        https://projekte.kosit.org/api/v4/projects/356/packages/maven/de/xeinkauf/D16B_SCRDM__Subset__CII/D16B/D16B_SCRDM__Subset__CII-D16B.zip\n      Download of CII Schematron rules on @build.date@ from\n        https://github.com/ConnectingEurope/eInvoicing-EN16931/releases/download/validation-1.3.16/en16931-cii-1.3.16.zip \n      Download of XRechnung Schematron rules on @build.date@ from\n        @xrechnung.download.url@",
+   "namespaces": {
+    "rsm": "urn:un:unece:uncefact:data:standard:CrossIndustryInvoice:100",
+    "ram": "urn:un:unece:uncefact:data:standard:ReusableAggregateBusinessInformationEntity:100",
+    "rep": "http://www.xoev.de/de/validator/varl/1"
+   },
+   "match": "exists(/rsm:CrossIndustryInvoice[rsm:ExchangedDocumentContext/ram:GuidelineSpecifiedDocumentContextParameter/ram:ID/text() = 'urn:cen.eu:en16931:2017#compliant#urn:xeinkauf.de:kosit:xrechnung_3.0#compliant#urn:xeinkauf.de:kosit:xrechnung:cvd_0.9'])",
+   "xsd": [
+    {
+     "name": "XML Schema for UN/CEFACT XML (SCRDM - CII\n          uncoupled)",
+     "location": "resources/cii/16b/xsd/CrossIndustryInvoice_100pD16B.xsd"
+    }
+   ],
+   "schematron": [
+    {
+     "name": "Schematron rules for EN16931 (CII)",
+     "location": "resources/cii/16b/xsl/EN16931-CII-validation.xsl",
+     "schemaId": "EN16931-CII"
+    },
+    {
+     "name": "Schematron rules for CIUS XRechnung (CII)",
+     "location": "resources/xrechnung/3.0.2/xsl/XRechnung-CII-validation.xsl",
+     "schemaId": "XRechnung-CII"
+    }
+   ],
+   "customLevels": {
+    "BR-CL-13": "information",
+    "BR-CL-23": "warning",
+    "BR-CL-21": "warning",
+    "CII-SR-452": "error",
+    "CII-SR-453": "error",
+    "CII-SR-454": "error",
+    "CII-SR-465": "error",
+    "CII-SR-466": "error",
+    "CII-SR-475": "information",
+    "CII-SR-476": "information"
+   },
+   "acceptMatch": "/rep:report/rep:assessment[1]/rep:accept[1]"
+  },
+  {
+   "name": "EN16931 (UBL Invoice)",
+   "description": "Validates UBL Invoice in version 2.1\n      Uses UBL Invoice 2.1 XML Schema,\n                Schematron rules from EN16931:2017, and XRechnung\n                3.0.2 \n      Download of UBL XML Schema on @build.date@ from\n                https://docs.oasis-open.org/ubl/os-UBL-2.1/UBL-2.1.zip\n      Download of UBL Schematron rules on @build.date@ from\n                https://github.com/ConnectingEurope/eInvoicing-EN16931/releases/download/validation-1.3.16/en16931-ubl-1.3.16.zip",
+   "namespaces": {
+    "cbc": "urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2",
+    "invoice": "urn:oasis:names:specification:ubl:schema:xsd:Invoice-2",
+    "rep": "http://www.xoev.de/de/validator/varl/1"
+   },
+   "match": "exists(/invoice:Invoice[ cbc:CustomizationID/text() = 'urn:cen.eu:en16931:2017' ])",
+   "xsd": [
+    {
+     "name": "XML Schema for UBL 2.1 Invoice",
+     "location": "resources/ubl/2.1/xsd/maindoc/UBL-Invoice-2.1.xsd"
+    }
+   ],
+   "schematron": [
+    {
+     "name": "Schematron rules for EN16931 (UBL)",
+     "location": "resources/ubl/2.1/xsl/EN16931-UBL-validation.xsl",
+     "schemaId": "EN16931-UBL"
+    }
+   ],
+   "customLevels": {},
+   "acceptMatch": "/rep:report/rep:assessment[1]/rep:accept[1]"
+  },
+  {
+   "name": "EN16931 (UBL CreditNote)",
+   "description": "Validates UBL CrediteNote version 2.1\n      Uses UBL CreditNote 2.1 XML Schema, \n                Schematron rules from EN16931:2017, and XRechnung\n                3.0.2 \n      Download of UBL XML Schema on @build.date@ from\n                https://docs.oasis-open.org/ubl/os-UBL-2.1/UBL-2.1.zip\n      Download of UBL Schematron rules on @build.date@ from\n                https://github.com/ConnectingEurope/eInvoicing-EN16931/releases/download/validation-1.3.16/en16931-ubl-1.3.16.zip",
+   "namespaces": {
+    "cbc": "urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2",
+    "creditnote": "urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2",
+    "rep": "http://www.xoev.de/de/validator/varl/1"
+   },
+   "match": "exists(/creditnote:CreditNote[cbc:CustomizationID/text() = 'urn:cen.eu:en16931:2017'])",
+   "xsd": [
+    {
+     "name": "XML Schema for UBL 2.1 CreditNote",
+     "location": "resources/ubl/2.1/xsd/maindoc/UBL-CreditNote-2.1.xsd"
+    }
+   ],
+   "schematron": [
+    {
+     "name": "Schematron rules for EN16931 (UBL)",
+     "location": "resources/ubl/2.1/xsl/EN16931-UBL-validation.xsl",
+     "schemaId": "EN16931-UBL"
+    }
+   ],
+   "customLevels": {},
+   "acceptMatch": "/rep:report/rep:assessment[1]/rep:accept[1]"
+  },
+  {
+   "name": "EN16931 (CII)",
+   "description": "Validates UN/CEFACT XML (SCRDM - CII uncoupled) version\n                D16B\n      Uses UN/CEFACT (SCRDM - CII uncoupled) version\n                D16B XML Schema, Schematron rules from EN16931:2017,\n                and XRechnung Schematron rules version 3.0.2 \n      Download of CII uncoupled XML Schema on @build.date@ from\n                https://projekte.kosit.org/api/v4/projects/356/packages/maven/de/xeinkauf/D16B_SCRDM__Subset__CII/D16B/D16B_SCRDM__Subset__CII-D16B.zip\n      Download of CII Schematron rules on @build.date@ from\n                https://github.com/ConnectingEurope/eInvoicing-EN16931/releases/download/validation-1.3.16/en16931-cii-1.3.16.zip",
+   "namespaces": {
+    "rsm": "urn:un:unece:uncefact:data:standard:CrossIndustryInvoice:100",
+    "ram": "urn:un:unece:uncefact:data:standard:ReusableAggregateBusinessInformationEntity:100",
+    "rep": "http://www.xoev.de/de/validator/varl/1"
+   },
+   "match": "exists(/rsm:CrossIndustryInvoice[ rsm:ExchangedDocumentContext/ram:GuidelineSpecifiedDocumentContextParameter/ram:ID/text() = 'urn:cen.eu:en16931:2017'])",
+   "xsd": [
+    {
+     "name": "XML Schema for UN/CEFACT XML (SCRDM - CII\n                    uncoupled)",
+     "location": "resources/cii/16b/xsd/CrossIndustryInvoice_100pD16B.xsd"
+    }
+   ],
+   "schematron": [
+    {
+     "name": "Schematron rules for EN16931 (CII)",
+     "location": "resources/cii/16b/xsl/EN16931-CII-validation.xsl",
+     "schemaId": "EN16931-CII"
+    }
+   ],
+   "customLevels": {},
+   "acceptMatch": "/rep:report/rep:assessment[1]/rep:accept[1]"
+  }
+ ]
+}

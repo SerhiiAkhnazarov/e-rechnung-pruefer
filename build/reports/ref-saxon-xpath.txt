@@ -1,0 +1,39 @@
+# suite        ref-saxon-xpath
+# fingerprint  85a3e2aa4dd6506cccb529b438b49e0a3281842a34706035354d6ecc68d7a879
+# git          a6a3ec9b062bf651ab595bfa27d160f0d73db947
+# command      sh -c set -e; /opt/node22/bin/node test/xpath-conformance/run-saxon.cjs <ext>/saxon; /opt/node22/bin/node test/xpath-conformance/run-saxon-doc.cjs /home/claude/ext-fresh/saxon; git diff --exit-code --stat -- test/xpath-conformance/expected.json test/xpath-conformance/expected-doc.json && echo "Saxon expectations reproduced byte-identically"
+# exit code    0
+# duration     3717 ms
+# date         2026-10-20T07:21:50.231Z
+378 expressions evaluated by Saxon -> expected.json
+267 expressions evaluated by Saxon -> expected-doc.json
+Saxon expectations reproduced byte-identically
+
+Picked up JAVA_TOOL_OPTIONS: 
+Warning at char 39 in xsl:value-of/@select on line 203 column 135 of battery.xsl:
+  SXWN9027  Evaluation will always throw a dynamic error: Invalid date "20260131" (Too short)
+Warning at char 42 in xsl:value-of/@select on line 256 column 133 of battery.xsl:
+  SXWN9027  Evaluation will always throw a dynamic error: Cannot convert string "1e2" to
+  xs:decimal: invalid character 'e'
+Warning at char 42 in xsl:value-of/@select on line 257 column 133 of battery.xsl:
+  SXWN9027  Evaluation will always throw a dynamic error: Cannot convert string "1E2" to
+  xs:decimal: invalid character 'E'
+Warning at char 42 in xsl:value-of/@select on line 260 column 131 of battery.xsl:
+  SXWN9027  Evaluation will always throw a dynamic error: Cannot convert string "-" to
+  xs:decimal: no digits in value
+Warning at char 42 in xsl:value-of/@select on line 261 column 135 of battery.xsl:
+  SXWN9027  Evaluation will always throw a dynamic error: Cannot convert string "1.2.3" to
+  xs:decimal: more than one decimal point
+Warning at char 42 in xsl:value-of/@select on line 262 column 130 of battery.xsl:
+  SXWN9027  Evaluation will always throw a dynamic error: Cannot convert string "" to
+  xs:decimal: no digits in value
+Warning at char 42 in xsl:value-of/@select on line 263 column 133 of battery.xsl:
+  SXWN9027  Evaluation will always throw a dynamic error: Cannot convert string "1.0" to an integer
+Warning at char 52 in xsl:value-of/@select on line 325 column 144 of battery.xsl:
+  SXWN9027  Evaluation will always throw a dynamic error: Cannot convert double NaN to an integer
+Warning at char 52 in xsl:value-of/@select on line 326 column 144 of battery.xsl:
+  SXWN9027  Evaluation will always throw a dynamic error: Cannot convert double "Infinity" to decimal
+Warning at char 32 in xsl:value-of/@select on line 327 column 149 of battery.xsl:
+  SXWN9027  Evaluation will always throw a dynamic error: Invalid date "2017-09-31"
+  (Non-existent date)
+Picked up JAVA_TOOL_OPTIONS: 

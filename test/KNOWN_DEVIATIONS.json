@@ -1,0 +1,5 @@
+{
+  "_comment": "Documented differences between this engine and the Saxon HE 12.8 reference. Empty: since the exact decimal arithmetic of patches/fontoxpath-pruefer.patch (xs:decimal as BigInt-scaled values, division with Saxon HE semantics, net.sf.saxon.value.BigDecimalValue.DIVIDE_PRECISION = 18, HALF_DOWN) the four former entries (16-significant-digit HUF slack boundary probes of the XRechnung XML-Mutate tests and their oracle counterparts) agree with Saxon. A non-empty list would be reported by test/run-xmute-tests.cjs and test/compare-oracle.cjs.",
+  "xmute": [],
+  "oracle": []
+}

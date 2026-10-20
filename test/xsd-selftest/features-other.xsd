@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:o="urn:erechnung-pruefer:xsd-selftest:other"
+           targetNamespace="urn:erechnung-pruefer:xsd-selftest:other" elementFormDefault="qualified" attributeFormDefault="qualified">
+  <xs:attribute name="globalAttr" type="xs:int"/>
+  <xs:element name="other">
+    <xs:complexType>
+      <xs:simpleContent>
+        <xs:extension base="xs:anyURI">
+          <xs:attribute ref="o:globalAttr"/>
+          <xs:attribute name="local" type="xs:token" form="unqualified"/>
+          <xs:attribute name="qualified" type="xs:token"/>
+        </xs:extension>
+      </xs:simpleContent>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>

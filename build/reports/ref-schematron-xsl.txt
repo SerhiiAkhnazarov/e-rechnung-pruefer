@@ -1,0 +1,17 @@
+# suite        ref-schematron-xsl
+# fingerprint  85a3e2aa4dd6506cccb529b438b49e0a3281842a34706035354d6ecc68d7a879
+# git          a6a3ec9b062bf651ab595bfa27d160f0d73db947
+# command      sh -c set -e; rm -rf build/reference-xsl; sh test/kosit-reference/build-xrechnung-xsl.sh build/reference-xsl; sh test/build-oracle-xsl.sh build/reference-xsl; ls build/reference-xsl/*.xsl | wc -l | sed "s/^/reference stylesheets: /"
+# exit code    0
+# duration     51884 ms
+# date         2026-10-20T07:16:37.341Z
+built build/reference-xsl/XRechnung-UBL-validation.xsl (sha256 5b4c548d1742c27f…)
+built build/reference-xsl/XRechnung-CII-validation.xsl (sha256 c5274a89cf882c07…)
+built build/reference-xsl/PEPPOL-UBL-validation.xsl (sha256 a3ce612da888f0c7…) from /home/claude/ext-fresh/peppol-bis-invoice-3/rules/sch/PEPPOL-EN16931-UBL.sch
+built build/reference-xsl/PEPPOL-CII-validation.xsl (sha256 7422f0ae2afc1056…) from /home/claude/ext-fresh/peppol-bis-invoice-3/rules/sch/PEPPOL-EN16931-CII.sch
+built build/reference-xsl/FACTUR-X-MINIMUM-validation.xsl (sha256 fdca8afcdcac31ab…) from /home/claude/ext-fresh/mustangproject/validator/src/main/resources/schematron/ZF_250/FACTUR-X_MINIMUM.sch
+built build/reference-xsl/FACTUR-X-BASIC-WL-validation.xsl (sha256 dce4563c82d9e8e0…) from /home/claude/ext-fresh/mustangproject/validator/src/main/resources/schematron/ZF_250/FACTUR-X_BASIC-WL.sch
+built build/reference-xsl/FACTUR-X-BASIC-validation.xsl (sha256 94f8e6099577e60c…) from /home/claude/ext-fresh/mustangproject/validator/src/main/resources/schematron/ZF_250/FACTUR-X_BASIC.sch
+built build/reference-xsl/FACTUR-X-EN16931-validation.xsl (sha256 24a46e926f4b3e4f…) from /home/claude/ext-fresh/mustangproject/validator/src/main/resources/schematron/ZF_250/FACTUR-X_EN16931.sch
+built build/reference-xsl/FACTUR-X-EXTENDED-validation.xsl (sha256 305d59b764976808…) from /home/claude/ext-fresh/mustangproject/validator/src/main/resources/schematron/ZF_250/FACTUR-X_EXTENDED.sch
+reference stylesheets: 9

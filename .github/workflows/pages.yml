@@ -1,0 +1,61 @@
+# pages.yml — publishes the E-Rechnung Prüfer as the GitHub Pages site of this repository
+# (Settings → Pages → Source: "GitHub Actions" must be selected once).
+# Runs only after the workflow "verify" has passed for a commit on main. The page is rebuilt from that
+# commit with the verification report of that very run (artifact "verification"), so the status line in
+# the program ("… Testreihen bestanden … – GitHub Actions …") is the result of the CI run of exactly
+# these sources (tools/build-standalone.cjs compares the file fingerprint).
+name: pages
+on:
+  workflow_run:
+    workflows: [verify]
+    types: [completed]
+    branches: [main]
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+  actions: read
+concurrency:
+  group: pages
+  cancel-in-progress: true
+jobs:
+  deploy:
+    if: github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-24.04
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verification report of the successful verify run
+        uses: actions/download-artifact@v4
+        with:
+          name: verification
+          path: ci-verification
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build the page with the CI verification status
+        run: |
+          set -e
+          cp ci-verification/build/reports/VERIFICATION.json build/reports/VERIFICATION.json
+          node tools/build-standalone.cjs --version "$(git describe --tags --always)"
+          grep -o '"verification":"[^"]*"' dist/BUILD_INFO.json
+          grep -q 'GitHub Actions' dist/BUILD_INFO.json
+          mkdir -p site
+          cp dist/E-Rechnung-Pruefer.html site/index.html
+          cp dist/E-Rechnung-Pruefer.html site/E-Rechnung-Pruefer.html
+          cp dist/BUILD_INFO.json site/BUILD_INFO.json
+          cp build/STANDARDS_MANIFEST.json site/STANDARDS_MANIFEST.json
+          cp build/reports/VERIFICATION.json site/VERIFICATION.json
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+      - id: deployment
+        uses: actions/deploy-pages@v4

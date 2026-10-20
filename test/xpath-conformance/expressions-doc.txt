@@ -1,0 +1,272 @@
+# Document battery: evaluated with the document node of doc.xml as context item; node results are rendered with fn:path().
+# Covers the patched path rewrites (//name, //@name, //(a|b), //(a/b|c)), the per-document index, unions and document order.
+//cbc:ID
+//cac:TaxCategory/cbc:ID
+//cac:InvoiceLine
+//cac:InvoiceLine/cbc:ID
+//cac:InvoiceLine//cbc:ID
+//cac:InvoiceLine[cbc:ID = '2']//cbc:ID
+//cac:InvoiceLine[1]
+//cac:InvoiceLine[2]
+//cac:InvoiceLine[last()]
+(//cac:InvoiceLine)[1]
+(//cac:InvoiceLine)[last()]
+//cac:InvoiceLine[position() = 2]
+//cac:InvoiceLine[cbc:ID][1]
+//cac:InvoiceLine[cbc:ID = '2.1']
+//cac:Party/cbc:Name
+//cac:Party//cbc:Name
+//cac:Party/cac:Party
+/inv:Invoice/cac:Party//cac:TaxCategory
+//*[local-name() = 'TaxCategory']
+//*[ends-with(name(), 'Amount')]
+//*[@currencyID]
+//@currencyID
+//@name
+//@id
+//@*
+//@x:flag
+//@cbc:version
+//cbc:ID/@schemeID
+count(//@*)
+count(//@name)
+count(//@name) - count(//cbc:ID/@name)
+string-join(//@name, ',')
+string-join(//@*/name(), ',')
+string-join(//@*/string(), ',')
+//cac:TaxTotal/@*
+//cac:TaxTotal/(@currencyID|@name)
+//(@currencyID|@name)
+//cac:TaxTotal//@currencyID
+//cac:InvoiceLine/@id
+/descendant-or-self::node()/@id
+/descendant::cac:InvoiceLine/attribute::id
+//(cac:InvoiceLine|cac:CreditNoteLine)
+//(cac:CreditNoteLine|cac:InvoiceLine)
+//(cac:InvoiceLine|cac:CreditNoteLine)/cbc:ID
+//(cac:InvoiceLine|cac:CreditNoteLine)[1]
+//(cac:InvoiceLine|cac:CreditNoteLine)[last()]
+//(cac:InvoiceLine|cac:CreditNoteLine)[cbc:ID = '3']
+//(cac:InvoiceLine[1]|cac:CreditNoteLine)
+//(cac:InvoiceLine|cac:CreditNoteLine[2])
+//(cac:InvoiceLine/cbc:ID|cac:CreditNoteLine)
+//(cac:InvoiceLine/cbc:ID[1]|cac:TaxTotal/cac:TaxSubtotal)
+//(cac:InvoiceLine|cac:TaxTotal/cac:TaxSubtotal)
+//(cac:InvoiceLine|cac:CreditNoteLine|cac:TaxSubtotal)
+//(cac:InvoiceLine|cac:InvoiceLine)
+//(cac:InvoiceLine|cac:Party//cac:Party)
+//(cbc:ID|@id)
+//(cac:Item|cac:InvoiceLine)
+(//cac:InvoiceLine|//cac:Item)
+(//cac:Item|//cac:InvoiceLine)
+(//cac:InvoiceLine union //cac:TaxTotal)
+(//cac:InvoiceLine intersect //cac:InvoiceLine[cbc:ID='2'])
+(//cac:InvoiceLine except //cac:InvoiceLine[cbc:ID='2'])
+(//cac:InvoiceLine|//cac:CreditNoteLine)/cac:Item
+(//cac:InvoiceLine|//cac:CreditNoteLine)[2]
+count(//(cac:InvoiceLine|cac:CreditNoteLine))
+sum(//(cac:InvoiceLine|cac:CreditNoteLine)/xs:decimal(cbc:LineExtensionAmount))
+string(sum(//(cac:InvoiceLine|cac:CreditNoteLine)/xs:decimal(cbc:LineExtensionAmount)))
+string(sum(//cac:InvoiceLine/xs:decimal(cbc:LineExtensionAmount)))
+string(sum(//cbc:LineExtensionAmount))
+string(sum(//cbc:LineExtensionAmount/xs:decimal(.)))
+exists(//cac:TaxCategory[cac:TaxScheme/normalize-space(upper-case(cbc:ID))='VAT']/cbc:ID[normalize-space(.) = 'S'])
+exists(//cac:TaxCategory[cac:TaxScheme/normalize-space(upper-case(cbc:ID))='VAT']/cbc:ID[normalize-space(.) = 'E'])
+//cac:TaxCategory[cac:TaxScheme/normalize-space(upper-case(cbc:ID))='VAT']/cbc:ID[normalize-space(.) = 's']
+//cac:ClassifiedTaxCategory[normalize-space(cbc:ID) = 'E'][cac:TaxScheme/normalize-space(upper-case(cbc:ID))='VAT']
+//cac:TaxCategory[cac:TaxScheme/cbc:ID='VAT']
+//cac:TaxCategory[cac:TaxScheme/cbc:ID='VAT'][1]
+//cac:TaxCategory[cac:TaxScheme/cbc:ID='VAT'][2]
+//cac:TaxCategory[cac:TaxScheme/cbc:ID='VAT'][cbc:ID = 'E']
+//cac:TaxSubtotal[cac:TaxCategory/cbc:ID = 'E']/cbc:TaxableAmount
+//comment()
+//processing-instruction()
+//processing-instruction('pi-inside')
+//text()[normalize-space()]
+//node()[self::text()][normalize-space()]
+/node()
+/*
+/
+count(//node())
+count(//*)
+count(//text())
+//b
+//b/..
+//b/../@name
+//cbc:Note/text()
+//cbc:Note[b]
+//cbc:Note[2]/text()[2]
+//cac:InvoiceLine/following-sibling::cac:InvoiceLine
+//cac:InvoiceLine/preceding-sibling::*[1]
+//cac:InvoiceLine[2]/ancestor::*
+//cac:InvoiceLine[2]/ancestor-or-self::cac:InvoiceLine
+(//cbc:ID)[3]/following::cbc:ID
+(//cbc:ID)[3]/preceding::cbc:ID
+//cbc:ID[. << (//cbc:ID)[3]]
+//cbc:ID[. >> (//cbc:ID)[last()-1]]
+(//cac:InvoiceLine)[2] is //cac:InvoiceLine[cbc:ID='2']
+(//cac:InvoiceLine)[2] is //cac:InvoiceLine[cbc:ID='2.1']
+//cac:InvoiceLine[@id='l2sub'] << //cac:CreditNoteLine
+//@id[. = 'l1'] << //@id[. = 'l2']
+//@id[. = 'l1'] >> //cbc:ID[. = 'INV-1']
+root(//b) is /
+for $n in //cac:InvoiceLine return count($n/ancestor::cac:InvoiceLine)
+for $n in //cac:InvoiceLine return string($n/@id)
+for $n in //(cac:InvoiceLine|cac:CreditNoteLine) return ($n/cbc:ID/string(), '|')
+//cac:InvoiceLine[not(ancestor::cac:InvoiceLine)]
+//cac:InvoiceLine[ancestor::cac:InvoiceLine]
+//cac:InvoiceLine/descendant::cac:InvoiceLine
+//cac:InvoiceLine/descendant-or-self::cac:InvoiceLine
+//cac:InvoiceLine[2]//cbc:ID
+(//cac:InvoiceLine)[2]//cbc:ID
+(//cac:InvoiceLine)[2]//@id
+(//cac:InvoiceLine)[2]/descendant-or-self::node()/@id
+(//cac:Party)[1]//cac:Party
+(//cac:Party)[1]//(cac:Party|cbc:Name)
+(//cac:Party)[2]//cac:Party
+(//cac:Party)[2]//cbc:Name
+(//cac:Party)[1]//@id
+(//cac:Party)[2]//@id
+(//cac:Party)[2]/@*
+//cac:Party[@id='p1a']/ancestor::cac:Party/@id
+/inv:Invoice/@cbc:version
+/inv:Invoice/@*[local-name()='flag']
+//@*[namespace-uri()='urn:test:x']
+//@*[name()='x:flag']
+//@*[not(namespace-uri())]
+count(//@*[not(namespace-uri())])
+string-join(for $a in //@* return concat(name($a), '=', $a), ' ')
+string-join(for $a in //@* return name($a/..), ' ')
+distinct-values(//@name)
+distinct-values(//@*/local-name())
+//*[@name]/local-name()
+//*[not(@name)][@id]/@id
+//(cac:InvoiceLine|cac:CreditNoteLine)/(cbc:ID|@id)
+//(cac:InvoiceLine|cac:CreditNoteLine)/(@id|cbc:ID)
+(//(cac:InvoiceLine|cac:CreditNoteLine)/(@id|cbc:ID))[3]
+//(cac:InvoiceLine|cac:CreditNoteLine)/.
+//(cac:InvoiceLine|cac:CreditNoteLine)/..
+//(cac:InvoiceLine|cac:CreditNoteLine)/parent::*
+//(cac:InvoiceLine|cac:CreditNoteLine)/self::cac:InvoiceLine
+//(cac:InvoiceLine|cac:CreditNoteLine)/cac:Item/cbc:Name
+not(//(cac:InvoiceLine|cac:CreditNoteLine)/cac:Item/cac:SellersItemIdentification/cbc:ExtendedID)
+not(//@unitCodeListID)
+not(//@languageID)
+count(//@name) - count(//cbc:PaymentMeansCode/@name) <= 0
+count(//cbc:ID) = count(//cbc:ID/..)
+count(//cbc:ID/..) = count(//cbc:ID)
+//cbc:ID[../@id]
+//cbc:ID[../@id]/..
+//cbc:ID/..[@id]
+//cbc:ID/../@id
+//cbc:ID[parent::cac:InvoiceLine]
+//cbc:ID[parent::cac:InvoiceLine][../@id='l2sub']
+//cbc:ID[@schemeID]
+//cbc:ID[@schemeID='A']
+//cbc:ID[@schemeID='A']/@name
+//cbc:ID[@schemeID='A'][@name='n1']
+//cbc:ID[@schemeID='B']
+(//cbc:ID)[@schemeID]
+(//*)[@id='l2'] is //cac:InvoiceLine[2]
+(//*[@id])[3]
+(//*[@id])[3]/@id
+//*[@id][3]
+//*[@id][3]/@id
+//cac:InvoiceLine[@id][2]
+//cac:InvoiceLine[2][@id]
+//cac:InvoiceLine[@id='l2']/cac:InvoiceLine[1]
+//cac:InvoiceLine[@id='l2']/cac:InvoiceLine[1]/@id
+//cac:InvoiceLine[@id='l2']/(cac:InvoiceLine|cbc:ID)[1]
+//cac:InvoiceLine[@id='l2']/(cac:InvoiceLine|cbc:ID)[last()]
+//cac:InvoiceLine[@id='l2']/(cac:InvoiceLine|cbc:ID)[2]/@id
+//cac:InvoiceLine[@id='l2']//(cac:InvoiceLine|cbc:ID)[1]
+//cac:InvoiceLine[@id='l2']//(cac:InvoiceLine|cbc:ID)
+//cac:InvoiceLine[@id='l2']//(cac:InvoiceLine|cbc:ID)[position() > 1]
+//cac:InvoiceLine[@id='l2']/descendant::*[1]
+//cac:InvoiceLine[@id='l2']/descendant::*[last()]
+//cac:InvoiceLine[@id='l2']/descendant::cbc:ID[1]
+//cac:InvoiceLine[@id='l2']/descendant::cbc:ID[2]
+//cac:InvoiceLine[@id='l2']//cbc:ID[1]
+//cac:InvoiceLine[@id='l2']//cbc:ID[2]
+//cac:InvoiceLine[@id='l2']//cbc:ID[last()]
+# positional predicates must never be rewritten
+//cac:InvoiceLine[position() > 1]
+//cac:InvoiceLine[position() = last()]
+//cac:InvoiceLine[last() > 2]
+//cac:InvoiceLine[position() gt 1][1]
+//cac:InvoiceLine[not(position() = 1)]
+//cac:InvoiceLine[count(cbc:ID) = position()]
+//cac:InvoiceLine[cbc:ID[position() = 1]]
+//(cac:InvoiceLine|cac:CreditNoteLine)[position() = 1]
+//(cac:InvoiceLine|cac:CreditNoteLine)[position() > 1]
+//(cac:InvoiceLine|cac:CreditNoteLine)[last()]
+//(cac:InvoiceLine|cac:CreditNoteLine)[exists(cbc:ID[position() = 1])]
+//@id[position() = 2]
+//@id[position() > 1]
+//@*[position() = last()]
+//cbc:ID[position() = 2]
+//cbc:ID[position() = 1]
+//cbc:ID[1]
+//cbc:ID[string(position())]
+//cbc:ID[1.5]
+//cbc:ID[1 + 0]
+//cbc:ID[count(../*)]
+//cbc:ID[count(../*) = 3]
+//cbc:ID[number('1')]
+//cbc:ID[xs:integer('2')]
+//cbc:ID[../@id]
+//cbc:ID['x']
+//cbc:ID['']
+//cbc:ID[.]
+//cbc:ID[(1)]
+//cbc:ID[(1, 2)[1]]
+//cbc:ID[(position() = 1)]
+//cbc:ID[true()][2]
+//(cbc:ID)[2]
+//(cac:InvoiceLine/cbc:ID)[2]
+//(cac:InvoiceLine/cbc:ID[position() = 1])
+//(cac:InvoiceLine[position() = 1]/cbc:ID)
+//(cac:InvoiceLine[1]/cbc:ID)
+//(cac:InvoiceLine/cbc:ID)[last()]
+//(cac:InvoiceLine/cbc:ID)
+//(cac:InvoiceLine/cac:Item/cac:ClassifiedTaxCategory[normalize-space(cbc:ID) = 'S'])
+//(cac:InvoiceLine/cac:Item/cac:ClassifiedTaxCategory[normalize-space(cbc:ID) = 'S'][cac:TaxScheme/normalize-space(upper-case(cbc:ID))='VAT'])
+//((/inv:Invoice | /cn:CreditNote))
+//((/inv:Invoice | /cn:CreditNote)[cbc:ID])
+//((/inv:Invoice | /cn:CreditNote)[cbc:ID = 'INV-1'])
+//((/inv:Invoice | /cn:CreditNote)[1])
+//(/inv:Invoice/cac:InvoiceLine)
+//(/inv:Invoice/cac:InvoiceLine[2])
+//(/inv:Invoice/cac:InvoiceLine | cbc:ID)
+//(*)
+//(*[not(*) and not(normalize-space())])
+//(*[@id])
+//(*[@id][1])
+//(text())
+//(text()[normalize-space()])
+//(node())
+//(@*)
+//(@id|cbc:ID)
+//(@id|cbc:ID)[1]
+//(.)
+//(..)
+//(cac:Item/..)
+//(cac:Item/../@id)
+//(cac:Item)/..
+//(parent::*)
+//(cac:Item|parent::cac:InvoiceLine)
+//(descendant::cbc:ID)
+//(self::cac:Item)
+//(cac:Item | self::cac:Item)
+//(cbc:ID, cbc:Name)
+//(cbc:ID, @id)[1]
+//(if (cbc:ID) then cbc:ID else cbc:Name)
+//(cbc:ID[. = '2'] | cbc:ID[. = '1'])
+//(cac:InvoiceLine[cbc:ID = '2']//cbc:ID)
+//(cac:InvoiceLine//cbc:ID)
+//(cac:InvoiceLine//cbc:ID)[1]
+//(cac:InvoiceLine//(cbc:ID|@id))
+//*[ends-with(name(), 'Amount') and not(ends-with(name(),'PriceAmount'))]
+//*[ends-with(name(), 'BinaryObject')]
+//*[not(*) and not(normalize-space())]
+//*[not(*) and not(normalize-space())]/name()

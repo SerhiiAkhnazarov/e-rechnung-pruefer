@@ -1,0 +1,13 @@
+# suite        performance-chromium
+# fingerprint  85a3e2aa4dd6506cccb529b438b49e0a3281842a34706035354d6ecc68d7a879
+# git          a6a3ec9b062bf651ab595bfa27d160f0d73db947
+# command      node test/perf.cjs <ext>/xrechnung-testsuite --browser chromium
+# exit code    0
+# duration     16640 ms
+# date         2026-10-20T07:44:24.656Z
+# machine: Intel(R) Xeon(R) Processor @ 2.80GHz × 2, 8 GiB, Node v22.22.0, chromium 141.0.7390.37
+cold start (1 line, first document): chromium 1722 ms, node 2492 ms
+  100 lines, 151 KiB: node 601 ms · chromium 415 ms (analysis 373 ms, XSD 10 ms, rules {"EN16931-UBL":250,"XRechnung-UBL":72}) · budget 3000 ms ok · findings identical (3)
+  500 lines, 736 KiB: node 1205 ms · chromium 999 ms (analysis 950 ms, XSD 22 ms, rules {"EN16931-UBL":658,"XRechnung-UBL":182}) · budget 8000 ms ok · findings identical (3)
+ 2000 lines, 2927 KiB: node 4399 ms · chromium 3765 ms (analysis 3642 ms, XSD 98 ms, rules {"EN16931-UBL":2570,"XRechnung-UBL":624}) · budget 30000 ms ok · findings identical (3)
+performance chromium: OK

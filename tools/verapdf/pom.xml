@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Resolves the veraPDF validation library for the CI job "pdfa-verapdf" (.github/workflows/verify.yml)
+  and the runner tools/verapdf/VeraMrr.java. Not part of the product.
+
+  org.verapdf:validation-model-jakarta 1.30.3 = the artefact and version Mustangproject (commit
+  c1618af86e68) validates ZUGFeRD/Factur-X PDFs with: pom.xml l. 83 <version.org.verapdf>1.30.3,
+  validator/pom.xml l. 59-62. Published on Maven Central (repo1 directory listing, 2026-10-08).
+  (The CLI artefact org.verapdf.apps:greenfield-apps is published only up to 1.28.2, hence the own runner.)
+  Resolution: mvn -C (strict checksums against the .sha1 files of Maven Central); the CI job lists the
+  SHA-256 of every resolved jar in build/reports/verapdf-artifacts.txt.
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>local.erechnung-pruefer</groupId>
+  <artifactId>verapdf-runner</artifactId>
+  <version>1</version>
+  <packaging>pom</packaging>
+  <properties>
+    <verapdf.version>1.30.3</verapdf.version>
+  </properties>
+  <dependencies>
+    <dependency>
+      <groupId>org.verapdf</groupId>
+      <artifactId>validation-model-jakarta</artifactId>
+      <version>${verapdf.version}</version>
+    </dependency>
+  </dependencies>
+</project>

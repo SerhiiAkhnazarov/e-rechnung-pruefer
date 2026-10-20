@@ -1,0 +1,27 @@
+{
+  "note": "Upstream versions that were reviewed and deliberately NOT adopted yet (tools/check-drift.cjs). Each entry names the reason and when it was reviewed; a new upstream change not listed here turns the drift check red.",
+  "einvoicing-en16931": {
+    "validation-1.3.17": {
+      "reviewed": "2026-10-19",
+      "reason": "CEN release 2026-10-09 (milestone '1.3.17 (Nov-26)'). The XRechnung validator configuration of KoSIT, which defines the rule sets of every XRechnung/EN16931 scenario, still pins cen.rules.version 1.3.16 (release v2026-08-31 and master bd160dc19ba7, build.xml line 73). Adopting 1.3.17 before KoSIT would break parity with the official validator; it is adopted with the KoSIT configuration release that switches to it."
+    }
+  },
+  "xrechnung-testsuite": {
+    "2026-08-19-rc1": {
+      "reviewed": "2026-10-19",
+      "reason": "release candidate of 2026-08-10/13, superseded by 2026-08-31-rc4 (test corpus only)"
+    },
+    "2026-08-19-rc2": {
+      "reviewed": "2026-10-19",
+      "reason": "release candidate of 2026-08-10/13, superseded by 2026-08-31-rc4 (test corpus only)"
+    },
+    "2026-08-19-rc3": {
+      "reviewed": "2026-10-19",
+      "reason": "release candidate of 2026-08-10/13, superseded by 2026-08-31-rc4 (test corpus only)"
+    },
+    "2026-08-31-rc4": {
+      "reviewed": "2026-10-19",
+      "reason": "tag on the release branch (commit 04cb0e80c14a, 2026-08-31); its tree differs from the pinned master commit 1ce1dafffd03 only in CHANGELOG.md and build.xml (git diff --stat), the test documents are identical"
+    }
+  }
+}

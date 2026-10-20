@@ -1,0 +1,35 @@
+# suite        verapdf-compare-selftest
+# fingerprint  85a3e2aa4dd6506cccb529b438b49e0a3281842a34706035354d6ecc68d7a879
+# git          a6a3ec9b062bf651ab595bfa27d160f0d73db947
+# command      node test/compare-verapdf.cjs --selftest
+# exit code    0
+# duration     46 ms
+# date         2026-10-20T07:43:25.984Z
+ok   5 jobs parsed
+ok   batchSummary encrypted=1
+ok   F/UF both
+ok   header both
+ok   encryption both (taskException)
+ok   afrelationship only veraPDF -> disagreement
+ok   font rule unmapped
+ok   missing job listed
+ok   total disagreements = 1
+  | veraPDF vs. container checks — selftest
+  | veraPDF: 1 compliant, 4 non-compliant; jobs without counterpart: 0; our PDFs without veraPDF job: 1
+  |   encryption               exact              both fail   1, both pass   4, only veraPDF   0, only ours   0
+  |   trailer-id               exact              both fail   0, both pass   5, only veraPDF   0, only ours   0
+  |   file-header              exact              both fail   1, both pass   4, only veraPDF   0, only ours   0  veraPDF rules: ISO 19005-3:2012 6.1.2-1
+  |   pdfaid                   ours-implies-vera  both fail   0, both pass   5, only veraPDF   0, only ours   0
+  |   xmp-in-catalog           ours-implies-vera  both fail   0, both pass   5, only veraPDF   0, only ours   0
+  |   xmp-extension-schema     ours-implies-vera  both fail   0, both pass   5, only veraPDF   0, only ours   0
+  |   filespec-F-UF            exact              both fail   1, both pass   4, only veraPDF   0, only ours   0  veraPDF rules: ISO 19005-3:2012 6.8-2
+  |   afrelationship           vera-implies-ours  both fail   0, both pass   4, only veraPDF   1, only ours   0  <-- 1 DISAGREEMENT(S)  veraPDF rules: ISO 19005-3:2012 6.8-3
+  |       only veraPDF: a/afrel.pdf [6.8-3]
+  |   embedded-file-mime       exact              both fail   0, both pass   5, only veraPDF   0, only ours   0
+  |   embedded-file-moddate    report             both fail   0, both pass   5, only veraPDF   0, only ours   0
+  |   associated-files         report             both fail   0, both pass   5, only veraPDF   0, only ours   0
+  |   veraPDF failures outside the container checks (fonts, colour, ... — not decidable without a PDF/A validator): 1 rules
+  |       ISO 19005-3:2012 6.2.11.4.1-1: 1 PDF(s)
+  |   no veraPDF job for: a/extra.pdf
+  | veraPDF comparison (selftest): 1 disagreements in 11 rule pairs, 5 PDFs
+compare-verapdf selftest: 9/9 checks passed

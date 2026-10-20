@@ -1,0 +1,36 @@
+diff --git a/src/unpack.ts b/src/unpack.ts
+index 7d0d0ca..0dd0fbe 100644
+--- a/src/unpack.ts
++++ b/src/unpack.ts
+@@ -25,6 +25,8 @@ export function unpackBlocks(
+ 	return predicateByNormalizedBlockId;
+ }
+ 
++const CN_INDEX = CATEGORIES.indexOf('Cn');
++
+ const numberByBase64: { [key: string]: number } = {};
+ 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'.split('').forEach((c, i) => {
+ 	numberByBase64[c] = i;
+@@ -60,7 +62,10 @@ export function unpackCategories(packed: string): Map<string, Predicate> {
+ 			}
+ 
+ 			case -1:
+-				// Gap, ignore
++				// Gap = codepoints without an entry in UnicodeData.txt: unassigned, general category Cn
++				// (XML Schema 1.0 Part 2, F.1.1). Surrogates (Cs) are skipped by the packer and end up here
++				// as well; they cannot occur in a string of Unicode scalar values, so this is harmless.
++				partsByCatIndex[CN_INDEX].push(length === 1 ? singleChar(first) : charRange(first, first + length - 1));
+ 				break;
+ 
+ 			default: {
+@@ -75,6 +80,10 @@ export function unpackCategories(packed: string): Map<string, Predicate> {
+ 		}
+ 		first += length;
+ 	}
++	// codepoints after the last entry of UnicodeData.txt (U+10FFFE, U+10FFFF) are unassigned as well
++	if (first <= 0x10ffff) {
++		partsByCatIndex[CN_INDEX].push(charRange(first, 0x10ffff));
++	}
+ 	const partsByPrefix: Map<string, Predicate[]> = new Map();
+ 	CATEGORIES.forEach((category, i) => {
+ 		const predicate = partsByCatIndex[i].reduce(union, nothing);

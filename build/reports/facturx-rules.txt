@@ -1,0 +1,138 @@
+Factur-X 1.09.2 / ZUGFeRD 2.5.2 (Mustangproject ZF_250) — FACTUR-X-<PROFILE> rule sets and XSD models
+fingerprint dd5a87386474b6d183b9636ab0a153e44c64d825109da6cfa5bb3d548e789a35  (git 79d665ff45fd6660c38440a14efdfdf7434db1d3)
+generated 2026-10-19T12:36:39.059Z
+stamped suite reports: build/reports/<suite>.txt, summary build/reports/VERIFICATION.json
+
+SOURCE  Mustangproject commit c1618af86e687eb8c55f476d7b17575c6f99e3ca (2026-10-16), validator/src/main/resources/{schematron,schema}/ZF_250
+  FACTUR-X-MINIMUM.json: 65241 B pretty, 55014 B compact
+      5 patterns, 39 rules, 66 asserts, 0 globals; c570a628498e0b633a3dd66dd745653a8a2bc66fc6ee346b1971b9dc2d5f6778  ../zugferd/mustangproject/validator/src/main/resources/schematron/ZF_250/FACTUR-X_MINIMUM.sch
+      document FACTUR-X_MINIMUM_codedb.xml: 34328 B original (sha256 5c575cf37533a12a758f08b6b9691841c1691f2af214f21e040a07ec892e1f20), 28646 B embedded
+      xsd/FACTUR-X-MINIMUM.json: 4879 B
+  FACTUR-X-BASIC-WL.json: 249805 B pretty, 199018 B compact
+      47 patterns, 179 rules, 337 asserts, 0 globals; c32dd6eb4ef9c3e88772726ff86aca796476b719152edd6d95aa96ddb17a63f0  ../zugferd/mustangproject/validator/src/main/resources/schematron/ZF_250/FACTUR-X_BASIC-WL.sch
+      document FACTUR-X_BASIC-WL_codedb.xml: 70633 B original (sha256 a34cd66dda00a9260368fa02dad97e966ded1c1ad100787a5318074328d20abb), 59258 B embedded
+      xsd/FACTUR-X-BASIC-WL.json: 8754 B
+  FACTUR-X-BASIC.json: 417259 B pretty, 346578 B compact
+      63 patterns, 248 rules, 472 asserts, 0 globals; b2a84cee0e497733bf595c435db18ba720a9f2e16f6741a972667a2f277f6bed  ../zugferd/mustangproject/validator/src/main/resources/schematron/ZF_250/FACTUR-X_BASIC.sch
+      document FACTUR-X_BASIC_codedb.xml: 151391 B original (sha256 a150b48359a72e1c1629edddb147d5133aabd03adb6ce8b3d287d0c2a6936d21), 126982 B embedded
+      xsd/FACTUR-X-BASIC.json: 10114 B
+  FACTUR-X-EN16931.json: 526127 B pretty, 430651 B compact
+      66 patterns, 373 rules, 627 asserts, 0 globals; ef8c8380b499d1267b2dcf1fa709b45631a77d6d5f220c6cc2ade2fdade59473  ../zugferd/mustangproject/validator/src/main/resources/schematron/ZF_250/FACTUR-X_EN16931.sch
+      document FACTUR-X_EN16931_codedb.xml: 182828 B original (sha256 70339a41d71b02bb97683f8eea04acbd764e077a88a446b32860d89c3351b62f), 153296 B embedded
+      xsd/FACTUR-X-EN16931.json: 12408 B
+  FACTUR-X-EXTENDED.json: 1203071 B pretty, 973069 B compact
+      82 patterns, 982 rules, 1464 asserts, 0 globals; 5b9039e31f86e90f1a34925e84d3fad206efa3ca5639bb98a0cefd3661d3e36a  ../zugferd/mustangproject/validator/src/main/resources/schematron/ZF_250/FACTUR-X_EXTENDED.sch
+      document FACTUR-X_EXTENDED_codedb.xml: 266730 B original (sha256 6e23aedbba0e3b32b3b1211d145186193215f56f755201555306c42327e75fbc), 223798 B embedded
+      xsd/FACTUR-X-EXTENDED.json: 18623 B
+
+CORPUS  node test/run-facturx-tests.cjs  (17900 ms)
+ZUGFeRD corpus (build/corpus/zugferd-cii, 167 CII documents) by GuidelineSpecifiedDocumentContextParameter/ram:ID
+
+ 111  urn:cen.eu:en16931:2017  →  FACTUR-X-EN16931 + EN16931-CII | XSD FACTUR-X-EN16931
+        XSD-ungültig 6, mit Schematron-Fehlern 22, erwartet gültig (correct/, PEPPOL/Valid) 55 → gültig 44, erwartet fehlerhaft (fail/) 11 → beanstandet 8
+   3  urn:cen.eu:en16931:2017#compliant#urn:factur-x.eu:1p0:basic  →  FACTUR-X-BASIC + EN16931-CII | XSD FACTUR-X-BASIC
+        XSD-ungültig 0, mit Schematron-Fehlern 0, erwartet gültig (correct/, PEPPOL/Valid) 3 → gültig 3
+   6  urn:cen.eu:en16931:2017#compliant#urn:xeinkauf.de:kosit:xrechnung_3.0  →  EN16931-CII + XRechnung-CII | XSD CII-D16B
+        XSD-ungültig 0, mit Schematron-Fehlern 2, erwartet fehlerhaft (fail/) 1 → beanstandet 1
+   5  urn:cen.eu:en16931:2017#compliant#urn:xoev-de:kosit:standard:xrechnung_1.2  →  EN16931-CII | XSD CII-D16B
+        XSD-ungültig 0, mit Schematron-Fehlern 0, erwartet gültig (correct/, PEPPOL/Valid) 5 → gültig 5
+   4  urn:cen.eu:en16931:2017#compliant#urn:xoev-de:kosit:standard:xrechnung_2.1  →  EN16931-CII | XSD CII-D16B
+        XSD-ungültig 0, mit Schematron-Fehlern 0
+   3  urn:cen.eu:en16931:2017#compliant#urn:zugferd.de:2p0:basic  →  FACTUR-X-BASIC + EN16931-CII | XSD FACTUR-X-BASIC
+        XSD-ungültig 0, mit Schematron-Fehlern 0, erwartet gültig (correct/, PEPPOL/Valid) 3 → gültig 3
+   8  urn:cen.eu:en16931:2017#conformant#urn:factur-x.eu:1p0:extended  →  FACTUR-X-EXTENDED | XSD FACTUR-X-EXTENDED
+        XSD-ungültig 0, mit Schematron-Fehlern 2, erwartet gültig (correct/, PEPPOL/Valid) 8 → gültig 6
+   5  urn:cen.eu:en16931:2017#conformant#urn:zugferd.de:2p0:extended  →  FACTUR-X-EXTENDED | XSD FACTUR-X-EXTENDED
+        XSD-ungültig 0, mit Schematron-Fehlern 4, erwartet gültig (correct/, PEPPOL/Valid) 5 → gültig 1
+   6  urn:cen.eu:en16931:2017:compliant:factur-x.eu:1p0:basic  →  FACTUR-X-BASIC + EN16931-CII | XSD FACTUR-X-BASIC
+        XSD-ungültig 1, mit Schematron-Fehlern 6, erwartet gültig (correct/, PEPPOL/Valid) 1 → gültig 0, erwartet fehlerhaft (fail/) 5 → beanstandet 5
+   2  urn:cen.eu:en16931:2017:compliant:factur-x.eu:1p0:extended  →  FACTUR-X-EXTENDED | XSD FACTUR-X-EXTENDED
+        XSD-ungültig 2, mit Schematron-Fehlern 2, erwartet fehlerhaft (fail/) 2 → beanstandet 2
+   6  urn:factur-x.eu:1p0:basicwl  →  FACTUR-X-BASIC-WL | XSD FACTUR-X-BASIC-WL
+        XSD-ungültig 0, mit Schematron-Fehlern 4, erwartet gültig (correct/, PEPPOL/Valid) 5 → gültig 2, erwartet fehlerhaft (fail/) 1 → beanstandet 1
+   7  urn:factur-x.eu:1p0:minimum  →  FACTUR-X-MINIMUM | XSD FACTUR-X-MINIMUM
+        XSD-ungültig 4, mit Schematron-Fehlern 7, erwartet gültig (correct/, PEPPOL/Valid) 5 → gültig 0, erwartet fehlerhaft (fail/) 2 → beanstandet 2
+   1  urn:zugferd.de:2p0:minimum  →  FACTUR-X-MINIMUM | XSD FACTUR-X-MINIMUM
+        XSD-ungültig 1, mit Schematron-Fehlern 1, erwartet gültig (correct/, PEPPOL/Valid) 1 → gültig 0
+
+Expectation deviations (directory semantics of the corpus README; every one is confirmed by the Saxon reference below):
+  correct-but-rejected ZUGFeRDv2_correct_FNFE-factur-x-examples_Avoir_FR_type381_BASIC.pdf__factur-x.xml  rules: FX-SCH-A-000493, ohne id: "Attribute @currencyID' marked as not used in the given conte"×13, CII-DT-031×13
+  correct-but-rejected ZUGFeRDv2_correct_FNFE-factur-x-examples_Facture_DOM_BASICWL.pdf__factur-x.xml  rules: ohne id: "Attribute @currencyID' marked as not used in the given conte"×7
+  correct-but-rejected ZUGFeRDv2_correct_FNFE-factur-x-examples_Facture_DOM_MINIMUM.pdf__factur-x.xml  rules: ohne id: "Element 'ram:PostalTradeAddress' is marked as not used in th", ohne id: "Element 'ram:SpecifiedTaxRegistration' is marked as not used", ohne id: "Attribute @currencyID' marked as not used in the given conte"×3
+  correct-but-rejected ZUGFeRDv2_correct_FNFE-factur-x-examples_Facture_FR_BASICWL.pdf__factur-x.xml  rules: ohne id: "Attribute @currencyID' marked as not used in the given conte"×9
+  correct-but-rejected ZUGFeRDv2_correct_FNFE-factur-x-examples_Facture_FR_MINIMUM.pdf__factur-x.xml  rules: ohne id: "Element 'ram:PostalTradeAddress' is marked as not used in th", ohne id: "Element 'ram:SpecifiedTaxRegistration' is marked as not used", ohne id: "Attribute @currencyID' marked as not used in the given conte"×3
+  correct-but-rejected ZUGFeRDv2_correct_FNFE-factur-x-examples_Facture_UE_BASICWL.pdf__factur-x.xml  rules: BR-IC-11, BR-IC-12, ohne id: "Attribute @currencyID' marked as not used in the given conte"×7
+  correct-but-rejected ZUGFeRDv2_correct_FNFE-factur-x-examples_Facture_UE_MINIMUM.pdf__factur-x.xml  rules: ohne id: "Element 'ram:PostalTradeAddress' is marked as not used in th", ohne id: "Element 'ram:SpecifiedTaxRegistration' is marked as not used", ohne id: "Attribute @currencyID' marked as not used in the given conte"×3
+  correct-but-rejected ZUGFeRDv2_correct_Mustangproject_MustangGnuaccountingBeispielRE-20190610_507.pdf__zugferd-invoice.xml  XSD: cvc-complex-type.2.4.d /rsm:CrossIndustryInvoice[1]/rsm:SupplyChainTradeTransaction[1]/ram:ApplicableHeaderTradeSettlement[1]/ram:SpecifiedTradeSettlementPaymentMeans[1]/ram:PayeeSpecifiedCreditorFinancialInstitution[1]/ram:GermanBankleitzahlID[1]  rules: FX-SCH-A-000581, BR-CL-11
+  correct-but-rejected ZUGFeRDv2_correct_PHP__gpFacturX_sample_inofficial_20190125_atgp_factur-x_v_1_0.pdf__factur-x.xml  rules: ohne id: "Attribute @schemeID' marked as not used in the given context"×2
+  correct-but-rejected ZUGFeRDv2_correct_intarsys_EN16931_zugferd_2p0_EN16931_1_Teilrechnung.pdf__zugferd-invoice.xml  XSD: cvc-complex-type.2.4.a /rsm:CrossIndustryInvoice[1]/rsm:SupplyChainTradeTransaction[1]/ram:IncludedSupplyChainTradeLineItem[1]/ram:SpecifiedLineTradeAgreement[1]/ram:GrossPriceProductTradePrice[1]/ram:AppliedTradeAllowanceCharge[1]/ram:ActualAmount[1]  rules: ohne id: "Element variant 'ram:AppliedTradeAllowanceCharge[ not(ram:Ch"
+  correct-but-rejected ZUGFeRDv2_correct_intarsys_EN16931_zugferd_2p0_EN16931_Betriebskostenabrechnung.pdf__zugferd-invoice.xml  rules: ohne id: "Element 'ram:ReferenceTypeCode' is marked as not used in the", CII-DT-024
+  correct-but-rejected ZUGFeRDv2_correct_intarsys_EN16931_zugferd_2p0_EN16931_ElektronischeAdresse.pdf__zugferd-invoice.xml  rules: FX-SCH-A-000571, BR-CL-25
+  correct-but-rejected ZUGFeRDv2_correct_intarsys_EN16931_zugferd_2p0_EN16931_Rabatte.pdf__zugferd-invoice.xml  XSD: cvc-complex-type.2.4.a /rsm:CrossIndustryInvoice[1]/rsm:SupplyChainTradeTransaction[1]/ram:IncludedSupplyChainTradeLineItem[1]/ram:SpecifiedLineTradeAgreement[1]/ram:GrossPriceProductTradePrice[1]/ram:AppliedTradeAllowanceCharge[1]/ram:ActualAmount[1]  rules: ohne id: "Element variant 'ram:AppliedTradeAllowanceCharge[ not(ram:Ch"
+  correct-but-rejected ZUGFeRDv2_correct_intarsys_EN16931_zugferd_2p0_EN16931_RechnungsUebertragung.pdf__zugferd-invoice.xml  rules: FX-SCH-A-000571, BR-CL-25
+  correct-but-rejected ZUGFeRDv2_correct_intarsys_EN16931_zugferd_2p0_EN16931_Rechnungskorrektur.pdf__zugferd-invoice.xml  XSD: cvc-complex-type.2.4.a /rsm:CrossIndustryInvoice[1]/rsm:SupplyChainTradeTransaction[1]/ram:IncludedSupplyChainTradeLineItem[2]/ram:SpecifiedLineTradeAgreement[1]/ram:GrossPriceProductTradePrice[1]/ram:AppliedTradeAllowanceCharge[1]/ram:ActualAmount[1]  rules: ohne id: "Element variant 'ram:AppliedTradeAllowanceCharge[ not(ram:Ch"
+  correct-but-rejected ZUGFeRDv2_correct_intarsys_EXTENDED_zugferd_2p0_EXTENDED_Fremdwaehrung.pdf__zugferd-invoice.xml  rules: FX-SCH-A-001137×2, FX-SCH-A-000704, FX-SCH-A-000973
+  correct-but-rejected ZUGFeRDv2_correct_intarsys_EXTENDED_zugferd_2p0_EXTENDED_InnergemeinschLieferungMehrereBestellungen.pdf__zugferd-invoice.xml  rules: FX-SCH-A-000704
+  correct-but-rejected ZUGFeRDv2_correct_intarsys_EXTENDED_zugferd_2p0_EXTENDED_Rechnungskorrektur.pdf__zugferd-invoice.xml  rules: FX-SCH-A-001084×2
+  correct-but-rejected ZUGFeRDv2_correct_intarsys_EXTENDED_zugferd_2p0_EXTENDED_Warenrechnung.pdf__zugferd-invoice.xml  rules: FX-SCH-A-001084×6
+  correct-but-rejected ZUGFeRDv2_correct_intarsys_MINIMUM_zugferd_2p0_MINIMUM.pdf__zugferd-invoice.xml  XSD: cvc-complex-type.2.4.a /rsm:CrossIndustryInvoice[1]/rsm:SupplyChainTradeTransaction[1]/ram:ApplicableHeaderTradeAgreement[1]/ram:SellerTradeParty[1]/ram:PostalTradeAddress[1]/ram:PostcodeCode[1]; cvc-complex-type.2.4.a /rsm:CrossIndustryInvoice[1]/rsm:SupplyChainTradeTransaction[1]/ram:ApplicableHeaderTradeAgreement[1]/ram:BuyerTradeParty[1]/ram:PostalTradeAddress[1]/ram:PostcodeCode[1]  rules: ohne id: "Element 'ram:PostalTradeAddress' is marked as not used in th"
+  correct-but-rejected ZUGFeRDv2_correct_symtrax_Beispiele_EN16931_zugferd_2p1_EN16931_Elektron_embedded.pdf__factur-x.xml  rules: CII-SR-465
+  correct-but-rejected ZUGFeRDv2_correct_symtrax_Beispiele_EN16931_zugferd_2p1_EN16931_ElektronischeAdresse.pdf__factur-x.xml  rules: FX-SCH-A-000571, BR-CL-25
+  correct-but-rejected ZUGFeRDv2_correct_symtrax_Beispiele_EN16931_zugferd_2p1_EN16931_RechnungsUebertragung.pdf__factur-x.xml  rules: FX-SCH-A-000571, BR-CL-25
+  correct-but-rejected ZUGFeRDv2_correct_symtrax_Beispiele_EXTENDED_zugferd_2p1_EXTENDED_Fremdwaehrung.pdf__factur-x.xml  rules: FX-SCH-A-001137×2, FX-SCH-A-000704, FX-SCH-A-000973
+  correct-but-rejected ZUGFeRDv2_correct_symtrax_Beispiele_EXTENDED_zugferd_2p1_EXTENDED_InnergemeinschLieferungMehrereBestellungen.pdf__factur.xml  rules: FX-SCH-A-000704
+  correct-but-rejected ZUGFeRDv2_correct_symtrax_Beispiele_MINIMUM_zugferd_2p1_MINIMUM_Buchungshilfe.pdf__factur-x.xml  XSD: cvc-complex-type.2.4.a /rsm:CrossIndustryInvoice[1]/rsm:SupplyChainTradeTransaction[1]/ram:ApplicableHeaderTradeAgreement[1]/ram:SellerTradeParty[1]/ram:PostalTradeAddress[1]/ram:PostcodeCode[1]; cvc-complex-type.2.4.a /rsm:CrossIndustryInvoice[1]/rsm:SupplyChainTradeTransaction[1]/ram:ApplicableHeaderTradeAgreement[1]/ram:BuyerTradeParty[1]/ram:PostalTradeAddress[1]/ram:PostcodeCode[1]  rules: ohne id: "Element 'ram:PostalTradeAddress' is marked as not used in th"
+  correct-but-rejected ZUGFeRDv2_correct_symtrax_Beispiele_MINIMUM_zugferd_2p1_MINIMUM_Rechnung.pdf__factur-x.xml  XSD: cvc-complex-type.2.4.a /rsm:CrossIndustryInvoice[1]/rsm:SupplyChainTradeTransaction[1]/ram:ApplicableHeaderTradeAgreement[1]/ram:SellerTradeParty[1]/ram:PostalTradeAddress[1]/ram:PostcodeCode[1]; cvc-complex-type.2.4.a /rsm:CrossIndustryInvoice[1]/rsm:SupplyChainTradeTransaction[1]/ram:ApplicableHeaderTradeAgreement[1]/ram:BuyerTradeParty[1]/ram:PostalTradeAddress[1]/ram:PostcodeCode[1]  rules: ohne id: "Element 'ram:PostalTradeAddress' is marked as not used in th"
+  fail-but-accepted    ZUGFeRDv2_fail_Mustangproject_noNetPriceValidation.xml
+  fail-but-accepted    ZUGFeRDv2_fail_Mustangproject_wrongFilename.pdf__factur-y.xml
+  fail-but-accepted    ZUGFeRDv2_fail_ZUGFeRD_2_fully_compliant_complete.pdf__factur-x.xml
+
+Factur-X corpus tests: 167 documents; expected valid 91 -> valid 64; expected invalid 22 -> flagged 19; Saxon comparisons 296 identical, 0 both dynamic error, 0 different, 0 without oracle; 17340 ms
+
+  fail-but-accepted explained: wrongFilename.pdf (attachment named factur-y.xml: PDF-level error), noNetPriceValidation.xml (Mustang arithmetic check
+  outside Schematron, XMLValidator.checkArithmetics), ZUGFeRD_2_fully_compliant_complete.pdf (PDF/A defect). correct-but-rejected: older 2.0/2.1 samples
+  violating 1.09.2 rules (FX-SCH-A "marked as not used", PostcodeCode order in MINIMUM XSD, codelist updates BR-CL-25/FX-SCH-A-000571 …);
+  every finding equals Saxon (296 identical document×rule-set comparisons).
+
+XSD vs XERCES  sh test/xsd-oracle/run-facturx-xsd-oracle.sh; node test/run-facturx-xsd-tests.cjs
+FACTUR-X-MINIMUM     documents  1181   xerces valid    3   verdict mismatches 0   identical verdicts+codes  1181   code-only differences 0   our time 164 ms   model 4879 bytes
+FACTUR-X-BASIC-WL    documents  1181   xerces valid    6   verdict mismatches 0   identical verdicts+codes   949   code-only differences 232   our time 201 ms   model 8754 bytes
+FACTUR-X-BASIC       documents  1181   xerces valid   20   verdict mismatches 0   identical verdicts+codes   949   code-only differences 232   our time 200 ms   model 10114 bytes
+FACTUR-X-EN16931     documents  1181   xerces valid  774   verdict mismatches 0   identical verdicts+codes  1176   code-only differences 5   our time 1759 ms   model 12408 bytes
+FACTUR-X-EXTENDED    documents  1181   xerces valid  791   verdict mismatches 0   identical verdicts+codes  1176   code-only differences 5   our time 2318 ms   model 18623 bytes
+Factur-X XSD vs Xerces: 5905 document×profile verdicts, 5905 identical verdicts, 0 verdict mismatches; error codes identical 5431, known 2.4.e/f code differences 474, other code differences 0; our time 4642 ms
+  open (runtime, not modified): src/xsd-validator.js reports cvc-complex-type.2.4.a/2.4.d where Xerces 2.12 reports 2.4.e/2.4.f for an element
+  exceeding a BOUNDED maxOccurs > 1 (e.g. ram:SpecifiedTaxRegistration maxOccurs="2" in FACTUR-X_EN16931_…ReusableAggregate…_100.xsd:236;
+  Xerces: "cvc-complex-type.2.4.f: … can occur a maximum of '2' times in the current sequence"). Verdicts are identical.
+
+SAXON PARITY  sh test/run-oracle.sh … --sets FACTUR-X (document() codedb next to the XSLT); node test/compare-oracle.cjs
+  cen-cii × FACTUR-X-BASIC     docs=    9 identical=    9 both-dynamic-error=  0 known-deviation= 0 MISMATCH=0 oracle-error-only=0 ours-error-only=0
+  cen-cii × FACTUR-X-BASIC-WL  docs=    9 identical=    9 both-dynamic-error=  0 known-deviation= 0 MISMATCH=0 oracle-error-only=0 ours-error-only=0
+  cen-cii × FACTUR-X-EN16931   docs=    9 identical=    9 both-dynamic-error=  0 known-deviation= 0 MISMATCH=0 oracle-error-only=0 ours-error-only=0
+  cen-cii × FACTUR-X-EXTENDED  docs=    9 identical=    8 both-dynamic-error=  1 known-deviation= 0 MISMATCH=0 oracle-error-only=0 ours-error-only=0
+  cen-cii × FACTUR-X-MINIMUM   docs=    9 identical=    9 both-dynamic-error=  0 known-deviation= 0 MISMATCH=0 oracle-error-only=0 ours-error-only=0
+  extra-cii × FACTUR-X-BASIC   docs=   73 identical=   73 both-dynamic-error=  0 known-deviation= 0 MISMATCH=0 oracle-error-only=0 ours-error-only=0
+  extra-cii × FACTUR-X-BASIC-WL docs=   73 identical=   73 both-dynamic-error=  0 known-deviation= 0 MISMATCH=0 oracle-error-only=0 ours-error-only=0
+  extra-cii × FACTUR-X-EN16931 docs=   73 identical=   73 both-dynamic-error=  0 known-deviation= 0 MISMATCH=0 oracle-error-only=0 ours-error-only=0
+  extra-cii × FACTUR-X-EXTENDED docs=   73 identical=   73 both-dynamic-error=  0 known-deviation= 0 MISMATCH=0 oracle-error-only=0 ours-error-only=0
+  extra-cii × FACTUR-X-MINIMUM docs=   73 identical=   73 both-dynamic-error=  0 known-deviation= 0 MISMATCH=0 oracle-error-only=0 ours-error-only=0
+  peppol-cii × FACTUR-X-BASIC  docs=  351 identical=  350 both-dynamic-error=  1 known-deviation= 0 MISMATCH=0 oracle-error-only=0 ours-error-only=0
+  peppol-cii × FACTUR-X-BASIC-WL docs=  351 identical=  350 both-dynamic-error=  1 known-deviation= 0 MISMATCH=0 oracle-error-only=0 ours-error-only=0
+  peppol-cii × FACTUR-X-EN16931 docs=  351 identical=  350 both-dynamic-error=  1 known-deviation= 0 MISMATCH=0 oracle-error-only=0 ours-error-only=0
+  peppol-cii × FACTUR-X-EXTENDED docs=  351 identical=  350 both-dynamic-error=  1 known-deviation= 0 MISMATCH=0 oracle-error-only=0 ours-error-only=0
+  peppol-cii × FACTUR-X-MINIMUM docs=  351 identical=  350 both-dynamic-error=  1 known-deviation= 0 MISMATCH=0 oracle-error-only=0 ours-error-only=0
+  xr-cii × FACTUR-X-BASIC      docs=  581 identical=  576 both-dynamic-error=  5 known-deviation= 0 MISMATCH=0 oracle-error-only=0 ours-error-only=0
+  xr-cii × FACTUR-X-BASIC-WL   docs=  581 identical=  580 both-dynamic-error=  1 known-deviation= 0 MISMATCH=0 oracle-error-only=0 ours-error-only=0
+  xr-cii × FACTUR-X-EN16931    docs=  581 identical=  576 both-dynamic-error=  5 known-deviation= 0 MISMATCH=0 oracle-error-only=0 ours-error-only=0
+  xr-cii × FACTUR-X-EXTENDED   docs=  581 identical=  575 both-dynamic-error=  6 known-deviation= 0 MISMATCH=0 oracle-error-only=0 ours-error-only=0
+  xr-cii × FACTUR-X-MINIMUM    docs=  581 identical=  581 both-dynamic-error=  0 known-deviation= 0 MISMATCH=0 oracle-error-only=0 ours-error-only=0
+  zugferd-cii × FACTUR-X-BASIC docs=  167 identical=  167 both-dynamic-error=  0 known-deviation= 0 MISMATCH=0 oracle-error-only=0 ours-error-only=0
+  zugferd-cii × FACTUR-X-BASIC-WL docs=  167 identical=  167 both-dynamic-error=  0 known-deviation= 0 MISMATCH=0 oracle-error-only=0 ours-error-only=0
+  zugferd-cii × FACTUR-X-EN16931 docs=  167 identical=  167 both-dynamic-error=  0 known-deviation= 0 MISMATCH=0 oracle-error-only=0 ours-error-only=0
+  zugferd-cii × FACTUR-X-EXTENDED docs=  167 identical=  167 both-dynamic-error=  0 known-deviation= 0 MISMATCH=0 oracle-error-only=0 ours-error-only=0
+  zugferd-cii × FACTUR-X-MINIMUM docs=  167 identical=  167 both-dynamic-error=  0 known-deviation= 0 MISMATCH=0 oracle-error-only=0 ours-error-only=0
+  FACTUR-X comparisons: 5905, mismatches: 0. both-dynamic-error = invalid inputs where the rule itself raises a dynamic error in Saxon
+  and ours (e.g. "yes" cast as xs:boolean, two ram:TaxTotalAmount in "cast as", "" to double).
+
+TIMINGS (Node 22, create / small EN16931 invoice / 1.3 MB CII): MINIMUM 39/11/14 ms, BASIC-WL 86/34/56, BASIC 143/67/52, EN16931 133/35/53, EXTENDED 1363/77/64.
+  Saxon skeleton compilation of all 7 sources: 42 s.

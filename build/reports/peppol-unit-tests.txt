@@ -1,0 +1,26 @@
+# suite        peppol-unit-tests
+# fingerprint  85a3e2aa4dd6506cccb529b438b49e0a3281842a34706035354d6ecc68d7a879
+# git          a6a3ec9b062bf651ab595bfa27d160f0d73db947
+# command      node test/run-peppol-tests.cjs <ext>/peppol-bis-invoice-3
+# exit code    0
+# duration     10880 ms
+# date         2026-10-20T07:23:37.041Z
+
+  unit-CII-DK        testSets  13  tests  120  passed  120  failed 0
+  unit-CII-IT        testSets   4  tests   12  passed   12  failed 0
+  unit-CII-NL        testSets   9  tests   22  passed   22  failed 0
+  unit-CII-NO        testSets   2  tests   13  passed   13  failed 0
+  unit-CII-PEPPOL    testSets  47  tests  158  passed  158  failed 0
+  unit-CII-SE        testSets  13  tests   26  passed   26  failed 0
+  unit-SBDH          testSets   1  tests    0  passed    0  failed 0  skipped testSets 1
+  unit-UBL-DE        testSets  28  tests   65  passed   65  failed 0
+  unit-UBL-DK        testSets  14  tests  137  passed  137  failed 0
+  unit-UBL-GR        testSets  10  tests   41  passed   41  failed 0
+  unit-UBL-IT        testSets   4  tests   12  passed   12  failed 0
+  unit-UBL-NL        testSets   9  tests   21  passed   21  failed 0
+  unit-UBL-NO        testSets   2  tests   14  passed   14  failed 0
+  unit-UBL-PEPPOL    testSets  63  tests  335  passed  335  failed 0
+  unit-UBL-SE        testSets  24  tests   48  passed   48  failed 0
+  configurations: peppolbis-en16931-base-3.0-cii=88, peppolbis-en16931-base-3.0-ubl=153, peppolbis-en16931-01-3.0-ubl-invoice=1
+
+Peppol BIS Billing 3.0 unit tests: 1024 passed, 0 failed, 1024 tests in 243 testSets (1 testSet(s) skipped: envelope rules) in 10705 ms

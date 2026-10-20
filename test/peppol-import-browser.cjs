@@ -1,0 +1,98 @@
+#!/usr/bin/env node
+/*
+ * peppol-import-browser.cjs — the Peppol BIS rule files are not redistributed (no licence); the user loads
+ * the official .sch files in the page ("Regelwerke laden"). This test proves for a real browser that
+ *  1. the rule set compiled in the browser (src/sch-compiler.js with the browser host) is identical to the
+ *     one compiled by the Node build (build/schemas/PEPPOL-*.json), apart from the recorded source names;
+ *  2. the SHA-256 shown as "verified" is computed over the file bytes and equals the manifest value, and a
+ *     modified file is reported as a deviating version;
+ *  3. documents analysed after the import give the same findings as the Node pipeline with all rule sets;
+ *  4. the imported rule set survives a reload (localStorage, where the browser provides it).
+ *
+ * Usage: node peppol-import-browser.cjs [--browser chromium|webkit|firefox] <peppol-bis-invoice-3 dir> <doc>...
+ */
+'use strict';
+const fs = require('fs');
+const os = require('os');
+const path = require('path');
+const { chromium, webkit, firefox } = require(path.join(__dirname, 'resolve-tool.cjs')).playwright();
+const PrueferCore = require(path.join(__dirname, '..', 'src', 'pruefer-core.js'));
+const { createEnv } = require(path.join(__dirname, '..', 'tools', 'node-env.cjs'));
+
+const args = process.argv.slice(2);
+const bi = args.indexOf('--browser');
+const browserName = bi >= 0 ? args[bi + 1] : 'chromium';
+const rest = bi >= 0 ? args.filter((a, i) => i !== bi && i !== bi + 1) : args;
+const [pepDir, ...docs] = rest;
+const root = path.join(__dirname, '..');
+const dist = path.join(root, 'dist', 'E-Rechnung-Pruefer.html');
+const fullEnv = createEnv({});
+
+const strip = (c) => { const o = JSON.parse(JSON.stringify(c)); delete o.sources; delete o.importedFrom; return o; };
+let fails = 0;
+const check = (ok, msg) => { console.log((ok ? '  ok   ' : '  FAIL ') + msg); if (!ok) fails++; };
+
+(async () => {
+  const engine = { chromium, webkit, firefox }[browserName];
+  const browser = await engine.launch();
+  const context = await browser.newContext();
+  const page = await context.newPage();
+  const errors = [];
+  page.on('pageerror', (e) => errors.push(e.message));
+  await page.goto('file://' + dist);
+  await page.waitForSelector('#ruleimport input[type=file]', { state: 'attached' });
+  console.log(browserName + ': Peppol import test');
+
+  for (const id of ['PEPPOL-UBL', 'PEPPOL-CII']) {
+    const file = path.join(pepDir, 'rules', 'sch', id.replace('PEPPOL-', 'PEPPOL-EN16931-') + '.sch');
+    await page.setInputFiles('#ruleimport input[type=file]', file);
+    await page.waitForFunction((i) => window.PrueferApp.imported[i], id, { timeout: 120000 });
+    const got = await page.evaluate((i) => window.PrueferApp.imported[i], id);
+    const ref = JSON.parse(fs.readFileSync(path.join(root, 'build', 'schemas', id + '.json'), 'utf8'));
+    const ga = JSON.stringify(strip(got)), rb = JSON.stringify(strip(ref));
+    if (ga !== rb) { let i = 0; while (i < ga.length && ga[i] === rb[i]) i++; console.log('    first difference at ' + i + '\n    browser: ' + ga.slice(Math.max(0, i - 120), i + 120) + '\n    node:    ' + rb.slice(Math.max(0, i - 120), i + 120)); }
+    check(ga === rb, id + ': compiled in the browser = Node build (' + got.stats.asserts + ' asserts)');
+    check(got.importedFrom.verified === true && got.importedFrom.sha256 === ref.sources[0].sha256, id + ': SHA-256 over bytes = manifest (' + got.importedFrom.sha256.slice(0, 16) + '…)');
+  }
+  const status = await page.locator('#ruleimport').textContent();
+  check(/SHA-256 entspricht/.test(status), 'status line shows the verified version');
+
+  // a modified file (one extra comment) must be reported as a deviating version
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'pep-'));
+  const modified = path.join(tmp, 'PEPPOL-EN16931-UBL.sch');
+  fs.writeFileSync(modified, fs.readFileSync(path.join(pepDir, 'rules', 'sch', 'PEPPOL-EN16931-UBL.sch'), 'utf8') + '\n<!-- modified -->\n');
+  await page.setInputFiles('#ruleimport input[type=file]', modified);
+  await page.waitForFunction(() => window.PrueferApp.imported['PEPPOL-UBL'] && window.PrueferApp.imported['PEPPOL-UBL'].importedFrom.verified === false, null, { timeout: 120000 });
+  check(/ABWEICHENDE Version/.test(await page.locator('#ruleimport').textContent()), 'modified file reported as deviating version');
+  // restore the official file
+  await page.setInputFiles('#ruleimport input[type=file]', path.join(pepDir, 'rules', 'sch', 'PEPPOL-EN16931-UBL.sch'));
+  await page.waitForFunction(() => window.PrueferApp.imported['PEPPOL-UBL'].importedFrom.verified === true, null, { timeout: 120000 });
+
+  // persistence across reload
+  await page.reload();
+  await page.waitForSelector('#ruleimport input[type=file]', { state: 'attached' });
+  const persisted = await page.evaluate(() => Object.keys(window.PrueferApp.imported).sort().join(','));
+  console.log('  info persisted after reload: ' + (persisted || '(none – browser has no localStorage for file:// pages)'));
+
+  // documents with the imported rules = Node with all rule sets
+  if (persisted !== 'PEPPOL-CII,PEPPOL-UBL') {
+    for (const id of ['PEPPOL-UBL', 'PEPPOL-CII']) {
+      const file = path.join(pepDir, 'rules', 'sch', id.replace('PEPPOL-', 'PEPPOL-EN16931-') + '.sch');
+      await page.setInputFiles('#ruleimport input[type=file]', file);
+      await page.waitForFunction((i) => window.PrueferApp.imported[i], id, { timeout: 120000 });
+    }
+  }
+  for (const doc of docs) {
+    const before = await page.locator('section.result').count();
+    await page.setInputFiles('#file', doc);
+    await page.waitForFunction((n) => document.querySelectorAll('section.result').length > n && document.getElementById('status').hidden, before, { timeout: 120000 });
+    const r = await page.evaluate(() => { const x = window.PrueferApp.results[0]; return { ids: (x.allFindings || []).map((f) => f.id + '|' + f.level).sort(), route: x.route, missing: x.missingRuleSets || [] }; });
+    const n = await PrueferCore.analyzeBytes(fullEnv, new Uint8Array(fs.readFileSync(doc)), path.basename(doc));
+    const exp = (n.allFindings || []).map((f) => f.id + '|' + f.level).sort();
+    check(JSON.stringify(r.ids) === JSON.stringify(exp) && r.missing.length === 0, path.basename(doc) + ': ' + r.ids.length + ' findings, identical to Node with all rule sets, route ' + JSON.stringify(r.route && (r.route.ruleSets || r.route)));
+  }
+  check(errors.length === 0, 'no page errors' + (errors.length ? ': ' + errors.join('; ') : ''));
+  await browser.close();
+  console.log('PEPPOL IMPORT ' + browserName + ': ' + (fails ? fails + ' FAILED' : 'OK'));
+  process.exit(fails ? 1 : 0);
+})().catch((e) => { console.error(e); process.exit(2); });

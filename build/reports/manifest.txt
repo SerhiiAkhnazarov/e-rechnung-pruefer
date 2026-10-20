@@ -1,0 +1,8 @@
+# suite        manifest
+# fingerprint  85a3e2aa4dd6506cccb529b438b49e0a3281842a34706035354d6ecc68d7a879
+# git          a6a3ec9b062bf651ab595bfa27d160f0d73db947
+# command      node tools/verify-manifest.cjs <ext>
+# exit code    0
+# duration     116 ms
+# date         2026-10-20T07:22:35.305Z
+manifest verification: 86 files identical, 0 mismatches, 0 not checked
