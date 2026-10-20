@@ -32,6 +32,9 @@
 })(typeof self !== 'undefined' ? self : this, function () {
 'use strict';
 let H = null;
+// comments of the source files outside their schema element (licence and permission notices, release notes),
+// kept verbatim with the compiled form (EUPL-1.2 Art. 5, Apache-2.0 §4(c)); main file first, then includes
+let sourceNotices = [];
 const SCH_NS = 'http://purl.oclc.org/dsdl/schematron';
 const XSL_NS = 'http://www.w3.org/1999/XSL/Transform';
 
@@ -49,6 +52,7 @@ function parseFile(file, seen) {
   seen.add(abs);
   const text = H.read(abs);
   const doc = H.parseXml(text);
+  for (let n = doc.firstChild; n; n = n.nextSibling) if (n.nodeType === 8) sourceNotices.push(String(n.data).trim());
   return { doc, abs, sha256: H.sha256(text), bytes: H.byteLength(text) };
 }
 
@@ -283,6 +287,7 @@ function rewriteDocumentCalls(expr, docs, baseDir) {
 
 function compileWith(host, file, id) {
   inlineCounter = 0;
+  sourceNotices = [];
   H = host;
   const seen = new Set();
   const main = parseFile(file, seen);
@@ -293,6 +298,8 @@ function compileWith(host, file, id) {
 
   const out = {
     id: id || H.basename(file).replace(/\.sch$/, ''),
+    // modification notice (Apache-2.0 §4(b), EUPL-1.2 Art. 5): this is a compiled form of the files in "sources"
+    generator: 'E-Rechnung Prüfer src/sch-compiler.js: ISO Schematron compiled to JSON; rules, tests and messages of the sources unchanged',
     queryBinding: schema.getAttribute('queryBinding') || 'xslt2',
     defaultPhase: schema.getAttribute('defaultPhase') || null,
     title: null,
@@ -302,6 +309,7 @@ function compileWith(host, file, id) {
     phases: [],
     patterns: [],
     sources,
+    notices: sourceNotices,
   };
 
   for (const c of childElements(schema)) {

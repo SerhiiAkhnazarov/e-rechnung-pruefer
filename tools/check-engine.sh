@@ -72,12 +72,16 @@ echo "$UNI_BLOCKS  $T/xspattern.js/src/generated/blocks.json" | sha256sum -c -
 echo "$UNI_CATS  $T/xspattern.js/src/generated/categories.json" | sha256sum -c -
 mkdir -p "$T/vendor"
 V='"3.34.0-src-exact"'
+# licence notices at the top of every bundle (MIT: "The above copyright notice and this permission notice shall be
+# included in all copies or substantial portions"); the full texts are in NOTICE (part E)
+FX_BANNER='/*! fontoxpath 3.34.0 (https://github.com/FontoXML/fontoxpath), Copyright (c) 2017 Fonto Group BV, Martin Middel, MIT License; contains xspattern (Copyright (c) 2019 Stef Busking), whynot (Copyright (c) 2017 Stef Busking) and prsc (Copyright (c) 2019 Stef Busking), MIT License, and tables generated from the Unicode Character Database 15.0.0 ((c) 2022 Unicode, Inc., Unicode License V3); esbuild helper code Copyright (c) 2020 Evan Wallace, MIT License. Built from source with patches/fontoxpath-pruefer.patch and patches/xspattern-pruefer.patch by tools/check-engine.sh of https://github.com/SerhiiAkhnazarov/e-rechnung-pruefer, whose NOTICE file contains the full licence texts. */'
+SD_BANNER='/*! slimdom 4.3.5 (https://github.com/bwrrp/slimdom.js), Copyright (c) 2017 Stef Busking, MIT License; contains prsc (Copyright (c) 2019 Stef Busking), MIT License; esbuild helper code Copyright (c) 2020 Evan Wallace, MIT License. Built by tools/check-engine.sh of https://github.com/SerhiiAkhnazarov/e-rechnung-pruefer, whose NOTICE file contains the full licence texts. */'
 cd "$T"
 export NODE_PATH="$T/node_modules"
-"$ESB" node_modules/fontoxpath/src/index.ts --bundle --format=cjs --target=es2020 --platform=node --define:VERSION="$V" --outfile=vendor/fontoxpath.cjs --log-level=warning
-"$ESB" node_modules/fontoxpath/src/index.ts --bundle --format=iife --global-name=fontoxpath --target=es2020 --platform=browser --define:VERSION="$V" --outfile=vendor/fontoxpath.iife.js --log-level=warning
-"$ESB" node_modules/fontoxpath/src/index.ts --bundle --minify --format=iife --global-name=fontoxpath --target=es2020 --platform=browser --define:VERSION="$V" --outfile=vendor/fontoxpath.iife.min.js --log-level=warning
-"$ESB" node_modules/slimdom/src/index.ts --bundle --format=cjs --target=es2019 --platform=node --outfile=vendor/slimdom.cjs --log-level=warning
+"$ESB" node_modules/fontoxpath/src/index.ts --bundle --format=cjs --target=es2020 --platform=node --define:VERSION="$V" --banner:js="$FX_BANNER" --outfile=vendor/fontoxpath.cjs --log-level=warning
+"$ESB" node_modules/fontoxpath/src/index.ts --bundle --format=iife --global-name=fontoxpath --target=es2020 --platform=browser --define:VERSION="$V" --banner:js="$FX_BANNER" --outfile=vendor/fontoxpath.iife.js --log-level=warning
+"$ESB" node_modules/fontoxpath/src/index.ts --bundle --minify --format=iife --global-name=fontoxpath --target=es2020 --platform=browser --define:VERSION="$V" --banner:js="$FX_BANNER" --outfile=vendor/fontoxpath.iife.min.js --log-level=warning
+"$ESB" node_modules/slimdom/src/index.ts --bundle --format=cjs --target=es2019 --platform=node --banner:js="$SD_BANNER" --outfile=vendor/slimdom.cjs --log-level=warning
 if [ -n "$UPDATE" ]; then cp "$T"/vendor/*.cjs "$T"/vendor/*.js "$HERE/vendor/"; echo "vendor/ updated"; fi
 diffs=0
 for f in fontoxpath.cjs fontoxpath.iife.js fontoxpath.iife.min.js slimdom.cjs; do

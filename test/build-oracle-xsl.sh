@@ -15,8 +15,8 @@
 # Environment: SAXON_JAR, PEPPOL_DIR, MUSTANG_DIR, PH_SCHEMATRON_DIR
 set -e
 OUT="${1:?out dir}"
-# repositories and tools in the CI layout under build/ext (tools/verify-all.cjs links them); every path can be overridden
-EXT="${EXT_DIR:-$(cd "$(dirname "$0")" && cd "$(git rev-parse --show-toplevel 2>/dev/null || echo ../..)" && pwd)/build/ext}"
+# sources in the layout of tools/fetch-sources.cjs (EXT_DIR is set by tools/verify-all.cjs; default <repository>/ext); every path can be overridden
+EXT="${EXT_DIR:-$(cd "$(dirname "$0")" && cd "$(git rev-parse --show-toplevel 2>/dev/null || echo ../..)" && pwd)/ext}"
 SAXON_JAR="${SAXON_JAR:-$EXT/saxon/saxon-he-12.8.jar}"
 PEPPOL_DIR="${PEPPOL_DIR:-$EXT/peppol-bis-invoice-3}"
 MUSTANG_DIR="${MUSTANG_DIR:-$EXT/mustangproject}"

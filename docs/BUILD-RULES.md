@@ -41,7 +41,7 @@ SHA-256 `e143facb…` (UBL) und `53bb5c06…` (CII) – identisch mit dem Manife
 sh tools/compile-rules.sh ext          # build/schemas/*.json  (tools/compile-sch.cjs; PEPPOL-* nur lokal, nicht ausgeliefert)
 sh tools/compile-xsd-models.sh ext     # build/xsd/*.json      (tools/compile-xsd.cjs)
 node tools/compile-scenarios.cjs ext/validator-configuration-xrechnung build/scenarios.json
-node tools/make-manifest.cjs           # build/STANDARDS_MANIFEST.json (Pfade im Kopf des Skripts = Klone der Entwicklungsumgebung)
+node tools/make-manifest.cjs ext       # build/STANDARDS_MANIFEST.json (aus den Quellen in ext/, Pfade logisch)
 ```
 
 `node tools/check-reproducible.cjs ext` erzeugt Merge-Ergebnis, alle Regelwerke, XSD-Modelle und
@@ -65,10 +65,12 @@ und prüft deren SHA-256, bündelt mit esbuild 0.28.2 (fontoxpath `--target=es20
 ## 4. Browser für die Browser-Testreihen
 
 ```sh
+npm install --no-save --no-audit --no-fund playwright@1.56.0 pdfjs-dist@6.2.108 esbuild@0.28.2
 npx playwright install --with-deps chromium webkit firefox   # Playwright 1.56.0
 ```
 
-lädt die Browser-Builds vom offiziellen Playwright-CDN (Chromium 141.0.7390.37 / Revision 1194, WebKit 26.0 /
+installiert die Testwerkzeuge in `node_modules/` (wie der CI-Job `verify`; liegen sie an anderer Stelle:
+`PLAYWRIGHT_MODULE`, `PDFJS_MODULE`, `ESBUILD_BINARY`) und lädt die Browser-Builds vom offiziellen Playwright-CDN (Chromium 141.0.7390.37 / Revision 1194, WebKit 26.0 /
 2215, Firefox 142.0.1 / 1495; `playwright-core/browsers.json`) – lokal und in CI (`verify.yml`) gleich. Das
 Repository enthält und verbreitet keine Browser-Builds. Ist ein Browser nicht installiert, markiert
 `verify-all` seine Testreihen als „nicht gelaufen“, und die Freigabe mit `--strict` schlägt fehl.
@@ -76,8 +78,8 @@ Repository enthält und verbreitet keine Browser-Builds. Ist ein Browser nicht i
 ## 5. Referenzen und Prüfung
 
 ```sh
-node tools/verify-all.cjs --ext ext            # alles: Referenzen neu erzeugen, Reproduzierbarkeit, alle Testreihen
-node tools/verify-manifest.cjs ext --reports --strict   # Freigabe: jede Testreihe gelaufen, bestanden, aktueller Fingerprint
+node tools/verify-all.cjs --ext ext --skip pdfa-verapdf   # alles: Referenzen neu erzeugen, Reproduzierbarkeit, alle Testreihen
+node tools/verify-manifest.cjs ext --reports --strict     # Freigabe: jede Testreihe gelaufen, bestanden, aktueller Fingerprint
 ```
 
 Stufe 1 von `verify-all` erzeugt die Referenzergebnisse jedes Mal neu aus den gepinnten Quellen

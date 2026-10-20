@@ -15,6 +15,13 @@ build/schemas/PEPPOL-*.json
 build/peppol-import/
 build/kosit-official/
 build/reference-xsl/
-build/verapdf/
-build/shots/
 build/ext/
+# work files of the CI jobs (.github/workflows)
+/verapdf/
+/maven.jar
+/maven.jar.sha1
+/jar-compare.txt
+/check-run.json
+/pages-report.txt
+/site/
+/ci-verification/

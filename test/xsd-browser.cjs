@@ -80,21 +80,7 @@ for (const f of fs.readdirSync(oracleDir).filter((x) => x.endsWith('.jsonl')).so
     else { diff++; out('  DIFF ' + file + '\n    node:    ' + nodeErrs.join(' | ') + '\n    browser: ' + br.errors.join(' | ')); }
   }
   out('documents ' + n + '   identical (verdict + error codes + locations) ' + same + '   differences ' + diff + '   parse differences ' + parseDiff + '   browser validation time ' + browserMs.toFixed(0) + ' ms');
-  // the 2000-line invoice, when present
-  const big = '/tmp/claude-0/-home-claude/d272a155-8880-58c1-ad42-3c9959e4445e/scratchpad/big2000.xml';
-  if (fs.existsSync(big)) {
-    const r = await page.evaluate(({ xml }) => {
-      const t0 = performance.now();
-      const doc = new DOMParser().parseFromString(xml, 'application/xml');
-      const t1 = performance.now();
-      const r1 = window.__validators['UBL-Invoice-2.1'].validate(doc);
-      const t2 = performance.now();
-      const r2 = window.__validators['UBL-Invoice-2.1'].validate(doc);
-      const t3 = performance.now();
-      return { parse: t1 - t0, first: t2 - t1, second: t3 - t2, valid: r1.valid && r2.valid };
-    }, { xml: fs.readFileSync(big, 'utf8') });
-    out('big2000.xml in ' + browserName + ': DOMParser ' + r.parse.toFixed(0) + ' ms, validate ' + r.first.toFixed(0) + ' ms (first) / ' + r.second.toFixed(0) + ' ms (second), valid=' + r.valid);
-  }
+  // run times of large invoices (100 / 500 / 2 000 lines, generated): test/perf.cjs
   await browser.close();
   if (reportFile) fs.appendFileSync(reportFile, '\n' + lines.join('\n') + '\n');
   process.exit(diff || parseDiff ? 1 : 0);

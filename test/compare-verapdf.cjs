@@ -5,13 +5,9 @@
  * metadata in the catalog, XMP extension schemas, embedded files: F/UF, AFRelationship, Subtype
  * (MIME type), Params/ModDate, association via AF).
  *
- * *** NOT RUN IN THE SANDBOX: veraPDF is not available there. `find / -iname '*verapdf*'` and a scan
- * *** of all 594 *.jar/*.zip files on the build machine for org/verapdf classes found no copy (only
- * *** the Mustang test resource veraPDFtestsuite6-7-11-t01-fail-a.pdf); the veraPDF library
- * *** (org.verapdf:validation-model-jakarta 1.30.3, run by tools/verapdf/VeraMrr.java) is missing and
- * *** Maven Central is unreachable (HTTP 403 from the proxy). The comparison runs in CI, job
- * *** "pdfa-verapdf" of .github/workflows/verify.yml.
- * *** Only `--selftest` (parser + classification on a synthetic report) runs in the sandbox.
+ * The comparison needs the veraPDF library (org.verapdf:validation-model-jakarta 1.30.3 from Maven Central,
+ * run by tools/verapdf/VeraMrr.java); it runs in the CI job "pdfa-verapdf" of .github/workflows/verify.yml.
+ * Without veraPDF only `--selftest` (parser + classification on a synthetic report) runs.
  *
  * Input format: veraPDF machine-readable report (MRR, `--format mrr`): report/jobs/job/{item/name,
  * validationReport[@isCompliant,@profileName]/details/rule[@clause,@testNumber,@status,

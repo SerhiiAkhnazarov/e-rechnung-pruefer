@@ -7,8 +7,8 @@
 # Environment: ZF_XSD_DIR (default: Mustangproject validator/src/main/resources/schema/ZF_250)
 set -e
 HERE="$(cd "$(dirname "$0")/../.." && pwd)"
-# repositories and tools in the CI layout under build/ext (tools/verify-all.cjs links them); every path can be overridden
-EXT="${EXT_DIR:-$(cd "$(dirname "$0")" && cd "$(git rev-parse --show-toplevel 2>/dev/null || echo ../..)" && pwd)/build/ext}"
+# sources in the layout of tools/fetch-sources.cjs (EXT_DIR is set by tools/verify-all.cjs; default <repository>/ext); every path can be overridden
+EXT="${EXT_DIR:-$(cd "$(dirname "$0")" && cd "$(git rev-parse --show-toplevel 2>/dev/null || echo ../..)" && pwd)/ext}"
 ZF_XSD_DIR="${ZF_XSD_DIR:-$EXT/mustangproject/validator/src/main/resources/schema/ZF_250}"
 OUT="$HERE/build/oracle/xsd-facturx"
 mkdir -p "$OUT"

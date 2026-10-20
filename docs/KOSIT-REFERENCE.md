@@ -396,7 +396,7 @@ Das Ant-Ziel `compile-scenario` (`build.xml:421-441`) ersetzt in `scenarios.xml`
   sind, schreibt `/*:Invoice[namespace-uri()='urn:…'][1]/…` (Modus `schematron-get-full-path`).
   Regel-IDs, Flags, Texte und die Menge der ausgelösten Asserts sind unabhängig vom Compiler
   (beide setzen ISO Schematron „xslt2“ um); ein Unterschied bestünde nur in der Notation der
-  Position. **Hinweis:** `docs/BUILD-RULES.md` (§4) und die Aufgabenstellung gingen davon aus, dass
+  Position. **Hinweis:** eine frühere Fassung von `docs/BUILD-RULES.md` ging davon aus, dass
   das Release mit dem ISO-Skeleton kompiliert sei – das ist nach `build.xml` beider Repositories
   nicht der Fall (SchXslt seit Release 2026-01-31, `CHANGELOG.md` der Konfiguration).
 
@@ -441,9 +441,9 @@ weil `resources/` nicht im Git liegt. **Ressourcen-Abbildung** (Quelle → Ort i
 
 | Nr. | Abweichung | Grund / Auswirkung |
 |---|---|---|
-| A1 | Schematron-XSLTs des Nachbaus sind mit dem **ISO-Skeleton** kompiliert, das Release mit **SchXslt 1.10.1** (Abschnitt 3.2). | Bewusst: der Nachbau soll eine vom Release unabhängige Kompilierung sein. Die Release-Kompilate selbst (SchXslt) prüft die Testreihe `kosit-official` mit dem Original-JAR (Abschnitt 5.2). Auswirkung nur auf die Notation von `@xpathLocation`; `compare-kosit.cjs` normalisiert beide Notationen (Selbsttest `--selftest`). Hinweis zur Verfügbarkeit (Korrektur einer früheren Aussage): SchXslt 1.10.1 ist auf GitHub erhältlich – als Kopie in `TEIC/TEI` unter `P5/Utilities/lib/schxslt-1.10.1/` (MIT; TEI-Commit `a1745378bf2f`, 2025-05-19, „Update schxslt from 1.9.5 to 1.10.1“; die Byte-Gleichheit mit dem codeberg-Release ist von hier nicht prüfbar, da codeberg.org gesperrt ist); die GitHub-Release-Dateien von KoSIT sind ebenfalls erreichbar. Nicht erreichbar sind hier nur `codeberg.org` und Maven Central (Proxy). |
+| A1 | Schematron-XSLTs des Nachbaus sind mit dem **ISO-Skeleton** kompiliert, das Release mit **SchXslt 1.10.1** (Abschnitt 3.2). | Bewusst: der Nachbau soll eine vom Release unabhängige Kompilierung sein. Die Release-Kompilate selbst (SchXslt) prüft die Testreihe `kosit-official` mit dem Original-JAR (Abschnitt 5.2). Auswirkung nur auf die Notation von `@xpathLocation`; `compare-kosit.cjs` normalisiert beide Notationen (Selbsttest `--selftest`). Hinweis zur Verfügbarkeit (Korrektur einer früheren Aussage): SchXslt 1.10.1 ist auf GitHub erhältlich – als Kopie in `TEIC/TEI` unter `P5/Utilities/lib/schxslt-1.10.1/` (MIT; TEI-Commit `a1745378bf2f`, 2025-05-19, „Update schxslt from 1.9.5 to 1.10.1“; die Byte-Gleichheit mit dem Release auf codeberg.org ist nicht geprüft); die Release-Dateien von KoSIT (GitHub) enthalten die mit SchXslt erzeugten XSLTs selbst. |
 | A2 | `report.sch` wird ebenfalls mit dem ISO-Skeleton statt SchXslt kompiliert. | wie A1; die Prüflogik ist identisch (reine `sch:assert`-Regeln). |
-| A3 | Das Zwischenformat wird als DOM direkt nach `createReportInput.xsd` gebaut, nicht über JAXB; SVRL wird mit einer Whitelist nach `svrl-kosit.xsd` gefiltert (siehe 1.6). | Der Nachbau kommt ohne Abhängigkeiten außer JDK und Saxon aus (jakarta.xml.bind ist nicht im JDK; Maven Central ist in der Entwicklungsumgebung nicht erreichbar). Das Original-JAR (5.2) enthält JAXB. Nicht reproduzierbar ohne JAXB: ob `StringTrimAdapter`/JAXB Leerraum in `xs:token`-/`NonEmptyString`-Werten (`s:match`, `s:resource/s:name`) normalisiert; die Präfixe des Zwischenformats (`in`, `s`, `svrl` statt JAXB-`ns2`…). Beides ohne Einfluss auf den Report-Inhalt, weil `default-report.xsl` nur über Namensräume adressiert und `s:*`-Elemente neu erzeugt. Das Zwischenformat wird wie im Original gegen `createReportInput.xsd` validiert (Schritt 6). |
+| A3 | Das Zwischenformat wird als DOM direkt nach `createReportInput.xsd` gebaut, nicht über JAXB; SVRL wird mit einer Whitelist nach `svrl-kosit.xsd` gefiltert (siehe 1.6). | Der Nachbau kommt ohne Abhängigkeiten außer JDK und Saxon aus (jakarta.xml.bind ist nicht im JDK und käme aus Maven Central). Das Original-JAR (5.2) enthält JAXB. Nicht reproduzierbar ohne JAXB: ob `StringTrimAdapter`/JAXB Leerraum in `xs:token`-/`NonEmptyString`-Werten (`s:match`, `s:resource/s:name`) normalisiert; die Präfixe des Zwischenformats (`in`, `s`, `svrl` statt JAXB-`ns2`…). Beides ohne Einfluss auf den Report-Inhalt, weil `default-report.xsl` nur über Namensräume adressiert und `s:*`-Elemente neu erzeugt. Das Zwischenformat wird wie im Original gegen `createReportInput.xsd` validiert (Schritt 6). |
 | A4 | `engine/name` = `KoSIT Validator 1.6.3 (KositReference re-implementation)` statt `KoSIT Validator 1.6.3`. | Reports dürfen nicht als Ausgabe des Original-JAR missverstanden werden; mit `--engine-name` überschreibbar. |
 | A5 | Konsolentabelle ohne ANSI-Farben und ohne Spaltenumbruch (`cmd/report/Grid.java` nicht nachgebaut). | Kosmetik; Statuszeilen und Exit-Codes sind identisch. |
 | A6 | Bei `--check-assertions` gewinnt der exakte Schlüssel `<name>-report.xml`, danach die Dokumentreihenfolge (Original: `HashMap`-Reihenfolge, undefiniert, Abschnitt 2). | Deterministisches Verhalten; im Test-Material betrifft das nur `cii-bt-20-cardinality-check` / `-2`, deren Zusicherungen hier dem jeweils passenden Report zugeordnet werden. |
@@ -452,7 +452,7 @@ weil `resources/` nicht im Git liegt. **Ressourcen-Abbildung** (Quelle → Ort i
 | A9 | Saxon HE 12.8 statt 12.9 (`pom.xml:51` des Klons). | Bewusst: 12.8 ist die Version, mit der die Konfiguration ihre XSLTs baut (`abu-saxon-provider.xml` Z. 4-5). Das Original-JAR enthält Saxon HE **12.9** (`net.sf.saxon.Version.getProductVersion()` im JAR = „12.9“); die Testreihe `kosit-official` (5.2) prüft also auch mit 12.9 – ohne Abweichung. (12.9 ist ebenfalls im Repository `Saxonica/Saxon-HE` erhältlich.) |
 | A10 | Beim Lesen einer Datei wird der Hash vor dem Parsen über die Bytes gebildet (Original: im Stream während des Parsens). | Gleicher Wert (SHA-256 der Rohbytes). |
 
-### 4.2 Ergebnis der Selbsttests der Konfiguration (`run.sh selftest`, Stand dieses Laufs)
+### 4.2 Ergebnis der Selbsttests der Konfiguration (`run.sh selftest`; die Zeilen „self-test:“ in `build/reports/kosit-reference.txt`)
 
 ```
 instances/processing-valid  (Test-scenarios.xml, assertions.xml):  9 Dokumente, Acceptable 2 / Rejected 7,
@@ -488,13 +488,12 @@ vom Validator immer mit dem Fallback-Report zurückgewiesen, vom Prüfer informa
 geprüft; für sie wird nur das Feld „Szenario“ verglichen (Bewertung = „nicht vergleichbar“, kein
 Mismatch).
 
-Damit der Prüfer dieselbe Reihenfolge wie der Validator einhält, führt `tools/pruefer-cli.cjs`
-jetzt vor den Schematron-Regeln die XSD-Prüfung aus (`src/xsd-validator.js`, Modell aus
-`build/xsd/` nach der `<validateWithXmlSchema>`-Ressource des Szenarios; ohne Szenario nach dem
-Wurzelelement) und überspringt die Schematron-Regeln bei ungültigem Schema
-(`schematronSkipped: "xsd-invalid"`, `assessment: "reject"`); das JSON enthält `xsd: {schema,
-resource, source, valid, errorCount, errors[{code, message, location}]}`. `src/pruefer-core.js`
-und der Browser-Build sind unverändert.
+Wie der Validator führt der Prüfer – im Browser und in `tools/pruefer-cli.cjs`, beide über
+`src/pruefer-core.js` (`analyzeBytes`) – vor den Schematron-Regeln die XSD-Prüfung aus
+(`src/xsd-validator.js`, Modell aus `build/xsd/` nach der `<validateWithXmlSchema>`-Ressource des
+Szenarios; ohne Szenario nach dem Wurzelelement) und überspringt die Schematron-Regeln bei ungültigem
+Schema (`schematronSkipped: "xsd-invalid"`, `assessment: "reject"`); das JSON enthält `xsd: {schema,
+resource, source, valid, errorCount, errors[{code, message, location}]}`.
 
 ### 5.1 Ergebnis über den Korpus (4 158 Dokumente, Nachbau: `build/reports/kosit-reference.txt`)
 

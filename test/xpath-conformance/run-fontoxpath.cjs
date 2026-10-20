@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 /* run-fontoxpath.cjs — evaluates expressions.txt with our fontoxpath build and compares with expected.json (Saxon). */
 'use strict';
+process.env.TZ = 'UTC'; // implicit timezone UTC, as Saxon in run-saxon.cjs (before any Date is created)
 const fs = require('fs'); const path = require('path');
 const fx = require(path.join(__dirname, '..', '..', 'vendor', 'fontoxpath.cjs'));
 const slimdom = require(path.join(__dirname, '..', '..', 'vendor', 'slimdom.cjs'));

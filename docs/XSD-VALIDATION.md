@@ -3,7 +3,7 @@
 Der KoSIT-Validator prüft jede Rechnung zuerst gegen das XML Schema des Syntaxformats
 (`<validateWithXmlSchema>` in `scenarios.xml`) und führt die Schematron-Regeln nur aus, wenn das
 Dokument schema-gültig ist. `src/xsd-validator.js` bildet diesen Schritt in JavaScript nach – ohne
-Abhängigkeiten, im Browser (DOMParser-Dokument, auch iOS Safari) und in Node (slimdom). Das
+Abhängigkeiten, im Browser (DOMParser-Dokument; geprüft in Chromium, WebKit – der Engine von Safari – und Firefox) und in Node (slimdom). Das
 Urteil (gültig / ungültig) **und die Folge der Fehlercodes** sind nachweislich identisch mit denen des
 JDK-eigenen Xerces (`javax.xml.validation`), also des Validators, den KoSIT verwendet.
 
@@ -60,11 +60,11 @@ Nicht umgesetzt (der Compiler bricht mit Fehlermeldung ab, statt still etwas zu 
 ## Erzeugung der Modelle
 
 ```sh
-# OASIS-Paket (liegt als docs/UBL-2.1.zip im ph-ubl-Repository) auspacken, xsdrt/ = Laufzeitvariante ohne Dokumentation
-unzip -q ph-ubl/docs/UBL-2.1.zip 'xsd/*' 'xsdrt/*' -d oasis/os-UBL-2.1
-node tools/compile-xsd.cjs oasis/os-UBL-2.1/xsdrt/maindoc/UBL-Invoice-2.1.xsd    build/xsd/UBL-Invoice-2.1.json
-node tools/compile-xsd.cjs oasis/os-UBL-2.1/xsdrt/maindoc/UBL-CreditNote-2.1.xsd build/xsd/UBL-CreditNote-2.1.json
-node tools/compile-xsd.cjs ph-cii/ph-cii-d16b/src/main/resources/external/schemas/d16b/data/standard/CrossIndustryInvoice_100pD16B.xsd build/xsd/CII-D16B.json
+node tools/fetch-sources.cjs ext       # packt u. a. das OASIS-Paket ph-ubl/docs/UBL-2.1.zip nach ext/os-UBL-2.1 aus
+sh tools/compile-xsd-models.sh ext     # = die folgenden Aufrufe (xsdrt/ = Laufzeitvariante ohne Dokumentation) und die Factur-X-Profile
+node tools/compile-xsd.cjs ext/os-UBL-2.1/xsdrt/maindoc/UBL-Invoice-2.1.xsd    build/xsd/UBL-Invoice-2.1.json
+node tools/compile-xsd.cjs ext/os-UBL-2.1/xsdrt/maindoc/UBL-CreditNote-2.1.xsd build/xsd/UBL-CreditNote-2.1.json
+node tools/compile-xsd.cjs ext/ph-cii/ph-cii-d16b/src/main/resources/external/schemas/d16b/data/standard/CrossIndustryInvoice_100pD16B.xsd build/xsd/CII-D16B.json
 ```
 
 `tools/compile-xsd.cjs` folgt `xs:import`/`xs:include` (auch Chamäleon-Includes), übernimmt
@@ -77,8 +77,8 @@ Attribute/Partikel; die effektiven Attributmengen und Inhaltsmodelle setzt die L
 Compiler mit der Laufzeit jeden Automaten und löst jeden Typ auf, ein nicht ausführbares Modell
 wird nie geschrieben.
 
-Größen: `UBL-Invoice-2.1.json` 212 334 Byte, `UBL-CreditNote-2.1.json` 212 278 Byte,
-`CII-D16B.json` 63 087 Byte (jeweils in sich vollständig). Die beiden UBL-Modelle teilen sich
+Größen (wie in `build/STANDARDS_MANIFEST.json`, Abschnitt `derived`): `UBL-Invoice-2.1.json` 218 298 Byte,
+`UBL-CreditNote-2.1.json` 218 242 Byte, `CII-D16B.json` 64 647 Byte (jeweils in sich vollständig). Die beiden UBL-Modelle teilen sich
 ~99 % des Inhalts; ein gemeinsames Modell (`node tools/compile-xsd.cjs Invoice.xsd CreditNote.xsd
 out.json`) wäre möglich, entspräche aber nicht exakt dem KoSIT-Verfahren (dort kennt das
 Invoice-Schema die CreditNote-Deklaration nicht; der Unterschied träfe nur verschachtelte
@@ -117,9 +117,9 @@ dieselben Dateien laufen und vergleicht die Urteile.
 
 ```sh
 sh test/xsd-oracle/run-xsd-oracle.sh                       # Xerces über alle Korpora (javac + java)
-node test/build-xsd-mutations.cjs                          # 150 gültige Basisdokumente → 3 175 Mutationen + 432 Sonden
+node test/build-xsd-mutations.cjs --zugferd ext/zugferd-corpus   # 150 gültige Basisdokumente (unverändert mitgeprüft) + 3 025 Mutationen + 432 Sonden
 sh test/xsd-oracle/run-xsd-oracle.sh xsd-mutations build/corpus/xsd-mutations
-node test/run-xsd-tests.cjs --report build/reports/xsd-vs-xerces.txt --big <große-Rechnung.xml>
+node test/run-xsd-tests.cjs --report build/reports/xsd-vs-xerces.txt
 node test/xsd-selftest.cjs --report build/reports/xsd-vs-xerces.txt   # synthetisches Schema für die sonst unbenutzten Konstrukte
 node test/xsd-browser.cjs  --report build/reports/xsd-vs-xerces.txt   # derselbe Code in Chromium mit DOMParser
 ```
@@ -146,8 +146,8 @@ Dazu: `test/xsd-selftest.cjs` – 255 Instanzen eines synthetischen Schemas
 float/double, hexBinary, QName, Substitutionsgruppen, nillable, fixed/default-Elementwerte,
 begrenzte Häufigkeiten inkl. Zählerfälle, anyAttribute lax/strict/skip, Chamäleon-Include,
 qualifizierte Attribute …): 255 identisch (Urteil + Codes), 0 Abweichungen. `test/xsd-browser.cjs` –
-1 053 Dokumente in Chromium (DOMParser): Urteile, Fehlercodes und Fundstellen identisch mit dem
-Node-Lauf (WebKit, Firefox: CI).
+1 053 Dokumente im Browser (DOMParser): Urteile, Fehlercodes und Fundstellen identisch mit dem
+Node-Lauf – Chromium und WebKit lokal und im CI, Firefox im CI (Testreihen `xsd-browser-*`).
 
 Die Referenz wird bei jedem vollständigen Lauf von `tools/verify-all.cjs` neu erzeugt (Stufe
 `ref-xerces`).

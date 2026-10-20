@@ -85,9 +85,10 @@ function compute(opts) {
     files[g] = {};
     for (const f of list) if (fs.existsSync(path.join(root, f))) files[g][f] = sha(path.join(root, f));
   }
-  const saxonJar = opts.saxonJar || process.env.SAXON_JAR || path.join(root, 'build', 'ext', 'saxon', 'saxon-he-12.8.jar');
+  const saxonJar = opts.saxonJar || process.env.SAXON_JAR || path.join(process.env.EXT_DIR || path.join(root, 'ext'), 'saxon', 'saxon-he-12.8.jar');
   let playwright = null;
-  for (const p of [process.env.PLAYWRIGHT_DIR, path.join(root, 'node_modules', 'playwright-core'), '/opt/npm-tools/node_modules/playwright-core'].filter(Boolean)) {
+  // playwright-core: PLAYWRIGHT_DIR, next to PLAYWRIGHT_MODULE (test/resolve-tool.cjs), or node_modules of the project
+  for (const p of [process.env.PLAYWRIGHT_DIR, process.env.PLAYWRIGHT_MODULE && path.join(path.dirname(process.env.PLAYWRIGHT_MODULE), 'playwright-core'), path.join(root, 'node_modules', 'playwright-core')].filter(Boolean)) {
     const bj = path.join(p, 'browsers.json');
     if (fs.existsSync(bj)) {
       const b = JSON.parse(fs.readFileSync(bj, 'utf8'));
@@ -111,7 +112,8 @@ function compute(opts) {
   const filesId = crypto.createHash('sha256').update(JSON.stringify(files)).digest('hex');
   const git = {
     commit: tryRun('git', ['-C', root, 'rev-parse', 'HEAD']),
-    dirty: (tryRun('git', ['-C', root, 'status', '--porcelain']) || '').length > 0,
+    // modified tracked files only; untracked files (fetched sources, CI work files) are not inputs
+    dirty: (tryRun('git', ['-C', root, 'status', '--porcelain', '--untracked-files=no']) || '').length > 0,
   };
   const manifest = JSON.parse(fs.readFileSync(path.join(root, 'build', 'STANDARDS_MANIFEST.json'), 'utf8'));
   const standards = {};

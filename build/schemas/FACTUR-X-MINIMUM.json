@@ -1,5 +1,6 @@
 {
  "id": "FACTUR-X-MINIMUM",
+ "generator": "E-Rechnung Prüfer src/sch-compiler.js: ISO Schematron compiled to JSON; rules, tests and messages of the sources unchanged",
  "queryBinding": "xslt2",
  "defaultPhase": null,
  "title": "Schema for Factur-X; 1.09.2; Accounting, MINIMUM",
@@ -1260,6 +1261,9 @@
    "sha256": "c570a628498e0b633a3dd66dd745653a8a2bc66fc6ee346b1971b9dc2d5f6778",
    "bytes": 19732
   }
+ ],
+ "notices": [
+  "Factur-X release metadata\n     Version: 1.09.2\n     Release date: 2026-08-04\n     Effective date: 2026-09-01"
  ],
  "documents": [
   {

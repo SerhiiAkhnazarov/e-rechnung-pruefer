@@ -9,22 +9,22 @@ Nutzungsrechten von FeRD, Abschnitt 5). Die vollständigen Peppol-Regelwerke sin
 und **nicht** im Repository (keine Lizenz zur Weitergabe, Abschnitt 5): Sie werden nur lokal für die
 Testreihen kompiliert (`build/schemas/PEPPOL-*.json` steht in `.gitignore`); im Programm lädt der
 Benutzer die offiziellen Dateien selbst (Bereich „Regelwerke laden“). Das Programm kompiliert sie im
-Browser mit demselben Compiler (`src/sch-compiler.js`) – Ergebnis byte-gleich mit dem Node-Build,
+Browser mit demselben Compiler (`src/sch-compiler.js`) – Ergebnis inhaltsgleich mit dem Node-Build (JSON ohne die Herkunftsfelder `sources`/`importedFrom`),
 nachgewiesen in `test/peppol-import-browser.cjs` – und zeigt an, ob die SHA-256 der Datei der geprüften
 Fassung (3.0.21) entspricht; eine andere Fassung wird als „nicht gegen Referenz verifiziert“ markiert.
 
-| Regelwerk (`build/schemas/`) | Quelle | Muster / Regeln / Asserts | JSON (kompakt) |
+| Regelwerk (`build/schemas/`) | Quelle | Muster / Regeln / Asserts | JSON-Datei (Byte, wie in `build/STANDARDS_MANIFEST.json`) |
 |---|---|---:|---:|
-| `PEPPOL-UBL` | `peppol-bis-invoice-3/rules/sch/PEPPOL-EN16931-UBL.sch` | 13 / 99 / 165 | 111 451 B |
-| `PEPPOL-CII` | `peppol-bis-invoice-3/rules/sch/PEPPOL-EN16931-CII.sch` | 7 / 63 / 91 | 72 636 B |
-| `FACTUR-X-MINIMUM` | Mustangproject `validator/src/main/resources/schematron/ZF_250/FACTUR-X_MINIMUM.sch` + `_codedb.xml` | 5 / 39 / 66 | 55 014 B |
-| `FACTUR-X-BASIC-WL` | `…/ZF_250/FACTUR-X_BASIC-WL.sch` + `_codedb.xml` | 47 / 179 / 337 | 199 018 B |
-| `FACTUR-X-BASIC` | `…/ZF_250/FACTUR-X_BASIC.sch` + `_codedb.xml` | 63 / 248 / 472 | 346 578 B |
-| `FACTUR-X-EN16931` | `…/ZF_250/FACTUR-X_EN16931.sch` + `_codedb.xml` | 66 / 373 / 627 | 430 651 B |
-| `FACTUR-X-EXTENDED` | `…/ZF_250/FACTUR-X_EXTENDED.sch` + `_codedb.xml` | 82 / 982 / 1 464 | 973 069 B |
+| `PEPPOL-UBL` | `peppol-bis-invoice-3/rules/sch/PEPPOL-EN16931-UBL.sch` | 13 / 99 / 165 | 138 767 B (nur lokal) |
+| `PEPPOL-CII` | `peppol-bis-invoice-3/rules/sch/PEPPOL-EN16931-CII.sch` | 7 / 63 / 91 | 88 572 B (nur lokal) |
+| `FACTUR-X-MINIMUM` | Mustangproject `validator/src/main/resources/schematron/ZF_250/FACTUR-X_MINIMUM.sch` + `_codedb.xml` | 5 / 39 / 66 | 65 505 B |
+| `FACTUR-X-BASIC-WL` | `…/ZF_250/FACTUR-X_BASIC-WL.sch` + `_codedb.xml` | 47 / 179 / 337 | 250 069 B |
+| `FACTUR-X-BASIC` | `…/ZF_250/FACTUR-X_BASIC.sch` + `_codedb.xml` | 63 / 248 / 472 | 417 523 B |
+| `FACTUR-X-EN16931` | `…/ZF_250/FACTUR-X_EN16931.sch` + `_codedb.xml` | 66 / 373 / 627 | 526 391 B |
+| `FACTUR-X-EXTENDED` | `…/ZF_250/FACTUR-X_EXTENDED.sch` + `_codedb.xml` | 82 / 982 / 1 464 | 1 203 335 B |
 
-XSD-Modelle (`build/xsd/`, `tools/compile-xsd.cjs`): `FACTUR-X-MINIMUM` 4 879 B, `-BASIC-WL` 8 754 B,
-`-BASIC` 10 114 B, `-EN16931` 12 408 B, `-EXTENDED` 18 623 B (je 4 Schemadokumente aus
+XSD-Modelle (`build/xsd/`, `tools/compile-xsd.cjs`): `FACTUR-X-MINIMUM` 7 934 B, `-BASIC-WL` 11 809 B,
+`-BASIC` 13 169 B, `-EN16931` 15 463 B, `-EXTENDED` 21 678 B (je 4 Schemadokumente aus
 `validator/src/main/resources/schema/ZF_250/<PROFIL>/`).
 
 ## 1. Peppol BIS Billing 3.0 (vollständig)

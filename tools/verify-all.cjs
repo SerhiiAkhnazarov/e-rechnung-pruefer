@@ -10,10 +10,9 @@
  * refuses reports whose fingerprint differs from the current inputs.
  *
  * Usage: node tools/verify-all.cjs [--ext <dir>] [--only a,b] [--skip a,b] [--reuse-references] [--list]
- *   --ext <dir>  directory with the standard repositories (layout of .github/workflows/verify.yml:
- *                einvoicing-en16931, xrechnung-schematron, xrechnung-testsuite,
- *                validator-configuration-xrechnung, peppol-bis-invoice-3, zugferd-corpus,
- *                mustangproject). Default: build/ext (created with links to the sandbox clones).
+ *   --ext <dir>  directory with all sources at their pinned versions, as prepared by
+ *                node tools/fetch-sources.cjs <dir> (repository names = logical names of
+ *                build/STANDARDS_MANIFEST.json). Default: ext (in the repository root, as in CI).
  */
 'use strict';
 const fs = require('fs');
@@ -27,35 +26,10 @@ const args = process.argv.slice(2);
 const opt = (n) => { const i = args.indexOf(n); return i >= 0 ? args[i + 1] : null; };
 const reports = path.join(root, 'build', 'reports');
 
-// development sandbox: link its clones under build/ext (same names as in CI); elsewhere pass --ext
-let ext = opt('--ext');
-if (!ext) {
-  ext = path.join(root, 'build', 'ext');
-  const links = {
-    'einvoicing-en16931': '/home/claude/connectingeurope/einvoicing-en16931',
-    'xrechnung-schematron': '/home/claude/itplr-kosit/xrechnung-schematron',
-    'xrechnung-testsuite': '/home/claude/itplr-kosit/xrechnung-testsuite',
-    'validator-configuration-xrechnung': '/home/claude/itplr-kosit/validator-configuration-xrechnung',
-    'peppol-bis-invoice-3': '/home/claude/openpeppol/peppol-bis-invoice-3',
-    'zugferd-corpus': '/home/claude/zugferd/corpus',
-    'mustangproject': '/home/claude/zugferd/mustangproject',
-    'os-UBL-2.1': '/home/claude/oasis/os-UBL-2.1',
-    'ph-cii': '/home/claude/phax/ph-cii',
-    'ph-schematron': '/home/claude/phax/ph-schematron',
-    'validator': '/home/claude/itplr-kosit/validator',
-    'saxon': '/home/claude/saxon-he-12.8',
-    'kosit-official': '/home/claude/kosit-official',
-    'fontoxpath': '/home/claude/fontoxml/fontoxpath',
-    'xspattern.js': '/home/claude/bwrrp/xspattern.js',
-    'whynot.js': '/home/claude/bwrrp/whynot.js',
-    'prsc.js': '/home/claude/bwrrp/prsc.js',
-    'slimdom.js': '/home/claude/bwrrp/slimdom.js',
-  };
-  fs.mkdirSync(ext, { recursive: true });
-  for (const [name, target] of Object.entries(links)) {
-    const l = path.join(ext, name);
-    if (!fs.existsSync(l) && fs.existsSync(target)) fs.symlinkSync(target, l);
-  }
+const ext = path.resolve(opt('--ext') || path.join(root, 'ext'));
+if (!args.includes('--list') && !fs.existsSync(ext)) {
+  console.error('verify-all: ' + ext + ' does not exist; run node tools/fetch-sources.cjs ' + path.relative(process.cwd(), ext) + ' first (or pass --ext <dir>)');
+  process.exit(2);
 }
 const E = (n) => path.join(ext, n);
 const node = process.execPath;
@@ -74,7 +48,7 @@ const E2E_FILES = [
 ];
 // name, command, report file, summary-line pattern; `needs` = paths that must exist;
 // `browser` = Playwright engine that must be installed (no download is attempted)
-const ESBUILD = process.env.ESBUILD_BINARY || [path.join(root, 'node_modules', '.bin', 'esbuild'), '/opt/npm-tools/node_modules/.bin/esbuild'].find((p) => fs.existsSync(p)) || 'esbuild';
+const ESBUILD = process.env.ESBUILD_BINARY || [path.join(root, 'node_modules', '.bin', 'esbuild')].find((p) => fs.existsSync(p)) || 'esbuild';
 const SH = (script) => ['sh', '-c', 'set -e; ' + script];
 const SUITES = [
   // ---- stage 1: reference results, regenerated from the pinned sources on every full run ----------
@@ -85,7 +59,7 @@ const SUITES = [
   { name: 'ref-schematron-xsl', reference: true, cmd: SH('rm -rf build/reference-xsl; sh test/kosit-reference/build-xrechnung-xsl.sh build/reference-xsl; sh test/build-oracle-xsl.sh build/reference-xsl; ls build/reference-xsl/*.xsl | wc -l | sed "s/^/reference stylesheets: /"'), summary: /^reference stylesheets/ },
   { name: 'ref-saxon-svrl', reference: true, cmd: ['sh', 'test/run-oracle.sh', E('saxon'), E('einvoicing-en16931'), 'build/reference-xsl'], summary: /./ },
   { name: 'ref-saxon-xpath', reference: true, cmd: SH(node + ' test/xpath-conformance/run-saxon.cjs ' + E('saxon') + '; ' + node + ' test/xpath-conformance/run-saxon-doc.cjs ' + E('saxon') + '; git diff --exit-code --stat -- test/xpath-conformance/expected.json test/xpath-conformance/expected-doc.json && echo "Saxon expectations reproduced byte-identically"'), summary: /evaluated by Saxon|reproduced/, all: true },
-  { name: 'ref-xerces', reference: true, cmd: SH('sh test/xsd-oracle/run-xsd-oracle.sh; ' + node + ' test/build-xsd-mutations.cjs; sh test/xsd-oracle/run-xsd-oracle.sh xsd-mutations build/corpus/xsd-mutations; sh test/xsd-oracle/run-facturx-xsd-oracle.sh; echo "Xerces reference: $(cat build/oracle/xsd/*.jsonl | wc -l) documents, Factur-X: $(cat build/oracle/xsd-facturx/*.jsonl | wc -l) validations"'), summary: /^Xerces reference/ },
+  { name: 'ref-xerces', reference: true, cmd: SH('sh test/xsd-oracle/run-xsd-oracle.sh; ' + node + ' test/build-xsd-mutations.cjs --zugferd ' + E('zugferd-corpus') + '; sh test/xsd-oracle/run-xsd-oracle.sh xsd-mutations build/corpus/xsd-mutations; sh test/xsd-oracle/run-facturx-xsd-oracle.sh; echo "Xerces reference: $(cat build/oracle/xsd/*.jsonl | wc -l) documents, Factur-X: $(cat build/oracle/xsd-facturx/*.jsonl | wc -l) validations"'), summary: /^Xerces reference/ },
   // ---- stage 2: the product against the references and the official test material ------------------
   { name: 'manifest', cmd: [node, 'tools/verify-manifest.cjs', ext], summary: /^manifest verification:/ },
   { name: 'engine-reproducible', cmd: ['sh', 'tools/check-engine.sh', ext, ESBUILD], summary: /^engine rebuild|applied cleanly/, all: true, needs: [E('fontoxpath')] },
@@ -99,7 +73,7 @@ const SUITES = [
   { name: 'facturx-corpus-tests', cmd: [node, 'test/run-facturx-tests.cjs'], summary: /^Factur-X corpus tests:/, needs: ['build/schemas/FACTUR-X-EN16931.json', 'build/rulesets.json', 'build/corpus/zugferd-cii', 'build/oracle/zugferd-cii'] },
   { name: 'facturx-xsd-vs-xerces', cmd: [node, 'test/run-facturx-xsd-tests.cjs'], summary: /^Factur-X XSD vs Xerces:/, needs: ['build/xsd/FACTUR-X-EN16931.json', 'build/oracle/xsd-facturx'] },
   { name: 'parity-saxon', cmd: [node, 'test/compare-oracle.cjs'], summary: /comparisons in .*mismatches/, needs: ['build/oracle'] },
-  { name: 'pattern-matcher-selftest', cmd: [node, 'test/selftest-pattern-matcher.cjs'].concat(['xr-ubl', 'xr-cii', 'extra-ubl', 'extra-cii'].flatMap((d) => listXml(path.join(root, 'build', 'corpus', d)))), summary: /^pattern matcher self-test:/ },
+  { name: 'pattern-matcher-selftest', cmd: [node, 'test/selftest-pattern-matcher.cjs'].concat(['xr-ubl', 'xr-cii', 'extra-ubl', 'extra-cii'].map((d) => 'build/corpus/' + d)), summary: /^pattern matcher self-test:/ },
   { name: 'xsd-vs-xerces', cmd: [node, 'test/run-xsd-tests.cjs'], summary: /^TOTAL/, all: true, needs: ['build/oracle/xsd'] },
   { name: 'xml-encoding', cmd: [node, 'test/run-encoding-tests.cjs'], summary: /^XML encoding tests:/ },
   { name: 'xsd-selftest', cmd: [node, 'test/xsd-selftest.cjs'], summary: /^instances/ },
@@ -122,9 +96,6 @@ const SUITES = [
 ];
 
 function browsers(f) { return ['chromium', 'webkit', 'firefox'].map(f); }
-function listXml(dir) {
-  return fs.existsSync(dir) ? fs.readdirSync(dir).filter((f) => f.endsWith('.xml')).sort().map((f) => path.join(dir, f)) : [];
-}
 
 if (args.includes('--list')) { for (const s of SUITES) console.log(s.name); process.exit(0); }
 const only = opt('--only') ? opt('--only').split(',') : null;
@@ -139,6 +110,19 @@ const previous = fs.existsSync(summaryFile) ? JSON.parse(fs.readFileSync(summary
 const results = {};
 // suites not run this time are kept only if they were produced with the same fingerprint
 if (previous && previous.fingerprint && previous.fingerprint.id === fp.id) Object.assign(results, previous.suites);
+
+// the environment of the suites: EXT_DIR for the shell scripts; JVM options of the host (JAVA_TOOL_OPTIONS,
+// e.g. proxy settings) are not an input of any suite and would only add machine details to the reports
+// TZ=UTC: the implicit timezone of XPath (Saxon, fontoxpath, the browsers) is the same on every machine, e.g. for
+// xs:date('2026-01-31Z') = xs:date('2026-01-31') in the XPath batteries
+const suiteEnv = Object.assign({}, process.env, { EXT_DIR: ext, TZ: 'UTC' });
+delete suiteEnv.JAVA_TOOL_OPTIONS;
+delete suiteEnv._JAVA_OPTIONS;
+// absolute paths of this machine in commands and outputs -> <ext>, ., node, <tmp>
+const PATHS = [[ext, '<ext>'], [root, '.'], [node, 'node'], [require('os').tmpdir(), '<tmp>']].filter(([p]) => p && p.length > 1).sort((a, b) => b[0].length - a[0].length);
+const escRe = (x) => x.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+const PATH_RES = PATHS.map(([p, r]) => [new RegExp(escRe(p) + '(?![\\w.-])', 'g'), r]);
+function machineIndependent(text) { let t = text; for (const [re, r] of PATH_RES) t = t.replace(re, r); return t; }
 
 let failed = 0;
 for (const s of SUITES) {
@@ -161,9 +145,9 @@ for (const s of SUITES) {
     continue;
   }
   const t0 = Date.now();
-  const r = spawnSync(s.cmd[0], s.cmd.slice(1), { cwd: root, encoding: 'utf8', maxBuffer: 1 << 30, env: Object.assign({}, process.env, { EXT_DIR: ext }) });
+  const r = spawnSync(s.cmd[0], s.cmd.slice(1), { cwd: root, encoding: 'utf8', maxBuffer: 1 << 30, env: suiteEnv });
   const ms = Date.now() - t0;
-  const output = (r.stdout || '') + (r.stderr ? '\n' + r.stderr : '');
+  const output = machineIndependent((r.stdout || '') + (r.stderr ? '\n' + r.stderr : ''));
   const lines = output.split('\n').filter((l) => l.trim());
   const matched = lines.filter((l) => s.summary.test(l.trim()));
   const summary = s.all ? matched.join(' | ') : (matched.pop() || lines[lines.length - 1] || '');
@@ -171,8 +155,8 @@ for (const s of SUITES) {
     '# suite        ' + s.name,
     '# fingerprint  ' + fp.id,
     '# git          ' + (fp.git.commit || '-') + (fp.git.dirty ? ' (uncommitted changes)' : ''),
-    // paths are written relative to the repository, the source checkouts as <ext>/… (machine-independent reports)
-    '# command      ' + s.cmd.map((c) => (typeof c === 'string' && c.startsWith(ext) ? '<ext>' + c.slice(ext.length) : c === node ? 'node' : (c.startsWith('/') && !path.relative(root, c).startsWith('..') ? path.relative(root, c) : c)).replace(ext, '<ext>')).join(' ').slice(0, 2000),
+    // paths are written relative to the repository, the sources as <ext>/…, temporary files as <tmp>/… (machine-independent reports)
+    '# command      ' + machineIndependent(s.cmd.join(' ')).slice(0, 2000),
     '# exit code    ' + r.status,
     '# duration     ' + ms + ' ms',
     '# date         ' + new Date().toISOString(),

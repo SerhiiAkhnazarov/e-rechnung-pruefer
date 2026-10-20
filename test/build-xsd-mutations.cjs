@@ -36,7 +36,8 @@
  * base64, "foo://" is not a valid anyURI, whitespace inside an empty-content element is an error);
  * the Xerces oracle run remains the proof, the expectations only document the behaviour.
  *
- * Usage: node test/build-xsd-mutations.cjs [--bases 150] [--zugferd build/ext/zugferd-corpus] [--max-base-bytes 400000]
+ * Usage: node test/build-xsd-mutations.cjs [--bases 150] [--zugferd <ext-dir>/zugferd-corpus] [--max-base-bytes 400000]
+ *   (default of --zugferd: $EXT_DIR/zugferd-corpus, else ext/zugferd-corpus; the corpus is required)
  */
 'use strict';
 const fs = require('fs');
@@ -48,7 +49,8 @@ const root = path.join(__dirname, '..');
 const args = process.argv.slice(2);
 function opt(n, d) { const i = args.indexOf(n); return i >= 0 ? args[i + 1] : d; }
 const BASES = parseInt(opt('--bases', '150'), 10);
-const ZUGFERD = opt('--zugferd', path.join(__dirname, '..', 'build', 'ext', 'zugferd-corpus'));
+const ZUGFERD = opt('--zugferd', path.join(process.env.EXT_DIR || path.join(root, 'ext'), 'zugferd-corpus'));
+if (!fs.existsSync(ZUGFERD)) { console.error('build-xsd-mutations: ZUGFeRD corpus not found: ' + ZUGFERD); process.exit(2); }
 const OUT = path.join(root, 'build', 'corpus', 'xsd-mutations');
 const MAX_BASE_BYTES = parseInt(opt('--max-base-bytes', '400000'), 10);
 

@@ -3,9 +3,9 @@
 # build/STANDARDS_MANIFEST.json) with tools/compile-sch.cjs.
 #
 # Usage: sh tools/compile-rules.sh <ext-dir>
-#   <ext-dir> layout as in .github/workflows/verify.yml / tools/verify-all.cjs (build/ext locally):
+#   <ext-dir> as prepared by tools/fetch-sources.cjs (the layout of .github/workflows/verify.yml):
 #   einvoicing-en16931, xrechnung-schematron (with build/schematron/ produced by the KoSIT merge step,
-#   docs/BUILD-RULES.md §2), mustangproject, peppol-bis-invoice-3 (optional: the Peppol rule sets are
+#   docs/BUILD-RULES.md §1), mustangproject, peppol-bis-invoice-3 (optional: the Peppol rule sets are
 #   compiled only for the test suites and are not shipped, see docs/RULESETS.md "Lizenz").
 set -e
 EXT="${1:?usage: compile-rules.sh <ext-dir>}"

@@ -4,7 +4,7 @@
 die Anforderungen der ZUGFeRD/Factur-X-Spezifikation an Metadaten und Anlage sowie die Regeln von
 PDF/A-3 (ISO 19005-3), die sich allein aus der Objektstruktur und den XMP-Metadaten entscheiden
 lassen. Es ist **kein** PDF/A-Validator; die vollständige Prüfung gegen ISO 19005-3 übernimmt veraPDF
-im CI-Job `pdfa-verapdf` (Abschnitt 6). Jeder Bericht enthält dazu den Hinweis `PDFA3-FULL-VALIDATION`.
+im CI-Job `pdfa-verapdf` (Abschnitt 7). Jeder Bericht enthält dazu den Hinweis `PDFA3-FULL-VALIDATION`.
 
 API (UMD, ohne Abhängigkeiten außer `src/pdf-embedded.js`, im Browser als `PdfA3Checks`):
 
@@ -207,19 +207,9 @@ Folgeänderungen.
 
 ## 7. veraPDF im CI (Job `pdfa-verapdf`)
 
-veraPDF ist in der Entwicklungsumgebung nicht erhältlich; geprüft am 2026-10-19 (Belege aus dem
-Protokoll des Egress-Proxys der Umgebung):
-
-* Maven Central (`repo1.maven.org`, Bibliothek und Abhängigkeiten): Verbindung vom Proxy abgelehnt (403);
-* `software.verapdf.org` (offizielle Installer/CLI): Verbindung vom Proxy abgelehnt („connect_rejected“);
-* GitHub-Releases von `veraPDF/veraPDF-apps` (Tag v1.30.3): keine Release-Dateien angehängt; ein Bau aus
-  den GitHub-Quellen bräuchte wiederum die Maven-Abhängigkeiten;
-* keine lokale Kopie (`find / -iname '*verapdf*'`, Durchsuchung aller `*.jar`/`*.zip` nach `org/verapdf`).
-
-Methode: der CI-Job `pdfa-verapdf` (GitHub Actions hat Zugang zu Maven Central). Lokal wäre es möglich,
-wenn die Domains `repo1.maven.org` bzw. `software.verapdf.org` in den Einstellungen der Umgebung
-freigegeben werden (claude.ai → Einstellungen → Capabilities, erlaubte Domains); dann läuft derselbe
-Job-Inhalt unverändert lokal. Der Job führt aus:
+veraPDF wird aus Maven Central bezogen; der Vergleich läuft deshalb im CI-Job `pdfa-verapdf` von
+`.github/workflows/verify.yml` (lokal ebenso, wenn Maven Central erreichbar ist: dieselben Befehle). Der
+Job führt aus:
 
 1. `node tools/fetch-sources.cjs ext --only zugferd-corpus,mustangproject` (Korpus `82e886fb2136`,
    Mustangproject `c1618af86e68`, Commits aus `build/STANDARDS_MANIFEST.json`).
@@ -247,10 +237,23 @@ Job-Inhalt unverändert lokal. Der Job führt aus:
    Rechnung strenger), `report` (ModDate, AF-Zuordnung). Abweichungen in den ersten drei Modi ⇒ Exit-Code 1.
    veraPDF-Fehler außerhalb der Container-Regeln (Schriften usw.) werden je Regel gezählt.
 6. Artefakt `pdfa-verapdf`: `verapdf.txt`, `verapdf-artifacts.txt`, `pdfa-verapdf.txt`
-   (Vergleich, mit Fingerprint), MRR-Dateien, `pdfa3-results.json`, `VERIFICATION.json`.
+   (Vergleich, mit Fingerprint), MRR-Dateien, `pdfa3-results.json`, `VERIFICATION.json`. Zusätzlich
+   veröffentlicht der Job das Ergebnis als Check-Run „veraPDF report“ des Commits (Testreihen, vollständiger
+   Vergleich `verapdf-compare.txt`, SHA-256 der veraPDF-Jars; abrufbar mit
+   `GET /repos/{owner}/{repo}/commits/{sha}/check-runs`). Der Job schlägt fehl, wenn eine der Testreihen
+   `pdfa3-container-checks`, `verapdf-compare-selftest`, `pdfa-verapdf` nicht bestanden hat oder nicht
+   gelaufen ist (`.github/scripts/check-run.cjs --require`).
+
+Ergebnis des ersten CI-Laufs mit Check-Run (2026-10-20, Commit `1efb1dd`, Lauf 39400752941): veraPDF 1.30.3
+bewertet 146 der 151 PDFs als PDF/A-3b-konform und 5 als nicht konform; der Abgleich mit den
+Container-Prüfungen ergibt **0 Widersprüche in 11 Regelpaaren**. Fälle, die nur veraPDF meldet (zulässig in
+den Modi `ours-implies-vera` und `report`): XMP-Paket nicht im Katalog (1, 6.6.2.1-1), Erweiterungsschema
+(1, 6.6.2.3.1-2), AF-Zuordnung (1, 6.8-4). Außerhalb der Container-Regeln: 4 veraPDF-Regeln zu Schriften und
+Farben (6.2.11.4.2-2 bei 3 PDFs, 6.2.4.3-2, 6.2.10-2, 6.2.4.3-4 bei je 1 PDF). PDF/A-3u: 19 von 19 PDFs
+konform; PDF/A-3a: 38 von 40 (zweimal 6.2.11.4.2-2).
+
 
 `test/compare-verapdf.cjs` ist gegen das MRR-Format geschrieben, wie Mustang es einbettet
-(PDFValidator.java Z. 125-132 `FormatOption.MRR`; `doc/mustang-validation.xsd` Z. 57-195) und hat in
-der Sandbox nur mit `--selftest` (synthetischer Bericht) gelaufen. Die Shell-Logik des Jobs
-(Listen mit Leerzeichen in Pfaden, MRR-Erzeugung, Vergleich) wurde lokal mit einem Platzhalter statt
-veraPDF durchlaufen; das Ergebnis eines echten veraPDF-Laufs liegt erst nach dem CI-Lauf vor.
+(PDFValidator.java Z. 125-132 `FormatOption.MRR`; `doc/mustang-validation.xsd` Z. 57-195); `--selftest`
+prüft Parser und Klassifikation an einem synthetischen Bericht (ohne veraPDF, Testreihe
+`verapdf-compare-selftest`).

@@ -31,6 +31,8 @@ const expectSelf = ['Assertions run: 229, Assertions failed: 0', 'Assertions run
 const missing = expectSelf.filter((e) => !self.includes(e));
 if (missing.length || /INVALID|FAILED \[/.test(self)) { console.log('configuration self-test FAILED: ' + missing.join('; ')); process.exit(1); }
 console.log('configuration self-tests: ' + expectSelf.join(' | '));
+// the validator's own result lines of the self-tests (documents per verdict), for the report
+for (const l of self.split('\n')) if (/^(Acceptable: \d+|Processed \d+|.*Assertions run: \d+)/.test(l.trim())) console.log('  self-test: ' + l.trim());
 const refDir = path.join(root, 'build', 'kosit-reference', 'reports');
 const ourDir = path.join(root, 'build', 'kosit-reference', 'pruefer');
 fs.rmSync(refDir, { recursive: true, force: true });

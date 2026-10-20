@@ -1,5 +1,5 @@
 {
-  "generated": "2026-10-19T16:45:13.465Z",
+  "generated": "2026-10-20T09:38:34.050Z",
   "generator": "tools/make-manifest.cjs",
   "sources": {
     "CEN eInvoicing-EN16931 (validation artefacts 1.3.16)": {
@@ -84,7 +84,7 @@
       "path": "peppol-bis-invoice-3",
       "remote": "https://github.com/OpenPEPPOL/peppol-bis-invoice-3.git",
       "commit": "806866bd2bd91d7e9623b68f08164e8fbe9e67a0",
-      "describe": "806866b",
+      "describe": "v3.0.19-96-g806866b",
       "commitDate": "2026-06-10T09:14:37+00:00",
       "licence": "no licence file in the repository; the BIS document forbids redistribution without consent of OpenPeppol AISBL — compiled only locally for the test suites, not redistributed (docs/RULESETS.md section 5)",
       "files": [
@@ -130,7 +130,7 @@
       "path": "validator",
       "remote": "https://github.com/itplr-kosit/validator.git",
       "commit": "6ac5167f2acad27df31263867e61d6698815c043",
-      "describe": "6ac5167",
+      "describe": "v1.6.2-15-g6ac5167",
       "commitDate": "2026-08-20T18:54:10+02:00",
       "licence": "Apache-2.0"
     },
@@ -138,7 +138,7 @@
       "path": "xrechnung-testsuite",
       "remote": "https://github.com/itplr-kosit/xrechnung-testsuite.git",
       "commit": "1ce1dafffd035e5ce59a7ab0d3bf44ac14af16c9",
-      "describe": "1ce1daf",
+      "describe": "v2026-08-31-1-g1ce1daf",
       "commitDate": "2026-09-04T15:14:05+02:00",
       "licence": "Apache-2.0"
     },
@@ -154,7 +154,7 @@
       "path": "fontoxpath",
       "remote": "https://github.com/FontoXML/fontoxpath",
       "commit": "7506ae0cd03dab66f49091ad5a9690eee3b33ce5",
-      "describe": "7506ae0",
+      "describe": "3.34.0-2-g7506ae0",
       "commitDate": "2026-06-30T11:29:04+02:00",
       "licence": "MIT",
       "patch": {
@@ -177,7 +177,7 @@
           "path": "xspattern.js",
           "remote": "https://github.com/bwrrp/xspattern.js",
           "commit": "953c958bf18f44efb5c46b0a0d5113a4f6b97640",
-          "describe": "953c958",
+          "describe": "3.1.0-2-g953c958",
           "commitDate": "2024-09-26T13:49:00+02:00"
         },
         {
@@ -218,7 +218,7 @@
       "path": "ph-schematron",
       "remote": "https://github.com/phax/ph-schematron.git",
       "commit": "a8e0cd1acf9a55e780a12809e03d873c7d0cfbf1",
-      "describe": "a8e0cd1",
+      "describe": "ph-schematron-parent-pom-10.2.0-8-ga8e0cd1a",
       "commitDate": "2026-10-17T20:52:56+02:00",
       "licence": "MIT (skeleton) / Apache-2.0 (ph-schematron)"
     },
@@ -226,7 +226,7 @@
       "path": "ph-ubl",
       "remote": "https://github.com/phax/ph-ubl.git",
       "commit": "31ded97ab4013a5959f5b1ad582c5b81506c18cf",
-      "describe": "31ded97",
+      "describe": "ph-ubl-parent-pom-10.2.1-16-g31ded97",
       "commitDate": "2026-10-17T20:44:36+02:00",
       "licence": "OASIS IPR Policy (RF on Limited Terms); schemas freely usable, see os-UBL-2.1 package",
       "archive": {
@@ -317,7 +317,7 @@
       "path": "ph-cii",
       "remote": "https://github.com/phax/ph-cii.git",
       "commit": "d367ec9dfc5248e423cdbb1b245e4b026f3a3756",
-      "describe": "d367ec9",
+      "describe": "ph-cii-parent-pom-4.1.3-5-gd367ec9",
       "commitDate": "2026-10-08T22:07:18+02:00",
       "licence": "UN/CEFACT (UNECE) — published for free use",
       "files": [
@@ -347,7 +347,7 @@
       "path": "mustangproject",
       "remote": "https://github.com/ZUGFeRD/mustangproject.git",
       "commit": "c1618af86e687eb8c55f476d7b17575c6f99e3ca",
-      "describe": "c1618af8",
+      "describe": "core-2.26.0-59-gc1618af8",
       "commitDate": "2026-10-16T19:51:59+02:00",
       "licence": "Mustangproject: Apache-2.0 (LICENSE; pom.xml <licenses>; validator/README.md \"Permissive Open Source APL2, see LICENSE\"). The ZF_250 Schematron/codedb files carry only \"Factur-X release metadata Version: 1.09.2, Release date: 2026-08-04, Effective date: 2026-09-01\", the XSDs no header at all; neither the files, their directories, LICENSE nor NOTICE state licence terms of FNFE-MPE / FeRD (the publishers of the Factur-X / ZUGFeRD specification). Separate terms of FNFE-MPE/FeRD are not contained in the repository - see docs/RULESETS.md section 5.",
       "version": "Factur-X 1.09.2 / ZUGFeRD 2.5.2 (History.md 2.25.0, 2026-08-04: \"#1216 ZUGFeRD 2.5.2 and Factur-X 1.09.2\")",
@@ -545,48 +545,48 @@
   "derived": {
     "EN16931-CII.json": {
       "file": "build/schemas/EN16931-CII.json",
-      "sha256": "43bb56bc69e566e7ace604e39a17614d77ee5d1457e9deefb11ba731a0a76c94",
-      "bytes": 374591
+      "sha256": "08bbe4a2c32bc2989481c66cae9d9487491a78759f2c6e2e6c9278da6d39d2a6",
+      "bytes": 374876
     },
     "EN16931-UBL.json": {
       "file": "build/schemas/EN16931-UBL.json",
-      "sha256": "c54ddd6bf2880a1b8b21fdc2d463fe137238ba4865f756f63444a1c8ae41c58e",
-      "bytes": 470523
+      "sha256": "08dc7425c64ac48ab9ac224aa4872d70fcbe29f88a8a4579aa21fc96c87cef20",
+      "bytes": 470808
     },
     "FACTUR-X-BASIC-WL.json": {
       "file": "build/schemas/FACTUR-X-BASIC-WL.json",
-      "sha256": "71d66845339c49ab0caa7558abcd3a76b56271da2c2f50262aa6fde8cede4bc4",
-      "bytes": 249794
+      "sha256": "ff51bed0689bbf8b37620a6831439b550afa4b643f01a68dda1e1620ecda41bd",
+      "bytes": 250069
     },
     "FACTUR-X-BASIC.json": {
       "file": "build/schemas/FACTUR-X-BASIC.json",
-      "sha256": "81d03a88919b5a30cf9ab57721a4beb153d2d3b80c35436f0b8a6b65d6380e6f",
-      "bytes": 417248
+      "sha256": "90f5a14af24aa10faeb49c263b9d21698db5f54bfad2200a2c54f37380a612c6",
+      "bytes": 417523
     },
     "FACTUR-X-EN16931.json": {
       "file": "build/schemas/FACTUR-X-EN16931.json",
-      "sha256": "b594608031446ec0e1f52745c212fe9c52af11bb78387972c8662db94eea5e74",
-      "bytes": 526116
+      "sha256": "116d3b60b9cfe64bb07e09b56e33f98b2ec7a4ade40ad03bcfae81553dbaf371",
+      "bytes": 526391
     },
     "FACTUR-X-EXTENDED.json": {
       "file": "build/schemas/FACTUR-X-EXTENDED.json",
-      "sha256": "73ced7e5a3a4eeae668704f21f8f59de314f4d1df71b8e7003d855c5a6595fb1",
-      "bytes": 1203060
+      "sha256": "617402f3ff6621760e2b463906d2c9264e7c42e52cfdeb78716632ab4a155840",
+      "bytes": 1203335
     },
     "FACTUR-X-MINIMUM.json": {
       "file": "build/schemas/FACTUR-X-MINIMUM.json",
-      "sha256": "c4af8b8c8894c135322193c8460b614a4d93f8e9fad865fbb3996a22fa1f03e0",
-      "bytes": 65230
+      "sha256": "78b7b63e47d01c15c4d0c67f0dff6cd456c03b54bfc81470394277dd019277c5",
+      "bytes": 65505
     },
     "XRechnung-CII.json": {
       "file": "build/schemas/XRechnung-CII.json",
-      "sha256": "d0505bfe509152bfb39fa98f66e1ff3bd392947c1843199de1529b084e01235d",
-      "bytes": 75077
+      "sha256": "42d4e35c6c796bb51dfe6c8fb1f590eeba0615919f6cd937b38ea295048bb161",
+      "bytes": 75234
     },
     "XRechnung-UBL.json": {
       "file": "build/schemas/XRechnung-UBL.json",
-      "sha256": "447b525a1d3b34dd94110d08b5162f7ab823c73efe21a784580772d1ab6ac8e4",
-      "bytes": 72866
+      "sha256": "e1bdeba517576c679b59f2d9d35dac6670b35f3c2380c16507159b34a18b67f8",
+      "bytes": 73023
     },
     "scenarios.json": {
       "file": "build/scenarios.json",
@@ -640,36 +640,36 @@
     },
     "fontoxpath.iife.js": {
       "file": "vendor/fontoxpath.iife.js",
-      "sha256": "c14e431b9325572842a72ac0eeb972dde11a484bf0052e62251d36184b6c690d",
-      "bytes": 1125174
+      "sha256": "c4e1eb066fda8b80c2f2eb59d835733d3f60b4cca2a907f44cd9702ce0f90b99",
+      "bytes": 1125859
     },
     "fontoxpath.iife.min.js": {
       "file": "vendor/fontoxpath.iife.min.js",
-      "sha256": "49dcd341ba8cfa503d07b239fd2f85b5a10fffbb2ffc73dc1c603cab5446d079",
-      "bytes": 409335
+      "sha256": "e7e6c62f77d8b8596d39f257df58ff48b189b723aa481562f6fa79a696167cd9",
+      "bytes": 410020
     },
     "fontoxpath.cjs": {
       "file": "vendor/fontoxpath.cjs",
-      "sha256": "e7cb430d074437e6a471cfa3ee8325fadc8ab83c07237d385c5eec8b49e40ca0",
-      "bytes": 1065389
+      "sha256": "1bca5346432faf6d3c60ec3abc837fd1a39605582649404c7779b66b175827b5",
+      "bytes": 1066074
     },
     "slimdom.cjs": {
       "file": "vendor/slimdom.cjs",
-      "sha256": "81917b6a90af435a61f8af53c6bd614f28df0be7edb0d5be0883b35a54b12965",
-      "bytes": 200250
+      "sha256": "c0c849867a5770bfe6f0387f67f830b6b16c32ee9c00d2d6bb9c799ae12f4961",
+      "bytes": 200625
     }
   },
   "localOnly": {
     "note": "compiled only for the test suites, not part of the repository or the build (no redistribution licence, docs/RULESETS.md)",
     "PEPPOL-CII.json": {
       "file": "build/schemas/PEPPOL-CII.json",
-      "sha256": "d893f3971442e1ebe5694502b64e8b81cfed782d9274f22a3059a327129be658",
-      "bytes": 88111
+      "sha256": "eafc866a9827f7b3c228f7940d94e1c5fe1b936a42f1fd722fc6c9e692d6853a",
+      "bytes": 88572
     },
     "PEPPOL-UBL.json": {
       "file": "build/schemas/PEPPOL-UBL.json",
-      "sha256": "39fa3b64aae37471bfd0785c97c97ad6dcf001cfc35ca2826c424205e8bfaa8f",
-      "bytes": 138304
+      "sha256": "05628f23995772494d293a22bfd72432aaa68d1034f6797f18c154c66344dfbb",
+      "bytes": 138767
     }
   }
 }

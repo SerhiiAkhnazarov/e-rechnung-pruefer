@@ -12,8 +12,8 @@
 #   ZUGFERD_CORPUS  directory with the ZUGFeRD/Factur-X example XMLs
 set -e
 HERE="$(cd "$(dirname "$0")/../.." && pwd)"
-# repositories and tools in the CI layout under build/ext (tools/verify-all.cjs links them); every path can be overridden
-EXT="${EXT_DIR:-$(cd "$(dirname "$0")" && cd "$(git rev-parse --show-toplevel 2>/dev/null || echo ../..)" && pwd)/build/ext}"
+# sources in the layout of tools/fetch-sources.cjs (EXT_DIR is set by tools/verify-all.cjs; default <repository>/ext); every path can be overridden
+EXT="${EXT_DIR:-$(cd "$(dirname "$0")" && cd "$(git rev-parse --show-toplevel 2>/dev/null || echo ../..)" && pwd)/ext}"
 UBL_XSD_DIR="${UBL_XSD_DIR:-$EXT/os-UBL-2.1/xsdrt}"
 CII_XSD_DIR="${CII_XSD_DIR:-$EXT/ph-cii/ph-cii-d16b/src/main/resources/external/schemas/d16b/data/standard}"
 ZUGFERD_CORPUS="${ZUGFERD_CORPUS:-$EXT/zugferd-corpus}"

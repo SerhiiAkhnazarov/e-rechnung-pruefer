@@ -39,7 +39,34 @@
  * line: null }. `code` is the XML Schema clause identifier Xerces uses for the same situation
  * (cvc-complex-type.2.4.a, cvc-datatype-valid.1.2.1, ...).
  *
- * Licence: EUPL-1.2.
+ * Licence: EUPL-1.2 — except the portions derived from Apache Xerces-J (below).
+ *
+ * Portions of this file are JavaScript translations of, or follow closely, classes of Apache Xerces-J 2.12.2
+ * as contained in OpenJDK 21 (module java.xml, package com.sun.org.apache.xerces.internal):
+ * impl.dv.xs.DecimalDV, AbstractDateTimeDV, YearDV, YearMonthDV, MonthDV, MonthDayDV, DayDV, AnyURIDV;
+ * impl.dv.util.Base64; util.URI; util.XMLChar; impl.xs.models.CMBuilder, XSDFACM; impl.xs.XMLSchemaValidator.
+ * Changes: translated to JavaScript and adapted to this validator (2026). Those portions are licensed under
+ * the Apache License, Version 2.0; the notices of the original source files follow, the Apache Xerces NOTICE
+ * and the licence text are reproduced in NOTICE (A.9, E.8, E.12):
+ *
+ *   Copyright (c) 2017, Oracle and/or its affiliates. All rights reserved.              (Base64)
+ *   Copyright (c) 2006, 2017, Oracle and/or its affiliates. All rights reserved.        (CMBuilder, XSDFACM)
+ *   Copyright (c) 2006, 2023, Oracle and/or its affiliates. All rights reserved.        (XMLSchemaValidator)
+ *
+ *   Licensed to the Apache Software Foundation (ASF) under one or more
+ *   contributor license agreements.  See the NOTICE file distributed with
+ *   this work for additional information regarding copyright ownership.
+ *   The ASF licenses this file to You under the Apache License, Version 2.0
+ *   (the "License"); you may not use this file except in compliance with
+ *   the License.  You may obtain a copy of the License at
+ *
+ *        http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *   Unless required by applicable law or agreed to in writing, software
+ *   distributed under the License is distributed on an "AS IS" BASIS,
+ *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *   See the License for the specific language governing permissions and
+ *   limitations under the License.
  */
 (function (root, factory) {
   if (typeof module === 'object' && module.exports) module.exports = factory();

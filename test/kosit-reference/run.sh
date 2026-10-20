@@ -10,7 +10,7 @@
 #                                                     build/kosit-reference/reports/<dir>/<name>-report.xml
 #   sh test/kosit-reference/run.sh run [options] FILE…  arbitrary call (same CLI options as the validator)
 #
-# Environment (defaults = the locations of the development sandbox; set them in CI):
+# Environment (defaults: the sources below $EXT_DIR, set by tools/verify-all.cjs, else <repository>/ext):
 #   SAXON_JAR          Saxon HE jar (its sibling lib/ is added to the class path when present)
 #   KOSIT_VALIDATOR    clone of https://github.com/itplr-kosit/validator (for src/main/model/xsd/*.xsd)
 #   KOSIT_CONFIG       clone of https://github.com/itplr-kosit/validator-configuration-xrechnung (v2026-08-31)
@@ -31,8 +31,8 @@
 #   scenarios.xml <- tools/compile-scenarios.cjs --emit-xml (Ant filter tokens of target compile-scenario)
 set -e
 HERE="$(cd "$(dirname "$0")/../.." && pwd)"
-# repositories and tools in the CI layout under build/ext (tools/verify-all.cjs links them); every path can be overridden
-EXT="${EXT_DIR:-$(cd "$(dirname "$0")" && cd "$(git rev-parse --show-toplevel 2>/dev/null || echo ../..)" && pwd)/build/ext}"
+# sources in the layout of tools/fetch-sources.cjs (EXT_DIR is set by tools/verify-all.cjs); every path can be overridden
+EXT="${EXT_DIR:-$HERE/ext}"
 SAXON_JAR="${SAXON_JAR:-$EXT/saxon/saxon-he-12.8.jar}"
 KOSIT_VALIDATOR="${KOSIT_VALIDATOR:-$EXT/validator}"
 KOSIT_CONFIG="${KOSIT_CONFIG:-$EXT/validator-configuration-xrechnung}"

@@ -13,7 +13,7 @@ const os = require('os');
 const path = require('path');
 const { spawnSync } = require('child_process');
 const root = path.join(__dirname, '..');
-const ext = process.argv[2] || path.join(root, 'build', 'ext');
+const ext = process.argv[2] || path.join(root, 'ext');
 let diff = 0, same = 0;
 const crypto = require('crypto');
 // 0. the merged XRechnung Schematron (KoSIT build step) against the SHA-256 in the manifest

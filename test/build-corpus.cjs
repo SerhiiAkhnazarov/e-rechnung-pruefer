@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /*
  * build-corpus.cjs — materialises every test document we know of as a standalone XML file so
- * that the Saxon reference pipeline (test/run-oracle-parity.sh) and our engine can be run on
+ * that the Saxon reference pipeline (test/run-oracle.sh) and our engine can be run on
  * identical inputs:
  *
  *   build/corpus/xr-ubl/   XRechnung UBL instances: originals + every XML-Mutate mutation

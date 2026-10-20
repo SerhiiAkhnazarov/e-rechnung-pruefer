@@ -2,6 +2,7 @@
 /* run-fontoxpath-doc.cjs — evaluates expressions-doc.txt with our fontoxpath build against doc.xml and compares with
  * expected-doc.json (Saxon). Runs twice: with the per-document index enabled (as the validator does) and disabled. */
 'use strict';
+process.env.TZ = 'UTC'; // implicit timezone UTC, as Saxon in run-saxon-doc.cjs (before any Date is created)
 const fs = require('fs'); const path = require('path');
 const fx = require(path.join(__dirname, '..', '..', 'vendor', 'fontoxpath.cjs'));
 const slimdom = require(path.join(__dirname, '..', '..', 'vendor', 'slimdom.cjs'));

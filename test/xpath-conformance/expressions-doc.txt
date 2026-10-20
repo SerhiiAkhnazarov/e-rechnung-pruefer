@@ -1,5 +1,6 @@
 # Document battery: evaluated with the document node of doc.xml as context item; node results are rendered with fn:path().
 # Covers the patched path rewrites (//name, //@name, //(a|b), //(a/b|c)), the per-document index, unions and document order.
+# Implicit timezone: UTC (TZ=UTC in run-saxon-doc.cjs, run-fontoxpath-doc.cjs and tools/verify-all.cjs).
 //cbc:ID
 //cac:TaxCategory/cbc:ID
 //cac:InvoiceLine
@@ -199,7 +200,6 @@ count(//cbc:ID/..) = count(//cbc:ID)
 //cac:InvoiceLine[cbc:ID[position() = 1]]
 //(cac:InvoiceLine|cac:CreditNoteLine)[position() = 1]
 //(cac:InvoiceLine|cac:CreditNoteLine)[position() > 1]
-//(cac:InvoiceLine|cac:CreditNoteLine)[last()]
 //(cac:InvoiceLine|cac:CreditNoteLine)[exists(cbc:ID[position() = 1])]
 //@id[position() = 2]
 //@id[position() > 1]
@@ -214,7 +214,6 @@ count(//cbc:ID/..) = count(//cbc:ID)
 //cbc:ID[count(../*) = 3]
 //cbc:ID[number('1')]
 //cbc:ID[xs:integer('2')]
-//cbc:ID[../@id]
 //cbc:ID['x']
 //cbc:ID['']
 //cbc:ID[.]

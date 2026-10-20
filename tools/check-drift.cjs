@@ -8,7 +8,7 @@
  *   - for Peppol (pinned to a branch head, see the manifest note): whether that branch has moved.
  * Versions reviewed and deliberately not adopted are listed with their reason in build/drift-acknowledged.json.
  * Exit code 1 when anything relevant changed, so a scheduled CI job (.github/workflows/drift.yml)
- * turns red and the pinned versions are reviewed (legal applicability dates: docs/RULESETS.md).
+ * turns red and the pinned versions are reviewed (versions in force: README.md, section "Was geprüft wird").
  *
  * Usage: node tools/check-drift.cjs [--out build/reports/drift.txt]
  * Licence: EUPL-1.2

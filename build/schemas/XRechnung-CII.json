@@ -1,5 +1,6 @@
 {
  "id": "XRechnung-CII",
+ "generator": "E-Rechnung Prüfer src/sch-compiler.js: ISO Schematron compiled to JSON; rules, tests and messages of the sources unchanged",
  "queryBinding": "xslt2",
  "defaultPhase": null,
  "title": "Schematron Version 2.6.0 - XRechnung 3.0.2 compatible - CII",
@@ -1933,6 +1934,7 @@
    "bytes": 4614
   }
  ],
+ "notices": [],
  "documents": [],
  "stats": {
   "patterns": 7,

@@ -1,10 +1,10 @@
 #!/bin/sh
 # merge-xrechnung-sch.sh — the KoSIT build step "merge-peppol-rules-with-xr-rules" of xrechnung-schematron
-# (docs/BUILD-RULES.md §2): integrates the whitelisted Peppol BIS rules (src/xsl/rule-list.xml) into the
+# (docs/BUILD-RULES.md §1): integrates the whitelisted Peppol BIS rules (src/xsl/rule-list.xml) into the
 # XRechnung Schematron with the repository's own src/xsl/peppol-into-xr.xsl. The result is what the KoSIT
 # validator configuration ships and what build/schemas/XRechnung-*.json is compiled from; its SHA-256 is
 # recorded in build/STANDARDS_MANIFEST.json (xrechnung-schematron "merged") and checked by
-# tools/verify-manifest.cjs.
+# tools/check-reproducible.cjs.
 #
 # Usage: sh tools/merge-xrechnung-sch.sh <ext-dir> [<out-dir>]
 #   <out-dir> default: <ext-dir>/xrechnung-schematron/build/schematron (the layout the KoSIT build produces)

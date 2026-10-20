@@ -1,13 +1,17 @@
 #!/usr/bin/env node
 /* selftest-pattern-matcher.cjs — cross-checks the per-node fallback matcher against the
- * set-based selector for every rule of every schema on the given documents. */
+ * set-based selector for every rule of every schema on the given documents.
+ * Usage: node test/selftest-pattern-matcher.cjs <file.xml|directory>...  (directories: their *.xml files, sorted);
+ * exit code 1 on a difference or when no document is given (no vacuous pass). */
 'use strict';
 const fs = require('fs');
 const path = require('path');
 const fx = require(path.join(__dirname, '..', 'vendor', 'fontoxpath.cjs'));
 const slimdom = require(path.join(__dirname, '..', 'vendor', 'slimdom.cjs'));
 const SR = require(path.join(__dirname, '..', 'src', 'schematron.js'));
-const files = process.argv.slice(2);
+const files = process.argv.slice(2).flatMap((a) => (fs.existsSync(a) && fs.statSync(a).isDirectory()
+  ? fs.readdirSync(a).filter((f) => f.endsWith('.xml')).sort().map((f) => path.join(a, f)) : [a]));
+if (!files.length) { console.log('pattern matcher self-test: no documents given'); process.exit(1); }
 let checks = 0, diffs = 0, dynamicErrors = 0;
 for (const id of ['EN16931-UBL', 'XRechnung-UBL', 'EN16931-CII', 'XRechnung-CII']) {
   const schema = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'build', 'schemas', id + '.json'), 'utf8'));

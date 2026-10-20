@@ -420,7 +420,7 @@
     sourceName: (p) => 'vom Benutzer geladen/' + p,
   });
   async function importRuleFile(file) {
-    // the SHA-256 is taken over the file's bytes, as in the manifest (build/manifest.json); the text is
+    // the SHA-256 is taken over the file's bytes, as in the manifest (build/STANDARDS_MANIFEST.json); the text is
     // decoded per XML 1.0 §4.3.3 like every other XML input
     const bytes = new Uint8Array(await file.arrayBuffer());
     const dec = XmlEncoding.decode(bytes);

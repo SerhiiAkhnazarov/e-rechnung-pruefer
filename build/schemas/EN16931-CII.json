@@ -1,5 +1,6 @@
 {
  "id": "EN16931-CII",
+ "generator": "E-Rechnung Prüfer src/sch-compiler.js: ISO Schematron compiled to JSON; rules, tests and messages of the sources unchanged",
  "queryBinding": "xslt2",
  "defaultPhase": null,
  "title": "EN16931 model bound to CII",
@@ -11441,6 +11442,10 @@
    "sha256": "54e0dc6d06cd7f17d268bb9696ff56f58d386ee28961c9bbef0a56718c400c89",
    "bytes": 240038
   }
+ ],
+ "notices": [
+  "Licensed under European Union Public Licence (EUPL) version 1.2.",
+  "Schematron version 1.3.16 - Last update: 2026-04-10"
  ],
  "documents": [],
  "stats": {

@@ -1,3 +1,4 @@
+/*! fontoxpath 3.34.0 (https://github.com/FontoXML/fontoxpath), Copyright (c) 2017 Fonto Group BV, Martin Middel, MIT License; contains xspattern (Copyright (c) 2019 Stef Busking), whynot (Copyright (c) 2017 Stef Busking) and prsc (Copyright (c) 2019 Stef Busking), MIT License, and tables generated from the Unicode Character Database 15.0.0 ((c) 2022 Unicode, Inc., Unicode License V3); esbuild helper code Copyright (c) 2020 Evan Wallace, MIT License. Built from source with patches/fontoxpath-pruefer.patch and patches/xspattern-pruefer.patch by tools/check-engine.sh of https://github.com/SerhiiAkhnazarov/e-rechnung-pruefer, whose NOTICE file contains the full licence texts. */
 var __defProp = Object.defineProperty;
 var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
 var __getOwnPropNames = Object.getOwnPropertyNames;

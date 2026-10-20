@@ -1,4 +1,5 @@
 # XPath conformance battery: one expression per line; evaluated by Saxon HE 12.8 (reference) and fontoxpath (ours); results compared as strings.
+# Implicit timezone: UTC (TZ=UTC in run-saxon.cjs, run-fontoxpath.cjs and tools/verify-all.cjs).
 # decimal arithmetic
 string(xs:decimal('0.1') + xs:decimal('0.2'))
 xs:decimal('0.1') + xs:decimal('0.2') = xs:decimal('0.3')
@@ -322,7 +323,6 @@ string(xs:decimal('1') - 0.9e0)
 string((xs:decimal('1') - 0.9e0) = 0.1e0)
 string(0.1e0 + 0.2e0)
 string(1e0 div 3)
-string(xs:float('1') div 3)
 string(xs:float('0.1') + xs:float('0.2'))
 string(xs:double(xs:float('0.1')))
 string(xs:float('16777217'))

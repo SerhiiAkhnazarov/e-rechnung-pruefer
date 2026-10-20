@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.2.0 (2026-10-19)
+## 0.2.0 (2026-10-20)
 
 Prüfumfang
 - XML-Schema-Prüfung (XSD 1.0) vor den Schematron-Regeln wie im KoSIT-Validator: UBL 2.1 Invoice/CreditNote,
@@ -10,8 +10,8 @@ Prüfumfang
 - Factur-X 1.09.2 / ZUGFeRD 2.5.2 (MINIMUM bis EXTENDED) mit eigenen Schematron-Regeln und Schemata;
   PDF/A-3-Container-Prüfungen für hybride Rechnungen (`docs/PDFA3-CHECKS.md`).
 - Peppol BIS Billing 3.0: offizielle Regeldateien lassen sich im Programm laden (nicht mitgeliefert,
-  keine Weitergabelizenz); Kompilierung im Browser byte-gleich mit dem Node-Build, SHA-256-Abgleich mit der
-  geprüften Fassung 3.0.21.
+  keine Weitergabelizenz); Kompilierung im Browser inhaltsgleich mit dem Node-Build, SHA-256-Abgleich mit
+  der geprüften Fassung 3.0.21.
 - Dokumente ohne KoSIT-Szenario werden nach dem passenden Regelwerk aus `build/rulesets.json` geprüft und
   als „nicht anwendbar“ bzw. nach ihrem eigenen Regelwerk bewertet – nie als XRechnung angenommen.
 - Ein Prüfablauf für Browser und Kommandozeile (`src/pruefer-core.js`).
@@ -19,25 +19,39 @@ Prüfumfang
 Engine
 - Exakte `xs:decimal`-Arithmetik wie Saxon (BigInt, `DIVIDE_PRECISION` 18, HALF_DOWN): die vier bisher
   dokumentierten Abweichungen der XML-Mutate-Tests entfallen (1 754 / 1 754).
-- Dokumentindex und Pfad-Umschreibungen für große Rechnungen (2 000 Positionen 3,0–5,2 s in Chromium, 3,9–5,0 s in WebKit).
+- Dokumentindex und Pfad-Umschreibungen für große Rechnungen (Laufzeiten: README, Abschnitt „Nachweise“).
 - Unicode-Tabellen aus UCD 15.0.0 (vorher versehentlich Kategorien aus 15.1.0), `\p{Cn}` für nicht
   zugewiesene Zeichen (`patches/xspattern-pruefer.patch`).
 - Schematron-Compiler deterministisch auch bei mehreren Übersetzungen in einer Seite.
 
 Nachweise
 - Vergleich mit dem **offiziellen KoSIT-Validator 1.6.3** (Release-JAR) und dem Release-ZIP der Konfiguration
-  v2026-08-31 über 4 158 Dokumente: 0 Abweichungen (Szenario, XSD-Urteil und -Fehlercodes, Meldungen,
-  Bewertung); zusätzlich KoSIT-Nachbau `test/kosit-reference/`.
+  v2026-08-31 über 4 158 Dokumente: 0 Abweichungen (Szenario und Annahme 4 158, XSD-Urteil 1 891,
+  XSD-Fehlercodes 89, Meldungen 1 802, Bewertung 1 891 Dokumente); zusätzlich KoSIT-Nachbau
+  `test/kosit-reference/`.
 - `tools/verify-all.cjs`: Referenzen (Saxon, Xerces) bei jedem Lauf neu erzeugt, Reproduzierbarkeit von
   Engine, Regelwerken, XSD-Modellen und Szenarien, Fingerprint je Bericht, Freigabe mit
   `verify-manifest.cjs --reports --strict`.
 - `tools/fetch-sources.cjs`: alle Quellen aus dem Manifest, Downloads SHA-256-geprüft; portable Manifest-Pfade.
-- Browser-Testreihen (XSD im Browser, Ende-zu-Ende, Peppol-Import, Laufzeit) in Chromium, WebKit und Firefox;
-  Browser-Builds von Playwright 1.56.0 vom offiziellen Playwright-CDN (`npx playwright install`).
+- Browser-Testreihen (XSD im Browser, Ende-zu-Ende, Peppol-Import, Laufzeit): lokal in Chromium und WebKit,
+  im CI zusätzlich in Firefox; Browser-Builds von Playwright 1.56.0 vom offiziellen Playwright-CDN.
 - CI in Chromium, WebKit und Firefox; KoSIT-JAR gegen Maven Central; veraPDF 1.30.3; wöchentliche
   Versionskontrolle (`tools/check-drift.cjs`, geprüfte Ausnahmen in `build/drift-acknowledged.json`).
+  Jeder Job veröffentlicht sein Ergebnis als Check-Run des Commits (über die REST-API lesbar).
+- Berichte ohne Rechnerangaben (Pfade als `<ext>`, `.`, `<tmp>`; JVM-Optionen des Rechners werden nicht an
+  die Testreihen weitergegeben); keine Abhängigkeit mehr von Pfaden der Entwicklungsumgebung.
+- XPath-Batterien ohne doppelte Ausdrücke (378 und 267).
 
 Recht
+- `NOTICE` mit dem vollständigen Wortlaut aller erforderlichen Lizenztexte und NOTICE-Dateien (MIT: fontoxpath,
+  xspattern, whynot, prsc, slimdom, esbuild; Unicode License V3; Apache License 2.0; NOTICE von Apache Xerces,
+  KoSIT-Validator und -Konfiguration, Mustangproject; Erklärung von KoSIT zu CEN/DIN), mit den Änderungen je
+  Bestandteil; im Programm wörtlich enthalten.
+- Teile von `src/xsd-validator.js` sind als Übertragung von Apache Xerces-J (Apache-2.0) gekennzeichnet, mit
+  den Hinweisen der Originaldateien; Lizenzkopf in jedem Engine-Bundle (`vendor/`).
+- Kompilierte Regelwerke tragen die Hinweise ihrer Quelldateien (`notices`) und einen Änderungsvermerk
+  (`generator`).
+- Fußzeile des Programms: Erklärung nach DIN/CEN (sichtbar) und Link zum Quellcode (EUPL-1.2 Art. 5).
 - Lizenzhinweise OASIS, UN/CEFACT, FeRD/FNFE (Apache 2.0 + Hinweis nach DIN/CEN) im Programm und in `legal/`;
   Impressum-Daten in `legal/impressum.json` (vom Anbieter auszufüllen).
 

@@ -9,7 +9,7 @@
  * --emit-xml writes the token-substituted scenarios.xml exactly as the Ant target "compile-scenario"
  * of the configuration's build.xml does (same <filter token=…> list, build.xml lines 421-441);
  * @build.date@ is set to validator.configuration.version.full (the release date) because the
- * sandbox has no build timestamp of the official release. Tokens outside that list (e.g.
+ * repository records no build timestamp of the official release. Tokens outside that list (e.g.
  * @xrechnung.cvd.version.major.minor@) stay literal — as in the official release.
  */
 'use strict';

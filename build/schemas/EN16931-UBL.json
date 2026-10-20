@@ -1,5 +1,6 @@
 {
  "id": "EN16931-UBL",
+ "generator": "E-Rechnung Prüfer src/sch-compiler.js: ISO Schematron compiled to JSON; rules, tests and messages of the sources unchanged",
  "queryBinding": "xslt2",
  "defaultPhase": null,
  "title": "EN16931  model bound to UBL",
@@ -13613,6 +13614,10 @@
    "sha256": "268d4f7a2688676695e6c69cba6fba69a6802604fee12cb544a6b30ff09555a3",
    "bytes": 309768
   }
+ ],
+ "notices": [
+  "Licensed under European Union Public Licence (EUPL) version 1.2.",
+  "Schematron version 1.3.16 - Last update: 2026-04-10"
  ],
  "documents": [],
  "stats": {

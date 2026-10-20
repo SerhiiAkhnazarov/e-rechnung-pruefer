@@ -7,9 +7,8 @@
  * test suite with its first invoice line repeated N times (new line IDs; the totals no longer add up, so
  * the documents produce a few findings — the rules are evaluated over every line either way).
  *
- * Budgets (target values, not guarantees; they hold on the development sandbox and are checked on the
- * GitHub runner): wall time per document in the browser after one warm-up document (the cold start is
- * reported separately).
+ * Budgets (target values, not guarantees; checked locally and on the GitHub runner): wall time per
+ * document in the browser after one warm-up document (the cold start is reported separately).
  *   100 lines ≤ 3 s · 500 lines ≤ 8 s · 2000 lines ≤ 30 s
  * The report records CPU model, core count, Node and browser versions, so that numbers from different
  * machines are not compared blindly.

@@ -1,17 +1,17 @@
 #!/bin/sh
 # build-xrechnung-xsl.sh — reproduces the XRechnung Schematron XSLT compilation that the KoSIT
-# configuration expects under resources/xrechnung/<version>/xsl/ (docs/BUILD-RULES.md §2 and §4):
+# configuration expects under resources/xrechnung/<version>/xsl/ (docs/BUILD-RULES.md §1 and §5):
 #   1. xrechnung-schematron build step "merge-peppol-rules-with-xr-rules" (peppol-into-xr.xsl)
 #   2. ISO Schematron XSLT2 skeleton (ph-schematron, 20100710-xslt2): include -> abstract -> svrl
 # The official release compiles the merged Schematron with SchXslt 1.10.1 instead (see
-# docs/KOSIT-REFERENCE.md, section "Abweichungen"); SchXslt is not reachable from the sandbox.
+# docs/KOSIT-REFERENCE.md, section "Abweichungen"); the test suite kosit-official uses those release XSLTs.
 #
 # Usage: sh build-xrechnung-xsl.sh <out-dir>   (writes XRechnung-UBL-validation.xsl / XRechnung-CII-validation.xsl)
 # Environment: SAXON_JAR, XR_SCHEMATRON_DIR, PEPPOL_DIR, PH_SCHEMATRON_DIR, XR_VERSION (3.0.2), XR_SCH_VERSION (2.6.0)
 set -e
 OUT="${1:?out dir}"
-# repositories and tools in the CI layout under build/ext (tools/verify-all.cjs links them); every path can be overridden
-EXT="${EXT_DIR:-$(cd "$(dirname "$0")" && cd "$(git rev-parse --show-toplevel 2>/dev/null || echo ../..)" && pwd)/build/ext}"
+# sources in the layout of tools/fetch-sources.cjs (EXT_DIR is set by tools/verify-all.cjs; default <repository>/ext); every path can be overridden
+EXT="${EXT_DIR:-$(cd "$(dirname "$0")" && cd "$(git rev-parse --show-toplevel 2>/dev/null || echo ../..)" && pwd)/ext}"
 SAXON_JAR="${SAXON_JAR:-$EXT/saxon/saxon-he-12.8.jar}"
 XR_SCHEMATRON_DIR="${XR_SCHEMATRON_DIR:-$EXT/xrechnung-schematron}"
 PEPPOL_DIR="${PEPPOL_DIR:-$EXT/peppol-bis-invoice-3}"

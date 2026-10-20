@@ -1,5 +1,6 @@
 {
  "id": "FACTUR-X-EN16931",
+ "generator": "E-Rechnung Prüfer src/sch-compiler.js: ISO Schematron compiled to JSON; rules, tests and messages of the sources unchanged",
  "queryBinding": "xslt2",
  "defaultPhase": null,
  "title": "Schema for Factur-X; 1.09.2; EN16931-COMPLIANT (FULLY)",
@@ -11780,6 +11781,9 @@
    "sha256": "ef8c8380b499d1267b2dcf1fa709b45631a77d6d5f220c6cc2ade2fdade59473",
    "bytes": 223660
   }
+ ],
+ "notices": [
+  "Factur-X release metadata\n     Version: 1.09.2\n     Release date: 2026-08-04\n     Effective date: 2026-09-01"
  ],
  "documents": [
   {

@@ -1,3 +1,4 @@
+/*! slimdom 4.3.5 (https://github.com/bwrrp/slimdom.js), Copyright (c) 2017 Stef Busking, MIT License; contains prsc (Copyright (c) 2019 Stef Busking), MIT License; esbuild helper code Copyright (c) 2020 Evan Wallace, MIT License. Built by tools/check-engine.sh of https://github.com/SerhiiAkhnazarov/e-rechnung-pruefer, whose NOTICE file contains the full licence texts. */
 "use strict";
 var __defProp = Object.defineProperty;
 var __getOwnPropDesc = Object.getOwnPropertyDescriptor;

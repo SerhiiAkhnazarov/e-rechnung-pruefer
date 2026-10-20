@@ -5,7 +5,10 @@ https://github.com/SerhiiAkhnazarov/e-rechnung-pruefer
 
 Own code (src/, tools/, test/, patches/, .github/): European Union Public Licence 1.2 (EUPL-1.2, see
 LICENSE). Parts of src/xsd-validator.js are derived from Apache Xerces-J (A.9). Part E of this file
-reproduces the licence texts and notices of the third-party components verbatim.
+reproduces the licence texts and notices of the third-party components verbatim. Every compiled rule set
+(build/schemas/*.json) carries the comments of its source files outside the schema element (field "notices",
+e.g. the EUPL notice of CEN) and a modification notice (field "generator"); every bundle in vendor/ starts
+with a licence banner.
 
 A. Contained in the program (dist/E-Rechnung-Pruefer.html) and in this repository
 
@@ -45,6 +48,9 @@ A.7  fontoxpath 3.34.0 (XPath 3.1 engine), https://github.com/FontoXML/fontoxpat
      The bundles contain these dependencies, all https://github.com/bwrrp:
      xspattern (commit 953c958bf18f, with patches/xspattern-pruefer.patch) — MIT (E.2);
      whynot 5.0.0 — MIT (E.3); prsc 4.0.0 — MIT (E.4).
+     patches/fontoxpath-pruefer.patch and patches/xspattern-pruefer.patch are diffs against fontoxpath and
+     xspattern: their context and removed lines are part of those MIT-licensed works (E.1, E.2), the added
+     lines are own code (EUPL-1.2).
 A.8  Unicode Character Database 15.0.0 (general categories and blocks from UnicodeData.txt and Blocks.txt,
      "© 2022 Unicode®, Inc.", packed into the tables of xspattern) — Unicode License V3 (E.7).
 A.9  Apache Xerces-J 2.12.2 as contained in OpenJDK 21 (module java.xml, packages
