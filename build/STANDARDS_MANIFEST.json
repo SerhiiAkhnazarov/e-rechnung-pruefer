@@ -1,5 +1,5 @@
 {
-  "generated": "2026-10-20T09:38:34.050Z",
+  "generated": "2026-10-20T11:02:33.655Z",
   "generator": "tools/make-manifest.cjs",
   "sources": {
     "CEN eInvoicing-EN16931 (validation artefacts 1.3.16)": {
@@ -129,10 +129,11 @@
     "KoSIT validator (source, for behaviour reference only)": {
       "path": "validator",
       "remote": "https://github.com/itplr-kosit/validator.git",
-      "commit": "6ac5167f2acad27df31263867e61d6698815c043",
-      "describe": "v1.6.2-15-g6ac5167",
-      "commitDate": "2026-08-20T18:54:10+02:00",
-      "licence": "Apache-2.0"
+      "commit": "37cddce28e15ac3a0319db006ab21d3f1064ca8c",
+      "describe": "v1.6.3",
+      "commitDate": "2026-08-20T17:23:24+02:00",
+      "licence": "Apache-2.0",
+      "note": "pinned to the release tag v1.6.3 (branch release/1.6.x) = source of the release JAR validator-1.6.3-standalone.jar compared by the suite kosit-official; the XRechnung configuration v2026-08-31 uses \"KoSIT Validator v1.6.3\" (its CHANGELOG.md)"
     },
     "KoSIT xrechnung-testsuite (test corpus)": {
       "path": "xrechnung-testsuite",

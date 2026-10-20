@@ -8,7 +8,7 @@ Die erste Referenz ist das **Original**: Release-JAR 1.6.3 mit dem Release-ZIP d
 
 | Quelle | Stand |
 |---|---|
-| `itplr-kosit/validator` (Klon `ext/validator`) | Commit `6ac5167f2acad27df31263867e61d6698815c043` („Merge branch 'release/1.6.x' into 'main'“, 2026-08-20); `CHANGELOG.md`: Release **1.6.3** vom 2026-08-20; `pom.xml:9` trägt bereits `1.6.4-SNAPSHOT` |
+| `itplr-kosit/validator` (Klon `ext/validator`) | Tag **v1.6.3**, Commit `37cddce28e15ac3a0319db006ab21d3f1064ca8c` („[maven-release-plugin] prepare release v1.6.3“, 2026-08-20, Branch `release/1.6.x`) = Quellstand des Release-JAR 1.6.3 (Abschnitt 5.2); `CHANGELOG.md`: Release **1.6.3** vom 2026-08-20; `pom.xml:9` = `1.6.3`. Die Konfiguration v2026-08-31 verwendet „KoSIT Validator v1.6.3“ (ihr `CHANGELOG.md`). Bis 2026-10-20 war der danach gemergte `main`-Stand `6ac5167f` gepinnt; er unterscheidet sich vom Tag nur in `CHANGELOG.md`, `pom.xml:9` (`1.6.4-SNAPSHOT`) und `.github/dependabot.yml` (`git diff --stat v1.6.3 6ac5167f`), `src/` ist identisch – alle Fundstellen unten gelten unverändert. |
 | `itplr-kosit/validator-configuration-xrechnung` (Klon `ext/validator-configuration-xrechnung`) | Tag **v2026-08-31**, Commit `b436fc4bf05ad501ab5cbb4a53fdffee3d4e18be` |
 | Saxon HE | Validator-`pom.xml:51`: `version.saxon-he` = 12.9; hier verwendet: Saxon HE **12.8** (`SaxonHE12-8J.zip` aus `github.com/Saxonica/Saxon-HE`, SHA-256 geprüft, `tools/fetch-sources.cjs`) |
 | JDK | 21 (`javax.xml.validation` = eingebautes Xerces, wie beim Validator: `impl/xml/BaseResolvingStrategy.java:35-41` erzwingt `com.sun.org.apache.xerces.internal`) |

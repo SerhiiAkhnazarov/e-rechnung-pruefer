@@ -21,12 +21,15 @@ Original (Abschnitt „Nachweise“).
 | Hybride PDF (ZUGFeRD/Factur-X): eingebettete XML, PDF/A-3-Container (Anhang, AF, XMP, Dateiname) | ISO 19005-3, Factur-X/ZUGFeRD-Spezifikation; `docs/PDFA3-CHECKS.md` | – |
 | Peppol BIS Billing 3.0 (vollständig) | OpenPeppol – **nicht mitgeliefert**, die offiziellen `.sch` lädt der Benutzer selbst | geprüft: 3.0.21 |
 
-Rechtsstand (geprüft 2026-10-19, `xeinkauf.de/xrechnung/versionen-und-bundles`): XRechnung 3.0 ist seit
+Rechtsstand (geprüft 2026-10-20, `xeinkauf.de/xrechnung/versionen-und-bundles`): XRechnung 3.0 ist seit
 01.02.2024 in Kraft und bleibt es „bis mindestens 31.07.2027“; jüngstes Bundle „3.0.2 Summer 2026
-Bugfix“ vom 31.08.2026 = die verwendete Konfiguration. XRechnung 4.0 liegt nur als Vorabversion vor
-(15.09.2026, finale Fassung voraussichtlich Frühjahr 2027). CEN hat am 09.10.2026 validation-1.3.17
-veröffentlicht; KoSIT verwendet weiterhin 1.3.16 – der Prüfer folgt KoSIT (Begründung in
-`build/drift-acknowledged.json`, wöchentliche Kontrolle `tools/check-drift.cjs`).
+Bugfix“ vom 31.08.2026 = die verwendete Konfiguration (das danach veröffentlichte Paket „XRechnung Bugfix
+Visualization 2026-10-13“ betrifft nur die Darstellung `xrechnung-visualization`, die der Prüfer nicht
+verwendet). XRechnung 4.0 liegt nur als Vorabversion vor (15.09.2026, finale Fassung voraussichtlich
+Frühjahr 2027). CEN hat am 09.10.2026 validation-1.3.17 veröffentlicht; KoSIT verwendet weiterhin 1.3.16 –
+der Prüfer folgt KoSIT. Peppol BIS Billing: verwendet 3.0.21 (Release Mai 2026, laut
+`docs.peppol.eu/poacc/billing/3.0/release-notes/` veröffentlicht 2026-05-20, verpflichtend ab 2026-08-17).
+Begründungen in `build/drift-acknowledged.json`, wöchentliche Kontrolle `tools/check-drift.cjs`.
 
 **Nicht** geprüft: elektronische Signaturen (für Rechnungen weder in Deutschland – § 14 Abs. 1 UStG –
 noch in Österreich – § 11 UStG – vorgeschrieben); vollständige PDF/A-3-Konformität von Schriften,

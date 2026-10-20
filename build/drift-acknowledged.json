@@ -23,5 +23,25 @@
       "reviewed": "2026-10-19",
       "reason": "tag on the release branch (commit 04cb0e80c14a, 2026-08-31); its tree differs from the pinned master commit 1ce1dafffd03 only in CHANGELOG.md and build.xml (git diff --stat), the test documents are identical"
     }
+  },
+  "peppol-bis-invoice-3": {
+    "v3.0.20": {
+      "reviewed": "2026-10-20",
+      "reason": "OLDER than the pinned version: GitHub release 'BIS version 3.0.20: 2025 November Release' (tag commit 261c458474e2 on master, 2026-03-16). The pinned commit 806866bd2bd9 (branch 2026-Q2-QA2, 2026-06-10) is release 3.0.21 ('Last update: 2026 May release 3.0.21.' in PEPPOL-EN16931-UBL.sch; docs.peppol.eu/poacc/billing/3.0/release-notes/: Version 3.0.21, publication 2026-05-20, mandatory from 2026-08-17), which has no tag on GitHub; KoSIT xrechnung-schematron 2.6.0 takes the Peppol rules from this branch head. v3.0.20 is no ancestor of the pin because OpenPeppol prepares each release on quarter branches. A tag v3.0.21 or later is not listed here and turns the check red."
+    }
+  },
+  "validator": {
+    "v2.0.0-alpha1": {
+      "reviewed": "2026-10-20",
+      "reason": "pre-release of the 2.x development line (annotated tag 2026-04-15 on branch 2.x: 'First functional version of the 2.x branch'). Not adopted: the XRechnung configuration v2026-08-31, whose scenarios and rules are under test, uses 'KoSIT Validator v1.6.3' (its CHANGELOG.md); the pinned source is tag v1.6.3, the official comparison (suite kosit-official) runs the release JAR 1.6.3."
+    },
+    "v2.0.0-tp1": {
+      "reviewed": "2026-10-20",
+      "reason": "pre-release of the 2.x development line (tag 2026-09-12 on branch 2.x; CHANGELOG.md of the tag: '2.0.0 - work in progress'). Not adopted for the same reason as v2.0.0-alpha1."
+    },
+    "v2.0.0-tp2": {
+      "reviewed": "2026-10-20",
+      "reason": "pre-release of the 2.x development line (tag 2026-09-14 on branch 2.x; CHANGELOG.md of the tag: '2.0.0 - work in progress', section '2.0.0-tp2'). Not adopted for the same reason as v2.0.0-alpha1."
+    }
   }
 }

@@ -34,10 +34,22 @@ Nachweise
   `verify-manifest.cjs --reports --strict`.
 - `tools/fetch-sources.cjs`: alle Quellen aus dem Manifest, Downloads SHA-256-geprüft; portable Manifest-Pfade.
 - Browser-Testreihen (XSD im Browser, Ende-zu-Ende, Peppol-Import, Laufzeit): lokal in Chromium und WebKit,
-  im CI zusätzlich in Firefox; Browser-Builds von Playwright 1.56.0 vom offiziellen Playwright-CDN.
+  im CI zusätzlich in Firefox; Browser-Builds von Playwright 1.56.0 (im CI per `npx playwright install` vom
+  offiziellen Playwright-CDN, lokal vorinstallierte Builds derselben Revisionen 1194 / 2215).
+- Testreihe `page-build`: jeder Lauf baut die Seite aus den aktuellen Quellen. `pages.yml` veröffentlicht nur
+  die Seite eines bestandenen `verify`-Laufs desselben Commits und prüft deren Statuszeile
+  („N von N Testreihen bestanden, 0 fehlgeschlagen – GitHub Actions …“).
+- Kennzeichen „mit Änderungen“ im Fingerprint nur noch bei geänderten Eingabedateien (nicht bei Berichten
+  oder `dist/`).
 - CI in Chromium, WebKit und Firefox; KoSIT-JAR gegen Maven Central; veraPDF 1.30.3; wöchentliche
   Versionskontrolle (`tools/check-drift.cjs`, geprüfte Ausnahmen in `build/drift-acknowledged.json`).
   Jeder Job veröffentlicht sein Ergebnis als Check-Run des Commits (über die REST-API lesbar).
+- Versionskontrolle wirksam für alle Quellen: das Manifest trägt `git describe --tags` aus vollständigen
+  Klonen (vorher bei 9 Quellen nur ein Commit-Kürzel, gegen das kein Tag als neuer erkannt wurde).
+  Geprüft und begründet: Peppol `v3.0.20` (Release November 2025, älter als das verwendete 3.0.21),
+  KoSIT-Validator `v2.0.0-alpha1`, `-tp1`, `-tp2` (Vorabversionen der 2.x-Linie).
+- Quellstand des KoSIT-Validators auf den Release-Tag `v1.6.3` gepinnt (= Quellstand des verglichenen
+  Release-JAR; vorher der danach gemergte `main`-Stand `6ac5167f`, `src/` identisch).
 - Berichte ohne Rechnerangaben (Pfade als `<ext>`, `.`, `<tmp>`; JVM-Optionen des Rechners werden nicht an
   die Testreihen weitergegeben); keine Abhängigkeit mehr von Pfaden der Entwicklungsumgebung.
 - XPath-Batterien ohne doppelte Ausdrücke (378 und 267).

@@ -1,10 +1,10 @@
 /*
  * KositReference.java — re-implementation of the processing pipeline of the KoSIT validator
- * (https://github.com/itplr-kosit/validator, main @ 6ac5167f = release 1.6.3) with JDK 21 +
- * Saxon HE only, so that varl reports (http://www.xoev.de/de/validator/varl/1) of the XRechnung
- * configuration can be produced in an environment where the official JAR cannot be built or
- * downloaded. Every step mirrors a class of the validator; the references in the comments point
- * to de/kosit/validationtool/**.java of the cloned source. See docs/KOSIT-REFERENCE.md.
+ * (https://github.com/itplr-kosit/validator, tag v1.6.3 @ 37cddce2 = source of the release JAR 1.6.3)
+ * with JDK 21 + Saxon HE only: an independent second reference beside the official JAR (suite
+ * kosit-official), producing varl reports (http://www.xoev.de/de/validator/varl/1) of the XRechnung
+ * configuration from its sources. Every step mirrors a class of the validator; the references in
+ * the comments point to de/kosit/validationtool/**.java of the cloned source. See docs/KOSIT-REFERENCE.md.
  *
  * Usage (same option names as CommandLineOptions.java of the validator):
  *   java -cp <saxon-he.jar>:<saxon lib/*>:<classes> KositReference
