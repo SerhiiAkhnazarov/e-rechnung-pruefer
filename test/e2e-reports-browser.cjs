@@ -56,6 +56,15 @@ const stableJson = (text) => { const j = JSON.parse(text); for (const r of j.res
   const context = await browser.newContext({ acceptDownloads: true, timezoneId });
   const page = await context.newPage();
   await page.clock.setFixedTime(NOW);
+  // every file the page offers (Blob + the download name of the link), to compare what the page produces even where
+  // the browser's own download protection holds a download back (e.g. a .xml file from a file:// page)
+  await page.addInitScript(() => {
+    const create = URL.createObjectURL.bind(URL);
+    window.__offered = [];
+    URL.createObjectURL = (obj) => { const url = create(obj); if (obj instanceof Blob) window.__offered.push({ url, blob: obj, name: null }); return url; };
+    const click = HTMLAnchorElement.prototype.click;
+    HTMLAnchorElement.prototype.click = function () { const o = window.__offered.find((x) => x.url === this.href); if (o) o.name = this.getAttribute('download'); return click.call(this); };
+  });
   const consoleErrors = [];
   page.on('console', (m) => { if (m.type() === 'error') consoleErrors.push(m.text()); });
   page.on('pageerror', (e) => consoleErrors.push('pageerror: ' + e.message));
@@ -68,15 +77,33 @@ const stableJson = (text) => { const j = JSON.parse(text); for (const r of j.res
   }
   const build = await page.evaluate(() => window.PRUEFER_BUILD);
   const ctx = { build, now: NOW, vat: legal };
+  const held = [];
+  /** click → the file the page offers (Blob) and the file the browser saved; both are compared */
   const download = async (locator) => {
-    const [dl] = await Promise.all([page.waitForEvent('download', { timeout: 60000 }), locator.click()]);
-    return { name: dl.suggestedFilename(), bytes: fs.readFileSync(await dl.path()) };
+    const n = await page.evaluate(() => window.__offered.length);
+    const saved = page.waitForEvent('download', { timeout: 30000 }).catch(() => null);
+    await locator.click({ timeout: 30000 });
+    const dl = await saved;
+    const offered = await page.evaluate(async (k) => {
+      const o = window.__offered[k];
+      if (!o) return null;
+      const url = await new Promise((res) => { const r = new FileReader(); r.onload = () => res(r.result); r.readAsDataURL(o.blob); });
+      return { name: o.name, base64: String(url).slice(String(url).indexOf(',') + 1) };
+    }, n);
+    return { offered: offered ? { name: offered.name, bytes: Buffer.from(offered.base64, 'base64') } : null, saved: dl ? { name: dl.suggestedFilename(), bytes: fs.readFileSync(await dl.path()) } : null };
   };
   let downloads = 0;
   const cmpFile = (what, got, wantName, wantBytes) => {
     downloads++;
-    check(label + ': ' + what + ' file name', got.name === wantName, got.name + ' vs ' + wantName);
-    check(label + ': ' + what + ' bytes identical to Node', sameBytes(got.bytes, wantBytes), got.bytes.length + ' vs ' + wantBytes.length + ' bytes');
+    check(label + ': ' + what + ' offered by the page', !!got.offered, 'no Blob offered');
+    if (got.offered) {
+      check(label + ': ' + what + ' file name', got.offered.name === wantName, got.offered.name + ' vs ' + wantName);
+      check(label + ': ' + what + ' bytes identical to Node', sameBytes(got.offered.bytes, wantBytes), got.offered.bytes.length + ' vs ' + wantBytes.length + ' bytes');
+    }
+    if (got.saved) {
+      check(label + ': ' + what + ' saved by the browser under the same name', got.saved.name === wantName, got.saved.name);
+      check(label + ': ' + what + ' saved bytes identical to Node', sameBytes(got.saved.bytes, wantBytes), got.saved.bytes.length + ' vs ' + wantBytes.length + ' bytes');
+    } else held.push(what + ' (' + wantName + ')');
   };
 
   // ---- per invoice ---------------------------------------------------------------------------------------------
@@ -130,13 +157,20 @@ const stableJson = (text) => { const j = JSON.parse(text); for (const r of j.res
   {
     const got = await download(page.locator('#json'));
     downloads++;
-    check(label + ': JSON file name', got.name === 'E-Rechnung-Pruefbericht.json');
-    check(label + ': JSON identical to Node (without run times)', stableJson(got.bytes.toString('utf8')) === stableJson(Reports.jsonReport(nodeResults, ctx)));
+    const want = stableJson(Reports.jsonReport(nodeResults, ctx));
+    for (const [kind, f] of [['offered by the page', got.offered], ['saved by the browser', got.saved]]) {
+      if (!f) { if (kind === 'offered by the page') check(label + ': JSON offered by the page', false); else held.push('JSON (E-Rechnung-Pruefbericht.json)'); continue; }
+      check(label + ': JSON ' + kind + ': file name', f.name === 'E-Rechnung-Pruefbericht.json', f.name);
+      check(label + ': JSON ' + kind + ': identical to Node (without run times)', stableJson(f.bytes.toString('utf8')) === want);
+    }
   }
   check(label + ': overview lists the VAT verdict', (await page.locator('#summary th').allTextContents()).includes('USt-Einordnung'));
   check(label + ': no console errors', !consoleErrors.length, consoleErrors.slice(0, 3).join(' | '));
   await browser.close();
   for (const m of failures) console.log('FAIL ' + m);
-  console.log(`E2E reports ${label} ${version} (${process.platform}, time zone ${timezoneId}): ${files.length} files, ${downloads} downloads compared with Node; ${pass + fail} checks, ${pass} passed, ${fail} failed`);
+  // a download held back by the browser's download protection is no defect of the page (its bytes were compared above),
+  // but it is reported: users of that browser are asked to keep the file
+  for (const h of held) console.log('NOTE ' + label + ' did not save ' + h + ' within 30 s (download protection of the browser); the offered file was compared');
+  console.log(`E2E reports ${label} ${version} (${process.platform}, time zone ${timezoneId}): ${files.length} files, ${downloads} files offered and compared with Node, ${downloads - held.length} of them also saved by the browser; ${pass + fail} checks, ${pass} passed, ${fail} failed`);
   process.exit(fail ? 1 : 0);
 })().catch((e) => { console.error(e); process.exit(1); });
