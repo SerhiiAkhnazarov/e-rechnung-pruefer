@@ -64,6 +64,9 @@ const SUITES = [
   { name: 'manifest', cmd: [node, 'tools/verify-manifest.cjs', ext], summary: /^manifest verification:/ },
   { name: 'engine-reproducible', cmd: ['sh', 'tools/check-engine.sh', ext, ESBUILD], summary: /^engine rebuild|applied cleanly/, all: true, needs: [E('fontoxpath')] },
   { name: 'build-reproducible', cmd: [node, 'tools/check-reproducible.cjs', ext], summary: /^reproducible build:/ },
+  // the page that the browser suites open (dist/E-Rechnung-Pruefer.html) is built from the current sources first,
+  // as in CI; the final page with the status line of this run is built after the run (tools/build-standalone.cjs)
+  { name: 'page-build', cmd: [node, 'tools/build-standalone.cjs', '--version', changelogVersion()], summary: /SHA-256/ },
   { name: 'xpath-conformance', cmd: [node, 'test/xpath-conformance/run-fontoxpath.cjs'], summary: /^XPath conformance/ },
   { name: 'xpath-document', cmd: [node, 'test/xpath-conformance/run-fontoxpath-doc.cjs'], summary: /^XPath document battery/, all: true },
   { name: 'batch-compile', cmd: [node, 'test/check-batches.cjs'], summary: /^batches/ },
@@ -96,6 +99,10 @@ const SUITES = [
 ];
 
 function browsers(f) { return ['chromium', 'webkit', 'firefox'].map(f); }
+function changelogVersion() {
+  const m = /^## (\d+\.\d+\.\d+) /m.exec(fs.readFileSync(path.join(root, 'CHANGELOG.md'), 'utf8'));
+  return m ? m[1] : '0.0.0';
+}
 
 if (args.includes('--list')) { for (const s of SUITES) console.log(s.name); process.exit(0); }
 const only = opt('--only') ? opt('--only').split(',') : null;

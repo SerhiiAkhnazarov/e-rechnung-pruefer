@@ -112,8 +112,9 @@ function compute(opts) {
   const filesId = crypto.createHash('sha256').update(JSON.stringify(files)).digest('hex');
   const git = {
     commit: tryRun('git', ['-C', root, 'rev-parse', 'HEAD']),
-    // modified tracked files only; untracked files (fetched sources, CI work files) are not inputs
-    dirty: (tryRun('git', ['-C', root, 'status', '--porcelain', '--untracked-files=no']) || '').length > 0,
+    // inputs that differ from the commit (modified or not yet committed); outputs (dist/, build/reports/) and
+    // work files are not inputs
+    dirty: (tryRun('git', ['-C', root, 'status', '--porcelain', '--'].concat(Object.values(files).flatMap((g) => Object.keys(g)))) || '').length > 0,
   };
   const manifest = JSON.parse(fs.readFileSync(path.join(root, 'build', 'STANDARDS_MANIFEST.json'), 'utf8'));
   const standards = {};

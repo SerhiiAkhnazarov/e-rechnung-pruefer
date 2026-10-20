@@ -48,8 +48,8 @@ jobs:
           cp ci-verification/build/reports/VERIFICATION.json build/reports/VERIFICATION.json
           VERSION="$(sed -n -E 's/^## ([0-9]+\.[0-9]+\.[0-9]+) .*/\1/p' CHANGELOG.md | head -n 1)"
           node tools/build-standalone.cjs --version "${VERSION}"
-          grep -o '"verification":"[^"]*"' dist/BUILD_INFO.json
-          grep -q 'GitHub Actions' dist/BUILD_INFO.json
+          # the status line must come from this CI run and report every suite as passed ("N von N … 0 fehlgeschlagen")
+          node -e "const b = require('./dist/BUILD_INFO.json'); console.log('version: ' + b.version + ', verification: ' + b.verification); if (!/GitHub Actions/.test(b.verification) || !/^(\d+) von \1 Testreihen bestanden, 0 fehlgeschlagen/.test(b.verification)) process.exit(1)"
           mkdir -p site
           cp dist/E-Rechnung-Pruefer.html site/index.html
           cp dist/E-Rechnung-Pruefer.html site/E-Rechnung-Pruefer.html
@@ -72,8 +72,7 @@ jobs:
           {
             echo "page: ${PAGE_URL:-not deployed}"
             echo "verify run: ${{ github.event.workflow_run.html_url }}"
-            grep -o '"version":"[^"]*"' dist/BUILD_INFO.json || true
-            grep -o '"verification":"[^"]*"' dist/BUILD_INFO.json || true
+            node -e "const b = require('./dist/BUILD_INFO.json'); console.log('version: ' + b.version); console.log('verification: ' + b.verification); console.log('page SHA-256: ' + b.sha256)" || true
             (cd site && sha256sum *) || true
           } > pages-report.txt
           rc=0
