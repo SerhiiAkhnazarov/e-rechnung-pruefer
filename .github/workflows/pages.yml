@@ -47,20 +47,24 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
       - name: Build the page with the CI verification status
         run: |
-          set -e
-          cp ci-verification/build/reports/VERIFICATION.json build/reports/VERIFICATION.json
-          VERSION="$(sed -n -E 's/^## ([0-9]+\.[0-9]+\.[0-9]+) .*/\1/p' CHANGELOG.md | head -n 1)"
-          node tools/build-standalone.cjs --version "${VERSION}"
-          # the status line must come from this CI run and report every suite as passed ("N von N … 0 fehlgeschlagen")
-          node -e "const b = require('./dist/BUILD_INFO.json'); console.log('version: ' + b.version + ', verification: ' + b.verification); if (!/GitHub Actions/.test(b.verification) || !/^(\d+) von \1 Testreihen bestanden, 0 fehlgeschlagen/.test(b.verification)) process.exit(1)"
-          # the program to be published is the program the CI run tested (same page apart from the build note)
-          node -e "const a = require('./dist/BUILD_INFO.json'), t = require('./ci-verification/dist/BUILD_INFO.json'); console.log('program SHA-256: to be published ' + a.programSha256 + ', tested ' + t.programSha256); if (!a.programSha256 || a.programSha256 !== t.programSha256) process.exit(1)"
-          mkdir -p site
-          cp dist/E-Rechnung-Pruefer.html site/index.html
-          cp dist/E-Rechnung-Pruefer.html site/E-Rechnung-Pruefer.html
-          cp dist/BUILD_INFO.json site/BUILD_INFO.json
-          cp build/STANDARDS_MANIFEST.json site/STANDARDS_MANIFEST.json
-          cp build/reports/VERIFICATION.json site/VERIFICATION.json
+          set -e -o pipefail
+          {
+            # build/reports/ is not part of the repository (outputs are built in CI only)
+            mkdir -p build/reports
+            cp ci-verification/build/reports/VERIFICATION.json build/reports/VERIFICATION.json
+            VERSION="$(sed -n -E 's/^## ([0-9]+\.[0-9]+\.[0-9]+) .*/\1/p' CHANGELOG.md | head -n 1)"
+            node tools/build-standalone.cjs --version "${VERSION}"
+            # the status line must come from this CI run and report every suite as passed ("N von N … 0 fehlgeschlagen")
+            node -e "const b = require('./dist/BUILD_INFO.json'); console.log('version: ' + b.version + ', verification: ' + b.verification); if (!/GitHub Actions/.test(b.verification) || !/^(\d+) von \1 Testreihen bestanden, 0 fehlgeschlagen/.test(b.verification)) process.exit(1)"
+            # the program to be published is the program the CI run tested (same page apart from the build note)
+            node -e "const a = require('./dist/BUILD_INFO.json'), t = require('./ci-verification/dist/BUILD_INFO.json'); console.log('program SHA-256: to be published ' + a.programSha256 + ', tested ' + t.programSha256); if (!a.programSha256 || a.programSha256 !== t.programSha256) process.exit(1)"
+            mkdir -p site
+            cp dist/E-Rechnung-Pruefer.html site/index.html
+            cp dist/E-Rechnung-Pruefer.html site/E-Rechnung-Pruefer.html
+            cp dist/BUILD_INFO.json site/BUILD_INFO.json
+            cp build/STANDARDS_MANIFEST.json site/STANDARDS_MANIFEST.json
+            cp build/reports/VERIFICATION.json site/VERIFICATION.json
+          } 2>&1 | tee pages-build.txt
       - uses: actions/configure-pages@v6
       - uses: actions/upload-pages-artifact@v5
         with:
@@ -88,6 +92,9 @@ jobs:
             echo "verify run: ${{ github.event.workflow_run.html_url }}"
             node -e "const b = require('./dist/BUILD_INFO.json'); console.log('version: ' + b.version); console.log('verification: ' + b.verification); console.log('page SHA-256: ' + b.sha256); console.log('program SHA-256: ' + b.programSha256)" || true
             (cd site && sha256sum *) || true
+            echo
+            echo "build (step \"Build the page with the CI verification status\"):"
+            cat pages-build.txt 2>/dev/null || echo "not run"
             echo
             echo "read back over HTTPS (tools/check-published.cjs):"
             cat published-check.txt 2>/dev/null || echo "not run"

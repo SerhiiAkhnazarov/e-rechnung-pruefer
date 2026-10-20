@@ -25,6 +25,7 @@ build/ext/
 /site/
 /ci-verification/
 /published-check.txt
+/pages-build.txt
 /platform-comparison.txt
 /linux/
 /windows/
