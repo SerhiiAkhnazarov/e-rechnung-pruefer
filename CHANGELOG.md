@@ -81,6 +81,10 @@ Recht
 - Fußzeile des Programms: Erklärung nach DIN/CEN (sichtbar) und Link zum Quellcode (EUPL-1.2 Art. 5).
 - Lizenzhinweise OASIS, UN/CEFACT, FeRD/FNFE (Apache 2.0 + Hinweis nach DIN/CEN) im Programm und in `legal/`;
   Impressum-Daten in `legal/impressum.json` (vom Anbieter auszufüllen).
+- Datenschutzhinweise (`legal/datenschutz.txt`) neben dem Impressum: Verarbeitung der Rechnungen nur im Browser,
+  `localStorage` nur für selbst geladene Peppol-Regelwerke, Bereitstellung über GitHub (IP-Protokollierung nach
+  Angaben von GitHub; Art. 6 Abs. 1 lit. f DSGVO; EU-U.S. Data Privacy Framework), Betroffenenrechte,
+  Aufsichtsbehörde; erscheinen zusammen mit dem Impressum, sobald `legal/impressum.json` ausgefüllt ist.
 
 ## 0.1.0 (2026-10-19)
 

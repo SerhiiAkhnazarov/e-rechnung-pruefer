@@ -137,6 +137,8 @@ UN/CEFACT-Hinweise; fontoxpath, xspattern, whynot, prsc, slimdom, esbuild-Hilfsc
 Teile von `src/xsd-validator.js` aus Apache Xerces-J, Apache-2.0). `NOTICE` und `legal/` sind wörtlich auch
 im Programm enthalten (Abschnitt „Lizenzen und Hinweise der Rechteinhaber“). Die Peppol-Regelwerke sind
 mangels Weitergabelizenz nicht enthalten.
+Impressum und Datenschutzhinweise der veröffentlichten Seite: `legal/impressum.json` (vom Anbieter auszufüllen)
+und `legal/datenschutz.txt`; beide erscheinen in der Fußzeile, sobald das Impressum ausgefüllt ist.
 
 Der E-Rechnung Prüfer ist eine Anwendung der Veröffentlichung ZUGFeRD 2.5.2 / Factur-X 1.09.2 und der
 Europäischen Norm EN 16931. Die Wiedergabe von Inhalten der EN 16931 erfolgt mit Erlaubnis von CEN und

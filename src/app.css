@@ -59,6 +59,7 @@ pre.xml .ln { color: #6c7a89; user-select: none; } pre.xml .ln.hit { color: #ffb
 button.btn { background: var(--accent); color: #fff; border: none; padding: 8px 14px; border-radius: 7px; font: inherit; font-weight: 600; cursor: pointer; }
 button.btn.secondary { background: #e3e9ef; color: var(--text); }
 footer { color: var(--muted); font-size: 12.5px; text-align: center; margin-top: 30px; }
+footer details.datenschutz p { text-align: left; max-width: 780px; margin: 6px auto; }
 .about ul { padding-left: 18px; } .about li { margin: 3px 0; }
 details.card > summary { cursor: pointer; font-weight: 650; font-size: 15px; }
 @media print { header.top, #drop, #exports, .tabs, footer, details.card { display: none !important; } .pane { display: block !important; } .card { break-inside: avoid; } body { background: #fff; } }

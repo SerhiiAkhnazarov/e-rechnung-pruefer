@@ -125,13 +125,18 @@ const notices = [
   { title: 'Lizenz des E-Rechnung Prüfers (EUPL-1.2)', text: read('LICENSE') },
 ];
 
-// provider identification (legal/impressum.json; shown only when filled in)
+// provider identification (legal/impressum.json) and privacy notice (legal/datenschutz.txt: paragraphs separated by
+// blank lines, the first one is the title, {{Verantwortlicher}} = name, address and e-mail of the provider);
+// both are shown only when the provider has filled in legal/impressum.json
 let impressumHtml = '';
 const imp = JSON.parse(read('legal/impressum.json'));
 if (imp.name) {
   const esc = (t) => String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;');
   const lines = [imp.name, imp.address, imp.email ? 'E-Mail: ' + imp.email : '', imp.phone ? 'Telefon: ' + imp.phone : '', imp.uid ? 'UID: ' + imp.uid : '', imp.business, imp.authority ? 'Aufsichtsbehörde: ' + imp.authority : '', imp.chamber, imp.mediaOwnerPurpose ? 'Blattlinie (§ 25 MedienG): ' + imp.mediaOwnerPurpose : ''].filter(Boolean);
   impressumHtml = '<br><details class="impressum"><summary>Impressum / Offenlegung</summary><p>' + lines.map(esc).join('<br>') + '</p></details>';
+  const controller = [imp.name, imp.address, imp.email ? 'E-Mail: ' + imp.email : ''].filter(Boolean).join(', ');
+  const [title, ...paras] = read('legal/datenschutz.txt').replace(/\r\n/g, '\n').split(/\n[ \t]*\n/).map((p) => p.replace(/\s*\n\s*/g, ' ').trim()).filter(Boolean);
+  impressumHtml += ' <details class="datenschutz"><summary>' + esc(title) + '</summary>' + paras.map((p) => '<p>' + esc(p.split('{{Verantwortlicher}}').join(controller)) + '</p>').join('') + '</details>';
 }
 
 let html = read('src/index.template.html');
