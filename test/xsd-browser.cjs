@@ -6,8 +6,9 @@
  * This proves that the validator depends on nothing but the standard DOM and that the browser
  * result equals the Node result that was proven against Xerces.
  *
- * Usage: node test/xsd-browser.cjs [--browser chromium] [--every 10] [--report file]
+ * Usage: node test/xsd-browser.cjs [--browser chromium] [--channel msedge|chrome] [--every 10] [--report file]
  *   The sample: every N-th document of every build/oracle/xsd/*.jsonl list plus all probes.
+ *   --channel: Microsoft Edge / Google Chrome installation of the machine instead of Playwright's Chromium build
  */
 'use strict';
 const fs = require('fs');
@@ -20,6 +21,8 @@ const root = path.join(__dirname, '..');
 const args = process.argv.slice(2);
 function opt(n, d) { const i = args.indexOf(n); return i >= 0 ? args[i + 1] : d; }
 const browserName = opt('--browser', 'chromium');
+const channel = opt('--channel', null);
+const label = channel || browserName;
 const every = parseInt(opt('--every', '10'), 10);
 const reportFile = opt('--report', null);
 
@@ -43,8 +46,10 @@ for (const f of fs.readdirSync(oracleDir).filter((x) => x.endsWith('.jsonl')).so
 
 (async () => {
   const engine = { chromium, webkit, firefox }[browserName];
-  const browser = await engine.launch();
-  const page = await browser.newPage();
+  const browser = await engine.launch(channel ? { channel } : {});
+  // the implicit timezone of the page = the one of the Node side (tools/verify-all.cjs sets TZ=UTC); browsers on
+  // Windows do not read TZ, so it is set explicitly (Playwright timezone emulation)
+  const page = await browser.newPage(process.env.TZ ? { timezoneId: process.env.TZ } : {});
   await page.setContent('<!doctype html><html><head><meta charset="utf-8"><title>xsd-validator browser test</title></head><body></body></html>');
   await page.addScriptTag({ content: fs.readFileSync(path.join(root, 'src', 'xsd-validator.js'), 'utf8') });
   await page.evaluate((models) => {
@@ -54,7 +59,7 @@ for (const f of fs.readdirSync(oracleDir).filter((x) => x.endsWith('.jsonl')).so
   const ua = await page.evaluate(() => navigator.userAgent);
   const lines = [];
   const out = (s) => { lines.push(s); console.log(s); };
-  out('xsd-validator in ' + browserName + ' (' + ua + ')');
+  out('xsd-validator in ' + label + ' ' + browser.version() + ' (' + ua + ')');
   let n = 0, same = 0, diff = 0, parseDiff = 0, browserMs = 0;
   for (const file of files) {
     const xml = fs.readFileSync(file, 'utf8');

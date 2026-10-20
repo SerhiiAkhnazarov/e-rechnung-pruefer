@@ -1,9 +1,0 @@
-# suite        xpath-document
-# fingerprint  85a3e2aa4dd6506cccb529b438b49e0a3281842a34706035354d6ecc68d7a879
-# git          a6a3ec9b062bf651ab595bfa27d160f0d73db947
-# command      node test/xpath-conformance/run-fontoxpath-doc.cjs
-# exit code    0
-# duration     1052 ms
-# date         2026-10-20T07:22:48.610Z
-XPath document battery vs Saxon HE 12.8 (index on): 269 identical, 0 different, 269 expressions
-XPath document battery vs Saxon HE 12.8 (index off): 269 identical, 0 different, 269 expressions

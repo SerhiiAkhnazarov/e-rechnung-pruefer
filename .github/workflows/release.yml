@@ -1,0 +1,102 @@
+# release.yml — publishes the current state of main as a GitHub release, started by hand
+# (Actions → release → Run workflow). Nothing is built here: the release carries exactly the files that
+# GitHub Pages serves for this commit, read back over HTTPS and checked by tools/check-published.cjs
+# (page = BUILD_INFO.json, verification report of this commit from GitHub Actions with every suite passed,
+# standards manifest). Preconditions, checked before anything is created:
+#   - every check run of the commit passed: "verification report", "Windows report", "platform comparison",
+#     "veraPDF report", "KoSIT JAR vs. Maven Central", "pages report";
+#   - the version (first "## x.y.z" of CHANGELOG.md) has no release yet (tag vx.y.z).
+# Assets: E-Rechnung-Pruefer.html, BUILD_INFO.json, VERIFICATION.json, STANDARDS_MANIFEST.json, SHA256SUMS.txt
+# (GitHub adds the source code of the tag as zip and tar.gz). Release notes: the CHANGELOG section of the version.
+# The result is recorded as check run "release report" of the commit.
+name: release
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+  checks: write
+  pages: read
+concurrency:
+  group: release
+  cancel-in-progress: false
+jobs:
+  release:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: main
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+      - name: Version, commit and preconditions
+        id: pre
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -e -o pipefail
+          SHA="$(git rev-parse HEAD)"
+          VERSION="$(sed -n -E 's/^## ([0-9]+\.[0-9]+\.[0-9]+) .*/\1/p' CHANGELOG.md | head -n 1)"
+          TAG="v${VERSION}"
+          echo "commit ${SHA}, version ${VERSION}, tag ${TAG}"
+          if gh release view "${TAG}" > /dev/null 2>&1 || git ls-remote --exit-code --tags origin "refs/tags/${TAG}" > /dev/null 2>&1; then
+            echo "::error::${TAG} exists already – a new release needs a new version in CHANGELOG.md"; exit 1
+          fi
+          gh api "repos/${GITHUB_REPOSITORY}/commits/${SHA}/check-runs?per_page=100" --paginate \
+            --jq '.check_runs[] | [.name, .conclusion, .completed_at, .html_url] | @tsv' > check-runs.tsv
+          missing=0
+          for name in "verification report" "Windows report" "platform comparison" "veraPDF report" "KoSIT JAR vs. Maven Central" "pages report"; do
+            row="$(awk -F '\t' -v n="${name}" '$1 == n' check-runs.tsv | sort -t "$(printf '\t')" -k3 | tail -n 1)"
+            conclusion="$(printf '%s' "${row}" | cut -f2)"
+            echo "${name}: ${conclusion:-missing} $(printf '%s' "${row}" | cut -f4)"
+            if [ "${conclusion}" != success ]; then missing=1; fi
+          done
+          if [ "${missing}" != 0 ]; then echo "::error::not every check run of ${SHA} passed – no release"; exit 1; fi
+          PAGE_URL="$(gh api "repos/${GITHUB_REPOSITORY}/pages" --jq .html_url)"
+          { echo "sha=${SHA}"; echo "version=${VERSION}"; echo "tag=${TAG}"; echo "page_url=${PAGE_URL}"; } >> "${GITHUB_OUTPUT}"
+      - name: The published files of this commit (read back over HTTPS and checked)
+        id: published
+        run: |
+          set -o pipefail
+          node tools/check-published.cjs "${{ steps.pre.outputs.page_url }}" --commit "${{ steps.pre.outputs.sha }}" --out release --retries 3 --wait 20 | tee published-check.txt
+      - name: Release notes (CHANGELOG section of the version)
+        run: |
+          set -e
+          {
+            awk -v v="${{ steps.pre.outputs.version }}" '/^## / { if (p) exit; if ($2 == v) { p = 1; next } } p' CHANGELOG.md
+            echo
+            echo "---"
+            echo "Prüfnachweise dieses Stands (Commit ${{ steps.pre.outputs.sha }}): Check-Runs „verification report“, „Windows report“, „platform comparison“, „veraPDF report“, „KoSIT JAR vs. Maven Central“, „pages report“ – \`GET /repos/${GITHUB_REPOSITORY}/commits/${{ steps.pre.outputs.sha }}/check-runs\`."
+            echo "Die Datei E-Rechnung-Pruefer.html ist byte-gleich mit ${{ steps.pre.outputs.page_url }} (SHA-256 in SHA256SUMS.txt)."
+          } > release-notes.md
+          cat release-notes.md
+      - name: Create the release
+        id: release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -e
+          gh release create "${{ steps.pre.outputs.tag }}" release/E-Rechnung-Pruefer.html release/BUILD_INFO.json release/VERIFICATION.json \
+            release/STANDARDS_MANIFEST.json release/SHA256SUMS.txt \
+            --target "${{ steps.pre.outputs.sha }}" --title "E-Rechnung Prüfer ${{ steps.pre.outputs.version }}" --notes-file release-notes.md
+          gh release view "${{ steps.pre.outputs.tag }}" --json url,tagName,assets --jq '"release: " + .url, (.assets[] | .name + " " + (.size | tostring) + " bytes")' | tee release-view.txt
+      - name: Publish the result as check run "release report"
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          {
+            echo "commit: ${{ steps.pre.outputs.sha }}, version ${{ steps.pre.outputs.version }}, tag ${{ steps.pre.outputs.tag }}"
+            cat check-runs.tsv 2>/dev/null | cut -f1,2 || true
+            echo
+            cat published-check.txt 2>/dev/null || true
+            echo
+            cat release/SHA256SUMS.txt 2>/dev/null || true
+            cat release-view.txt 2>/dev/null || echo "no release created"
+          } > release-report.txt
+          rc=0
+          node .github/scripts/check-run.cjs --name "release report" --sha "${{ steps.pre.outputs.sha || github.sha }}" \
+            --gate "${{ steps.release.outcome }}" --gate-label "Release (gh release create)" --attach release-report.txt > check-run.json || rc=$?
+          gh api -X POST "repos/${GITHUB_REPOSITORY}/check-runs" --input check-run.json > /dev/null || echo "::warning::check run could not be published"
+          exit "${rc}"

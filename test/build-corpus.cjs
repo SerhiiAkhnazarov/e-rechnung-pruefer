@@ -131,7 +131,11 @@ if (cenRepo) {
 }
 
 // 3. extra directories: classify by root namespace
-function walkDir(d, cb) { for (const e of fs.readdirSync(d, { withFileTypes: true })) { const p = path.join(d, e.name); if (e.isDirectory()) walkDir(p, cb); else cb(p); } }
+// directory entries in name order and paths compared with '/' as separator: the same order on every platform
+const byName = (a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0);
+const posix = (p) => p.split(path.sep).join('/');
+const byPosixPath = (a, b) => (posix(a) < posix(b) ? -1 : posix(a) > posix(b) ? 1 : 0);
+function walkDir(d, cb) { for (const e of fs.readdirSync(d, { withFileTypes: true }).sort(byName)) { const p = path.join(d, e.name); if (e.isDirectory()) walkDir(p, cb); else cb(p); } }
 for (const ex of extras) {
   walkDir(ex, (p) => {
     if (!p.endsWith('.xml')) return;
@@ -187,7 +191,7 @@ async function zugferd() {
   const PdfEmbedded = require(path.join(__dirname, '..', 'src', 'pdf-embedded.js'));
   const files = [];
   walkDir(zugferdDir, (p) => { if (/\.(xml|pdf)$/i.test(p) && !p.includes(path.sep + '.git' + path.sep)) files.push(p); });
-  files.sort();
+  files.sort(byPosixPath);
   let pdfs = 0, pdfWithout = 0;
   const skippedLarge = [];
   for (const p of files) {

@@ -1,8 +1,0 @@
-# suite        pdf-scan-fallback
-# fingerprint  85a3e2aa4dd6506cccb529b438b49e0a3281842a34706035354d6ecc68d7a879
-# git          a6a3ec9b062bf651ab595bfa27d160f0d73db947
-# command      node test/run-pdf-fallback-tests.cjs <ext>/zugferd-corpus
-# exit code    0
-# duration     1052 ms
-# date         2026-10-20T07:43:07.199Z
-PDF scan-fallback (xref destroyed): 151 identical XML attachments, 0 different

@@ -26,10 +26,12 @@ const { execFileSync } = require('child_process');
 const root = path.join(__dirname, '..');
 const sha = (f) => crypto.createHash('sha256').update(fs.readFileSync(f)).digest('hex');
 
+// file keys are repository-relative paths with '/' on every platform (path.posix), so that the same files give
+// the same filesId on Linux, macOS and Windows (CI job "windows" compares it with the Linux run)
 function filesIn(dir, filter) {
   const abs = path.join(root, dir);
   if (!fs.existsSync(abs)) return [];
-  return fs.readdirSync(abs).filter((f) => fs.statSync(path.join(abs, f)).isFile() && (!filter || filter(f))).sort().map((f) => path.join(dir, f));
+  return fs.readdirSync(abs).filter((f) => fs.statSync(path.join(abs, f)).isFile() && (!filter || filter(f))).sort().map((f) => path.posix.join(dir, f));
 }
 
 function filesUnder(dir, filter) {
@@ -38,7 +40,7 @@ function filesUnder(dir, filter) {
   const out = [];
   (function walk(d) {
     for (const e of fs.readdirSync(path.join(root, d), { withFileTypes: true }).sort((a, b) => (a.name < b.name ? -1 : 1))) {
-      const p = path.join(d, e.name);
+      const p = path.posix.join(d, e.name);
       if (e.isDirectory()) walk(p); else if (e.isFile() && (!filter || filter(p))) out.push(p);
     }
   })(dir);

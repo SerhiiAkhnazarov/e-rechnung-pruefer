@@ -38,7 +38,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -148,13 +148,17 @@ public class XsdOracle {
         xif.setProperty(XMLInputFactory.SUPPORT_DTD, Boolean.FALSE);
         xif.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, Boolean.FALSE);
 
+        // one order on every platform: the path with '/' as separator, compared case-sensitively (java.io.File
+        // compares case-insensitively on Windows), so that each output line, and every N-th document sampled by
+        // test/xsd-browser.cjs, is the same document on Linux, macOS and Windows
+        Comparator<File> order = Comparator.comparing((File x) -> x.getPath().replace('\\', '/'));
         List<File> files = new ArrayList<>();
         for (int i = 4; i < args.length; i++) {
             File f = new File(args[i]);
             if (f.isDirectory()) {
                 try (Stream<Path> s = Files.walk(f.toPath())) {
                     s.filter(p -> Files.isRegularFile(p) && p.toString().toLowerCase().endsWith(".xml"))
-                     .sorted().forEach(p -> files.add(p.toFile()));
+                     .map(Path::toFile).sorted(order).forEach(files::add);
                 }
             } else if (f.isFile()) {
                 files.add(f);
@@ -162,7 +166,7 @@ public class XsdOracle {
                 System.err.println("warning: not found: " + f);
             }
         }
-        Collections.sort(files);
+        files.sort(order);
 
         int nValid = 0, nInvalid = 0;
         long tv = 0;

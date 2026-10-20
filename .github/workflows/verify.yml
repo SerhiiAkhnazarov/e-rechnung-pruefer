@@ -15,9 +15,16 @@
 #   org.verapdf:validation-model-jakarta from Maven Central via tools/verapdf/VeraMrr.java, strict
 #   checksums; = the veraPDF version of Mustangproject), compared with the container checks
 #   (src/pdfa3-checks.js). Procedure and rule mapping: docs/PDFA3-CHECKS.md.
+# Job "windows": Windows, the platform the product is made for — the four browser suites (XSD in the browser,
+#   end to end, Peppol import, run time) in Microsoft Edge and Google Chrome as installed on the runner image
+#   (Playwright channels msedge / chrome), with the corpus, the Xerces reference and the page built on Windows
+#   from byte-identical inputs (checkout without line-ending conversion).
+# Job "platforms": the Linux and the Windows run verified the same inputs (filesId) and the same program
+#   (programSha256 of the tested page, tools/build-standalone.cjs).
 # Every job publishes its result as a check run of the commit ("verification report", "KoSIT JAR vs. Maven
-# Central", "veraPDF report"; .github/scripts/check-run.cjs): per suite status and summary, and the end of
-# the report of every suite that did not pass — readable with GET /repos/{owner}/{repo}/commits/{sha}/check-runs.
+# Central", "veraPDF report", "Windows report", "platform comparison"; .github/scripts/check-run.cjs): per suite
+# status and summary, and the end of the report of every suite that did not pass — readable with
+# GET /repos/{owner}/{repo}/commits/{sha}/check-runs.
 name: verify
 on:
   push:
@@ -70,7 +77,8 @@ jobs:
           rc=0
           node .github/scripts/check-run.cjs --name "verification report" --sha "${GITHUB_SHA}" \
             --verification build/reports/VERIFICATION.json \
-            --gate "${{ steps.gate.outcome }}" --gate-label "Freigabe (verify-manifest --reports --strict)" > check-run.json || rc=$?
+            --gate "${{ steps.gate.outcome }}" --gate-label "Freigabe (verify-manifest --reports --strict)" \
+            --attach build/reports/VERIFICATION.json > check-run.json || rc=$?
           gh api -X POST "repos/${GITHUB_REPOSITORY}/check-runs" --input check-run.json > /dev/null || echo "::warning::check run could not be published"
           echo "check run published (payload exit code ${rc})"
       - uses: actions/upload-artifact@v7
@@ -198,3 +206,103 @@ jobs:
             build/reports/
             build/pdfa3-results.json
             build/verapdf/
+
+  windows:
+    runs-on: windows-2025
+    timeout-minutes: 120
+    permissions:
+      contents: read
+      checks: write
+    defaults:
+      run:
+        shell: bash
+    env:
+      WINDOWS_SUITES: manifest,ref-corpus,ref-xerces,xml-encoding,page-build,xsd-browser-edge-win,xsd-browser-chrome-win,e2e-edge-win,e2e-chrome-win,peppol-import-edge-win,peppol-import-chrome-win,performance-edge-win,performance-chrome-win
+    steps:
+      - name: Check out without line-ending conversion (inputs byte-identical with the repository, same filesId as on Linux)
+        run: |
+          git config --global core.autocrlf false
+          git config --global core.eol lf
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Working tree = repository (line endings of every file as committed)
+        run: git ls-files --eol | awk '{ i = substr($1, 3); w = substr($2, 3); if (i != w) { n++; print } } END { print (n + 0) " files with line endings other than in the repository"; exit (n > 0) }'
+      - name: Test tools (exact versions; Microsoft Edge and Google Chrome of the runner image, no browser download)
+        run: npm install --no-save --no-audit --no-fund playwright@1.56.0 pdfjs-dist@6.2.108 esbuild@0.28.2
+      - name: Fetch all pinned sources and release artefacts (SHA-256 checked)
+        run: node tools/fetch-sources.cjs ext
+      - name: Peppol rule sets for the Peppol import test (compiled from the pinned source, never shipped)
+        run: |
+          set -e
+          node tools/compile-sch.cjs ext/peppol-bis-invoice-3/rules/sch/PEPPOL-EN16931-UBL.sch build/schemas/PEPPOL-UBL.json --id PEPPOL-UBL
+          node tools/compile-sch.cjs ext/peppol-bis-invoice-3/rules/sch/PEPPOL-EN16931-CII.sch build/schemas/PEPPOL-CII.json --id PEPPOL-CII
+      - name: Windows run (inputs, corpus, Xerces reference, page build, browser suites in Edge and Chrome)
+        id: verification
+        run: node tools/verify-all.cjs --ext ext --only "${WINDOWS_SUITES}"
+      - name: Gate (every suite run and passed with the current fingerprint)
+        id: gate
+        run: node tools/verify-manifest.cjs ext --reports --strict
+      - name: Publish the result as check run "Windows report"
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          rc=0
+          node .github/scripts/check-run.cjs --name "Windows report" --sha "${GITHUB_SHA}" \
+            --verification build/reports/VERIFICATION.json --require "${WINDOWS_SUITES}" \
+            --gate "${{ steps.gate.outcome }}" --gate-label "Freigabe (verify-manifest --reports --strict)" \
+            --attach build/reports/VERIFICATION.json > check-run.json || rc=$?
+          gh api -X POST "repos/${GITHUB_REPOSITORY}/check-runs" --input check-run.json > /dev/null || echo "::warning::check run could not be published"
+          echo "check run published (payload exit code ${rc})"
+          exit "${rc}"
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: verification-windows
+          path: |
+            build/reports/
+            build/shots/
+            dist/BUILD_INFO.json
+
+  platforms:
+    needs: [verify, windows]
+    if: always()
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      checks: write
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+      - uses: actions/download-artifact@v8
+        with:
+          name: verification
+          path: linux
+      - uses: actions/download-artifact@v8
+        with:
+          name: verification-windows
+          path: windows
+      - name: Compare the Linux and the Windows run (inputs, program, results)
+        id: compare
+        run: |
+          set -o pipefail
+          node .github/scripts/compare-platforms.cjs linux windows "${GITHUB_SHA}" | tee platform-comparison.txt
+      - name: Publish the result as check run "platform comparison"
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          rc=0
+          node .github/scripts/check-run.cjs --name "platform comparison" --sha "${GITHUB_SHA}" \
+            --gate "${{ steps.compare.outcome }}" --gate-label "Vergleich Linux / Windows (.github/scripts/compare-platforms.cjs)" --attach platform-comparison.txt > check-run.json || rc=$?
+          gh api -X POST "repos/${GITHUB_REPOSITORY}/check-runs" --input check-run.json > /dev/null || echo "::warning::check run could not be published"
+          exit "${rc}"

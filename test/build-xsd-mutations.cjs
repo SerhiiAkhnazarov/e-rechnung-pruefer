@@ -694,7 +694,9 @@ function main() {
   pools.push(listXml(path.join(corpus, 'extra-cii')));
   const zf = [];
   if (fs.existsSync(ZUGFERD)) (function walk(d) { for (const e of fs.readdirSync(d, { withFileTypes: true })) { const p = path.join(d, e.name); if (e.isDirectory()) walk(p); else if (/\.xml$/i.test(e.name)) zf.push(p); } })(ZUGFERD);
-  pools.push(zf.sort());
+  // paths compared with '/' as separator: the same base documents on every platform
+  const posix = (p) => p.split(path.sep).join('/');
+  pools.push(zf.sort((a, b) => (posix(a) < posix(b) ? -1 : posix(a) > posix(b) ? 1 : 0)));
   const bases = [];
   const idx = pools.map(() => 0);
   let guard = 0;
@@ -727,7 +729,7 @@ function main() {
     results.forEach((r, i) => {
       const name = baseName + '__x' + String(i).padStart(2, '0') + '_' + r.kind + '.xml';
       fs.writeFileSync(path.join(OUT, name), r.xml);
-      manifest.push({ file: name, base: path.relative(root, f), kind: r.kind, note: r.note });
+      manifest.push({ file: name, base: path.relative(root, f).split(path.sep).join('/'), kind: r.kind, note: r.note });
       kinds[r.kind] = (kinds[r.kind] || 0) + 1;
       nFiles++;
     });
@@ -741,7 +743,7 @@ function main() {
     kinds.probe = (kinds.probe || 0) + 1;
     nFiles++;
   }
-  fs.writeFileSync(path.join(OUT, 'MANIFEST.json'), JSON.stringify({ generated: new Date().toISOString(), bases: bases.map((f) => path.relative(root, f)), kinds, entries: manifest }, null, 1));
+  fs.writeFileSync(path.join(OUT, 'MANIFEST.json'), JSON.stringify({ generated: new Date().toISOString(), bases: bases.map((f) => path.relative(root, f).split(path.sep).join('/')), kinds, entries: manifest }, null, 1));
   console.log('build-xsd-mutations: ' + bases.length + ' base documents -> ' + nFiles + ' files in ' + path.relative(root, OUT));
   console.log('  kinds: ' + Object.entries(kinds).map(([k, v]) => k + ' ' + v).join(', '));
 }

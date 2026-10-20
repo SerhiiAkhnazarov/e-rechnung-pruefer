@@ -30,6 +30,13 @@ function run(cmd, a, opts) {
   const r = spawnSync(cmd, a, Object.assign({ encoding: 'utf8', stdio: ['ignore', 'inherit', 'inherit'] }, opts || {}));
   if (r.status !== 0) throw new Error(cmd + ' ' + a.join(' ') + ' failed (' + r.status + ')');
 }
+// zip archives: unzip; on Windows the bsdtar of the system (%SystemRoot%\System32\tar.exe reads zip files; Git for
+// Windows has no unzip, and the GNU tar of Git Bash cannot read zip). dirs: top-level directories to extract (all when empty)
+function extractZip(zip, dest, dirs) {
+  fs.mkdirSync(dest, { recursive: true });
+  if (process.platform === 'win32') run(path.join(process.env.SystemRoot || 'C:\\Windows', 'System32', 'tar.exe'), ['-xf', zip, '-C', dest].concat(dirs || []));
+  else run('unzip', ['-q', '-o', zip].concat((dirs || []).map((d) => d + '/*')).concat(['-d', dest]));
+}
 // sub-trees for sparse checkouts (repositories of which only a part is used)
 const SPARSE = {
   'ph-schematron': ['ph-schematron-isosch/src/main/resources/external/schematron/20100710-xslt2'],
@@ -59,7 +66,7 @@ if (ublSrc && (!only || only.has('os-UBL-2.1'))) {
   const zip = path.join(ext, ublSrc.archive.file);
   if (sha(zip) !== ublSrc.archive.sha256) throw new Error('SHA-256 mismatch ' + zip);
   fs.rmSync(path.join(ext, 'os-UBL-2.1'), { recursive: true, force: true });
-  run('unzip', ['-q', zip, 'xsd/*', 'xsdrt/*', '-d', path.join(ext, 'os-UBL-2.1')]);
+  extractZip(zip, path.join(ext, 'os-UBL-2.1'), ['xsd', 'xsdrt']);
   console.log('unzip os-UBL-2.1 (sha256 ' + ublSrc.archive.sha256.slice(0, 12) + ' verified)');
   log.push(['archive', ublSrc.archive.file, ublSrc.archive.sha256].join('\t'));
 }
@@ -99,7 +106,7 @@ for (const d of DOWNLOADS) {
   if (h !== d.sha256) throw new Error('SHA-256 mismatch ' + d.file + ': ' + h + ' (expected ' + d.sha256 + ')');
   console.log('ok   ' + d.file + ' sha256 ' + h.slice(0, 16) + '…');
   log.push(['download', d.url, h, fs.statSync(target).size].join('\t'));
-  if (d.unzipTo) run('unzip', ['-q', '-o', target, '-d', path.join(ext, d.unzipTo)]);
+  if (d.unzipTo) extractZip(target, path.join(ext, d.unzipTo));
 }
 fs.writeFileSync(path.join(ext, 'DOWNLOADS.txt'), '# fetched by tools/fetch-sources.cjs ' + new Date().toISOString() + '\n' + log.join('\n') + '\n');
 console.log('sources ready in ' + ext);

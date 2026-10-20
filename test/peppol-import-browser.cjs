@@ -9,20 +9,26 @@
  *  3. documents analysed after the import give the same findings as the Node pipeline with all rule sets;
  *  4. the imported rule set survives a reload (localStorage, where the browser provides it).
  *
- * Usage: node peppol-import-browser.cjs [--browser chromium|webkit|firefox] <peppol-bis-invoice-3 dir> <doc>...
+ * Usage: node peppol-import-browser.cjs [--browser chromium|webkit|firefox] [--channel msedge|chrome]
+ *          <peppol-bis-invoice-3 dir> <doc>...
+ *   --channel: Microsoft Edge / Google Chrome installation of the machine instead of Playwright's Chromium build
  */
 'use strict';
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
-const { chromium, webkit, firefox } = require(path.join(__dirname, 'resolve-tool.cjs')).playwright();
+const tool = require(path.join(__dirname, 'resolve-tool.cjs'));
+const { chromium, webkit, firefox } = tool.playwright();
 const PrueferCore = require(path.join(__dirname, '..', 'src', 'pruefer-core.js'));
 const { createEnv } = require(path.join(__dirname, '..', 'tools', 'node-env.cjs'));
 
 const args = process.argv.slice(2);
-const bi = args.indexOf('--browser');
-const browserName = bi >= 0 ? args[bi + 1] : 'chromium';
-const rest = bi >= 0 ? args.filter((a, i) => i !== bi && i !== bi + 1) : args;
+const OPTS = ['--browser', '--channel'];
+const optValue = (n, d) => { const i = args.indexOf(n); return i >= 0 ? args[i + 1] : d; };
+const browserName = optValue('--browser', 'chromium');
+const channel = optValue('--channel', null);
+const label = channel || browserName;
+const rest = args.filter((a, i) => !OPTS.includes(a) && !OPTS.includes(args[i - 1]));
 const [pepDir, ...docs] = rest;
 const root = path.join(__dirname, '..');
 const dist = path.join(root, 'dist', 'E-Rechnung-Pruefer.html');
@@ -34,14 +40,16 @@ const check = (ok, msg) => { console.log((ok ? '  ok   ' : '  FAIL ') + msg); if
 
 (async () => {
   const engine = { chromium, webkit, firefox }[browserName];
-  const browser = await engine.launch();
-  const context = await browser.newContext();
+  const browser = await engine.launch(channel ? { channel } : {});
+  // the implicit timezone of the page = the one of the Node side (tools/verify-all.cjs sets TZ=UTC); browsers on
+  // Windows do not read TZ, so it is set explicitly (Playwright timezone emulation)
+  const context = await browser.newContext(process.env.TZ ? { timezoneId: process.env.TZ } : {});
   const page = await context.newPage();
   const errors = [];
   page.on('pageerror', (e) => errors.push(e.message));
-  await page.goto('file://' + dist);
+  await page.goto(tool.fileUrl(dist));
   await page.waitForSelector('#ruleimport input[type=file]', { state: 'attached' });
-  console.log(browserName + ': Peppol import test');
+  console.log(label + ' ' + browser.version() + ' (' + process.platform + '): Peppol import test');
 
   for (const id of ['PEPPOL-UBL', 'PEPPOL-CII']) {
     const file = path.join(pepDir, 'rules', 'sch', id.replace('PEPPOL-', 'PEPPOL-EN16931-') + '.sch');
@@ -93,6 +101,6 @@ const check = (ok, msg) => { console.log((ok ? '  ok   ' : '  FAIL ') + msg); if
   }
   check(errors.length === 0, 'no page errors' + (errors.length ? ': ' + errors.join('; ') : ''));
   await browser.close();
-  console.log('PEPPOL IMPORT ' + browserName + ': ' + (fails ? fails + ' FAILED' : 'OK'));
+  console.log('PEPPOL IMPORT ' + label + ': ' + (fails ? fails + ' FAILED' : 'OK'));
   process.exit(fails ? 1 : 0);
 })().catch((e) => { console.error(e); process.exit(2); });

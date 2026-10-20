@@ -53,6 +53,21 @@ Nachweise
 - Berichte ohne Rechnerangaben (Pfade als `<ext>`, `.`, `<tmp>`; JVM-Optionen des Rechners werden nicht an
   die Testreihen weitergegeben); keine Abhängigkeit mehr von Pfaden der Entwicklungsumgebung.
 - XPath-Batterien ohne doppelte Ausdrücke (378 und 267).
+- Windows: CI-Job `windows` (Windows Server 2025) – die vier Browser-Testreihen in Microsoft Edge und Google
+  Chrome des Runner-Images (Playwright-Kanäle `msedge`, `chrome`), mit Korpus, Xerces-Referenz und Seite unter
+  Windows gebaut; Job `platforms` vergleicht Eingaben (`filesId`) und Programm (`programSha256`) mit dem
+  Linux-Lauf; Check-Runs „Windows report“ und „platform comparison“.
+- Plattformunabhängig: Fingerprint-Schlüssel mit `/` auf jedem System; Reihenfolge von Korpus und
+  Xerces-Referenz unabhängig von Dateisystem und Groß-/Kleinschreibung (unter Linux byte-gleich mit vorher,
+  7 778 Dateien); `file:`-URLs über `pathToFileURL`; Zip-Archive unter Windows mit dem `tar.exe` des Systems;
+  Pfade in Shell-Befehlen gequotet; Zeitzone der Browser = `TZ` der Testreihen.
+- `programSha256` in `BUILD_INFO.json` (SHA-256 der Seite ohne den Build-Vermerk): `pages.yml` veröffentlicht nur
+  das getestete Programm und liest die veröffentlichten Dateien danach über HTTPS zurück
+  (`tools/check-published.cjs`); `release.yml` (von Hand gestartet) veröffentlicht genau diese Dateien als
+  Release, wenn alle Check-Runs des Commits bestanden sind.
+- Seite (`dist/`) und Berichte (`build/reports/`) nicht mehr im Repository: die dort liegende Seite war ein
+  älterer Build (ohne die Lizenzhinweise der Folgecommits, Statuszeile eines früheren lokalen Laufs); jede Kopie
+  entsteht jetzt aus den Quellen im CI. Check-Runs enthalten `VERIFICATION.json` vollständig.
 
 Recht
 - `NOTICE` mit dem vollständigen Wortlaut aller erforderlichen Lizenztexte und NOTICE-Dateien (MIT: fontoxpath,

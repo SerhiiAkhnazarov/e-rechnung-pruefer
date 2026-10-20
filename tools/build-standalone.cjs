@@ -158,15 +158,22 @@ const parts = {
   '__RULES_DATE__': 'CEN 1.3.16 · XRechnung ' + scenarios.properties['xrechnung.version'] + ' (KoSIT ' + scenarios.properties['validator.configuration.version.full'] + ') · Factur-X 1.09.2 / ZUGFeRD 2.5.2',
   '__IMPRESSUM__': impressumHtml,
 };
+// the build note (window.PRUEFER_BUILD: version, date, fingerprint, verification status) is inserted last;
+// programSha256 = SHA-256 of the page with the placeholder instead of the note, i.e. of the program itself.
+// Two builds of the same sources have the same programSha256 on every machine and day (CI: the page tested in
+// the job verify, the Windows build, the published page).
+const BUILD_KEY = '/*__BUILD__*/';
 for (const [k, v] of Object.entries(parts)) {
   if (!html.includes(k)) throw new Error('placeholder missing: ' + k);
-  html = html.split(k).join(v);
+  if (k !== BUILD_KEY) html = html.split(k).join(v);
 }
+const programSha256 = sha(html);
+html = html.split(BUILD_KEY).join(parts[BUILD_KEY]);
 fs.mkdirSync(path.join(root, 'dist'), { recursive: true });
 const outFile = path.join(root, 'dist', 'E-Rechnung-Pruefer.html');
 fs.writeFileSync(outFile, html);
 const comps = {};
 for (const f of ['vendor/fontoxpath.iife.min.js', 'src/schematron.js', 'src/pdf-embedded.js', 'src/invoice-model.js', 'src/sha256.js', 'src/xml-encoding.js', 'src/xsd-validator.js', 'src/pdfa3-checks.js', 'src/sch-compiler.js', 'src/pruefer-core.js', 'src/app.js']) comps[path.basename(f)] = { bytes: fs.statSync(path.join(root, f)).size, sha256: sha(read(f)) };
-const info = Object.assign({}, build, { file: path.basename(outFile), bytes: Buffer.byteLength(html), sha256: sha(html), embeddedRuleSets: Object.keys(schemas), embeddedXsdModels: Object.keys(xsd), components: comps });
+const info = Object.assign({}, build, { file: path.basename(outFile), bytes: Buffer.byteLength(html), sha256: sha(html), programSha256, embeddedRuleSets: Object.keys(schemas), embeddedXsdModels: Object.keys(xsd), components: comps });
 fs.writeFileSync(path.join(root, 'dist', 'BUILD_INFO.json'), JSON.stringify(info, null, 2));
-console.log(`${outFile}: ${(info.bytes / 1024 / 1024).toFixed(2)} MB, SHA-256 ${info.sha256}; rule sets ${Object.keys(schemas).join(', ')}; XSD ${Object.keys(xsd).join(', ')}`);
+console.log(`${outFile}: ${(info.bytes / 1024 / 1024).toFixed(2)} MB, SHA-256 ${info.sha256}, program SHA-256 ${programSha256}; rule sets ${Object.keys(schemas).join(', ')}; XSD ${Object.keys(xsd).join(', ')}`);

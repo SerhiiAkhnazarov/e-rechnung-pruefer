@@ -1,8 +1,10 @@
 # E-Rechnung Prüfer
 
 Offline-Prüfung elektronischer Rechnungen – XRechnung, ZUGFeRD / Factur-X, EN 16931, Peppol BIS –
-**vollständig im Browser**: eine einzige HTML-Datei, keine Installation, kein Upload, keine
-Netzwerkverbindung. `dist/E-Rechnung-Pruefer.html` öffnen, XML- oder PDF-Datei hineinziehen.
+**vollständig im Browser**: eine einzige HTML-Datei, keine Installation, kein Upload. Online:
+https://serhiiakhnazarov.github.io/e-rechnung-pruefer/ (einmal laden, geprüft wird nur im Browser) – oder die
+Datei `E-Rechnung-Pruefer.html` aus den [Releases](https://github.com/SerhiiAkhnazarov/e-rechnung-pruefer/releases)
+öffnen, ohne Netzwerkverbindung. XML- oder PDF-Datei hineinziehen.
 
 Die Prüfung folgt dem Ablauf des offiziellen KoSIT-Validators (Zeichenkodierung → XML Schema →
 Schematron → Bewertung) und liefert für XRechnung/EN 16931 nachweislich dieselben Ergebnisse wie das
@@ -57,7 +59,11 @@ Peppol-Transport (SBDH/AS4).
 Jeder Lauf von `node tools/verify-all.cjs` erzeugt die Referenzergebnisse neu aus den gepinnten
 Quellen, prüft die Reproduzierbarkeit der Bausteine der ausgelieferten Seite (Engine-Bundles, Regelwerke,
 XSD-Modelle, Szenarien) und schreibt jeden Bericht mit dem Fingerprint seiner Eingaben
-(`build/reports/VERIFICATION.json`). Stand 2026-10-20 (lokaler Lauf; Firefox nur im CI):
+(`build/reports/VERIFICATION.json`). Die Ergebnisse jedes Commits stehen in seinen Check-Runs (unten, „CI“);
+die veröffentlichte Seite trägt den Bericht ihres CI-Laufs mit (`VERIFICATION.json` und `BUILD_INFO.json`
+neben der Seite und in jedem Release). Seite und Berichte liegen nicht im Repository – jede Kopie wird aus den
+Quellen gebaut und geprüft. Ergebnisse der CI-Läufe (gleich in jedem Lauf; die Zahlen jedes Commits im
+Check-Run „verification report“):
 
 | Testreihe | Ergebnis |
 |---|---|
@@ -72,22 +78,28 @@ XSD-Modelle, Szenarien) und schreibt jeden Bericht mit dem Fingerprint seiner Ei
 | Zeichenkodierung gegen JDK-Parser | 31 Fälle: 28 identisch, 3 von XML 1.0 vorgeschriebene schwerwiegende Fehler, die der JDK-Parser toleriert |
 | PDF-Extraktion gegen pdf.js, ZUGFeRD-Korpus | 151 / 151 (auch bei zerstörter Querverweistabelle) |
 | PDF/A-3-Container-Prüfungen | 151 Korpus-PDFs wie erwartet, 3 394 / 3 394 Mutationen erkannt, Mustang-Parität 15 / 15 (davon 1 Fall strenger als Mustang: `/AFRelationship /Unspecified` an der Rechnungs-XML, `docs/PDFA3-CHECKS.md`) |
-| Browser Chromium und WebKit (Engine von Safari) lokal und im CI, Firefox nur im CI | XSD-Prüfung im Browser 1 053 / 1 053 identisch mit Node (Urteil, Codes, Fundstellen); Ende-zu-Ende-Prüfung im Browser = Node; Peppol-Import im Browser inhaltsgleich mit dem Node-Build (JSON ohne die Herkunftsfelder `sources`/`importedFrom`) |
-| Reproduzierbarkeit | Engine-Bundles aus Upstream + Patches, alle Regelwerke, XSD-Modelle, Szenarien: byte-gleich (die Seite selbst enthält Datum und Prüfstatus des Builds) |
+| Browser: Linux – Chromium, WebKit (Engine von Safari), Firefox; Windows – Microsoft Edge, Google Chrome | XSD-Prüfung im Browser 1 053 / 1 053 identisch mit Node (Urteil, Codes, Fundstellen); Ende-zu-Ende-Prüfung im Browser = Node; Peppol-Import im Browser inhaltsgleich mit dem Node-Build (JSON ohne die Herkunftsfelder `sources`/`importedFrom`) |
+| Reproduzierbarkeit | Engine-Bundles aus Upstream + Patches, alle Regelwerke, XSD-Modelle, Szenarien: byte-gleich; die Seite: unter Linux und Windows dasselbe Programm (`programSha256` in `BUILD_INFO.json` = SHA-256 der Seite ohne den Build-Vermerk mit Datum und Prüfstatus) |
 
-Laufzeit (2 Kerne, nach dem ersten Dokument): Chromium – 100 Positionen 0,3–0,6 s, 500 Positionen
-0,8–1,4 s, 2 000 Positionen 3,0–5,2 s (sieben Läufe); WebKit – 0,4–0,6 s, 1,0–1,7 s, 3,9–5,0 s (vier Läufe)
-(`test/perf.cjs`, Messwerte je Lauf in `build/reports/performance-*.txt`).
+Laufzeit (`test/perf.cjs`, je Dokument im Browser nach dem ersten Dokument): Grenzen 100 Positionen ≤ 3 s,
+500 ≤ 8 s, 2 000 ≤ 30 s, geprüft in jedem CI-Lauf in allen fünf Browsern; die Messwerte des Laufs mit Prozessor,
+Kernzahl und Browserversion stehen in den Berichten `performance-*` (Check-Runs „verification report“ und
+„Windows report“).
 
-CI (`.github/workflows/verify.yml`): dieselbe Pipeline in Chromium, **WebKit und Firefox**, Freigabe
-nur wenn jede Testreihe mit dem aktuellen Fingerprint bestanden ist; Vergleich des KoSIT-JAR mit Maven
-Central; veraPDF 1.30.3 über den ZUGFeRD-Korpus. Jeder Job veröffentlicht sein Ergebnis als Check-Run des
-Commits („verification report“, „KoSIT JAR vs. Maven Central“, „veraPDF report“, „pages report“; Tabelle
-aller Testreihen, Berichtsende jeder nicht bestandenen), abrufbar über
+CI (`.github/workflows/verify.yml`): dieselbe Pipeline unter Linux in Chromium, **WebKit und Firefox**,
+Freigabe nur wenn jede Testreihe mit dem aktuellen Fingerprint bestanden ist; **Windows** (Job `windows`): die
+Browser-Testreihen in **Microsoft Edge und Google Chrome**, mit Korpus, Xerces-Referenz und Seite unter Windows
+gebaut; Job `platforms`: beide Läufe haben dieselben Eingaben (`filesId`) und dasselbe Programm
+(`programSha256`) geprüft; Vergleich des KoSIT-JAR mit Maven Central; veraPDF 1.30.3 über den ZUGFeRD-Korpus.
+Jeder Job veröffentlicht sein Ergebnis als Check-Run des Commits („verification report“, „Windows report“,
+„platform comparison“, „KoSIT JAR vs. Maven Central“, „veraPDF report“, „pages report“; Tabelle aller
+Testreihen, Berichtsende jeder nicht bestandenen, `VERIFICATION.json` vollständig), abrufbar über
 `GET /repos/SerhiiAkhnazarov/e-rechnung-pruefer/commits/<sha>/check-runs`. `pages.yml` veröffentlicht die
-Seite nur nach bestandenem `verify` desselben Commits und baut sie mit dem Prüfbericht dieses CI-Laufs
-(Statuszeile im Programm unter „Build“). `drift.yml`: wöchentlicher Abgleich mit neuen Versionen der
-Normgeber.
+Seite nur nach bestandenem `verify` desselben Commits, baut sie mit dem Prüfbericht dieses CI-Laufs
+(Statuszeile im Programm unter „Build“), verlangt dasselbe Programm wie die getestete Seite und liest die
+veröffentlichten Dateien danach über HTTPS zurück (`tools/check-published.cjs`). `release.yml` (von Hand
+gestartet) veröffentlicht genau diese Dateien als Release, wenn alle Check-Runs des Commits bestanden sind.
+`drift.yml`: wöchentlicher Abgleich mit neuen Versionen der Normgeber.
 
 ## Bauen und prüfen
 
@@ -104,6 +116,12 @@ node tools/verify-all.cjs --ext ext --skip pdfa-verapdf   # vollständige Prüfu
 node tools/verify-manifest.cjs ext --reports --strict     # Freigabe
 node tools/pruefer-cli.cjs rechnung.xml             # dieselbe Prüfung auf der Kommandozeile (JSON)
 ```
+
+Unter Windows (Git Bash, wie im CI-Job `windows`; vorher `git config --global core.autocrlf false` und
+`git config --global core.eol lf`, damit die Dateien byte-gleich ausgecheckt werden): die Browser-Testreihen in
+den installierten Browsern Edge und Chrome – `node tools/verify-all.cjs --ext ext --only` mit den Namen aus
+`node tools/verify-all.cjs --list` (`…-edge-win`, `…-chrome-win`; vorher `ref-corpus`, `ref-xerces`,
+`xml-encoding`, `page-build`).
 
 Liegen die Testwerkzeuge an anderer Stelle: `PLAYWRIGHT_MODULE`, `PDFJS_MODULE` (Paketverzeichnisse) und
 `ESBUILD_BINARY` (`test/resolve-tool.cjs`, `tools/verify-all.cjs`).

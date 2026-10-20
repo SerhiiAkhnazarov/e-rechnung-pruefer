@@ -13,7 +13,9 @@
  * The report records CPU model, core count, Node and browser versions, so that numbers from different
  * machines are not compared blindly.
  *
- * Usage: node perf.cjs <xrechnung-testsuite dir> [--browser chromium|webkit|firefox] [--sizes 100,500,2000]
+ * Usage: node perf.cjs <xrechnung-testsuite dir> [--browser chromium|webkit|firefox] [--channel msedge|chrome]
+ *          [--sizes 100,500,2000]
+ *   --channel: Microsoft Edge / Google Chrome installation of the machine instead of Playwright's Chromium build
  */
 'use strict';
 const fs = require('fs');
@@ -21,11 +23,14 @@ const os = require('os');
 const path = require('path');
 const PrueferCore = require(path.join(__dirname, '..', 'src', 'pruefer-core.js'));
 const { createEnv } = require(path.join(__dirname, '..', 'tools', 'node-env.cjs'));
+const tool = require(path.join(__dirname, 'resolve-tool.cjs'));
 
 const args = process.argv.slice(2);
 const opt = (n, d) => { const i = args.indexOf(n); return i >= 0 ? args[i + 1] : d; };
-const suite = args.find((a, i) => !a.startsWith('--') && !['--browser', '--sizes'].includes(args[i - 1]));
+const suite = args.find((a, i) => !a.startsWith('--') && !['--browser', '--channel', '--sizes'].includes(args[i - 1]));
 const browserName = opt('--browser', 'chromium');
+const channel = opt('--channel', null);
+const label = channel || browserName;
 const sizes = opt('--sizes', '100,500,2000').split(',').map(Number);
 const BUDGET = { 100: 3000, 500: 8000, 2000: 30000 };
 const root = path.join(__dirname, '..');
@@ -42,19 +47,21 @@ function makeInvoice(n) {
 (async () => {
   const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'perf-'));
   const env = createEnv({ exclude: /^PEPPOL-/ });
-  const { [browserName]: engine } = require(path.join(__dirname, 'resolve-tool.cjs')).playwright();
-  const browser = await engine.launch();
-  const page = await browser.newPage();
-  await page.goto('file://' + dist);
+  const { [browserName]: engine } = tool.playwright();
+  const browser = await engine.launch(channel ? { channel } : {});
+  // the implicit timezone of the page = the one of the Node side (tools/verify-all.cjs sets TZ=UTC); browsers on
+  // Windows do not read TZ, so it is set explicitly (Playwright timezone emulation)
+  const page = await browser.newPage(process.env.TZ ? { timezoneId: process.env.TZ } : {});
+  await page.goto(tool.fileUrl(dist));
   await page.waitForSelector('#drop');
-  console.log('# machine: ' + os.cpus()[0].model + ' × ' + os.cpus().length + ', ' + Math.round(os.totalmem() / 2 ** 30) + ' GiB, Node ' + process.version + ', ' + browserName + ' ' + browser.version());
+  console.log('# machine: ' + os.cpus()[0].model + ' × ' + os.cpus().length + ', ' + Math.round(os.totalmem() / 2 ** 30) + ' GiB, ' + process.platform + ', Node ' + process.version + ', ' + label + ' ' + browser.version());
   let fails = 0;
   // cold start (first document after loading the page: XPath compilation, JIT) measured separately
   { const f = path.join(tmp, 'warmup.xml'); fs.writeFileSync(f, src); const c0 = Date.now(); await page.setInputFiles('#file', f);
     await page.waitForFunction(() => document.querySelectorAll('section.result').length > 0 && document.getElementById('status').hidden, null, { timeout: 300000 });
     const cb = Date.now() - c0;
     const c1 = process.hrtime.bigint(); await PrueferCore.analyzeBytes(env, new Uint8Array(fs.readFileSync(f)), 'warmup.xml');
-    console.log('cold start (1 line, first document): ' + browserName + ' ' + cb + ' ms, node ' + (Number(process.hrtime.bigint() - c1) / 1e6).toFixed(0) + ' ms'); }
+    console.log('cold start (1 line, first document): ' + label + ' ' + cb + ' ms, node ' + (Number(process.hrtime.bigint() - c1) / 1e6).toFixed(0) + ' ms'); }
   for (const n of sizes) {
     const file = path.join(tmp, 'invoice-' + n + '-lines.xml');
     fs.writeFileSync(file, makeInvoice(n));
@@ -73,11 +80,11 @@ function makeInvoice(n) {
     const budget = BUDGET[n];
     const within = budget ? wall <= budget : true;
     if (!same || !within) fails++;
-    console.log(`${String(n).padStart(5)} lines, ${(bytes.length / 1024).toFixed(0)} KiB: node ${nodeMs.toFixed(0)} ms · ${browserName} ${wall} ms (analysis ${b.timing.total} ms, XSD ${b.timing.xsd} ms, rules ${JSON.stringify(b.timing.rules)})` +
+    console.log(`${String(n).padStart(5)} lines, ${(bytes.length / 1024).toFixed(0)} KiB: node ${nodeMs.toFixed(0)} ms · ${label} ${wall} ms (analysis ${b.timing.total} ms, XSD ${b.timing.xsd} ms, rules ${JSON.stringify(b.timing.rules)})` +
       (budget ? ` · budget ${budget} ms ${within ? 'ok' : 'EXCEEDED'}` : '') + ` · findings ${same ? 'identical' : 'DIFFER'} (${b.ids.length})`);
   }
   await browser.close();
   fs.rmSync(tmp, { recursive: true, force: true });
-  console.log('performance ' + browserName + ': ' + (fails ? fails + ' FAILED' : 'OK'));
+  console.log('performance ' + label + ': ' + (fails ? fails + ' FAILED' : 'OK'));
   process.exit(fails ? 1 : 0);
 })().catch((e) => { console.error(e); process.exit(2); });

@@ -50,6 +50,8 @@ const E2E_FILES = [
 // `browser` = Playwright engine that must be installed (no download is attempted)
 const ESBUILD = process.env.ESBUILD_BINARY || [path.join(root, 'node_modules', '.bin', 'esbuild')].find((p) => fs.existsSync(p)) || 'esbuild';
 const SH = (script) => ['sh', '-c', 'set -e; ' + script];
+// a path inside such a script: quoted, with '/' on Windows (sh reads the backslashes of D:\a\x as escapes)
+const Q = (p) => "'" + (process.platform === 'win32' ? p.replace(/\\/g, '/') : p).replace(/'/g, "'\\''") + "'";
 const SUITES = [
   // ---- stage 1: reference results, regenerated from the pinned sources on every full run ----------
   // (independent engines: Saxon HE 12.8 for Schematron/XPath, JDK 21 Xerces for XSD and encodings;
@@ -58,8 +60,8 @@ const SUITES = [
       '--extra', E('xrechnung-testsuite') + '/src/test', '--extra', E('validator-configuration-xrechnung') + '/src/test', '--peppol', E('peppol-bis-invoice-3'), '--zugferd', E('zugferd-corpus')], summary: /./ },
   { name: 'ref-schematron-xsl', reference: true, cmd: SH('rm -rf build/reference-xsl; sh test/kosit-reference/build-xrechnung-xsl.sh build/reference-xsl; sh test/build-oracle-xsl.sh build/reference-xsl; ls build/reference-xsl/*.xsl | wc -l | sed "s/^/reference stylesheets: /"'), summary: /^reference stylesheets/ },
   { name: 'ref-saxon-svrl', reference: true, cmd: ['sh', 'test/run-oracle.sh', E('saxon'), E('einvoicing-en16931'), 'build/reference-xsl'], summary: /./ },
-  { name: 'ref-saxon-xpath', reference: true, cmd: SH(node + ' test/xpath-conformance/run-saxon.cjs ' + E('saxon') + '; ' + node + ' test/xpath-conformance/run-saxon-doc.cjs ' + E('saxon') + '; git diff --exit-code --stat -- test/xpath-conformance/expected.json test/xpath-conformance/expected-doc.json && echo "Saxon expectations reproduced byte-identically"'), summary: /evaluated by Saxon|reproduced/, all: true },
-  { name: 'ref-xerces', reference: true, cmd: SH('sh test/xsd-oracle/run-xsd-oracle.sh; ' + node + ' test/build-xsd-mutations.cjs --zugferd ' + E('zugferd-corpus') + '; sh test/xsd-oracle/run-xsd-oracle.sh xsd-mutations build/corpus/xsd-mutations; sh test/xsd-oracle/run-facturx-xsd-oracle.sh; echo "Xerces reference: $(cat build/oracle/xsd/*.jsonl | wc -l) documents, Factur-X: $(cat build/oracle/xsd-facturx/*.jsonl | wc -l) validations"'), summary: /^Xerces reference/ },
+  { name: 'ref-saxon-xpath', reference: true, cmd: SH(Q(node) + ' test/xpath-conformance/run-saxon.cjs ' + Q(E('saxon')) + '; ' + Q(node) + ' test/xpath-conformance/run-saxon-doc.cjs ' + Q(E('saxon')) + '; git diff --exit-code --stat -- test/xpath-conformance/expected.json test/xpath-conformance/expected-doc.json && echo "Saxon expectations reproduced byte-identically"'), summary: /evaluated by Saxon|reproduced/, all: true },
+  { name: 'ref-xerces', reference: true, cmd: SH('sh test/xsd-oracle/run-xsd-oracle.sh; ' + Q(node) + ' test/build-xsd-mutations.cjs --zugferd ' + Q(E('zugferd-corpus')) + '; sh test/xsd-oracle/run-xsd-oracle.sh xsd-mutations build/corpus/xsd-mutations; sh test/xsd-oracle/run-facturx-xsd-oracle.sh; echo "Xerces reference: $(cat build/oracle/xsd/*.jsonl | wc -l) documents, Factur-X: $(cat build/oracle/xsd-facturx/*.jsonl | wc -l) validations"'), summary: /^Xerces reference/ },
   // ---- stage 2: the product against the references and the official test material ------------------
   { name: 'manifest', cmd: [node, 'tools/verify-manifest.cjs', ext], summary: /^manifest verification:/ },
   { name: 'engine-reproducible', cmd: ['sh', 'tools/check-engine.sh', ext, ESBUILD], summary: /^engine rebuild|applied cleanly/, all: true, needs: [E('fontoxpath')] },
@@ -96,9 +98,19 @@ const SUITES = [
     ...['base-example.xml', 'Allowance-example.xml', 'vat-category-E.xml', 'base-creditnote-correction.xml'].map((f) => E('peppol-bis-invoice-3') + '/rules/examples/' + f)],
     summary: /^PEPPOL IMPORT/, needs: ['build/schemas/PEPPOL-UBL.json', 'build/schemas/PEPPOL-CII.json'] })),
   ...browsers((b) => ({ name: 'performance-' + b, browser: b, cmd: [node, 'test/perf.cjs', E('xrechnung-testsuite'), '--browser', b], summary: /lines,|^cold start|^performance/, all: true })),
+  // ---- Windows (CI job "windows"): the four browser suites in Microsoft Edge and Google Chrome as installed on the
+  // machine (Playwright channels msedge / chrome, no browser download) – the platform the product is made for.
+  // Recorded only on Windows; the Linux run neither runs nor lists them (VERIFICATION.json of the job verify).
+  ...windows((id, ch) => ({ name: 'xsd-browser-' + id + '-win', cmd: [node, 'test/xsd-browser.cjs', '--browser', 'chromium', '--channel', ch], summary: /identical|differences/ })),
+  ...windows((id, ch) => ({ name: 'e2e-' + id + '-win', cmd: [node, 'test/e2e-browser.cjs', '--browser', 'chromium', '--channel', ch, '--screenshot', 'build/shots/' + id + '-win', ...E2E_FILES], summary: new RegExp('^E2E ' + ch) })),
+  ...windows((id, ch) => ({ name: 'peppol-import-' + id + '-win', cmd: [node, 'test/peppol-import-browser.cjs', '--browser', 'chromium', '--channel', ch, E('peppol-bis-invoice-3'),
+    ...['base-example.xml', 'Allowance-example.xml', 'vat-category-E.xml', 'base-creditnote-correction.xml'].map((f) => E('peppol-bis-invoice-3') + '/rules/examples/' + f)],
+    summary: /^PEPPOL IMPORT/, needs: ['build/schemas/PEPPOL-UBL.json', 'build/schemas/PEPPOL-CII.json'] })),
+  ...windows((id, ch) => ({ name: 'performance-' + id + '-win', cmd: [node, 'test/perf.cjs', E('xrechnung-testsuite'), '--browser', 'chromium', '--channel', ch], summary: /lines,|^cold start|^performance/, all: true })),
 ];
 
 function browsers(f) { return ['chromium', 'webkit', 'firefox'].map(f); }
+function windows(f) { return [['edge', 'msedge'], ['chrome', 'chrome']].map(([id, ch]) => Object.assign(f(id, ch), { browser: 'chromium', channel: ch, platform: 'win32' })); }
 function changelogVersion() {
   const m = /^## (\d+\.\d+\.\d+) /m.exec(fs.readFileSync(path.join(root, 'CHANGELOG.md'), 'utf8'));
   return m ? m[1] : '0.0.0';
@@ -125,8 +137,16 @@ if (previous && previous.fingerprint && previous.fingerprint.id === fp.id) Objec
 const suiteEnv = Object.assign({}, process.env, { EXT_DIR: ext, TZ: 'UTC' });
 delete suiteEnv.JAVA_TOOL_OPTIONS;
 delete suiteEnv._JAVA_OPTIONS;
-// absolute paths of this machine in commands and outputs -> <ext>, ., node, <tmp>
-const PATHS = [[ext, '<ext>'], [root, '.'], [node, 'node'], [require('os').tmpdir(), '<tmp>']].filter(([p]) => p && p.length > 1).sort((a, b) => b[0].length - a[0].length);
+// absolute paths of this machine in commands and outputs -> <ext>, ., node, <tmp>; on Windows in every spelling
+// that occurs in the outputs: D:\a\x (Node, Java), D:/a/x (Java via Git Bash), D:\\a\\x (inside JSON), /d/a/x (Git Bash)
+function spellings(p) {
+  const out = [p];
+  try { const real = fs.realpathSync.native(p); if (real !== p) out.push(real); } catch (e) { /* not on disk */ }
+  if (process.platform !== 'win32') return out;
+  return out.flatMap((q) => [q, q.replace(/\\/g, '/'), q.replace(/\\/g, '\\\\')].concat(/^[A-Za-z]:\\/.test(q) ? ['/' + q[0].toLowerCase() + q.slice(2).replace(/\\/g, '/')] : []));
+}
+const PATHS = [[ext, '<ext>'], [root, '.'], [node, 'node'], [require('os').tmpdir(), '<tmp>']].filter(([p]) => p && p.length > 1)
+  .flatMap(([p, r]) => [...new Set(spellings(p))].map((q) => [q, r])).sort((a, b) => b[0].length - a[0].length);
 const escRe = (x) => x.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 const PATH_RES = PATHS.map(([p, r]) => [new RegExp(escRe(p) + '(?![\\w.-])', 'g'), r]);
 function machineIndependent(text) { let t = text; for (const [re, r] of PATH_RES) t = t.replace(re, r); return t; }
@@ -140,9 +160,19 @@ for (const s of SUITES) {
     console.log(`- ${s.name.padEnd(26)} NOT RUN (references reused)`);
     continue;
   }
-  if (s.browser && !hasBrowser(s.browser)) {
-    results[s.name] = { status: 'not-run', reason: 'Playwright browser ' + s.browser + ' not installed (install it from the official Playwright CDN: npx playwright install --with-deps ' + s.browser + '; the CI job verify installs chromium, webkit and firefox this way)', fingerprint: fp.id };
-    console.log(`- ${s.name.padEnd(26)} NOT RUN (browser ${s.browser} not installed)`);
+  if (s.platform && s.platform !== process.platform) {
+    // platform suites (Windows: Edge, Chrome) belong to the run on that platform; listed only when asked for
+    if (only) {
+      results[s.name] = { status: 'not-run', reason: 'runs on Windows only (CI job windows: Microsoft Edge and Google Chrome of the runner image)', fingerprint: fp.id };
+      console.log(`- ${s.name.padEnd(26)} NOT RUN (Windows only)`);
+    }
+    continue;
+  }
+  if (s.browser && !hasBrowser(s.browser, s.channel)) {
+    results[s.name] = { status: 'not-run', reason: s.channel
+      ? 'browser ' + s.channel + ' not installed (Playwright channel ' + s.channel + ': the ' + (s.channel === 'msedge' ? 'Microsoft Edge' : 'Google Chrome') + ' installation of the machine; the CI job windows uses the one of the runner image)'
+      : 'Playwright browser ' + s.browser + ' not installed (install it from the official Playwright CDN: npx playwright install --with-deps ' + s.browser + '; the CI job verify installs chromium, webkit and firefox this way)', fingerprint: fp.id };
+    console.log(`- ${s.name.padEnd(26)} NOT RUN (browser ${s.channel || s.browser} not installed)`);
     continue;
   }
   const missing = (s.needs || []).filter((p) => !fs.existsSync(path.isAbsolute(p) ? p : path.join(root, p)));

@@ -2,7 +2,6 @@ node_modules/
 build/corpus/
 build/oracle/
 build/shots/
-build/reports/zugferd-corpus/
 build/pruefer-json/
 build/kosit-reports/
 ext/
@@ -25,3 +24,16 @@ build/ext/
 /pages-report.txt
 /site/
 /ci-verification/
+/published-check.txt
+/platform-comparison.txt
+/linux/
+/windows/
+/release/
+/release-notes.md
+/release-report.txt
+/release-view.txt
+/check-runs.tsv
+# outputs, built and verified in CI (verify.yml, pages.yml, release.yml; results as check runs of the commit):
+# not kept in the repository, so that no page or report older than the sources can be taken from here
+dist/
+build/reports/
