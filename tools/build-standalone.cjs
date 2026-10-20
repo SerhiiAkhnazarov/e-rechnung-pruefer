@@ -39,6 +39,10 @@ const xsd = {};
 for (const f of fs.readdirSync(path.join(root, 'build', 'xsd')).filter((x) => x.endsWith('.json')).sort()) xsd[f.replace(/\.json$/, '')] = JSON.parse(read('build/xsd/' + f));
 const scenarios = JSON.parse(read('build/scenarios.json'));
 const rulesets = JSON.parse(read('build/rulesets.json'));
+// umsatzsteuerliche Einordnung: legal table + syntax binding (only the parts the program uses)
+const vatLegal = JSON.parse(read('legal/ust-pflichtangaben.json'));
+const btPaths = JSON.parse(read('build/bt-paths.json'));
+const vat = { legal: vatLegal, paths: { syntax: btPaths.syntax, groups: btPaths.groups } };
 const manifest = JSON.parse(read('build/STANDARDS_MANIFEST.json'));
 
 function safeJson(obj) {
@@ -52,7 +56,7 @@ function safeJs(code, name) {
 
 const src = (prefix) => { const k = Object.keys(manifest.sources).find((x) => x.startsWith(prefix)); return k ? manifest.sources[k] : {}; };
 const cen = src('CEN eInvoicing-EN16931'), xr = src('KoSIT xrechnung-schematron'), cfg = src('KoSIT validator-configuration'), pep = src('OpenPeppol peppol-bis-invoice-3');
-const mus = src('Mustangproject'), ubl = src('OASIS UBL 2.1'), cii = src('UN/CEFACT CII D16B');
+const mus = src('Mustangproject'), ubl = src('OASIS UBL 2.1'), cii = src('UN/CEFACT CII D16B'), xrv = src('KoSIT xrechnung-visualization');
 const c8 = (s) => (s && s.commit ? s.commit.slice(0, 8) : '?');
 
 // verification fingerprint: the inputs of the published test results (build/reports/VERIFICATION.json)
@@ -110,6 +114,8 @@ const build = {
     { name: 'OASIS UBL 2.1 – XML-Schemata', version: 'os-UBL-2.1 (2013-11-04)', detail: 'Variante xsdrt wie im KoSIT-Build; über phax/ph-ubl Commit ' + c8(ubl), licence: 'OASIS-Hinweis (siehe Lizenzen)', sha256: xsd['UBL-Invoice-2.1'] ? xsd['UBL-Invoice-2.1'].sources[0].sha256 : null },
     { name: 'UN/CEFACT Cross Industry Invoice – XML-Schemata', version: 'D16B (100pD16B, „uncoupled“)', detail: 'über phax/ph-cii Commit ' + c8(cii), licence: 'UN/CEFACT-Hinweis (siehe Lizenzen)', sha256: xsd['CII-D16B'] ? xsd['CII-D16B'].sources[0].sha256 : null },
     { name: 'Peppol BIS Billing 3.0 (vollständig)', version: '3.0.21', detail: 'nicht eingebettet (keine Weitergabelizenz) – vom Benutzer zu laden; geprüfte Fassung: Commit ' + c8(pep), licence: 'OpenPeppol AISBL', sha256: importable['PEPPOL-UBL'].sha256 },
+    { name: 'KoSIT XRechnung-Visualisierung – Syntaxbindung der Geschäftsbegriffe', version: xrv.describe || c8(xrv), detail: 'Pfad jedes BT/BG in UBL und CII, abgeleitet aus den KoSIT-Stylesheets über den Testkorpus (build/bt-paths.json); Commit ' + c8(xrv), licence: 'Apache-2.0', sha256: sha(read('build/bt-paths.json')) },
+    { name: 'Umsatzsteuerliche Einordnung (Deutschland)', version: 'Stand ' + vatLegal.stand, detail: '§ 14 Abs. 4, § 14a, § 22c UStG; §§ 31, 33 UStDV; BMF-Schreiben vom 15.10.2024 und 15.10.2025 (legal/ust-pflichtangaben.json, docs/UST-EINORDNUNG.md)', licence: 'EUPL-1.2', sha256: sha(read('legal/ust-pflichtangaben.json')) },
   ],
   importable,
   schemas: Object.fromEntries(Object.keys(schemas).map((id) => [id, { stats: schemas[id].stats, sources: schemas[id].sources }])),
@@ -151,12 +157,17 @@ const parts = {
   '/*__XSD__*/': safeJs(read('src/xsd-validator.js'), 'xsd-validator.js'),
   '/*__PDFA3__*/': safeJs(read('src/pdfa3-checks.js'), 'pdfa3-checks.js'),
   '/*__SCHCOMPILER__*/': safeJs(read('src/sch-compiler.js'), 'sch-compiler.js'),
+  '/*__VATJS__*/': safeJs(read('src/vat-relevance.js'), 'vat-relevance.js'),
+  '/*__PDFFONTS__*/': safeJs(read('src/pdf-fonts.js'), 'pdf-fonts.js'),
+  '/*__PDFWRITER__*/': safeJs(read('src/pdf-writer.js'), 'pdf-writer.js'),
+  '/*__REPORTS__*/': safeJs(read('src/reports.js'), 'reports.js'),
   '/*__CORE__*/': safeJs(read('src/pruefer-core.js'), 'pruefer-core.js'),
   '/*__SCHEMAS__*/': safeJson(schemas),
   '/*__SCENARIOS__*/': safeJson(scenarios),
   '/*__RULESETS__*/': safeJson(rulesets),
   '/*__XSDMODELS__*/': safeJson(xsd),
   '/*__NOTICES__*/': safeJson(notices),
+  '/*__VAT__*/': safeJson(vat),
   '/*__BUILD__*/': safeJson(build),
   '/*__APP__*/': safeJs(read('src/app.js'), 'app.js'),
   '__VERSION__': VERSION,
@@ -178,7 +189,7 @@ fs.mkdirSync(path.join(root, 'dist'), { recursive: true });
 const outFile = path.join(root, 'dist', 'E-Rechnung-Pruefer.html');
 fs.writeFileSync(outFile, html);
 const comps = {};
-for (const f of ['vendor/fontoxpath.iife.min.js', 'src/schematron.js', 'src/pdf-embedded.js', 'src/invoice-model.js', 'src/sha256.js', 'src/xml-encoding.js', 'src/xsd-validator.js', 'src/pdfa3-checks.js', 'src/sch-compiler.js', 'src/pruefer-core.js', 'src/app.js']) comps[path.basename(f)] = { bytes: fs.statSync(path.join(root, f)).size, sha256: sha(read(f)) };
+for (const f of ['vendor/fontoxpath.iife.min.js', 'src/schematron.js', 'src/pdf-embedded.js', 'src/invoice-model.js', 'src/sha256.js', 'src/xml-encoding.js', 'src/xsd-validator.js', 'src/pdfa3-checks.js', 'src/sch-compiler.js', 'src/vat-relevance.js', 'src/pdf-fonts.js', 'src/pdf-writer.js', 'src/reports.js', 'src/pruefer-core.js', 'src/app.js', 'legal/ust-pflichtangaben.json', 'build/bt-paths.json']) comps[path.basename(f)] = { bytes: fs.statSync(path.join(root, f)).size, sha256: sha(read(f)) };
 const info = Object.assign({}, build, { file: path.basename(outFile), bytes: Buffer.byteLength(html), sha256: sha(html), programSha256, embeddedRuleSets: Object.keys(schemas), embeddedXsdModels: Object.keys(xsd), components: comps });
 fs.writeFileSync(path.join(root, 'dist', 'BUILD_INFO.json'), JSON.stringify(info, null, 2));
 console.log(`${outFile}: ${(info.bytes / 1024 / 1024).toFixed(2)} MB, SHA-256 ${info.sha256}, program SHA-256 ${programSha256}; rule sets ${Object.keys(schemas).join(', ')}; XSD ${Object.keys(xsd).join(', ')}`);

@@ -8,7 +8,10 @@ Datei `E-Rechnung-Pruefer.html` aus den [Releases](https://github.com/SerhiiAkhn
 
 Die Prüfung folgt dem Ablauf des offiziellen KoSIT-Validators (Zeichenkodierung → XML Schema →
 Schematron → Bewertung) und liefert für XRechnung/EN 16931 nachweislich dieselben Ergebnisse wie das
-Original (Abschnitt „Nachweise“).
+Original (Abschnitt „Nachweise“). Darüber hinaus ordnet der Prüfer jeden Befund **umsatzsteuerlich** ein
+(Formatfehler, Fehler mit oder ohne Bezug zu einer Rechnungspflichtangabe – BMF-Schreiben vom 15.10.2025 und
+15.10.2026), zeigt, ob die Pflichtangaben im strukturierten Teil vorhanden sind, und schreibt je Rechnung ein
+**Prüfprotokoll** (PDF) zum Aufbewahren, eine **Lesefassung** (PDF) und die Rechnungsdaten als **CSV**.
 
 ## Was geprüft wird
 
@@ -22,6 +25,8 @@ Original (Abschnitt „Nachweise“).
 | Factur-X / ZUGFeRD (MINIMUM, BASIC WL, BASIC, EN 16931, EXTENDED) | FNFE-MPE/FeRD-Schematron und -Schemata (über Mustangproject) | Factur-X 1.09.2 / ZUGFeRD 2.5.2 |
 | Hybride PDF (ZUGFeRD/Factur-X): eingebettete XML, PDF/A-3-Container (Anhang, AF, XMP, Dateiname) | ISO 19005-3, Factur-X/ZUGFeRD-Spezifikation; `docs/PDFA3-CHECKS.md` | – |
 | Peppol BIS Billing 3.0 (vollständig) | OpenPeppol – **nicht mitgeliefert**, die offiziellen `.sch` lädt der Benutzer selbst | geprüft: 3.0.21 |
+| Umsatzsteuerliche Einordnung jedes Befunds, Gesamturteil, Übersicht der Pflichtangaben (Deutschland) | §§ 14, 14a, 15, 22c, 27 Abs. 38 UStG, §§ 31, 33, 34a UStDV, BMF-Schreiben vom 15.10.2024, 15.10.2025, 15.10.2026, Zuordnung nach KoSIT/FeRD; `docs/UST-EINORDNUNG.md` | Rechtsstand 20.10.2026 |
+| Rechnungsdaten (alle Geschäftsbegriffe der EN 16931) | Syntaxbindung der KoSIT-Visualisierung (`build/bt-paths.json`) | xrechnung-visualization v2026-08-31 |
 
 Rechtsstand (geprüft 2026-10-20, `xeinkauf.de/xrechnung/versionen-und-bundles`): XRechnung 3.0 ist seit
 01.02.2024 in Kraft und bleibt es „bis mindestens 31.07.2027“; jüngstes Bundle „3.0.2 Summer 2026
@@ -37,6 +42,24 @@ Begründungen in `build/drift-acknowledged.json`, wöchentliche Kontrolle `tools
 noch in Österreich – § 11 UStG – vorgeschrieben); vollständige PDF/A-3-Konformität von Schriften,
 Farbräumen usw. (das leistet nur ein vollständiger PDF/A-Validator; veraPDF läuft als Vergleich im CI);
 Peppol-Transport (SBDH/AS4).
+
+## Was der Prüfer liefert
+
+* **Je Datei:** Ergebnis wie der KoSIT-Validator; **umsatzsteuerliche Einordnung** – keine E-Rechnung
+  (Formatfehler, Profil MINIMUM/BASIC WL), Pflichtangaben betroffen, Pflichtangabe fehlt, Fehler ohne
+  umsatzsteuerliche Bedeutung, keine Fehler – mit Übergangsregelung, Ausnahmen, Kleinbetrag, Kleinunternehmer,
+  Reverse Charge; **Übersicht der Pflichtangaben** (vorhanden, fehlt, prüfen, entfällt, nicht zutreffend);
+  Rechnungsdaten mit allen Positionen, Zeilennummer jedes Befunds in der XML.
+* **Dateien je Rechnung:** Prüfprotokoll (PDF: Datei mit SHA-256, Prüfweg, Regelstand, Befunde mit Einordnung,
+  Pflichtangaben, Zeitpunkt – zum Aufbewahren mit der Rechnung), Lesefassung (PDF; maßgeblich bleibt die XML), die
+  XML einer ZUGFeRD-/Factur-X-PDF, die eingebetteten Dateien der PDF und die Anlagen der Rechnung (BG-24).
+* **Für alle geprüften Dateien:** Prüfbericht (CSV, ein Befund je Zeile mit Einordnung), Rechnungsdaten (CSV, eine
+  Rechnung je Zeile, Umsatzsteuer je Kategorie und Satz), Positionen (CSV), JSON mit Datenmodell. CSV mit
+  Byte-Order-Mark, `;`, Dezimalkomma und TT.MM.JJJJ für deutsche Tabellenkalkulationen.
+
+Die Einordnung ist eine Hilfe zur Prüfung, keine Steuerberatung: Sie zeigt, welche Pflichtangaben ein Befund
+nach der Zuordnung des Werkzeugs betrifft und ob die Angaben vorhanden sind – nicht, ob sie richtig sind.
+Grundlagen, Zuordnung, Grenzen und die unabhängige Durchsicht: `docs/UST-EINORDNUNG.md`.
 
 ## Wie es funktioniert
 
@@ -78,8 +101,13 @@ Check-Run „verification report“):
 | Zeichenkodierung gegen JDK-Parser | 31 Fälle: 28 identisch, 3 von XML 1.0 vorgeschriebene schwerwiegende Fehler, die der JDK-Parser toleriert |
 | PDF-Extraktion gegen pdf.js, ZUGFeRD-Korpus | 151 / 151 (auch bei zerstörter Querverweistabelle) |
 | PDF/A-3-Container-Prüfungen | 151 Korpus-PDFs wie erwartet, 3 394 / 3 394 Mutationen erkannt, Mustang-Parität 15 / 15 (davon 1 Fall strenger als Mustang: `/AFRelationship /Unspecified` an der Rechnungs-XML, `docs/PDFA3-CHECKS.md`) |
-| Browser: Linux – Chromium, WebKit (Engine von Safari), Firefox; Windows – Microsoft Edge, Google Chrome | XSD-Prüfung im Browser 1 053 / 1 053 identisch mit Node (Urteil, Codes, Fundstellen); Ende-zu-Ende-Prüfung im Browser = Node; Peppol-Import im Browser inhaltsgleich mit dem Node-Build (JSON ohne die Herkunftsfelder `sources`/`importedFrom`) |
-| Reproduzierbarkeit | Engine-Bundles aus Upstream + Patches, alle Regelwerke, XSD-Modelle, Szenarien: byte-gleich; die Seite: unter Linux und Windows dasselbe Programm (`programSha256` in `BUILD_INFO.json` = SHA-256 der Seite ohne den Build-Vermerk mit Datum und Prüfstatus) |
+| Rechnungsdaten gegen die offizielle KoSIT-Visualisierung (xrechnung-visualization, Saxon HE 12.8) | 4 157 Dokumente, 164 Geschäftsbegriffe, 184 676 Vergleiche: alle Werte identisch auf 2 072 / 2 072 schemagültigen Dokumenten (für schemaungültige ist das KoSIT-Ergebnis nicht definiert) |
+| Umsatzsteuerliche Einordnung | 3 714 / 3 714 Prüfungen: Rechtstabelle, begründete Erwartungen je Regel, jeder Status der Übersicht und jedes Urteil an konstruierten Rechnungen, 3 140 Korpusdokumente mit 5 096 Befunden konsistent eingeordnet |
+| Dateien: CSV, JSON, Prüfprotokoll und Lesefassung (PDF), Anlagen | 1 977 Dokumente, 3 952 PDF: `qpdf --check`, Text über poppler (`pdftotext`, `pdfinfo`) und pdf.js; CSV mit strengem Leser gegen die Daten; 173 Anlagen gleich dem Base64-Decoder von Node; 20 702 / 20 702 Prüfungen |
+| Zeilennummern der Befunde gegen libexpat (Python) | 7 795 Dokumente, 878 914 Elemente, 4 646 Befunde: 0 Abweichungen |
+| SHA-256 (`src/sha256.js`) gegen OpenSSL | 8 928 / 8 928 Eingaben (172 MiB) |
+| Browser: Linux – Chromium, WebKit (Engine von Safari), Firefox; Windows – Microsoft Edge, Google Chrome | XSD-Prüfung im Browser 1 053 / 1 053 identisch mit Node (Urteil, Codes, Fundstellen); Ende-zu-Ende-Prüfung im Browser = Node; jede Datei der Seite (Protokoll, Lesefassung, CSV, JSON, XML, Anlagen) byte-gleich mit Node, SHA-256 der Seite gleich OpenSSL; Peppol-Import im Browser inhaltsgleich mit dem Node-Build (JSON ohne die Herkunftsfelder `sources`/`importedFrom`) |
+| Reproduzierbarkeit | Engine-Bundles aus Upstream + Patches, alle Regelwerke, XSD-Modelle, Szenarien, Syntaxbindung (`build/bt-paths.json`), Zeichenbreiten (`src/pdf-fonts.js`): byte-gleich; die Seite: unter Linux und Windows dasselbe Programm (`programSha256` in `BUILD_INFO.json` = SHA-256 der Seite ohne den Build-Vermerk mit Datum und Prüfstatus) |
 
 Laufzeit (`test/perf.cjs`, je Dokument im Browser nach dem ersten Dokument): Grenzen 100 Positionen ≤ 3 s,
 500 ≤ 8 s, 2 000 ≤ 30 s, geprüft in jedem CI-Lauf in allen fünf Browsern; die Messwerte des Laufs mit Prozessor,
@@ -103,7 +131,8 @@ gestartet) veröffentlicht genau diese Dateien als Release, wenn alle Check-Runs
 
 ## Bauen und prüfen
 
-Voraussetzungen: Node 22, JDK 21 (Referenzen), Git, curl, unzip. Dieselben Schritte wie im CI-Job `verify`:
+Voraussetzungen: Node 22, JDK 21 (Referenzen), Git, curl, unzip, Python 3 (Referenz der Zeilennummern:
+libexpat), qpdf und poppler-utils (Prüfung der PDF-Dateien). Dieselben Schritte wie im CI-Job `verify`:
 
 ```sh
 npm install --no-save --no-audit --no-fund playwright@1.56.0 pdfjs-dist@6.2.108 esbuild@0.28.2   # Testwerkzeuge
@@ -111,7 +140,7 @@ npx playwright install --with-deps chromium webkit firefox   # Browser vom offiz
 node tools/fetch-sources.cjs ext                    # alle Quellen in den gepinnten Ständen (SHA-256 geprüft)
 sh tools/merge-xrechnung-sch.sh ext                 # KoSIT-Merge-Schritt (XRechnung + Peppol-Whitelist)
 sh tools/compile-rules.sh ext                       # Regelwerke (byte-gleich mit build/schemas; Peppol nur lokal)
-node tools/build-standalone.cjs --version 0.2.0     # dist/E-Rechnung-Pruefer.html + dist/BUILD_INFO.json
+node tools/build-standalone.cjs --version 0.3.0     # dist/E-Rechnung-Pruefer.html + dist/BUILD_INFO.json
 node tools/verify-all.cjs --ext ext --skip pdfa-verapdf   # vollständige Prüfung (veraPDF: CI-Job pdfa-verapdf)
 node tools/verify-manifest.cjs ext --reports --strict     # Freigabe
 node tools/pruefer-cli.cjs rechnung.xml             # dieselbe Prüfung auf der Kommandozeile (JSON)
@@ -134,7 +163,8 @@ Eigener Code: **EUPL-1.2** (`LICENSE`). Enthaltene Fremdbestandteile, ihre Lizen
 `NOTICE` – mit dem vollständigen Wortlaut aller Lizenztexte und NOTICE-Dateien (Teil E) – und `legal/`
 (CEN EUPL-1.2; KoSIT Apache-2.0; FeRD/FNFE Apache-2.0 mit Hinweis nach DIN/CEN; OASIS- und
 UN/CEFACT-Hinweise; fontoxpath, xspattern, whynot, prsc, slimdom, esbuild-Hilfscode MIT; Unicode License V3;
-Teile von `src/xsd-validator.js` aus Apache Xerces-J, Apache-2.0). `NOTICE` und `legal/` sind wörtlich auch
+Teile von `src/xsd-validator.js` aus Apache Xerces-J, Apache-2.0; Syntaxbindung aus der KoSIT-Visualisierung,
+Apache-2.0; Zeichenbreiten aus den Adobe-AFM-Dateien mit Adobes Erlaubnis). `NOTICE` und `legal/` sind wörtlich auch
 im Programm enthalten (Abschnitt „Lizenzen und Hinweise der Rechteinhaber“). Die Peppol-Regelwerke sind
 mangels Weitergabelizenz nicht enthalten.
 Impressum und Datenschutzhinweise der veröffentlichten Seite: `legal/impressum.json` (vom Anbieter auszufüllen)
@@ -144,5 +174,5 @@ Der E-Rechnung Prüfer ist eine Anwendung der Veröffentlichung ZUGFeRD 2.5.2 / 
 Europäischen Norm EN 16931. Die Wiedergabe von Inhalten der EN 16931 erfolgt mit Erlaubnis von CEN und
 DIN (Inhaber der Urheberrechte).
 
-Das Ergebnis ist eine technische Prüfung gegen die veröffentlichten Regelwerke, keine steuerliche oder
-rechtliche Beratung.
+Das Ergebnis ist eine technische Prüfung gegen die veröffentlichten Regelwerke mit einer umsatzsteuerlichen
+Einordnung nach den veröffentlichten Verwaltungsanweisungen, keine steuerliche oder rechtliche Beratung.

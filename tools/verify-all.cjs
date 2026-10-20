@@ -46,6 +46,8 @@ const E2E_FILES = [
   'build/corpus/encoding/cp1252-decl.xml',
   'build/corpus/encoding/utf16le-bom.xml',
 ];
+// documents of the report tests (Node and browser): in addition an invoice with an embedded attachment (BG-24)
+const REPORT_FILES = E2E_FILES.slice(0, 5).concat([E('xrechnung-testsuite') + '/src/test/business-cases/standard/02.03a-INVOICE_ubl.xml', 'build/corpus/encoding/latin1-declared-utf8.xml', 'build/corpus/encoding/utf16le-bom.xml']);
 // name, command, report file, summary-line pattern; `needs` = paths that must exist;
 // `browser` = Playwright engine that must be installed (no download is attempted)
 const ESBUILD = process.env.ESBUILD_BINARY || [path.join(root, 'node_modules', '.bin', 'esbuild')].find((p) => fs.existsSync(p)) || 'esbuild';
@@ -60,6 +62,9 @@ const SUITES = [
       '--extra', E('xrechnung-testsuite') + '/src/test', '--extra', E('validator-configuration-xrechnung') + '/src/test', '--peppol', E('peppol-bis-invoice-3'), '--zugferd', E('zugferd-corpus')], summary: /./ },
   { name: 'ref-schematron-xsl', reference: true, cmd: SH('rm -rf build/reference-xsl; sh test/kosit-reference/build-xrechnung-xsl.sh build/reference-xsl; sh test/build-oracle-xsl.sh build/reference-xsl; ls build/reference-xsl/*.xsl | wc -l | sed "s/^/reference stylesheets: /"'), summary: /^reference stylesheets/ },
   { name: 'ref-saxon-svrl', reference: true, cmd: ['sh', 'test/run-oracle.sh', E('saxon'), E('einvoicing-en16931'), 'build/reference-xsl'], summary: /./ },
+  // the official KoSIT visualization stylesheets over the corpus (after ref-saxon-svrl, which empties build/oracle):
+  // reference values of every business term (invoice model) and the syntax binding of build/bt-paths.json
+  { name: 'ref-kosit-visualization', reference: true, cmd: ['sh', 'test/kosit-visualization/run.sh', E('saxon'), E('xrechnung-visualization')], summary: /^KoSIT visualization instances:/ },
   { name: 'ref-saxon-xpath', reference: true, cmd: SH(Q(node) + ' test/xpath-conformance/run-saxon.cjs ' + Q(E('saxon')) + '; ' + Q(node) + ' test/xpath-conformance/run-saxon-doc.cjs ' + Q(E('saxon')) + '; git diff --exit-code --stat -- test/xpath-conformance/expected.json test/xpath-conformance/expected-doc.json && echo "Saxon expectations reproduced byte-identically"'), summary: /evaluated by Saxon|reproduced/, all: true },
   { name: 'ref-xerces', reference: true, cmd: SH('sh test/xsd-oracle/run-xsd-oracle.sh; ' + Q(node) + ' test/build-xsd-mutations.cjs --zugferd ' + Q(E('zugferd-corpus')) + '; sh test/xsd-oracle/run-xsd-oracle.sh xsd-mutations build/corpus/xsd-mutations; sh test/xsd-oracle/run-facturx-xsd-oracle.sh; echo "Xerces reference: $(cat build/oracle/xsd/*.jsonl | wc -l) documents, Factur-X: $(cat build/oracle/xsd-facturx/*.jsonl | wc -l) validations"'), summary: /^Xerces reference/ },
   // ---- stage 2: the product against the references and the official test material ------------------
@@ -81,6 +86,12 @@ const SUITES = [
   { name: 'pattern-matcher-selftest', cmd: [node, 'test/selftest-pattern-matcher.cjs'].concat(['xr-ubl', 'xr-cii', 'extra-ubl', 'extra-cii'].map((d) => 'build/corpus/' + d)), summary: /^pattern matcher self-test:/ },
   { name: 'xsd-vs-xerces', cmd: [node, 'test/run-xsd-tests.cjs'], summary: /^TOTAL/, all: true, needs: ['build/oracle/xsd'] },
   { name: 'xml-encoding', cmd: [node, 'test/run-encoding-tests.cjs'], summary: /^XML encoding tests:/ },
+  // invoice data, VAT classification, files written, line numbers, checksums (0.3.0)
+  { name: 'invoice-model-vs-kosit', cmd: [node, 'test/run-invoice-model-tests.cjs'], summary: /^invoice model vs KoSIT visualization:/, needs: ['build/oracle/xr'] },
+  { name: 'vat-relevance', cmd: [node, 'test/run-vat-tests.cjs'], summary: /^corpus:|^VAT relevance tests:/, all: true },
+  { name: 'reports', cmd: [node, 'test/run-reports-tests.cjs', ...REPORT_FILES], summary: /^readers:|^reports tests:/, all: true },
+  { name: 'line-numbers-vs-expat', cmd: [node, 'test/run-line-tests.cjs'], summary: /^reference:|^line numbers vs expat:/, all: true },
+  { name: 'sha256-vs-node-crypto', cmd: [node, 'test/run-sha256-tests.cjs'], summary: /^SHA-256/ },
   { name: 'xsd-selftest', cmd: [node, 'test/xsd-selftest.cjs'], summary: /^instances/ },
   ...browsers((b) => ({ name: 'xsd-browser-' + b, browser: b, cmd: [node, 'test/xsd-browser.cjs', '--browser', b], summary: /identical|differences/ })),
   { name: 'kosit-reference', cmd: [node, 'test/kosit-reference/verify.cjs'], summary: /configuration self-tests|MISMATCHES|fresh run/, all: true, needs: ['build/corpus/xr-ubl', E('saxon') + '/saxon-he-12.8.jar'] },
@@ -94,6 +105,7 @@ const SUITES = [
       .concat(['3u', '3a'].filter((f) => fs.existsSync(path.join(root, 'build', 'verapdf', 'mrr-' + f + '.xml'))).flatMap((f) => ['--extra', 'build/verapdf/mrr-' + f + '.xml'])),
     summary: /^veraPDF comparison \(mrr-3b\.xml\):/, needs: ['build/verapdf/mrr-3b.xml', 'build/pdfa3-results.json'] },
   ...browsers((b) => ({ name: 'e2e-' + b, browser: b, cmd: [node, 'test/e2e-browser.cjs', '--browser', b, '--screenshot', 'build/shots/' + b, ...E2E_FILES], summary: new RegExp('^E2E ' + b) })),
+  ...browsers((b) => ({ name: 'reports-browser-' + b, browser: b, cmd: [node, 'test/e2e-reports-browser.cjs', '--browser', b, ...REPORT_FILES], summary: new RegExp('^E2E reports ' + b) })),
   ...browsers((b) => ({ name: 'peppol-import-' + b, browser: b, cmd: [node, 'test/peppol-import-browser.cjs', '--browser', b, E('peppol-bis-invoice-3'),
     ...['base-example.xml', 'Allowance-example.xml', 'vat-category-E.xml', 'base-creditnote-correction.xml'].map((f) => E('peppol-bis-invoice-3') + '/rules/examples/' + f)],
     summary: /^PEPPOL IMPORT/, needs: ['build/schemas/PEPPOL-UBL.json', 'build/schemas/PEPPOL-CII.json'] })),
@@ -103,6 +115,7 @@ const SUITES = [
   // Recorded only on Windows; the Linux run neither runs nor lists them (VERIFICATION.json of the job verify).
   ...windows((id, ch) => ({ name: 'xsd-browser-' + id + '-win', cmd: [node, 'test/xsd-browser.cjs', '--browser', 'chromium', '--channel', ch], summary: /identical|differences/ })),
   ...windows((id, ch) => ({ name: 'e2e-' + id + '-win', cmd: [node, 'test/e2e-browser.cjs', '--browser', 'chromium', '--channel', ch, '--screenshot', 'build/shots/' + id + '-win', ...E2E_FILES], summary: new RegExp('^E2E ' + ch) })),
+  ...windows((id, ch) => ({ name: 'reports-browser-' + id + '-win', cmd: [node, 'test/e2e-reports-browser.cjs', '--browser', 'chromium', '--channel', ch, ...REPORT_FILES], summary: new RegExp('^E2E reports ' + ch) })),
   ...windows((id, ch) => ({ name: 'peppol-import-' + id + '-win', cmd: [node, 'test/peppol-import-browser.cjs', '--browser', 'chromium', '--channel', ch, E('peppol-bis-invoice-3'),
     ...['base-example.xml', 'Allowance-example.xml', 'vat-category-E.xml', 'base-creditnote-correction.xml'].map((f) => E('peppol-bis-invoice-3') + '/rules/examples/' + f)],
     summary: /^PEPPOL IMPORT/, needs: ['build/schemas/PEPPOL-UBL.json', 'build/schemas/PEPPOL-CII.json'] })),

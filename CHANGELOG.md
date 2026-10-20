@@ -1,5 +1,73 @@
 # Changelog
 
+## 0.3.0 (2026-10-20)
+
+Umsatzsteuerliche Einordnung (Deutschland) – `docs/UST-EINORDNUNG.md`
+- Jeder Befund wird eingeordnet: Formatfehler (keine E-Rechnung, BMF-Schreiben vom 15.10.2025, Rn. 6a),
+  PDF-Container, Geschäftsregelfehler mit Bezug zu einer Rechnungspflichtangabe (§ 14 Abs. 4 Satz 1 Nr. 1–10 und
+  ab 1.1.2028 Nr. 6a, § 14 Abs. 5 Satz 2, § 14a, § 22c UStG, § 31 Abs. 5 UStDV) oder ohne diesen Bezug
+  (umsatzsteuerlich unbeachtlich, Rn. 35a; BMF-Schreiben vom 15.10.2026), „prüfen“, wo die betroffene Angabe nicht
+  feststellbar ist – nie „unbeachtlich“ im Zweifel. Zuordnung der Pflichtangaben zu den Geschäftsbegriffen nach den
+  Empfehlungen von KoSIT und FeRD, auf die das BMF-Schreiben vom 15.10.2026 verweist; Syntaxbindung aus der
+  KoSIT-Visualisierung (`build/bt-paths.json`, reproduzierbar). Daten: `legal/ust-pflichtangaben.json`.
+- Gesamturteil je Rechnung statt pauschaler Empfehlung zur Zurückweisung: keine E-Rechnung, nicht einordenbar,
+  Formatfehler, Profil (MINIMUM, BASIC WL, ZUGFeRD 1.0), Pflichtangaben betroffen, Pflichtangabe fehlt, Fehler ohne
+  USt-Bedeutung, keine Fehler, unvollständig – mit Übergangsregelung (§ 27 Abs. 38 UStG), Ausnahmen von der
+  E-Rechnungspflicht, Kleinbetragsrechnung (§ 33 UStDV), Kleinunternehmer (§ 34a UStDV), Steuerschuldnerschaft
+  des Leistungsempfängers (§ 15 Abs. 1 Satz 1 Nr. 4 UStG), hybride Rechnungen (BMF-Schreiben vom 15.10.2024,
+  Rz. 31, 32), Folgen nach § 15 Abs. 1 Satz 1 Nr. 1 Satz 2 UStG und Rückwirkung der Berichtigung (Rz. 49).
+- Übersicht „Pflichtangaben“: ob jede Pflichtangabe im strukturierten Teil vorhanden ist (vorhanden, fehlt,
+  prüfen, entfällt, nicht zutreffend), mit Gutschrift-Codes, Endrechnung (BT-113), § 14a Abs. 1, 3, 4, 6, 7,
+  Fiskalvertretung im Inland, Steuer in Euro (Art. 230 MwStSystRL) und den beiden BFH-Urteilen zum
+  Leistungszeitpunkt.
+- Unabhängige rechtliche Durchsicht vom 20.10.2026 eingearbeitet (u. a. BMF-Schreiben vom 15.10.2026, Endrechnung,
+  Kleinbetrag nur bis zu einem Gesamtbetrag von 250 Euro auch bei Korrekturen, BT-7/BT-8 kein Leistungszeitpunkt,
+  § 22c nur bei Fiskalvertretung im Inland, Kategorie O, alle Gutschrift- und Berichtigungs-Codes, Texte ohne
+  Überzeichnung). Der Wortlaut des BMF-Schreibens vom 15.10.2026 war nicht abrufbar; sein Inhalt stammt aus
+  Fachveröffentlichungen vom 16.10.2026 und ist am Original zu prüfen.
+
+Dateien
+- Je Rechnung: Prüfprotokoll (PDF) zum Aufbewahren mit der Rechnung (Datei, SHA-256, Prüfweg, Regelstand,
+  Befunde mit Einordnung, Pflichtangaben, Zeitpunkt), Lesefassung (PDF; maßgeblich bleibt die XML), die XML einer
+  ZUGFeRD-/Factur-X-PDF, die eingebetteten Dateien der PDF und die Anlagen (BG-24) zum Herunterladen.
+- Für alle Dateien: Prüfbericht (CSV) mit USt-Einordnung, Rechnungsdaten (CSV, eine Zeile je Rechnung, Umsatzsteuer
+  je Kategorie und Satz), Positionen (CSV), JSON mit Datenmodell und Einordnung; CSV mit Byte-Order-Mark, `;`,
+  Dezimalkomma und TT.MM.JJJJ für deutsche Tabellenkalkulationen.
+- Eigener PDF-Schreiber (`src/pdf-writer.js`, PDF 1.4, Standardschriften, Zeichenbreiten aus den Adobe-AFM-Dateien,
+  `src/pdf-fonts.js`, reproduzierbar; NOTICE A.12, E.14); gleiche Bytes in jedem Browser und in Node.
+
+Rechnungsdaten
+- Datenmodell neu (`src/invoice-model.js`): Syntaxbindung wie die KoSIT-Visualisierung, alle Geschäftsbegriffe
+  der Kopf-, Parteien-, Liefer-, Zahlungs-, Steuer- und Positionsdaten mit Nachlässen, Zuschlägen, Merkmalen und
+  Anlagen; Datumswerte nach ihrem Format; Beträge ohne Rundung.
+- Zeilennummern der Befunde im gemeinsamen Prüfablauf (Browser und Kommandozeile gleich; Zeilenenden nach
+  XML 1.0 §2.11).
+
+Nachweise (neue Testreihen)
+- `invoice-model-vs-kosit`: Werte des Datenmodells gegen die offizielle KoSIT-Visualisierung (Saxon HE 12.8),
+  4 157 Dokumente, 164 Geschäftsbegriffe, 184 676 Vergleiche, 0 Abweichungen auf den 2 072 schemagültigen
+  Dokumenten (auf schemaungültigen ist das KoSIT-Ergebnis nicht definiert).
+- `vat-relevance`: Rechtstabelle (jeder Geschäftsbegriff in der Syntaxbindung, jede Regel im Regelwerk),
+  Einordnung mit von Hand begründeten Erwartungen, Übersicht und Urteil an konstruierten Rechnungen für jeden
+  Status, Korpus mit Konsistenz von Urteil, Befunden und Übersicht.
+- `reports`: CSV mit einem strengen Leser zurückgelesen und gegen die Daten verglichen; jede PDF mit
+  `qpdf --check`, Text über poppler (`pdftotext`, `pdfinfo`) und Mozilla pdf.js; Anlagen gegen den
+  Base64-Decoder von Node.
+- `line-numbers-vs-expat`: Zeilennummern gegen libexpat über den ganzen Korpus und Grenzfälle.
+- `sha256-vs-node-crypto`: `src/sha256.js` gegen OpenSSL.
+- `reports-browser-*` (Chromium, WebKit, Firefox; Windows: Edge, Chrome): jede Datei der Seite byte-gleich mit
+  Node, SHA-256 der Seite gleich OpenSSL, Anzeige von Urteil, Übersicht und Filter.
+- `ref-kosit-visualization` (Referenzstufe); `build-reproducible` erzeugt `build/bt-paths.json` und
+  `src/pdf-fonts.js` neu (byte-gleich).
+
+Recht
+- `LICENSE`: kanonischer Text der EUPL-1.2 (wie choosealicense.com/SPDX, ohne vorangestellten Kopf), damit
+  GitHub die Lizenz erkennt (vorher „Other“); Lizenz unverändert.
+- `NOTICE`: A.11 KoSIT xrechnung-visualization (Apache-2.0, Syntaxbindung), A.12 und E.14 Adobe-AFM-Zeichenbreiten
+  (Erlaubnis von Adobe), Testwerkzeuge qpdf, poppler, Python/libexpat, matplotlib (Quelle der AFM-Dateien).
+- Texte der Einordnung ohne Zusicherung einer Eignung: das BMF empfiehlt keine Validierungsanwendungen; das
+  Protokoll dokumentiert die Prüfung, die Eignung beurteilt der Anwender.
+
 ## 0.2.0 (2026-10-20)
 
 Prüfumfang

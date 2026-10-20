@@ -42,6 +42,7 @@ const SPARSE = {
   'ph-schematron': ['ph-schematron-isosch/src/main/resources/external/schematron/20100710-xslt2'],
   'ph-cii': ['ph-cii-d16b/src/main/resources/external/schemas/d16b'],
   'ph-ubl': ['docs/UBL-2.1.zip'],
+  'matplotlib': ['lib/matplotlib/mpl-data/fonts/pdfcorefonts'],
 };
 const repos = [];
 for (const src of Object.values(manifest.sources)) for (const r of src.repos || [src]) if (r.remote && r.commit && r.path) repos.push(r);

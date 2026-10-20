@@ -1,5 +1,5 @@
 {
-  "generated": "2026-10-20T11:02:33.655Z",
+  "generated": "2026-10-20T16:32:38.090Z",
   "generator": "tools/make-manifest.cjs",
   "sources": {
     "CEN eInvoicing-EN16931 (validation artefacts 1.3.16)": {
@@ -512,6 +512,73 @@
         }
       ]
     },
+    "KoSIT xrechnung-visualization (v2026-08-31)": {
+      "path": "xrechnung-visualization",
+      "remote": "https://github.com/itplr-kosit/xrechnung-visualization.git",
+      "commit": "e158048ec6774cd4837744b21ca34dc95ba14862",
+      "describe": "v2026-08-31",
+      "commitDate": "2026-09-02T15:18:05+02:00",
+      "licence": "Apache-2.0",
+      "files": [
+        {
+          "file": "xrechnung-visualization/src/xsl/ubl-invoice-xr.xsl",
+          "sha256": "ef2c2af5efbc5e130a4fe4b67c62080ff179a67df08522dbf9cfcf305093c899",
+          "bytes": 112956
+        },
+        {
+          "file": "xrechnung-visualization/src/xsl/ubl-creditnote-xr.xsl",
+          "sha256": "8cf629bd45887447d605b442201bad5f14dff118133b358adb4468c5fd31cf89",
+          "bytes": 120384
+        },
+        {
+          "file": "xrechnung-visualization/src/xsl/cii-xr.xsl",
+          "sha256": "216c591ef7bd887e2f89d5623bd20fbf73a9b48ae51f93fdbb0e46d1645f63e3",
+          "bytes": 138370
+        },
+        {
+          "file": "xrechnung-visualization/src/xsl/common-xr.xsl",
+          "sha256": "3155e48fe19dd23ff74e3f191721e28c7a51a5e76a093fb1e2ee60bfe08edc41",
+          "bytes": 5660
+        },
+        {
+          "file": "xrechnung-visualization/src/xsl/functions.xsl",
+          "sha256": "1e8e2c414a19d63007408856649037c8654f5c7391618c48010865dac60db3ed",
+          "bytes": 6187
+        }
+      ],
+      "note": "the KoSIT stylesheets that map UBL/CII to the semantic model of XRechnung (xr:id = BT/BG, xr:src = source path); run over the corpus (test/kosit-visualization/run.sh) they give the syntax binding build/bt-paths.json (tools/build-bt-paths.cjs) and the reference values of test/run-invoice-model-tests.cjs. Same release date as the validator configuration (2026-08-31)."
+    },
+    "Adobe Core14 font metrics (AFM, via matplotlib v3.10.7) — widths for the PDF writer": {
+      "path": "matplotlib",
+      "remote": "https://github.com/matplotlib/matplotlib.git",
+      "commit": "4aeb773422464799998d900198b35cb80e94b3e1",
+      "describe": "v3.10.7",
+      "commitDate": "2025-10-08T17:46:31-05:00",
+      "licence": "Adobe AFM permission (readme.txt): may be used, copied and distributed for any purpose and without charge, with or without modification, provided that all copyright notices are retained (see src/pdf-fonts.js, NOTICE A.12)",
+      "files": [
+        {
+          "file": "matplotlib/lib/matplotlib/mpl-data/fonts/pdfcorefonts/Helvetica.afm",
+          "sha256": "db772f2830fb6d000907791d8d26a12524d96943a9a739e520ee855c6b25c96f",
+          "bytes": 74292
+        },
+        {
+          "file": "matplotlib/lib/matplotlib/mpl-data/fonts/pdfcorefonts/Helvetica-Bold.afm",
+          "sha256": "8b697881c8ee617a177f6f2e2bbc88570b9fd2b9f0e89ecfc0f5507878f988fc",
+          "bytes": 69269
+        },
+        {
+          "file": "matplotlib/lib/matplotlib/mpl-data/fonts/pdfcorefonts/Courier.afm",
+          "sha256": "31d72adad79910126b22a5579ec9e179eee86674ecebe3fcff6f76916193af0e",
+          "bytes": 15335
+        },
+        {
+          "file": "matplotlib/lib/matplotlib/mpl-data/fonts/pdfcorefonts/readme.txt",
+          "sha256": "311bfca694884d86006fb96de443b0f4359635921b95fc6c161bb94d013b7292",
+          "bytes": 828
+        }
+      ],
+      "note": "tools/gen-pdf-fonts.cjs extracts the WinAnsiEncoding character widths into src/pdf-fonts.js; the AFM files themselves are not contained in the program or the repository (sparse checkout of lib/matplotlib/mpl-data/fonts/pdfcorefonts)."
+    },
     "Release artefacts (fetched by tools/fetch-sources.cjs, SHA-256 checked before use; local runs and CI)": {
       "artefacts": [
         {
@@ -598,6 +665,16 @@
       "file": "build/rulesets.json",
       "sha256": "620a9c9e438740e13c0acb33b1d243e4b179fd34632958c741247cf1f3be49ae",
       "bytes": 9565
+    },
+    "bt-paths.json": {
+      "file": "build/bt-paths.json",
+      "sha256": "603265e2c95f835d85a5362fd37f0ab68e488cedcd5843b77b36715b4bbde92b",
+      "bytes": 72890
+    },
+    "src/pdf-fonts.js": {
+      "file": "src/pdf-fonts.js",
+      "sha256": "cb7555b19068e8f4e51c0d9d2171d53a615ee6d1bcb682b9682d6dbeb698b4c7",
+      "bytes": 5148
     },
     "xsd/CII-D16B.json": {
       "file": "build/xsd/CII-D16B.json",

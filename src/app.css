@@ -68,3 +68,24 @@ label.btn input[type=file] { display: none; }
 .warn-note { color: var(--warn); }
 details.notice { margin: 6px 0; } details.notice summary { cursor: pointer; font-size: 13.5px; }
 details.notice pre { background: #f6f8fa; padding: 8px; border-radius: 6px; max-height: 40vh; overflow: auto; }
+/* umsatzsteuerliche Einordnung, files of an invoice, Pflichtangaben (0.3.0) */
+.badge.info { background: var(--info-bg); color: var(--info); }
+.pill.ok { background: var(--ok-bg); color: var(--ok); } .pill.bad { background: var(--bad-bg); color: var(--bad); } .pill.warn { background: var(--warn-bg); color: var(--warn); } .pill.info { background: var(--info-bg); color: var(--info); }
+.ust { border-radius: 8px; padding: 10px 12px; margin: 10px 0; border-left: 4px solid var(--neutral); background: var(--neutral-bg); }
+.ust.ust-ok { border-left-color: var(--ok); background: var(--ok-bg); } .ust.ust-bad { border-left-color: var(--bad); background: var(--bad-bg); }
+.ust.ust-warn { border-left-color: var(--warn); background: var(--warn-bg); } .ust.ust-info { border-left-color: var(--info); background: var(--info-bg); }
+.ust-head { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.ust-text { margin: 6px 0; font-size: 14px; }
+.ust details summary { cursor: pointer; color: var(--accent); }
+.ust ul { padding-left: 18px; margin: 6px 0; }
+.actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin: 10px 0 4px; }
+button.btn.small-btn { padding: 5px 10px; font-size: 13px; }
+.exports-label { font-weight: 650; color: var(--muted); margin-right: 2px; }
+.table-scroll { overflow-x: auto; max-width: 100%; }
+ul.attachments { padding-left: 18px; } ul.attachments li { margin: 5px 0; }
+table.checklist td:first-child { min-width: 180px; }
+table.checklist tr[data-status="fehlt"] td:first-child { border-left: 3px solid var(--bad); }
+table.checklist tr[data-status="prüfen"] td:first-child { border-left: 3px solid var(--warn); }
+button:focus-visible, .tab:focus-visible, summary:focus-visible, a:focus-visible, label.btn:focus-within { outline: 2px solid var(--accent); outline-offset: 2px; }
+@media (max-width: 760px) { main { padding: 12px 12px 48px; } .card { padding: 12px; } dl.kv { grid-template-columns: 1fr; } dl.kv dd { margin-bottom: 4px; } }
+@media print { .actions { display: none !important; } }

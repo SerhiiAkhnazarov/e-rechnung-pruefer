@@ -54,7 +54,9 @@ const t0 = Date.now();
 for (const dir of fs.readdirSync(oracle).sort()) {
   if (onlyDir && dir !== onlyDir) continue;
   const dpath = path.join(oracle, dir);
-  if (!fs.statSync(dpath).isDirectory()) continue;
+  // only the SVRL results of test/run-oracle.sh (one directory per corpus directory); build/oracle also holds the
+  // other references (xr: KoSIT visualization, xsd*: Xerces)
+  if (!fs.statSync(dpath).isDirectory() || !fs.existsSync(path.join(corpus, dir))) continue;
   for (const schemaId of fs.readdirSync(dpath).filter((n) => fs.statSync(path.join(dpath, n)).isDirectory()).sort()) {
     if (onlySchema && schemaId !== onlySchema) continue;
     const failedList = new Set(fs.existsSync(path.join(dpath, schemaId + '.failed')) ? fs.readFileSync(path.join(dpath, schemaId + '.failed'), 'utf8').split('\n').map((s) => s.trim()).filter(Boolean) : []);

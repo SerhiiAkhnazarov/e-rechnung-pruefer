@@ -12,7 +12,9 @@
  *                        assessment of default-report.xsl);
  *              profile — otherwise the entry of build/rulesets.json (Factur-X/ZUGFeRD profiles, Peppol BIS,
  *                        EN 16931 without CIUS, outdated XRechnung): its XSD model, then its rule sets;
- *         ─► findings, counts, assessment, invoice data model.
+ *         ─► findings with line numbers, counts, assessment, invoice data model,
+ *         ─► umsatzsteuerliche Einordnung of every finding and of the invoice (src/vat-relevance.js; with env.VatRelevance
+ *            and env.vatData = {legal: legal/ust-pflichtangaben.json, paths: build/bt-paths.json}).
  *
  * Rule sets and XSD models are provided by the host (env.ruleSet(id), env.xsdModel(id)); a rule set that the
  * host does not have (the Peppol rules are not redistributed, see docs/RULESETS.md) is reported in
@@ -179,6 +181,107 @@
     return out;
   }
 
+  /** the VAT relevance classifier of an environment (env.VatRelevance + env.vatData {legal, paths}), created once */
+  function vatRelevance(env) {
+    if (!env.VatRelevance || !env.vatData) return null;
+    return env.vatCache || (env.vatCache = env.VatRelevance.create(env.vatData));
+  }
+
+  // ---------------------------------------------------------------------------------------------
+  // line numbers of the findings: the line of the start tag ('<') of the element a finding refers to
+  // (attributes: their element; text nodes: the enclosing element)
+  // ---------------------------------------------------------------------------------------------
+  /**
+   * The line of every element start tag of an XML text, in text order (= document order of the elements).
+   * Line breaks as in XML 1.0 §2.11: CR LF, CR and LF each end a line. Comments, CDATA sections, processing
+   * instructions and the document type declaration (with its internal subset and quoted literals) are skipped.
+   */
+  function elementLineIndex(text) {
+    const lines = [];
+    const n = text.length;
+    let line = 1;
+    let i = 0;
+    // advances over [from, to) counting line breaks; returns to
+    const over = (from, to) => {
+      for (let k = from; k < to; k++) {
+        const c = text.charCodeAt(k);
+        if (c === 10) line++;
+        else if (c === 13) { line++; if (k + 1 < to && text.charCodeAt(k + 1) === 10) k++; }
+      }
+      return to;
+    };
+    const until = (from, end) => { const e = text.indexOf(end, from); return over(from, e < 0 ? n : e + end.length); };
+    while (i < n) {
+      const c = text.charCodeAt(i);
+      if (c === 10) { line++; i++; continue; }
+      if (c === 13) { line++; i += text.charCodeAt(i + 1) === 10 ? 2 : 1; continue; }
+      if (c !== 60) { i++; continue; } // '<'
+      if (text.startsWith('<!--', i)) { i = until(i + 4, '-->'); continue; }
+      if (text.startsWith('<![CDATA[', i)) { i = until(i + 9, ']]>'); continue; }
+      if (text.startsWith('<?', i)) { i = until(i + 2, '?>'); continue; }
+      if (text.startsWith('<!', i)) { // <!DOCTYPE …>, optionally with an internal subset […]
+        let depth = 0, quote = 0, k = i + 2;
+        while (k < n) {
+          const ch = text.charCodeAt(k);
+          if (ch === 10 || ch === 13) { k = over(k, k + (ch === 13 && text.charCodeAt(k + 1) === 10 ? 2 : 1)); continue; }
+          if (quote) { if (ch === quote) quote = 0; k++; continue; }
+          if (ch === 34 || ch === 39) { quote = ch; k++; continue; }
+          if (depth > 0 && text.startsWith('<!--', k)) { k = until(k + 4, '-->'); continue; }
+          if (depth > 0 && text.startsWith('<?', k)) { k = until(k + 2, '?>'); continue; }
+          if (ch === 91) depth++;
+          else if (ch === 93) depth--;
+          else if (ch === 62 && depth <= 0) { k++; break; }
+          k++;
+        }
+        i = k;
+        continue;
+      }
+      if (text.charCodeAt(i + 1) !== 47) lines.push(line); // a start tag (not '</')
+      i++;
+    }
+    return lines;
+  }
+
+  /** the elements of a document in document order (pre-order), iteratively */
+  function elementsInDocumentOrder(doc) {
+    const out = [];
+    const stack = [];
+    for (let c = doc.lastChild; c; c = c.previousSibling) if (c.nodeType === 1) stack.push(c);
+    while (stack.length) {
+      const e = stack.pop();
+      out.push(e);
+      for (let c = e.lastChild; c; c = c.previousSibling) if (c.nodeType === 1) stack.push(c);
+    }
+    return out;
+  }
+
+  /**
+   * finding.line for every finding (null where there is no element). When the number of start tags of the text and
+   * the number of elements of the parsed document differ (an entity whose replacement text contains markup), no
+   * lines are assigned at all rather than wrong ones (result.lineIndex.ok = false).
+   */
+  function assignLines(env, result) {
+    for (const f of result.allFindings) f.line = null;
+    if (!result.xml || !result.doc || typeof result.xml.text !== 'string') return;
+    const lines = elementLineIndex(result.xml.text);
+    const elements = elementsInDocumentOrder(result.doc);
+    result.lineIndex = { ok: lines.length === elements.length, startTags: lines.length, elements: elements.length };
+    if (!result.lineIndex.ok) return;
+    const index = new Map();
+    elements.forEach((e, k) => index.set(e, k));
+    let byPath = null; // XSD findings carry the path of their node only
+    for (const f of result.allFindings) {
+      let node = f.node || null;
+      if (!node && f.source === 'xsd' && f.location && result.docIndex) {
+        if (!byPath) { byPath = new Map(); for (const k of result.docIndex.keys()) if (k.nodeType === 1 || k.nodeType === 2) byPath.set(env.SchematronRunner.nodePath(k), k); }
+        node = byPath.get(f.location) || null;
+      }
+      const el = !node ? null : node.nodeType === 1 ? node : node.nodeType === 2 ? node.ownerElement : node.parentNode;
+      const k = el ? index.get(el) : undefined;
+      f.line = k !== undefined ? lines[k] : null;
+    }
+  }
+
   function sortFindings(list) {
     return list.sort((a, b) => LEVEL_ORDER[a.level] - LEVEL_ORDER[b.level] || (SOURCE_ORDER[a.source] || 0) - (SOURCE_ORDER[b.source] || 0) || String(a.id).localeCompare(String(b.id)) || String(a.location || '').localeCompare(String(b.location || '')));
   }
@@ -203,6 +306,8 @@
       try {
         const ex = await env.PdfEmbedded.extractEmbeddedFiles(bytes);
         result.pdf = { attachments: ex.files.map((f) => ({ name: f.name, size: f.size, mimeType: f.mimeType, afRelationship: f.afRelationship, description: f.description, filter: f.filter })), xmp: ex.xmp ? { zugferd: ex.xmp.zugferd, pdfa: ex.xmp.pdfa } : null, warnings: ex.warnings, method: ex.method };
+        // the embedded files themselves (for download in the app; not serialised)
+        Object.defineProperty(result.pdf, 'files', { value: ex.files.map((f) => ({ name: f.name, mimeType: f.mimeType, bytes: f.bytes })), enumerable: false });
         const inv = env.PdfEmbedded.pickInvoiceXml(ex.files);
         if (inv) { xmlBytes = inv.bytes; result.pdf.invoiceAttachment = inv.name; result.xmlSha256 = env.sha256 ? await env.sha256(inv.bytes) : null; }
         else result.warnings.push('Die PDF-Datei enthält keine eingebettete Rechnungs-XML (ZUGFeRD/Factur-X: factur-x.xml, zugferd-invoice.xml, xrechnung.xml).');
@@ -234,6 +339,15 @@
       const counts = { error: 0, warning: 0, information: 0 };
       for (const f of result.allFindings) counts[f.level]++;
       result.counts = counts;
+      const tLines = now();
+      assignLines(env, result);
+      result.timing.lines = Math.round(now() - tLines);
+      // umsatzsteuerliche Einordnung (Deutschland, src/vat-relevance.js): every finding, then the invoice
+      const vat = vatRelevance(env);
+      if (vat) {
+        for (const f of result.allFindings) f.ust = vat.classify(f, result.syntax, result.model);
+        result.ust = vat.verdict(result);
+      }
       result.timing.total = Math.round(now() - t0);
       return result;
     };
@@ -309,5 +423,5 @@
     return finish(assessment);
   }
 
-  return { analyzeBytes, analyzeDocument, profileFor, rulesetEntry, LEVEL_ORDER };
+  return { analyzeBytes, analyzeDocument, profileFor, rulesetEntry, elementLineIndex, elementsInDocumentOrder, LEVEL_ORDER };
 });

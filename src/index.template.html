@@ -21,9 +21,12 @@
   </section>
   <div id="status" hidden></div>
   <div id="exports" class="card" hidden>
-    <button class="btn" id="csv" type="button">Prüfbericht als CSV</button>
-    <button class="btn" id="json" type="button">Prüfbericht als JSON</button>
-    <button class="btn secondary" id="print" type="button">Drucken / PDF</button>
+    <span class="exports-label">Alle Dateien:</span>
+    <button class="btn" id="csv" type="button" title="Ein Befund je Zeile, mit umsatzsteuerlicher Einordnung">Prüfbericht (CSV)</button>
+    <button class="btn" id="data-csv" type="button" title="Eine Rechnung je Zeile: Kopfdaten, Parteien, Beträge, Zahlung, Umsatzsteuer je Satz">Rechnungsdaten (CSV)</button>
+    <button class="btn" id="lines-csv" type="button" title="Eine Rechnungsposition je Zeile">Positionen (CSV)</button>
+    <button class="btn secondary" id="json" type="button" title="Alles maschinenlesbar, einschließlich der Rechnungsdaten">JSON</button>
+    <button class="btn secondary" id="print" type="button">Drucken</button>
     <button class="btn secondary" id="clear" type="button">Liste leeren</button>
   </div>
   <section id="summary" class="card" hidden></section>
@@ -36,13 +39,15 @@
       <li><strong>Zeichenkodierung</strong> nach XML 1.0 (§ 4.3.3, Anhang F); für XRechnung zusätzlich die Pflicht zu UTF-8 (Spezifikation XRechnung 3.0.2, Abschnitt 6.1);</li>
       <li><strong>XML-Schema</strong> (UBL 2.1, UN/CEFACT CII D16B bzw. die Factur-X-/ZUGFeRD-Profilschemata) – mit den Fehlercodes des Xerces-Validators, den auch der KoSIT-Validator verwendet; bei Schemafehlern entfallen die Geschäftsregeln, wie beim KoSIT-Validator;</li>
       <li><strong>Geschäftsregeln</strong>: XRechnung und EN 16931 genau so, wie sie der XRechnung-Validator der KoSIT in seinen Szenarien anwendet (inkl. Fehlerstufen „customLevel“); ZUGFeRD / Factur-X nach den Profilregeln (MINIMUM, BASIC WL, BASIC, EN 16931, EXTENDED) von Factur-X 1.09.2 / ZUGFeRD 2.5.2; Peppol BIS Billing 3.0, sobald Sie die offiziellen Peppol-Regeldateien geladen haben (siehe „Regelwerke“);</li>
-      <li>Darstellung der Rechnungsdaten (Geschäftsbegriffe BT-/BG-), SHA-256-Prüfsummen, Zeilenangaben zu jedem Befund.</li>
+      <li><strong>Umsatzsteuerliche Einordnung</strong> (Deutschland) jedes Befunds nach den BMF-Schreiben vom 15.10.2025 und 15.10.2026: Formatfehler (keine E-Rechnung, Rn. 6a), Geschäftsregelfehler mit Bezug zu einer Rechnungspflichtangabe des § 14 Abs. 4, Abs. 5 oder § 14a UStG oder ohne diesen Bezug (umsatzsteuerlich unbeachtlich, Rn. 35a) – Zuordnung der Pflichtangaben nach den Empfehlungen von KoSIT und FeRD – und die Übersicht, ob die Pflichtangaben im strukturierten Teil vorhanden sind (mit Kleinbetragsrechnungen, Kleinunternehmern, Gutschriften, Endrechnungen, § 14a, § 22c und Berichtigungen);</li>
+      <li>Darstellung der Rechnungsdaten (Geschäftsbegriffe BT-/BG- der EN 16931, Syntaxbindung wie die XRechnung-Visualisierung der KoSIT), SHA-256-Prüfsummen, Zeilenangaben zu jedem Befund;</li>
+      <li>Dateien: Prüfprotokoll (PDF) und Lesefassung (PDF) je Rechnung, Rechnungsdaten und Positionen als CSV, Prüfbericht als CSV und JSON, eingebettete Anlagen und die XML einer ZUGFeRD-/Factur-X-PDF zum Herunterladen.</li>
     </ul>
     <p><strong>Nicht geprüft wird:</strong></p>
     <ul>
       <li>die vollständige PDF/A-3-Konformität (Schriften, Farbräume, Transparenz …) – dafür ist ein PDF/A-Validator wie veraPDF nötig;</li>
       <li>elektronische Signaturen – sie sind für Rechnungen nicht vorgeschrieben: Echtheit der Herkunft, Unversehrtheit des Inhalts und Lesbarkeit können durch jedes innerbetriebliche Kontrollverfahren gewährleistet werden (Deutschland: § 14 Abs. 1 UStG; Österreich: § 11 Abs. 1 und 1a UStG 1994 in der Fassung des AbgÄG 2012, freie Wahl des Verfahrens);</li>
-      <li>die inhaltliche Richtigkeit (z. B. ob die Leistung erbracht wurde) und die steuerrechtliche Beurteilung im Einzelfall. Dieses Werkzeug ersetzt keine Steuer- oder Rechtsberatung.</li>
+      <li>die inhaltliche Richtigkeit (z. B. ob die Leistung erbracht wurde, ob Steuersatz und Leistungsbeschreibung zutreffen) und die steuerrechtliche Beurteilung im Einzelfall: Die umsatzsteuerliche Einordnung zeigt, welche Pflichtangaben ein Befund betrifft und ob die Angaben vorhanden sind – nicht, ob sie richtig sind. Dieses Werkzeug ersetzt keine Steuer- oder Rechtsberatung.</li>
     </ul>
     <p><strong>Eingebettete Regelwerke, Schemata und Versionen:</strong></p>
     <div id="buildinfo"></div>
@@ -67,12 +72,17 @@
 <script>/*__XSD__*/</script>
 <script>/*__PDFA3__*/</script>
 <script>/*__SCHCOMPILER__*/</script>
+<script>/*__VATJS__*/</script>
+<script>/*__PDFFONTS__*/</script>
+<script>/*__PDFWRITER__*/</script>
+<script>/*__REPORTS__*/</script>
 <script>/*__CORE__*/</script>
 <script>window.PRUEFER_SCHEMAS = /*__SCHEMAS__*/;</script>
 <script>window.PRUEFER_SCENARIOS = /*__SCENARIOS__*/;</script>
 <script>window.PRUEFER_RULESETS = /*__RULESETS__*/;</script>
 <script>window.PRUEFER_XSD = /*__XSDMODELS__*/;</script>
 <script>window.PRUEFER_NOTICES = /*__NOTICES__*/;</script>
+<script>window.PRUEFER_VAT = /*__VAT__*/;</script>
 <script>window.PRUEFER_BUILD = /*__BUILD__*/;</script>
 <script>/*__APP__*/</script>
 </body>

@@ -16,6 +16,13 @@ const InvoiceModel = require(path.join(root, 'src', 'invoice-model.js'));
 const XsdValidator = require(path.join(root, 'src', 'xsd-validator.js'));
 const PdfA3Checks = require(path.join(root, 'src', 'pdfa3-checks.js'));
 const XmlEncoding = require(path.join(root, 'src', 'xml-encoding.js'));
+const VatRelevance = require(path.join(root, 'src', 'vat-relevance.js'));
+
+/** build/bt-paths.json without its provenance fields: the part the program uses (syntax binding, groups) */
+function vatPaths() {
+  const j = JSON.parse(fs.readFileSync(path.join(root, 'build', 'bt-paths.json'), 'utf8'));
+  return { syntax: j.syntax, groups: j.groups };
+}
 
 /** opts.exclude: regular expression of rule-set ids to treat as unavailable (e.g. /^PEPPOL-/ to mirror the browser build) */
 function createEnv(opts) {
@@ -24,7 +31,9 @@ function createEnv(opts) {
   const loadJson = (dir, id) => { const f = path.join(root, 'build', dir, id + '.json'); return fs.existsSync(f) ? JSON.parse(fs.readFileSync(f, 'utf8')) : null; };
   const ruleSetCache = {}, xsdCache = {};
   const env = {
-    fontoxpath: fx, SchematronRunner, XsdValidator, PdfEmbedded, PdfA3Checks, XmlEncoding, InvoiceModel,
+    fontoxpath: fx, SchematronRunner, XsdValidator, PdfEmbedded, PdfA3Checks, XmlEncoding, InvoiceModel, VatRelevance,
+    // the same data as the browser build (window.PRUEFER_VAT): legal table and syntax binding
+    vatData: { legal: JSON.parse(fs.readFileSync(path.join(root, 'legal', 'ust-pflichtangaben.json'), 'utf8')), paths: vatPaths() },
     scenarios: JSON.parse(fs.readFileSync(path.join(root, 'build', 'scenarios.json'), 'utf8')),
     rulesets: JSON.parse(fs.readFileSync(path.join(root, 'build', 'rulesets.json'), 'utf8')),
     ruleSet: (id) => (id in ruleSetCache ? ruleSetCache[id] : (ruleSetCache[id] = loadJson('schemas', id))),
@@ -36,4 +45,4 @@ function createEnv(opts) {
   if (opts.exclude) { const orig = env.ruleSet; env.ruleSet = (id) => (opts.exclude.test(id) ? null : orig(id)); }
   return env;
 }
-module.exports = { createEnv, fx, slimdom };
+module.exports = { createEnv, vatPaths, fx, slimdom };

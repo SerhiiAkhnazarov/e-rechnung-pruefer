@@ -7,7 +7,8 @@
  *     every source repository commit and every consumed source file),
  *   - the engine (patch, vendored bundles), the runtime sources (src/*.js),
  *   - every compiled rule set, XSD model and the scenario table (build/schemas, build/xsd,
- *     build/scenarios.json),
+ *     build/scenarios.json), the legal table of the VAT classification (legal/) and the syntax binding
+ *     (build/bt-paths.json),
  *   - the reference toolchain used by the oracle tests (Saxon jar, Java, Node, Playwright browser).
  *
  * `id` is the SHA-256 of the canonical JSON of the content part (files + toolchain), so two runs
@@ -78,6 +79,8 @@ function compute(opts) {
     rulesets: filesIn('build/schemas', (f) => f.endsWith('.json') && !/^PEPPOL-/.test(f)),
     xsdModels: filesIn('build/xsd', (f) => f.endsWith('.json')),
     scenarios: ['build/scenarios.json'].concat(fs.existsSync(path.join(root, 'build', 'rulesets.json')) ? ['build/rulesets.json'] : []),
+    // umsatzsteuerliche Einordnung: the legal table and the syntax binding derived from the KoSIT visualization
+    legal: filesIn('legal', (f) => f.endsWith('.json')).concat(['build/bt-paths.json']),
     tools: filesIn('tools', (f) => /\.(cjs|sh)$/.test(f)).concat(filesUnder('tools/verapdf')),
     tests: filesUnder('test', (f) => !f.endsWith('.class')),  // scripts, oracles' sources, expectations, test schemas
     // dist/ is not an input: it is generated from the groups above by tools/build-standalone.cjs and

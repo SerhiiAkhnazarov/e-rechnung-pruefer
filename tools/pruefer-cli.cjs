@@ -15,7 +15,9 @@
  * schematronSkipped ('xsd-invalid'), ruleSets, ruleSetsRun, missingRuleSets, findings[{level, originalLevel,
  * id, schema, text, location, context, test}] (Schematron), issues[{source: encoding|pdf|xsd, level, id,
  * text, location}], counts (all sources), assessment (accept|reject|incomplete|not-applicable|
- * not-processable), legalStatus, processingErrors, engineWarnings, warnings, timing, model.
+ * not-processable), legalStatus, processingErrors, engineWarnings, warnings, timing, model,
+ * ust (umsatzsteuerliche Einordnung: id, kurz, text, angaben, hinweise, pflichtangaben; findings[].ust / issues[].ust:
+ * klasse, basis, bt, angaben — src/vat-relevance.js, docs/UST-EINORDNUNG.md).
  */
 'use strict';
 const fs = require('fs');
@@ -51,7 +53,7 @@ async function analyzeFile(file) {
   out.scenarioDetails = r.scenario || null;
   out.scenario = r.scenario ? r.scenario.name : null;
   out.customLevels = r.scenario ? r.scenario.customLevels : {};
-  out.findings = (r.findings || []).map((f) => ({ level: f.level, originalLevel: f.originalLevel, id: f.id, schema: f.schema, text: f.text, location: f.location, context: f.context, test: f.test }));
+  out.findings = (r.findings || []).map((f) => ({ level: f.level, originalLevel: f.originalLevel, id: f.id, schema: f.schema, text: f.text, location: f.location, context: f.context, test: f.test, ust: f.ust }));
   out.issues = r.issues;
   delete out.allFindings;
   return out;
@@ -77,7 +79,7 @@ function expand(p, out) {
     n++;
     if (outDir) fs.writeFileSync(path.join(outDir, path.basename(f) + '.report.json'), JSON.stringify(r, null, 1));
     else all.push(r);
-    if (!quiet) console.error(`${String(r.assessment).padEnd(16)} E${(r.counts || {}).error || 0} W${(r.counts || {}).warning || 0} I${(r.counts || {}).information || 0}  ${path.basename(f)}${r.scenario ? '  [' + r.scenario + ']' : r.profile ? '  [' + r.profile.label + ']' : ''}`);
+    if (!quiet) console.error(`${String(r.assessment).padEnd(16)} ${String(r.ust ? r.ust.id : '').padEnd(14)} E${(r.counts || {}).error || 0} W${(r.counts || {}).warning || 0} I${(r.counts || {}).information || 0}  ${path.basename(f)}${r.scenario ? '  [' + r.scenario + ']' : r.profile ? '  [' + r.profile.label + ']' : ''}`);
   }
   if (!outDir) console.log(JSON.stringify(all.length === 1 ? all[0] : all, null, 1));
   if (!quiet) console.error(`${n} file(s) processed`);

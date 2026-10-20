@@ -124,6 +124,16 @@ const sources = {
         note: 'the pinned commit is a master commit after the release; the consumed ZF_250 rule and schema files are identical to the release tag, the newer commit is pinned for the validator test sources cited by test/run-pdfa3-tests.cjs' }; })(),
     files: ruleSources(/^FACTUR-X-/).concat(xsdSources(fs.existsSync(path.join(root, 'build', 'xsd')) ? fs.readdirSync(path.join(root, 'build', 'xsd')).filter((f) => /^FACTUR-X-/.test(f)) : [])),
   }),
+  'KoSIT xrechnung-visualization (v2026-08-31)': Object.assign(repoInfo(E('xrechnung-visualization')), {
+    licence: 'Apache-2.0',
+    files: ['src/xsl/ubl-invoice-xr.xsl', 'src/xsl/ubl-creditnote-xr.xsl', 'src/xsl/cii-xr.xsl', 'src/xsl/common-xr.xsl', 'src/xsl/functions.xsl'].map((f) => fileEntry(E('xrechnung-visualization') + '/' + f)),
+    note: 'the KoSIT stylesheets that map UBL/CII to the semantic model of XRechnung (xr:id = BT/BG, xr:src = source path); run over the corpus (test/kosit-visualization/run.sh) they give the syntax binding build/bt-paths.json (tools/build-bt-paths.cjs) and the reference values of test/run-invoice-model-tests.cjs. Same release date as the validator configuration (2026-08-31).',
+  }),
+  'Adobe Core14 font metrics (AFM, via matplotlib v3.10.7) — widths for the PDF writer': Object.assign(repoInfo(E('matplotlib')), {
+    licence: 'Adobe AFM permission (readme.txt): may be used, copied and distributed for any purpose and without charge, with or without modification, provided that all copyright notices are retained (see src/pdf-fonts.js, NOTICE A.12)',
+    files: ['Helvetica.afm', 'Helvetica-Bold.afm', 'Courier.afm', 'readme.txt'].map((f) => fileEntry(E('matplotlib') + '/lib/matplotlib/mpl-data/fonts/pdfcorefonts/' + f)),
+    note: 'tools/gen-pdf-fonts.cjs extracts the WinAnsiEncoding character widths into src/pdf-fonts.js; the AFM files themselves are not contained in the program or the repository (sparse checkout of lib/matplotlib/mpl-data/fonts/pdfcorefonts).',
+  }),
   'Release artefacts (fetched by tools/fetch-sources.cjs, SHA-256 checked before use; local runs and CI)': {
     artefacts: [
       { name: 'KoSIT validator 1.6.3 (standalone JAR, contains Saxon HE 12.9)', url: 'https://github.com/itplr-kosit/validator/releases/download/v1.6.3/validator-1.6.3-standalone.jar', sha256: '799e64befca97d4080e03608c80b85dd5a5ecc5f4ae4f35d1116ec2855b9a7c9', licence: 'Apache-2.0', alsoOn: 'Maven Central org.kosit:validator:1.6.3:jar:standalone (CI job kosit-jar-maven compares both byte by byte)' },
@@ -169,6 +179,8 @@ const localOnly = {};
 for (const f of fs.readdirSync(path.join(root, 'build', 'schemas'))) (/^PEPPOL-/.test(f) ? localOnly : derived)[f] = fileEntry(path.join(root, 'build', 'schemas', f));
 derived['scenarios.json'] = fileEntry(path.join(root, 'build', 'scenarios.json'));
 if (fs.existsSync(path.join(root, 'build', 'rulesets.json'))) derived['rulesets.json'] = fileEntry(path.join(root, 'build', 'rulesets.json'));
+if (fs.existsSync(path.join(root, 'build', 'bt-paths.json'))) derived['bt-paths.json'] = fileEntry(path.join(root, 'build', 'bt-paths.json'));
+derived['src/pdf-fonts.js'] = fileEntry(path.join(root, 'src', 'pdf-fonts.js'));
 if (fs.existsSync(path.join(root, 'build', 'xsd'))) for (const f of fs.readdirSync(path.join(root, 'build', 'xsd'))) derived['xsd/' + f] = fileEntry(path.join(root, 'build', 'xsd', f));
 for (const f of ['fontoxpath.iife.js', 'fontoxpath.iife.min.js', 'fontoxpath.cjs', 'slimdom.cjs']) if (fs.existsSync(path.join(root, 'vendor', f))) derived[f] = fileEntry(path.join(root, 'vendor', f));
 

@@ -1,0 +1,2087 @@
+{
+ "generator": "tools/build-bt-paths.cjs",
+ "source": {
+  "repository": "xrechnung-visualization",
+  "files": [
+   {
+    "file": "xrechnung-visualization/src/xsl/ubl-invoice-xr.xsl",
+    "sha256": "ef2c2af5efbc5e130a4fe4b67c62080ff179a67df08522dbf9cfcf305093c899"
+   },
+   {
+    "file": "xrechnung-visualization/src/xsl/ubl-creditnote-xr.xsl",
+    "sha256": "8cf629bd45887447d605b442201bad5f14dff118133b358adb4468c5fd31cf89"
+   },
+   {
+    "file": "xrechnung-visualization/src/xsl/cii-xr.xsl",
+    "sha256": "216c591ef7bd887e2f89d5623bd20fbf73a9b48ae51f93fdbb0e46d1645f63e3"
+   },
+   {
+    "file": "xrechnung-visualization/src/xsl/common-xr.xsl",
+    "sha256": "3155e48fe19dd23ff74e3f191721e28c7a51a5e76a093fb1e2ee60bfe08edc41"
+   },
+   {
+    "file": "xrechnung-visualization/src/xsl/functions.xsl",
+    "sha256": "1e8e2c414a19d63007408856649037c8654f5c7391618c48010865dac60db3ed"
+   }
+  ],
+  "licence": "Apache-2.0"
+ },
+ "corpus": {
+  "instances": 4157,
+  "terms": 281861,
+  "unresolved": 34,
+  "rootSkipped": 9896
+ },
+ "groupsNotLocated": [
+  "CII /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction BG-13 (contains BG-22 at /ram:ApplicableHeaderTradeSettlement/ram:SpecifiedTradeSettlementHeaderMonetarySummation)",
+  "CII /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement BG-19 (contains BG-22 at /ram:SpecifiedTradeSettlementHeaderMonetarySummation)"
+ ],
+ "syntax": {
+  "UBL-Invoice": {
+   "/Invoice/cac:AccountingCustomerParty": [
+    "BG-7"
+   ],
+   "/Invoice/cac:AccountingCustomerParty/cac:Party/cac:Contact": [
+    "BG-9"
+   ],
+   "/Invoice/cac:AccountingCustomerParty/cac:Party/cac:Contact/cbc:ElectronicMail": [
+    "BT-58"
+   ],
+   "/Invoice/cac:AccountingCustomerParty/cac:Party/cac:Contact/cbc:Name": [
+    "BT-56"
+   ],
+   "/Invoice/cac:AccountingCustomerParty/cac:Party/cac:Contact/cbc:Telephone": [
+    "BT-57"
+   ],
+   "/Invoice/cac:AccountingCustomerParty/cac:Party/cac:PartyIdentification/cbc:ID": [
+    "BT-46"
+   ],
+   "/Invoice/cac:AccountingCustomerParty/cac:Party/cac:PartyLegalEntity/cbc:CompanyID": [
+    "BT-47"
+   ],
+   "/Invoice/cac:AccountingCustomerParty/cac:Party/cac:PartyLegalEntity/cbc:RegistrationName": [
+    "BT-44"
+   ],
+   "/Invoice/cac:AccountingCustomerParty/cac:Party/cac:PartyName/cbc:Name": [
+    "BT-45"
+   ],
+   "/Invoice/cac:AccountingCustomerParty/cac:Party/cac:PartyTaxScheme/cbc:CompanyID": [
+    "BT-48"
+   ],
+   "/Invoice/cac:AccountingCustomerParty/cac:Party/cac:PostalAddress": [
+    "BG-8"
+   ],
+   "/Invoice/cac:AccountingCustomerParty/cac:Party/cac:PostalAddress/cac:AddressLine/cbc:Line": [
+    "BT-163"
+   ],
+   "/Invoice/cac:AccountingCustomerParty/cac:Party/cac:PostalAddress/cac:Country/cbc:IdentificationCode": [
+    "BT-55"
+   ],
+   "/Invoice/cac:AccountingCustomerParty/cac:Party/cac:PostalAddress/cbc:AdditionalStreetName": [
+    "BT-51"
+   ],
+   "/Invoice/cac:AccountingCustomerParty/cac:Party/cac:PostalAddress/cbc:CityName": [
+    "BT-52"
+   ],
+   "/Invoice/cac:AccountingCustomerParty/cac:Party/cac:PostalAddress/cbc:CountrySubentity": [
+    "BT-54"
+   ],
+   "/Invoice/cac:AccountingCustomerParty/cac:Party/cac:PostalAddress/cbc:PostalZone": [
+    "BT-53"
+   ],
+   "/Invoice/cac:AccountingCustomerParty/cac:Party/cac:PostalAddress/cbc:StreetName": [
+    "BT-50"
+   ],
+   "/Invoice/cac:AccountingCustomerParty/cac:Party/cbc:EndpointID": [
+    "BT-49"
+   ],
+   "/Invoice/cac:AccountingSupplierParty": [
+    "BG-4"
+   ],
+   "/Invoice/cac:AccountingSupplierParty/cac:Party/cac:Contact": [
+    "BG-6"
+   ],
+   "/Invoice/cac:AccountingSupplierParty/cac:Party/cac:Contact/cbc:ElectronicMail": [
+    "BT-43"
+   ],
+   "/Invoice/cac:AccountingSupplierParty/cac:Party/cac:Contact/cbc:Name": [
+    "BT-41"
+   ],
+   "/Invoice/cac:AccountingSupplierParty/cac:Party/cac:Contact/cbc:Telephone": [
+    "BT-42"
+   ],
+   "/Invoice/cac:AccountingSupplierParty/cac:Party/cac:PartyIdentification/cbc:ID": [
+    "BT-29",
+    "BT-90"
+   ],
+   "/Invoice/cac:AccountingSupplierParty/cac:Party/cac:PartyLegalEntity/cbc:CompanyID": [
+    "BT-30"
+   ],
+   "/Invoice/cac:AccountingSupplierParty/cac:Party/cac:PartyLegalEntity/cbc:CompanyLegalForm": [
+    "BT-33"
+   ],
+   "/Invoice/cac:AccountingSupplierParty/cac:Party/cac:PartyLegalEntity/cbc:RegistrationName": [
+    "BT-27"
+   ],
+   "/Invoice/cac:AccountingSupplierParty/cac:Party/cac:PartyName/cbc:Name": [
+    "BT-28"
+   ],
+   "/Invoice/cac:AccountingSupplierParty/cac:Party/cac:PartyTaxScheme/cbc:CompanyID": [
+    "BT-31",
+    "BT-32"
+   ],
+   "/Invoice/cac:AccountingSupplierParty/cac:Party/cac:PostalAddress": [
+    "BG-5"
+   ],
+   "/Invoice/cac:AccountingSupplierParty/cac:Party/cac:PostalAddress/cac:AddressLine/cbc:Line": [
+    "BT-162"
+   ],
+   "/Invoice/cac:AccountingSupplierParty/cac:Party/cac:PostalAddress/cac:Country/cbc:IdentificationCode": [
+    "BT-40"
+   ],
+   "/Invoice/cac:AccountingSupplierParty/cac:Party/cac:PostalAddress/cbc:AdditionalStreetName": [
+    "BT-36"
+   ],
+   "/Invoice/cac:AccountingSupplierParty/cac:Party/cac:PostalAddress/cbc:CityName": [
+    "BT-37"
+   ],
+   "/Invoice/cac:AccountingSupplierParty/cac:Party/cac:PostalAddress/cbc:CountrySubentity": [
+    "BT-39"
+   ],
+   "/Invoice/cac:AccountingSupplierParty/cac:Party/cac:PostalAddress/cbc:PostalZone": [
+    "BT-38"
+   ],
+   "/Invoice/cac:AccountingSupplierParty/cac:Party/cac:PostalAddress/cbc:StreetName": [
+    "BT-35"
+   ],
+   "/Invoice/cac:AccountingSupplierParty/cac:Party/cbc:EndpointID": [
+    "BT-34"
+   ],
+   "/Invoice/cac:AdditionalDocumentReference": [
+    "BG-24"
+   ],
+   "/Invoice/cac:AdditionalDocumentReference/cac:Attachment/cac:ExternalReference/cbc:URI": [
+    "BT-124"
+   ],
+   "/Invoice/cac:AdditionalDocumentReference/cac:Attachment/cbc:EmbeddedDocumentBinaryObject": [
+    "BT-125"
+   ],
+   "/Invoice/cac:AdditionalDocumentReference/cbc:DocumentDescription": [
+    "BT-123"
+   ],
+   "/Invoice/cac:AdditionalDocumentReference/cbc:ID": [
+    "BT-18",
+    "BT-122"
+   ],
+   "/Invoice/cac:AllowanceCharge": [
+    "BG-20",
+    "BG-21"
+   ],
+   "/Invoice/cac:AllowanceCharge/cac:TaxCategory/cbc:ID": [
+    "BT-95",
+    "BT-102"
+   ],
+   "/Invoice/cac:AllowanceCharge/cac:TaxCategory/cbc:Percent": [
+    "BT-96",
+    "BT-103"
+   ],
+   "/Invoice/cac:AllowanceCharge/cbc:AllowanceChargeReason": [
+    "BT-97",
+    "BT-104"
+   ],
+   "/Invoice/cac:AllowanceCharge/cbc:AllowanceChargeReasonCode": [
+    "BT-98",
+    "BT-105"
+   ],
+   "/Invoice/cac:AllowanceCharge/cbc:Amount": [
+    "BT-92",
+    "BT-99"
+   ],
+   "/Invoice/cac:AllowanceCharge/cbc:BaseAmount": [
+    "BT-93",
+    "BT-100"
+   ],
+   "/Invoice/cac:AllowanceCharge/cbc:MultiplierFactorNumeric": [
+    "BT-94",
+    "BT-101"
+   ],
+   "/Invoice/cac:BillingReference/cac:InvoiceDocumentReference": [
+    "BG-3"
+   ],
+   "/Invoice/cac:BillingReference/cac:InvoiceDocumentReference/cbc:ID": [
+    "BT-25"
+   ],
+   "/Invoice/cac:BillingReference/cac:InvoiceDocumentReference/cbc:IssueDate": [
+    "BT-26"
+   ],
+   "/Invoice/cac:ContractDocumentReference/cbc:ID": [
+    "BT-12"
+   ],
+   "/Invoice/cac:Delivery": [
+    "BG-13"
+   ],
+   "/Invoice/cac:Delivery/cac:DeliveryLocation/cac:Address": [
+    "BG-15"
+   ],
+   "/Invoice/cac:Delivery/cac:DeliveryLocation/cac:Address/cac:AddressLine/cbc:Line": [
+    "BT-165"
+   ],
+   "/Invoice/cac:Delivery/cac:DeliveryLocation/cac:Address/cac:Country/cbc:IdentificationCode": [
+    "BT-80"
+   ],
+   "/Invoice/cac:Delivery/cac:DeliveryLocation/cac:Address/cbc:AdditionalStreetName": [
+    "BT-76"
+   ],
+   "/Invoice/cac:Delivery/cac:DeliveryLocation/cac:Address/cbc:CityName": [
+    "BT-77"
+   ],
+   "/Invoice/cac:Delivery/cac:DeliveryLocation/cac:Address/cbc:CountrySubentity": [
+    "BT-79"
+   ],
+   "/Invoice/cac:Delivery/cac:DeliveryLocation/cac:Address/cbc:PostalZone": [
+    "BT-78"
+   ],
+   "/Invoice/cac:Delivery/cac:DeliveryLocation/cac:Address/cbc:StreetName": [
+    "BT-75"
+   ],
+   "/Invoice/cac:Delivery/cac:DeliveryLocation/cbc:ID": [
+    "BT-71"
+   ],
+   "/Invoice/cac:Delivery/cac:DeliveryParty/cac:PartyName/cbc:Name": [
+    "BT-70"
+   ],
+   "/Invoice/cac:Delivery/cbc:ActualDeliveryDate": [
+    "BT-72"
+   ],
+   "/Invoice/cac:DespatchDocumentReference/cbc:ID": [
+    "BT-16"
+   ],
+   "/Invoice/cac:InvoiceLine": [
+    "BG-25"
+   ],
+   "/Invoice/cac:InvoiceLine/cac:AllowanceCharge": [
+    "BG-27",
+    "BG-28"
+   ],
+   "/Invoice/cac:InvoiceLine/cac:AllowanceCharge/cbc:AllowanceChargeReason": [
+    "BT-139",
+    "BT-144"
+   ],
+   "/Invoice/cac:InvoiceLine/cac:AllowanceCharge/cbc:AllowanceChargeReasonCode": [
+    "BT-140",
+    "BT-145"
+   ],
+   "/Invoice/cac:InvoiceLine/cac:AllowanceCharge/cbc:Amount": [
+    "BT-136",
+    "BT-141"
+   ],
+   "/Invoice/cac:InvoiceLine/cac:AllowanceCharge/cbc:BaseAmount": [
+    "BT-137",
+    "BT-142"
+   ],
+   "/Invoice/cac:InvoiceLine/cac:AllowanceCharge/cbc:MultiplierFactorNumeric": [
+    "BT-138",
+    "BT-143"
+   ],
+   "/Invoice/cac:InvoiceLine/cac:DocumentReference/cbc:ID": [
+    "BT-128"
+   ],
+   "/Invoice/cac:InvoiceLine/cac:InvoicePeriod": [
+    "BG-26"
+   ],
+   "/Invoice/cac:InvoiceLine/cac:InvoicePeriod/cbc:EndDate": [
+    "BT-135"
+   ],
+   "/Invoice/cac:InvoiceLine/cac:InvoicePeriod/cbc:StartDate": [
+    "BT-134"
+   ],
+   "/Invoice/cac:InvoiceLine/cac:Item": [
+    "BG-31"
+   ],
+   "/Invoice/cac:InvoiceLine/cac:Item/cac:AdditionalItemProperty": [
+    "BG-32"
+   ],
+   "/Invoice/cac:InvoiceLine/cac:Item/cac:AdditionalItemProperty/cbc:Name": [
+    "BT-160"
+   ],
+   "/Invoice/cac:InvoiceLine/cac:Item/cac:AdditionalItemProperty/cbc:Value": [
+    "BT-161"
+   ],
+   "/Invoice/cac:InvoiceLine/cac:Item/cac:BuyersItemIdentification/cbc:ID": [
+    "BT-156"
+   ],
+   "/Invoice/cac:InvoiceLine/cac:Item/cac:ClassifiedTaxCategory": [
+    "BG-30"
+   ],
+   "/Invoice/cac:InvoiceLine/cac:Item/cac:ClassifiedTaxCategory/cbc:ID": [
+    "BT-151"
+   ],
+   "/Invoice/cac:InvoiceLine/cac:Item/cac:ClassifiedTaxCategory/cbc:Percent": [
+    "BT-152"
+   ],
+   "/Invoice/cac:InvoiceLine/cac:Item/cac:CommodityClassification/cbc:ItemClassificationCode": [
+    "BT-158"
+   ],
+   "/Invoice/cac:InvoiceLine/cac:Item/cac:OriginCountry/cbc:IdentificationCode": [
+    "BT-159"
+   ],
+   "/Invoice/cac:InvoiceLine/cac:Item/cac:SellersItemIdentification/cbc:ID": [
+    "BT-155"
+   ],
+   "/Invoice/cac:InvoiceLine/cac:Item/cac:StandardItemIdentification/cbc:ID": [
+    "BT-157"
+   ],
+   "/Invoice/cac:InvoiceLine/cac:Item/cbc:Description": [
+    "BT-154"
+   ],
+   "/Invoice/cac:InvoiceLine/cac:Item/cbc:Name": [
+    "BT-153"
+   ],
+   "/Invoice/cac:InvoiceLine/cac:OrderLineReference/cbc:LineID": [
+    "BT-132"
+   ],
+   "/Invoice/cac:InvoiceLine/cac:Price": [
+    "BG-29"
+   ],
+   "/Invoice/cac:InvoiceLine/cac:Price/cac:AllowanceCharge/cbc:Amount": [
+    "BT-147"
+   ],
+   "/Invoice/cac:InvoiceLine/cac:Price/cac:AllowanceCharge/cbc:BaseAmount": [
+    "BT-148"
+   ],
+   "/Invoice/cac:InvoiceLine/cac:Price/cbc:BaseQuantity": [
+    "BT-149"
+   ],
+   "/Invoice/cac:InvoiceLine/cac:Price/cbc:BaseQuantity/@unitCode": [
+    "BT-150"
+   ],
+   "/Invoice/cac:InvoiceLine/cac:Price/cbc:PriceAmount": [
+    "BT-146"
+   ],
+   "/Invoice/cac:InvoiceLine/cac:SubInvoiceLine": [
+    "BG-DEX-01"
+   ],
+   "/Invoice/cac:InvoiceLine/cac:SubInvoiceLine/cac:Item": [
+    "BG-DEX-02"
+   ],
+   "/Invoice/cac:InvoiceLine/cac:SubInvoiceLine/cac:Item/cac:ClassifiedTaxCategory": [
+    "BG-DEX-06"
+   ],
+   "/Invoice/cac:InvoiceLine/cac:SubInvoiceLine/cac:Item/cac:ClassifiedTaxCategory/cbc:ID": [
+    "BT-151"
+   ],
+   "/Invoice/cac:InvoiceLine/cac:SubInvoiceLine/cac:Item/cac:ClassifiedTaxCategory/cbc:Percent": [
+    "BT-152"
+   ],
+   "/Invoice/cac:InvoiceLine/cac:SubInvoiceLine/cac:Item/cbc:Name": [
+    "BT-153"
+   ],
+   "/Invoice/cac:InvoiceLine/cac:SubInvoiceLine/cac:Price": [
+    "BG-DEX-07"
+   ],
+   "/Invoice/cac:InvoiceLine/cac:SubInvoiceLine/cac:Price/cac:AllowanceCharge/cbc:Amount": [
+    "BT-147"
+   ],
+   "/Invoice/cac:InvoiceLine/cac:SubInvoiceLine/cac:Price/cac:AllowanceCharge/cbc:BaseAmount": [
+    "BT-148"
+   ],
+   "/Invoice/cac:InvoiceLine/cac:SubInvoiceLine/cac:Price/cbc:BaseQuantity": [
+    "BT-149"
+   ],
+   "/Invoice/cac:InvoiceLine/cac:SubInvoiceLine/cac:Price/cbc:BaseQuantity/@unitCode": [
+    "BT-150"
+   ],
+   "/Invoice/cac:InvoiceLine/cac:SubInvoiceLine/cac:Price/cbc:PriceAmount": [
+    "BT-146"
+   ],
+   "/Invoice/cac:InvoiceLine/cac:SubInvoiceLine/cac:SubInvoiceLine": [
+    "BG-DEX-01"
+   ],
+   "/Invoice/cac:InvoiceLine/cac:SubInvoiceLine/cac:SubInvoiceLine/cac:Item": [
+    "BG-DEX-02"
+   ],
+   "/Invoice/cac:InvoiceLine/cac:SubInvoiceLine/cac:SubInvoiceLine/cac:Item/cac:ClassifiedTaxCategory": [
+    "BG-DEX-06"
+   ],
+   "/Invoice/cac:InvoiceLine/cac:SubInvoiceLine/cac:SubInvoiceLine/cac:Item/cac:ClassifiedTaxCategory/cbc:ID": [
+    "BT-151"
+   ],
+   "/Invoice/cac:InvoiceLine/cac:SubInvoiceLine/cac:SubInvoiceLine/cac:Item/cac:ClassifiedTaxCategory/cbc:Percent": [
+    "BT-152"
+   ],
+   "/Invoice/cac:InvoiceLine/cac:SubInvoiceLine/cac:SubInvoiceLine/cac:Item/cbc:Name": [
+    "BT-153"
+   ],
+   "/Invoice/cac:InvoiceLine/cac:SubInvoiceLine/cac:SubInvoiceLine/cac:Price": [
+    "BG-DEX-07"
+   ],
+   "/Invoice/cac:InvoiceLine/cac:SubInvoiceLine/cac:SubInvoiceLine/cac:Price/cbc:BaseQuantity": [
+    "BT-149"
+   ],
+   "/Invoice/cac:InvoiceLine/cac:SubInvoiceLine/cac:SubInvoiceLine/cac:Price/cbc:BaseQuantity/@unitCode": [
+    "BT-150"
+   ],
+   "/Invoice/cac:InvoiceLine/cac:SubInvoiceLine/cac:SubInvoiceLine/cac:Price/cbc:PriceAmount": [
+    "BT-146"
+   ],
+   "/Invoice/cac:InvoiceLine/cac:SubInvoiceLine/cac:SubInvoiceLine/cac:SubInvoiceLine": [
+    "BG-DEX-01"
+   ],
+   "/Invoice/cac:InvoiceLine/cac:SubInvoiceLine/cac:SubInvoiceLine/cac:SubInvoiceLine/cac:Item": [
+    "BG-DEX-02"
+   ],
+   "/Invoice/cac:InvoiceLine/cac:SubInvoiceLine/cac:SubInvoiceLine/cac:SubInvoiceLine/cac:Item/cac:ClassifiedTaxCategory": [
+    "BG-DEX-06"
+   ],
+   "/Invoice/cac:InvoiceLine/cac:SubInvoiceLine/cac:SubInvoiceLine/cac:SubInvoiceLine/cac:Item/cac:ClassifiedTaxCategory/cbc:ID": [
+    "BT-151"
+   ],
+   "/Invoice/cac:InvoiceLine/cac:SubInvoiceLine/cac:SubInvoiceLine/cac:SubInvoiceLine/cac:Item/cac:ClassifiedTaxCategory/cbc:Percent": [
+    "BT-152"
+   ],
+   "/Invoice/cac:InvoiceLine/cac:SubInvoiceLine/cac:SubInvoiceLine/cac:SubInvoiceLine/cac:Item/cbc:Name": [
+    "BT-153"
+   ],
+   "/Invoice/cac:InvoiceLine/cac:SubInvoiceLine/cac:SubInvoiceLine/cac:SubInvoiceLine/cac:Price": [
+    "BG-DEX-07"
+   ],
+   "/Invoice/cac:InvoiceLine/cac:SubInvoiceLine/cac:SubInvoiceLine/cac:SubInvoiceLine/cac:Price/cbc:BaseQuantity": [
+    "BT-149"
+   ],
+   "/Invoice/cac:InvoiceLine/cac:SubInvoiceLine/cac:SubInvoiceLine/cac:SubInvoiceLine/cac:Price/cbc:BaseQuantity/@unitCode": [
+    "BT-150"
+   ],
+   "/Invoice/cac:InvoiceLine/cac:SubInvoiceLine/cac:SubInvoiceLine/cac:SubInvoiceLine/cac:Price/cbc:PriceAmount": [
+    "BT-146"
+   ],
+   "/Invoice/cac:InvoiceLine/cac:SubInvoiceLine/cac:SubInvoiceLine/cac:SubInvoiceLine/cbc:ID": [
+    "BT-126"
+   ],
+   "/Invoice/cac:InvoiceLine/cac:SubInvoiceLine/cac:SubInvoiceLine/cac:SubInvoiceLine/cbc:InvoicedQuantity": [
+    "BT-129"
+   ],
+   "/Invoice/cac:InvoiceLine/cac:SubInvoiceLine/cac:SubInvoiceLine/cac:SubInvoiceLine/cbc:InvoicedQuantity/@unitCode": [
+    "BT-130"
+   ],
+   "/Invoice/cac:InvoiceLine/cac:SubInvoiceLine/cac:SubInvoiceLine/cac:SubInvoiceLine/cbc:LineExtensionAmount": [
+    "BT-131"
+   ],
+   "/Invoice/cac:InvoiceLine/cac:SubInvoiceLine/cac:SubInvoiceLine/cbc:ID": [
+    "BT-126"
+   ],
+   "/Invoice/cac:InvoiceLine/cac:SubInvoiceLine/cac:SubInvoiceLine/cbc:InvoicedQuantity": [
+    "BT-129"
+   ],
+   "/Invoice/cac:InvoiceLine/cac:SubInvoiceLine/cac:SubInvoiceLine/cbc:InvoicedQuantity/@unitCode": [
+    "BT-130"
+   ],
+   "/Invoice/cac:InvoiceLine/cac:SubInvoiceLine/cac:SubInvoiceLine/cbc:LineExtensionAmount": [
+    "BT-131"
+   ],
+   "/Invoice/cac:InvoiceLine/cac:SubInvoiceLine/cbc:ID": [
+    "BT-126"
+   ],
+   "/Invoice/cac:InvoiceLine/cac:SubInvoiceLine/cbc:InvoicedQuantity": [
+    "BT-129"
+   ],
+   "/Invoice/cac:InvoiceLine/cac:SubInvoiceLine/cbc:InvoicedQuantity/@unitCode": [
+    "BT-130"
+   ],
+   "/Invoice/cac:InvoiceLine/cac:SubInvoiceLine/cbc:LineExtensionAmount": [
+    "BT-131"
+   ],
+   "/Invoice/cac:InvoiceLine/cbc:AccountingCost": [
+    "BT-133"
+   ],
+   "/Invoice/cac:InvoiceLine/cbc:ID": [
+    "BT-126"
+   ],
+   "/Invoice/cac:InvoiceLine/cbc:InvoicedQuantity": [
+    "BT-129"
+   ],
+   "/Invoice/cac:InvoiceLine/cbc:InvoicedQuantity/@unitCode": [
+    "BT-130"
+   ],
+   "/Invoice/cac:InvoiceLine/cbc:LineExtensionAmount": [
+    "BT-131"
+   ],
+   "/Invoice/cac:InvoiceLine/cbc:Note": [
+    "BT-127"
+   ],
+   "/Invoice/cac:InvoicePeriod": [
+    "BG-14"
+   ],
+   "/Invoice/cac:InvoicePeriod/cbc:DescriptionCode": [
+    "BT-8"
+   ],
+   "/Invoice/cac:InvoicePeriod/cbc:EndDate": [
+    "BT-74"
+   ],
+   "/Invoice/cac:InvoicePeriod/cbc:StartDate": [
+    "BT-73"
+   ],
+   "/Invoice/cac:LegalMonetaryTotal": [
+    "BG-22"
+   ],
+   "/Invoice/cac:LegalMonetaryTotal/cbc:AllowanceTotalAmount": [
+    "BT-107"
+   ],
+   "/Invoice/cac:LegalMonetaryTotal/cbc:ChargeTotalAmount": [
+    "BT-108"
+   ],
+   "/Invoice/cac:LegalMonetaryTotal/cbc:LineExtensionAmount": [
+    "BT-106"
+   ],
+   "/Invoice/cac:LegalMonetaryTotal/cbc:PayableAmount": [
+    "BT-115"
+   ],
+   "/Invoice/cac:LegalMonetaryTotal/cbc:PayableRoundingAmount": [
+    "BT-114"
+   ],
+   "/Invoice/cac:LegalMonetaryTotal/cbc:PrepaidAmount": [
+    "BT-113"
+   ],
+   "/Invoice/cac:LegalMonetaryTotal/cbc:TaxExclusiveAmount": [
+    "BT-109"
+   ],
+   "/Invoice/cac:LegalMonetaryTotal/cbc:TaxInclusiveAmount": [
+    "BT-112"
+   ],
+   "/Invoice/cac:OrderReference/cbc:ID": [
+    "BT-13"
+   ],
+   "/Invoice/cac:OrderReference/cbc:SalesOrderID": [
+    "BT-14"
+   ],
+   "/Invoice/cac:OriginatorDocumentReference/cbc:ID": [
+    "BT-17"
+   ],
+   "/Invoice/cac:PayeeParty": [
+    "BG-10"
+   ],
+   "/Invoice/cac:PayeeParty/cac:PartyIdentification/cbc:ID": [
+    "BT-60",
+    "BT-90"
+   ],
+   "/Invoice/cac:PayeeParty/cac:PartyLegalEntity/cbc:CompanyID": [
+    "BT-61"
+   ],
+   "/Invoice/cac:PayeeParty/cac:PartyName/cbc:Name": [
+    "BT-59"
+   ],
+   "/Invoice/cac:PaymentMeans/cac:CardAccount": [
+    "BG-18"
+   ],
+   "/Invoice/cac:PaymentMeans/cac:CardAccount/cbc:HolderName": [
+    "BT-88"
+   ],
+   "/Invoice/cac:PaymentMeans/cac:CardAccount/cbc:PrimaryAccountNumberID": [
+    "BT-87"
+   ],
+   "/Invoice/cac:PaymentMeans/cac:PayeeFinancialAccount": [
+    "BG-17"
+   ],
+   "/Invoice/cac:PaymentMeans/cac:PayeeFinancialAccount/cac:FinancialInstitutionBranch/cbc:ID": [
+    "BT-86"
+   ],
+   "/Invoice/cac:PaymentMeans/cac:PayeeFinancialAccount/cbc:ID": [
+    "BT-84"
+   ],
+   "/Invoice/cac:PaymentMeans/cac:PayeeFinancialAccount/cbc:Name": [
+    "BT-85"
+   ],
+   "/Invoice/cac:PaymentMeans/cac:PaymentMandate": [
+    "BG-19"
+   ],
+   "/Invoice/cac:PaymentMeans/cac:PaymentMandate/cac:PayerFinancialAccount/cbc:ID": [
+    "BT-91"
+   ],
+   "/Invoice/cac:PaymentMeans/cac:PaymentMandate/cbc:ID": [
+    "BT-89"
+   ],
+   "/Invoice/cac:PaymentMeans/cbc:PaymentID": [
+    "BT-83"
+   ],
+   "/Invoice/cac:PaymentMeans/cbc:PaymentMeansCode": [
+    "BT-81"
+   ],
+   "/Invoice/cac:PaymentMeans/cbc:PaymentMeansCode/@name": [
+    "BT-82"
+   ],
+   "/Invoice/cac:PaymentTerms/cbc:Note": [
+    "BT-20"
+   ],
+   "/Invoice/cac:PrepaidPayment": [
+    "BG-DEX-09"
+   ],
+   "/Invoice/cac:PrepaidPayment/cbc:ID": [
+    "BT-DEX-001"
+   ],
+   "/Invoice/cac:PrepaidPayment/cbc:InstructionID": [
+    "BT-DEX-003"
+   ],
+   "/Invoice/cac:PrepaidPayment/cbc:PaidAmount": [
+    "BT-DEX-002"
+   ],
+   "/Invoice/cac:ProjectReference/cbc:ID": [
+    "BT-11"
+   ],
+   "/Invoice/cac:ReceiptDocumentReference/cbc:ID": [
+    "BT-15"
+   ],
+   "/Invoice/cac:TaxRepresentativeParty": [
+    "BG-11"
+   ],
+   "/Invoice/cac:TaxRepresentativeParty/cac:PartyName/cbc:Name": [
+    "BT-62"
+   ],
+   "/Invoice/cac:TaxRepresentativeParty/cac:PartyTaxScheme/cbc:CompanyID": [
+    "BT-63"
+   ],
+   "/Invoice/cac:TaxRepresentativeParty/cac:PostalAddress": [
+    "BG-12"
+   ],
+   "/Invoice/cac:TaxRepresentativeParty/cac:PostalAddress/cac:AddressLine/cbc:Line": [
+    "BT-164"
+   ],
+   "/Invoice/cac:TaxRepresentativeParty/cac:PostalAddress/cac:Country/cbc:IdentificationCode": [
+    "BT-69"
+   ],
+   "/Invoice/cac:TaxRepresentativeParty/cac:PostalAddress/cbc:AdditionalStreetName": [
+    "BT-65"
+   ],
+   "/Invoice/cac:TaxRepresentativeParty/cac:PostalAddress/cbc:CityName": [
+    "BT-66"
+   ],
+   "/Invoice/cac:TaxRepresentativeParty/cac:PostalAddress/cbc:CountrySubentity": [
+    "BT-68"
+   ],
+   "/Invoice/cac:TaxRepresentativeParty/cac:PostalAddress/cbc:PostalZone": [
+    "BT-67"
+   ],
+   "/Invoice/cac:TaxRepresentativeParty/cac:PostalAddress/cbc:StreetName": [
+    "BT-64"
+   ],
+   "/Invoice/cac:TaxTotal/cac:TaxSubtotal": [
+    "BG-23"
+   ],
+   "/Invoice/cac:TaxTotal/cac:TaxSubtotal/cac:TaxCategory/cbc:ID": [
+    "BT-118"
+   ],
+   "/Invoice/cac:TaxTotal/cac:TaxSubtotal/cac:TaxCategory/cbc:Percent": [
+    "BT-119"
+   ],
+   "/Invoice/cac:TaxTotal/cac:TaxSubtotal/cac:TaxCategory/cbc:TaxExemptionReason": [
+    "BT-120"
+   ],
+   "/Invoice/cac:TaxTotal/cac:TaxSubtotal/cac:TaxCategory/cbc:TaxExemptionReasonCode": [
+    "BT-121"
+   ],
+   "/Invoice/cac:TaxTotal/cac:TaxSubtotal/cbc:TaxAmount": [
+    "BT-117"
+   ],
+   "/Invoice/cac:TaxTotal/cac:TaxSubtotal/cbc:TaxableAmount": [
+    "BT-116"
+   ],
+   "/Invoice/cac:TaxTotal/cbc:TaxAmount": [
+    "BT-110",
+    "BT-111"
+   ],
+   "/Invoice/cbc:AccountingCost": [
+    "BT-19"
+   ],
+   "/Invoice/cbc:BuyerReference": [
+    "BT-10"
+   ],
+   "/Invoice/cbc:DocumentCurrencyCode": [
+    "BT-5"
+   ],
+   "/Invoice/cbc:DueDate": [
+    "BT-9"
+   ],
+   "/Invoice/cbc:ID": [
+    "BT-1"
+   ],
+   "/Invoice/cbc:InvoiceTypeCode": [
+    "BT-3"
+   ],
+   "/Invoice/cbc:IssueDate": [
+    "BT-2"
+   ],
+   "/Invoice/cbc:Note": [
+    "BT-21",
+    "BT-22"
+   ],
+   "/Invoice/cbc:TaxCurrencyCode": [
+    "BT-6"
+   ],
+   "/Invoice/cbc:TaxPointDate": [
+    "BT-7"
+   ]
+  },
+  "UBL-CreditNote": {
+   "/CreditNote/cac:AccountingCustomerParty": [
+    "BG-7"
+   ],
+   "/CreditNote/cac:AccountingCustomerParty/cac:Party/cac:Contact": [
+    "BG-9"
+   ],
+   "/CreditNote/cac:AccountingCustomerParty/cac:Party/cac:Contact/cbc:ElectronicMail": [
+    "BT-58"
+   ],
+   "/CreditNote/cac:AccountingCustomerParty/cac:Party/cac:Contact/cbc:Name": [
+    "BT-56"
+   ],
+   "/CreditNote/cac:AccountingCustomerParty/cac:Party/cac:Contact/cbc:Telephone": [
+    "BT-57"
+   ],
+   "/CreditNote/cac:AccountingCustomerParty/cac:Party/cac:PartyIdentification/cbc:ID": [
+    "BT-46"
+   ],
+   "/CreditNote/cac:AccountingCustomerParty/cac:Party/cac:PartyLegalEntity/cbc:CompanyID": [
+    "BT-47"
+   ],
+   "/CreditNote/cac:AccountingCustomerParty/cac:Party/cac:PartyLegalEntity/cbc:RegistrationName": [
+    "BT-44"
+   ],
+   "/CreditNote/cac:AccountingCustomerParty/cac:Party/cac:PartyName/cbc:Name": [
+    "BT-45"
+   ],
+   "/CreditNote/cac:AccountingCustomerParty/cac:Party/cac:PartyTaxScheme/cbc:CompanyID": [
+    "BT-48"
+   ],
+   "/CreditNote/cac:AccountingCustomerParty/cac:Party/cac:PostalAddress": [
+    "BG-8"
+   ],
+   "/CreditNote/cac:AccountingCustomerParty/cac:Party/cac:PostalAddress/cac:AddressLine/cbc:Line": [
+    "BT-163"
+   ],
+   "/CreditNote/cac:AccountingCustomerParty/cac:Party/cac:PostalAddress/cac:Country/cbc:IdentificationCode": [
+    "BT-55"
+   ],
+   "/CreditNote/cac:AccountingCustomerParty/cac:Party/cac:PostalAddress/cbc:AdditionalStreetName": [
+    "BT-51"
+   ],
+   "/CreditNote/cac:AccountingCustomerParty/cac:Party/cac:PostalAddress/cbc:CityName": [
+    "BT-52"
+   ],
+   "/CreditNote/cac:AccountingCustomerParty/cac:Party/cac:PostalAddress/cbc:CountrySubentity": [
+    "BT-54"
+   ],
+   "/CreditNote/cac:AccountingCustomerParty/cac:Party/cac:PostalAddress/cbc:PostalZone": [
+    "BT-53"
+   ],
+   "/CreditNote/cac:AccountingCustomerParty/cac:Party/cac:PostalAddress/cbc:StreetName": [
+    "BT-50"
+   ],
+   "/CreditNote/cac:AccountingCustomerParty/cac:Party/cbc:EndpointID": [
+    "BT-49"
+   ],
+   "/CreditNote/cac:AccountingSupplierParty": [
+    "BG-4"
+   ],
+   "/CreditNote/cac:AccountingSupplierParty/cac:Party/cac:Contact": [
+    "BG-6"
+   ],
+   "/CreditNote/cac:AccountingSupplierParty/cac:Party/cac:Contact/cbc:ElectronicMail": [
+    "BT-43"
+   ],
+   "/CreditNote/cac:AccountingSupplierParty/cac:Party/cac:Contact/cbc:Name": [
+    "BT-41"
+   ],
+   "/CreditNote/cac:AccountingSupplierParty/cac:Party/cac:Contact/cbc:Telephone": [
+    "BT-42"
+   ],
+   "/CreditNote/cac:AccountingSupplierParty/cac:Party/cac:PartyIdentification/cbc:ID": [
+    "BT-29",
+    "BT-90"
+   ],
+   "/CreditNote/cac:AccountingSupplierParty/cac:Party/cac:PartyLegalEntity/cbc:CompanyID": [
+    "BT-30"
+   ],
+   "/CreditNote/cac:AccountingSupplierParty/cac:Party/cac:PartyLegalEntity/cbc:CompanyLegalForm": [
+    "BT-33"
+   ],
+   "/CreditNote/cac:AccountingSupplierParty/cac:Party/cac:PartyLegalEntity/cbc:RegistrationName": [
+    "BT-27"
+   ],
+   "/CreditNote/cac:AccountingSupplierParty/cac:Party/cac:PartyName/cbc:Name": [
+    "BT-28"
+   ],
+   "/CreditNote/cac:AccountingSupplierParty/cac:Party/cac:PartyTaxScheme/cbc:CompanyID": [
+    "BT-31",
+    "BT-32"
+   ],
+   "/CreditNote/cac:AccountingSupplierParty/cac:Party/cac:PostalAddress": [
+    "BG-5"
+   ],
+   "/CreditNote/cac:AccountingSupplierParty/cac:Party/cac:PostalAddress/cac:AddressLine/cbc:Line": [
+    "BT-162"
+   ],
+   "/CreditNote/cac:AccountingSupplierParty/cac:Party/cac:PostalAddress/cac:Country/cbc:IdentificationCode": [
+    "BT-40"
+   ],
+   "/CreditNote/cac:AccountingSupplierParty/cac:Party/cac:PostalAddress/cbc:AdditionalStreetName": [
+    "BT-36"
+   ],
+   "/CreditNote/cac:AccountingSupplierParty/cac:Party/cac:PostalAddress/cbc:CityName": [
+    "BT-37"
+   ],
+   "/CreditNote/cac:AccountingSupplierParty/cac:Party/cac:PostalAddress/cbc:CountrySubentity": [
+    "BT-39"
+   ],
+   "/CreditNote/cac:AccountingSupplierParty/cac:Party/cac:PostalAddress/cbc:PostalZone": [
+    "BT-38"
+   ],
+   "/CreditNote/cac:AccountingSupplierParty/cac:Party/cac:PostalAddress/cbc:StreetName": [
+    "BT-35"
+   ],
+   "/CreditNote/cac:AccountingSupplierParty/cac:Party/cbc:EndpointID": [
+    "BT-34"
+   ],
+   "/CreditNote/cac:AdditionalDocumentReference": [
+    "BG-24"
+   ],
+   "/CreditNote/cac:AdditionalDocumentReference/cac:Attachment/cac:ExternalReference/cbc:URI": [
+    "BT-124"
+   ],
+   "/CreditNote/cac:AdditionalDocumentReference/cac:Attachment/cbc:EmbeddedDocumentBinaryObject": [
+    "BT-125"
+   ],
+   "/CreditNote/cac:AdditionalDocumentReference/cbc:DocumentDescription": [
+    "BT-123"
+   ],
+   "/CreditNote/cac:AdditionalDocumentReference/cbc:ID": [
+    "BT-11",
+    "BT-18",
+    "BT-122"
+   ],
+   "/CreditNote/cac:AllowanceCharge": [
+    "BG-20",
+    "BG-21"
+   ],
+   "/CreditNote/cac:AllowanceCharge/cac:TaxCategory/cbc:ID": [
+    "BT-95",
+    "BT-102"
+   ],
+   "/CreditNote/cac:AllowanceCharge/cac:TaxCategory/cbc:Percent": [
+    "BT-96",
+    "BT-103"
+   ],
+   "/CreditNote/cac:AllowanceCharge/cbc:AllowanceChargeReason": [
+    "BT-97",
+    "BT-104"
+   ],
+   "/CreditNote/cac:AllowanceCharge/cbc:AllowanceChargeReasonCode": [
+    "BT-98",
+    "BT-105"
+   ],
+   "/CreditNote/cac:AllowanceCharge/cbc:Amount": [
+    "BT-92",
+    "BT-99"
+   ],
+   "/CreditNote/cac:AllowanceCharge/cbc:BaseAmount": [
+    "BT-93",
+    "BT-100"
+   ],
+   "/CreditNote/cac:AllowanceCharge/cbc:MultiplierFactorNumeric": [
+    "BT-94",
+    "BT-101"
+   ],
+   "/CreditNote/cac:BillingReference/cac:InvoiceDocumentReference": [
+    "BG-3"
+   ],
+   "/CreditNote/cac:BillingReference/cac:InvoiceDocumentReference/cbc:ID": [
+    "BT-25"
+   ],
+   "/CreditNote/cac:BillingReference/cac:InvoiceDocumentReference/cbc:IssueDate": [
+    "BT-26"
+   ],
+   "/CreditNote/cac:ContractDocumentReference/cbc:ID": [
+    "BT-12"
+   ],
+   "/CreditNote/cac:CreditNoteLine": [
+    "BG-25"
+   ],
+   "/CreditNote/cac:CreditNoteLine/cac:AllowanceCharge": [
+    "BG-27",
+    "BG-28"
+   ],
+   "/CreditNote/cac:CreditNoteLine/cac:AllowanceCharge/cbc:AllowanceChargeReason": [
+    "BT-139",
+    "BT-144"
+   ],
+   "/CreditNote/cac:CreditNoteLine/cac:AllowanceCharge/cbc:AllowanceChargeReasonCode": [
+    "BT-140",
+    "BT-145"
+   ],
+   "/CreditNote/cac:CreditNoteLine/cac:AllowanceCharge/cbc:Amount": [
+    "BT-136",
+    "BT-141"
+   ],
+   "/CreditNote/cac:CreditNoteLine/cac:AllowanceCharge/cbc:BaseAmount": [
+    "BT-137",
+    "BT-142"
+   ],
+   "/CreditNote/cac:CreditNoteLine/cac:AllowanceCharge/cbc:MultiplierFactorNumeric": [
+    "BT-138",
+    "BT-143"
+   ],
+   "/CreditNote/cac:CreditNoteLine/cac:DocumentReference/cbc:ID": [
+    "BT-128"
+   ],
+   "/CreditNote/cac:CreditNoteLine/cac:InvoicePeriod": [
+    "BG-26"
+   ],
+   "/CreditNote/cac:CreditNoteLine/cac:InvoicePeriod/cbc:EndDate": [
+    "BT-135"
+   ],
+   "/CreditNote/cac:CreditNoteLine/cac:InvoicePeriod/cbc:StartDate": [
+    "BT-134"
+   ],
+   "/CreditNote/cac:CreditNoteLine/cac:Item": [
+    "BG-31"
+   ],
+   "/CreditNote/cac:CreditNoteLine/cac:Item/cac:AdditionalItemProperty": [
+    "BG-32"
+   ],
+   "/CreditNote/cac:CreditNoteLine/cac:Item/cac:AdditionalItemProperty/cbc:Name": [
+    "BT-160"
+   ],
+   "/CreditNote/cac:CreditNoteLine/cac:Item/cac:AdditionalItemProperty/cbc:Value": [
+    "BT-161"
+   ],
+   "/CreditNote/cac:CreditNoteLine/cac:Item/cac:BuyersItemIdentification/cbc:ID": [
+    "BT-156"
+   ],
+   "/CreditNote/cac:CreditNoteLine/cac:Item/cac:ClassifiedTaxCategory": [
+    "BG-30"
+   ],
+   "/CreditNote/cac:CreditNoteLine/cac:Item/cac:ClassifiedTaxCategory/cbc:ID": [
+    "BT-151"
+   ],
+   "/CreditNote/cac:CreditNoteLine/cac:Item/cac:ClassifiedTaxCategory/cbc:Percent": [
+    "BT-152"
+   ],
+   "/CreditNote/cac:CreditNoteLine/cac:Item/cac:CommodityClassification/cbc:ItemClassificationCode": [
+    "BT-158"
+   ],
+   "/CreditNote/cac:CreditNoteLine/cac:Item/cac:OriginCountry/cbc:IdentificationCode": [
+    "BT-159"
+   ],
+   "/CreditNote/cac:CreditNoteLine/cac:Item/cac:SellersItemIdentification/cbc:ID": [
+    "BT-155"
+   ],
+   "/CreditNote/cac:CreditNoteLine/cac:Item/cac:StandardItemIdentification/cbc:ID": [
+    "BT-157"
+   ],
+   "/CreditNote/cac:CreditNoteLine/cac:Item/cbc:Description": [
+    "BT-154"
+   ],
+   "/CreditNote/cac:CreditNoteLine/cac:Item/cbc:Name": [
+    "BT-153"
+   ],
+   "/CreditNote/cac:CreditNoteLine/cac:OrderLineReference/cbc:LineID": [
+    "BT-132"
+   ],
+   "/CreditNote/cac:CreditNoteLine/cac:Price": [
+    "BG-29"
+   ],
+   "/CreditNote/cac:CreditNoteLine/cac:Price/cac:AllowanceCharge/cbc:Amount": [
+    "BT-147"
+   ],
+   "/CreditNote/cac:CreditNoteLine/cac:Price/cac:AllowanceCharge/cbc:BaseAmount": [
+    "BT-148"
+   ],
+   "/CreditNote/cac:CreditNoteLine/cac:Price/cbc:BaseQuantity": [
+    "BT-149"
+   ],
+   "/CreditNote/cac:CreditNoteLine/cac:Price/cbc:BaseQuantity/@unitCode": [
+    "BT-150"
+   ],
+   "/CreditNote/cac:CreditNoteLine/cac:Price/cbc:PriceAmount": [
+    "BT-146"
+   ],
+   "/CreditNote/cac:CreditNoteLine/cbc:AccountingCost": [
+    "BT-133"
+   ],
+   "/CreditNote/cac:CreditNoteLine/cbc:CreditedQuantity": [
+    "BT-129"
+   ],
+   "/CreditNote/cac:CreditNoteLine/cbc:CreditedQuantity/@unitCode": [
+    "BT-130"
+   ],
+   "/CreditNote/cac:CreditNoteLine/cbc:ID": [
+    "BT-126"
+   ],
+   "/CreditNote/cac:CreditNoteLine/cbc:LineExtensionAmount": [
+    "BT-131"
+   ],
+   "/CreditNote/cac:CreditNoteLine/cbc:Note": [
+    "BT-127"
+   ],
+   "/CreditNote/cac:Delivery": [
+    "BG-13"
+   ],
+   "/CreditNote/cac:Delivery/cac:DeliveryLocation/cac:Address": [
+    "BG-15"
+   ],
+   "/CreditNote/cac:Delivery/cac:DeliveryLocation/cac:Address/cac:AddressLine/cbc:Line": [
+    "BT-165"
+   ],
+   "/CreditNote/cac:Delivery/cac:DeliveryLocation/cac:Address/cac:Country/cbc:IdentificationCode": [
+    "BT-80"
+   ],
+   "/CreditNote/cac:Delivery/cac:DeliveryLocation/cac:Address/cbc:AdditionalStreetName": [
+    "BT-76"
+   ],
+   "/CreditNote/cac:Delivery/cac:DeliveryLocation/cac:Address/cbc:CityName": [
+    "BT-77"
+   ],
+   "/CreditNote/cac:Delivery/cac:DeliveryLocation/cac:Address/cbc:CountrySubentity": [
+    "BT-79"
+   ],
+   "/CreditNote/cac:Delivery/cac:DeliveryLocation/cac:Address/cbc:PostalZone": [
+    "BT-78"
+   ],
+   "/CreditNote/cac:Delivery/cac:DeliveryLocation/cac:Address/cbc:StreetName": [
+    "BT-75"
+   ],
+   "/CreditNote/cac:Delivery/cac:DeliveryLocation/cbc:ID": [
+    "BT-71"
+   ],
+   "/CreditNote/cac:Delivery/cac:DeliveryParty/cac:PartyName/cbc:Name": [
+    "BT-70"
+   ],
+   "/CreditNote/cac:Delivery/cbc:ActualDeliveryDate": [
+    "BT-72"
+   ],
+   "/CreditNote/cac:DespatchDocumentReference/cbc:ID": [
+    "BT-16"
+   ],
+   "/CreditNote/cac:InvoicePeriod": [
+    "BG-14"
+   ],
+   "/CreditNote/cac:InvoicePeriod/cbc:EndDate": [
+    "BT-74"
+   ],
+   "/CreditNote/cac:InvoicePeriod/cbc:StartDate": [
+    "BT-73"
+   ],
+   "/CreditNote/cac:LegalMonetaryTotal": [
+    "BG-22"
+   ],
+   "/CreditNote/cac:LegalMonetaryTotal/cbc:AllowanceTotalAmount": [
+    "BT-107"
+   ],
+   "/CreditNote/cac:LegalMonetaryTotal/cbc:ChargeTotalAmount": [
+    "BT-108"
+   ],
+   "/CreditNote/cac:LegalMonetaryTotal/cbc:LineExtensionAmount": [
+    "BT-106"
+   ],
+   "/CreditNote/cac:LegalMonetaryTotal/cbc:PayableAmount": [
+    "BT-115"
+   ],
+   "/CreditNote/cac:LegalMonetaryTotal/cbc:PayableRoundingAmount": [
+    "BT-114"
+   ],
+   "/CreditNote/cac:LegalMonetaryTotal/cbc:PrepaidAmount": [
+    "BT-113"
+   ],
+   "/CreditNote/cac:LegalMonetaryTotal/cbc:TaxExclusiveAmount": [
+    "BT-109"
+   ],
+   "/CreditNote/cac:LegalMonetaryTotal/cbc:TaxInclusiveAmount": [
+    "BT-112"
+   ],
+   "/CreditNote/cac:OrderReference/cbc:ID": [
+    "BT-13"
+   ],
+   "/CreditNote/cac:OrderReference/cbc:SalesOrderID": [
+    "BT-14"
+   ],
+   "/CreditNote/cac:OriginatorDocumentReference/cbc:ID": [
+    "BT-17"
+   ],
+   "/CreditNote/cac:PayeeParty": [
+    "BG-10"
+   ],
+   "/CreditNote/cac:PayeeParty/cac:PartyIdentification/cbc:ID": [
+    "BT-60",
+    "BT-90"
+   ],
+   "/CreditNote/cac:PayeeParty/cac:PartyLegalEntity/cbc:CompanyID": [
+    "BT-61"
+   ],
+   "/CreditNote/cac:PayeeParty/cac:PartyName/cbc:Name": [
+    "BT-59"
+   ],
+   "/CreditNote/cac:PaymentMeans/cac:CardAccount": [
+    "BG-18"
+   ],
+   "/CreditNote/cac:PaymentMeans/cac:CardAccount/cbc:HolderName": [
+    "BT-88"
+   ],
+   "/CreditNote/cac:PaymentMeans/cac:CardAccount/cbc:PrimaryAccountNumberID": [
+    "BT-87"
+   ],
+   "/CreditNote/cac:PaymentMeans/cac:PayeeFinancialAccount": [
+    "BG-17"
+   ],
+   "/CreditNote/cac:PaymentMeans/cac:PayeeFinancialAccount/cac:FinancialInstitutionBranch/cbc:ID": [
+    "BT-86"
+   ],
+   "/CreditNote/cac:PaymentMeans/cac:PayeeFinancialAccount/cbc:ID": [
+    "BT-84"
+   ],
+   "/CreditNote/cac:PaymentMeans/cac:PayeeFinancialAccount/cbc:Name": [
+    "BT-85"
+   ],
+   "/CreditNote/cac:PaymentMeans/cac:PaymentMandate": [
+    "BG-19"
+   ],
+   "/CreditNote/cac:PaymentMeans/cac:PaymentMandate/cac:PayerFinancialAccount/cbc:ID": [
+    "BT-91"
+   ],
+   "/CreditNote/cac:PaymentMeans/cac:PaymentMandate/cbc:ID": [
+    "BT-89"
+   ],
+   "/CreditNote/cac:PaymentMeans/cbc:PaymentDueDate": [
+    "BT-9"
+   ],
+   "/CreditNote/cac:PaymentMeans/cbc:PaymentID": [
+    "BT-83"
+   ],
+   "/CreditNote/cac:PaymentMeans/cbc:PaymentMeansCode": [
+    "BT-81"
+   ],
+   "/CreditNote/cac:PaymentMeans/cbc:PaymentMeansCode/@name": [
+    "BT-82"
+   ],
+   "/CreditNote/cac:PaymentTerms/cbc:Note": [
+    "BT-20"
+   ],
+   "/CreditNote/cac:ReceiptDocumentReference/cbc:ID": [
+    "BT-15"
+   ],
+   "/CreditNote/cac:TaxRepresentativeParty": [
+    "BG-11"
+   ],
+   "/CreditNote/cac:TaxRepresentativeParty/cac:PartyName/cbc:Name": [
+    "BT-62"
+   ],
+   "/CreditNote/cac:TaxRepresentativeParty/cac:PartyTaxScheme/cbc:CompanyID": [
+    "BT-63"
+   ],
+   "/CreditNote/cac:TaxRepresentativeParty/cac:PostalAddress": [
+    "BG-12"
+   ],
+   "/CreditNote/cac:TaxRepresentativeParty/cac:PostalAddress/cac:AddressLine/cbc:Line": [
+    "BT-164"
+   ],
+   "/CreditNote/cac:TaxRepresentativeParty/cac:PostalAddress/cac:Country/cbc:IdentificationCode": [
+    "BT-69"
+   ],
+   "/CreditNote/cac:TaxRepresentativeParty/cac:PostalAddress/cbc:AdditionalStreetName": [
+    "BT-65"
+   ],
+   "/CreditNote/cac:TaxRepresentativeParty/cac:PostalAddress/cbc:CityName": [
+    "BT-66"
+   ],
+   "/CreditNote/cac:TaxRepresentativeParty/cac:PostalAddress/cbc:CountrySubentity": [
+    "BT-68"
+   ],
+   "/CreditNote/cac:TaxRepresentativeParty/cac:PostalAddress/cbc:PostalZone": [
+    "BT-67"
+   ],
+   "/CreditNote/cac:TaxRepresentativeParty/cac:PostalAddress/cbc:StreetName": [
+    "BT-64"
+   ],
+   "/CreditNote/cac:TaxTotal/cac:TaxSubtotal": [
+    "BG-23"
+   ],
+   "/CreditNote/cac:TaxTotal/cac:TaxSubtotal/cac:TaxCategory/cbc:ID": [
+    "BT-118"
+   ],
+   "/CreditNote/cac:TaxTotal/cac:TaxSubtotal/cac:TaxCategory/cbc:Percent": [
+    "BT-119"
+   ],
+   "/CreditNote/cac:TaxTotal/cac:TaxSubtotal/cac:TaxCategory/cbc:TaxExemptionReason": [
+    "BT-120"
+   ],
+   "/CreditNote/cac:TaxTotal/cac:TaxSubtotal/cac:TaxCategory/cbc:TaxExemptionReasonCode": [
+    "BT-121"
+   ],
+   "/CreditNote/cac:TaxTotal/cac:TaxSubtotal/cbc:TaxAmount": [
+    "BT-117"
+   ],
+   "/CreditNote/cac:TaxTotal/cac:TaxSubtotal/cbc:TaxableAmount": [
+    "BT-116"
+   ],
+   "/CreditNote/cac:TaxTotal/cbc:TaxAmount": [
+    "BT-110",
+    "BT-111"
+   ],
+   "/CreditNote/cbc:AccountingCost": [
+    "BT-19"
+   ],
+   "/CreditNote/cbc:BuyerReference": [
+    "BT-10"
+   ],
+   "/CreditNote/cbc:CreditNoteTypeCode": [
+    "BT-3"
+   ],
+   "/CreditNote/cbc:DocumentCurrencyCode": [
+    "BT-5"
+   ],
+   "/CreditNote/cbc:ID": [
+    "BT-1"
+   ],
+   "/CreditNote/cbc:IssueDate": [
+    "BT-2"
+   ],
+   "/CreditNote/cbc:Note": [
+    "BT-22"
+   ],
+   "/CreditNote/cbc:TaxCurrencyCode": [
+    "BT-6"
+   ],
+   "/CreditNote/cbc:TaxPointDate": [
+    "BT-7"
+   ]
+  },
+  "CII": {
+   "/rsm:CrossIndustryInvoice/rsm:ExchangedDocument/ram:ID": [
+    "BT-1"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:ExchangedDocument/ram:IncludedNote": [
+    "BG-1"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:ExchangedDocument/ram:IncludedNote/ram:Content": [
+    "BT-22"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:ExchangedDocument/ram:IncludedNote/ram:SubjectCode": [
+    "BT-21"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:ExchangedDocument/ram:IssueDateTime/udt:DateTimeString": [
+    "BT-2"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:ExchangedDocument/ram:TypeCode": [
+    "BT-3"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:ExchangedDocumentContext": [
+    "BG-2"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:ExchangedDocumentContext/ram:BusinessProcessSpecifiedDocumentContextParameter/ram:ID": [
+    "BT-23"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:ExchangedDocumentContext/ram:GuidelineSpecifiedDocumentContextParameter/ram:ID": [
+    "BT-24"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:AdditionalReferencedDocument": [
+    "BG-24"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:AdditionalReferencedDocument/ram:AttachmentBinaryObject": [
+    "BT-125"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:AdditionalReferencedDocument/ram:IssuerAssignedID": [
+    "BT-17",
+    "BT-18",
+    "BT-122"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:AdditionalReferencedDocument/ram:Name": [
+    "BT-123"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:AdditionalReferencedDocument/ram:URIID": [
+    "BT-124"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:BuyerOrderReferencedDocument/ram:IssuerAssignedID": [
+    "BT-13"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:BuyerReference": [
+    "BT-10"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:BuyerTradeParty": [
+    "BG-7"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:BuyerTradeParty/ram:DefinedTradeContact": [
+    "BG-9"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:BuyerTradeParty/ram:DefinedTradeContact/ram:DepartmentName": [
+    "BT-56"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:BuyerTradeParty/ram:DefinedTradeContact/ram:EmailURIUniversalCommunication/ram:URIID": [
+    "BT-58"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:BuyerTradeParty/ram:DefinedTradeContact/ram:PersonName": [
+    "BT-56"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:BuyerTradeParty/ram:DefinedTradeContact/ram:TelephoneUniversalCommunication/ram:CompleteNumber": [
+    "BT-57"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:BuyerTradeParty/ram:GlobalID": [
+    "BT-46"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:BuyerTradeParty/ram:ID": [
+    "BT-46"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:BuyerTradeParty/ram:Name": [
+    "BT-44"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:BuyerTradeParty/ram:PostalTradeAddress": [
+    "BG-8"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:BuyerTradeParty/ram:PostalTradeAddress/ram:CityName": [
+    "BT-52"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:BuyerTradeParty/ram:PostalTradeAddress/ram:CountryID": [
+    "BT-55"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:BuyerTradeParty/ram:PostalTradeAddress/ram:CountrySubDivisionName": [
+    "BT-54"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:BuyerTradeParty/ram:PostalTradeAddress/ram:LineOne": [
+    "BT-50"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:BuyerTradeParty/ram:PostalTradeAddress/ram:LineThree": [
+    "BT-163"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:BuyerTradeParty/ram:PostalTradeAddress/ram:LineTwo": [
+    "BT-51"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:BuyerTradeParty/ram:PostalTradeAddress/ram:PostcodeCode": [
+    "BT-53"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:BuyerTradeParty/ram:SpecifiedLegalOrganization/ram:ID": [
+    "BT-47"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:BuyerTradeParty/ram:SpecifiedLegalOrganization/ram:TradingBusinessName": [
+    "BT-45"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:BuyerTradeParty/ram:SpecifiedTaxRegistration/ram:ID": [
+    "BT-48"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:BuyerTradeParty/ram:URIUniversalCommunication/ram:URIID": [
+    "BT-49"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:ContractReferencedDocument/ram:IssuerAssignedID": [
+    "BT-12"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:SellerOrderReferencedDocument/ram:IssuerAssignedID": [
+    "BT-14"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:SellerTaxRepresentativeTradeParty": [
+    "BG-11"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:SellerTaxRepresentativeTradeParty/ram:Name": [
+    "BT-62"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:SellerTaxRepresentativeTradeParty/ram:PostalTradeAddress": [
+    "BG-12"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:SellerTaxRepresentativeTradeParty/ram:PostalTradeAddress/ram:CityName": [
+    "BT-66"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:SellerTaxRepresentativeTradeParty/ram:PostalTradeAddress/ram:CountryID": [
+    "BT-69"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:SellerTaxRepresentativeTradeParty/ram:PostalTradeAddress/ram:CountrySubDivisionName": [
+    "BT-68"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:SellerTaxRepresentativeTradeParty/ram:PostalTradeAddress/ram:LineOne": [
+    "BT-64"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:SellerTaxRepresentativeTradeParty/ram:PostalTradeAddress/ram:LineThree": [
+    "BT-164"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:SellerTaxRepresentativeTradeParty/ram:PostalTradeAddress/ram:LineTwo": [
+    "BT-65"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:SellerTaxRepresentativeTradeParty/ram:PostalTradeAddress/ram:PostcodeCode": [
+    "BT-67"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:SellerTaxRepresentativeTradeParty/ram:SpecifiedTaxRegistration/ram:ID": [
+    "BT-63"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:SellerTradeParty": [
+    "BG-4"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:SellerTradeParty/ram:DefinedTradeContact": [
+    "BG-6"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:SellerTradeParty/ram:DefinedTradeContact/ram:DepartmentName": [
+    "BT-41"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:SellerTradeParty/ram:DefinedTradeContact/ram:EmailURIUniversalCommunication/ram:URIID": [
+    "BT-43"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:SellerTradeParty/ram:DefinedTradeContact/ram:PersonName": [
+    "BT-41"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:SellerTradeParty/ram:DefinedTradeContact/ram:TelephoneUniversalCommunication/ram:CompleteNumber": [
+    "BT-42"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:SellerTradeParty/ram:Description": [
+    "BT-33"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:SellerTradeParty/ram:GlobalID": [
+    "BT-29"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:SellerTradeParty/ram:ID": [
+    "BT-29"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:SellerTradeParty/ram:Name": [
+    "BT-27"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:SellerTradeParty/ram:PostalTradeAddress": [
+    "BG-5"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:SellerTradeParty/ram:PostalTradeAddress/ram:CityName": [
+    "BT-37"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:SellerTradeParty/ram:PostalTradeAddress/ram:CountryID": [
+    "BT-40"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:SellerTradeParty/ram:PostalTradeAddress/ram:CountrySubDivisionName": [
+    "BT-39"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:SellerTradeParty/ram:PostalTradeAddress/ram:LineOne": [
+    "BT-35"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:SellerTradeParty/ram:PostalTradeAddress/ram:LineThree": [
+    "BT-162"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:SellerTradeParty/ram:PostalTradeAddress/ram:LineTwo": [
+    "BT-36"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:SellerTradeParty/ram:PostalTradeAddress/ram:PostcodeCode": [
+    "BT-38"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:SellerTradeParty/ram:SpecifiedLegalOrganization/ram:ID": [
+    "BT-30"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:SellerTradeParty/ram:SpecifiedLegalOrganization/ram:TradingBusinessName": [
+    "BT-28"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:SellerTradeParty/ram:SpecifiedTaxRegistration/ram:ID": [
+    "BT-31",
+    "BT-32"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:SellerTradeParty/ram:URIUniversalCommunication/ram:URIID": [
+    "BT-34"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:SpecifiedProcuringProject/ram:ID": [
+    "BT-11"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeDelivery/ram:ActualDeliverySupplyChainEvent/ram:OccurrenceDateTime/udt:DateTimeString": [
+    "BT-72"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeDelivery/ram:DespatchAdviceReferencedDocument/ram:IssuerAssignedID": [
+    "BT-16"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeDelivery/ram:ReceivingAdviceReferencedDocument/ram:IssuerAssignedID": [
+    "BT-15"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeDelivery/ram:ShipToTradeParty/ram:GlobalID": [
+    "BT-71"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeDelivery/ram:ShipToTradeParty/ram:ID": [
+    "BT-71"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeDelivery/ram:ShipToTradeParty/ram:Name": [
+    "BT-70"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeDelivery/ram:ShipToTradeParty/ram:PostalTradeAddress": [
+    "BG-15"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeDelivery/ram:ShipToTradeParty/ram:PostalTradeAddress/ram:CityName": [
+    "BT-77"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeDelivery/ram:ShipToTradeParty/ram:PostalTradeAddress/ram:CountryID": [
+    "BT-80"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeDelivery/ram:ShipToTradeParty/ram:PostalTradeAddress/ram:CountrySubDivisionName": [
+    "BT-79"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeDelivery/ram:ShipToTradeParty/ram:PostalTradeAddress/ram:LineOne": [
+    "BT-75"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeDelivery/ram:ShipToTradeParty/ram:PostalTradeAddress/ram:LineThree": [
+    "BT-165"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeDelivery/ram:ShipToTradeParty/ram:PostalTradeAddress/ram:LineTwo": [
+    "BT-76"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeDelivery/ram:ShipToTradeParty/ram:PostalTradeAddress/ram:PostcodeCode": [
+    "BT-78"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:ApplicableTradeTax": [
+    "BG-23"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:ApplicableTradeTax/ram:BasisAmount": [
+    "BT-116"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:ApplicableTradeTax/ram:CalculatedAmount": [
+    "BT-117"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:ApplicableTradeTax/ram:CategoryCode": [
+    "BT-118"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:ApplicableTradeTax/ram:DueDateTypeCode": [
+    "BT-8"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:ApplicableTradeTax/ram:ExemptionReason": [
+    "BT-120"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:ApplicableTradeTax/ram:ExemptionReasonCode": [
+    "BT-121"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:ApplicableTradeTax/ram:RateApplicablePercent": [
+    "BT-119"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:ApplicableTradeTax/ram:TaxPointDate/udt:DateString": [
+    "BT-7"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:BillingSpecifiedPeriod": [
+    "BG-14"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:BillingSpecifiedPeriod/ram:EndDateTime/udt:DateTimeString": [
+    "BT-74"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:BillingSpecifiedPeriod/ram:StartDateTime/udt:DateTimeString": [
+    "BT-73"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:CreditorReferenceID": [
+    "BT-90"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:InvoiceCurrencyCode": [
+    "BT-5"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:InvoiceReferencedDocument": [
+    "BG-3"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:InvoiceReferencedDocument/ram:FormattedIssueDateTime/qdt:DateTimeString": [
+    "BT-26"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:InvoiceReferencedDocument/ram:IssuerAssignedID": [
+    "BT-25"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:PayeeTradeParty": [
+    "BG-10"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:PayeeTradeParty/ram:GlobalID": [
+    "BT-60"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:PayeeTradeParty/ram:ID": [
+    "BT-60"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:PayeeTradeParty/ram:Name": [
+    "BT-59"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:PayeeTradeParty/ram:SpecifiedLegalOrganization/ram:ID": [
+    "BT-61"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:PaymentReference": [
+    "BT-83"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:ReceivableSpecifiedTradeAccountingAccount/ram:ID": [
+    "BT-19"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:SpecifiedTradeAllowanceCharge": [
+    "BG-20",
+    "BG-21"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:SpecifiedTradeAllowanceCharge/ram:ActualAmount": [
+    "BT-92",
+    "BT-99"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:SpecifiedTradeAllowanceCharge/ram:BasisAmount": [
+    "BT-93",
+    "BT-100"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:SpecifiedTradeAllowanceCharge/ram:CalculationPercent": [
+    "BT-94",
+    "BT-101"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:SpecifiedTradeAllowanceCharge/ram:CategoryTradeTax/ram:CategoryCode": [
+    "BT-95",
+    "BT-102"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:SpecifiedTradeAllowanceCharge/ram:CategoryTradeTax/ram:RateApplicablePercent": [
+    "BT-96",
+    "BT-103"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:SpecifiedTradeAllowanceCharge/ram:Reason": [
+    "BT-97",
+    "BT-104"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:SpecifiedTradeAllowanceCharge/ram:ReasonCode": [
+    "BT-98",
+    "BT-105"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:SpecifiedTradePaymentTerms/ram:Description": [
+    "BT-20"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:SpecifiedTradePaymentTerms/ram:DirectDebitMandateID": [
+    "BT-89"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:SpecifiedTradePaymentTerms/ram:DueDateDateTime": [
+    "BT-9"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:SpecifiedTradeSettlementHeaderMonetarySummation": [
+    "BG-22"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:SpecifiedTradeSettlementHeaderMonetarySummation/ram:AllowanceTotalAmount": [
+    "BT-107"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:SpecifiedTradeSettlementHeaderMonetarySummation/ram:ChargeTotalAmount": [
+    "BT-108"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:SpecifiedTradeSettlementHeaderMonetarySummation/ram:DuePayableAmount": [
+    "BT-115"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:SpecifiedTradeSettlementHeaderMonetarySummation/ram:GrandTotalAmount": [
+    "BT-112"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:SpecifiedTradeSettlementHeaderMonetarySummation/ram:LineTotalAmount": [
+    "BT-106"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:SpecifiedTradeSettlementHeaderMonetarySummation/ram:RoundingAmount": [
+    "BT-114"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:SpecifiedTradeSettlementHeaderMonetarySummation/ram:TaxBasisTotalAmount": [
+    "BT-109"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:SpecifiedTradeSettlementHeaderMonetarySummation/ram:TaxTotalAmount": [
+    "BT-110",
+    "BT-111"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:SpecifiedTradeSettlementHeaderMonetarySummation/ram:TotalPrepaidAmount": [
+    "BT-113"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:SpecifiedTradeSettlementPaymentMeans": [
+    "BG-16"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:SpecifiedTradeSettlementPaymentMeans/ram:ApplicableTradeSettlementFinancialCard": [
+    "BG-18"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:SpecifiedTradeSettlementPaymentMeans/ram:ApplicableTradeSettlementFinancialCard/ram:CardholderName": [
+    "BT-88"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:SpecifiedTradeSettlementPaymentMeans/ram:ApplicableTradeSettlementFinancialCard/ram:ID": [
+    "BT-87"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:SpecifiedTradeSettlementPaymentMeans/ram:Information": [
+    "BT-82"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:SpecifiedTradeSettlementPaymentMeans/ram:PayeePartyCreditorFinancialAccount": [
+    "BG-17"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:SpecifiedTradeSettlementPaymentMeans/ram:PayeePartyCreditorFinancialAccount/ram:AccountName": [
+    "BT-85"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:SpecifiedTradeSettlementPaymentMeans/ram:PayeePartyCreditorFinancialAccount/ram:IBANID": [
+    "BT-84"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:SpecifiedTradeSettlementPaymentMeans/ram:PayeePartyCreditorFinancialAccount/ram:ProprietaryID": [
+    "BT-84"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:SpecifiedTradeSettlementPaymentMeans/ram:PayeeSpecifiedCreditorFinancialInstitution/ram:BICID": [
+    "BT-86"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:SpecifiedTradeSettlementPaymentMeans/ram:PayerPartyDebtorFinancialAccount/ram:IBANID": [
+    "BT-91"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:SpecifiedTradeSettlementPaymentMeans/ram:TypeCode": [
+    "BT-81"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:TaxCurrencyCode": [
+    "BT-6"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:IncludedSupplyChainTradeLineItem": [
+    "BG-25"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:IncludedSupplyChainTradeLineItem/ram:AssociatedDocumentLineDocument/ram:IncludedNote/ram:Content": [
+    "BT-127"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:IncludedSupplyChainTradeLineItem/ram:AssociatedDocumentLineDocument/ram:LineID": [
+    "BT-126"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:IncludedSupplyChainTradeLineItem/ram:SpecifiedLineTradeAgreement": [
+    "BG-29"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:IncludedSupplyChainTradeLineItem/ram:SpecifiedLineTradeAgreement/ram:BuyerOrderReferencedDocument/ram:LineID": [
+    "BT-132"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:IncludedSupplyChainTradeLineItem/ram:SpecifiedLineTradeAgreement/ram:GrossPriceProductTradePrice/ram:AppliedTradeAllowanceCharge/ram:ActualAmount": [
+    "BT-147"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:IncludedSupplyChainTradeLineItem/ram:SpecifiedLineTradeAgreement/ram:GrossPriceProductTradePrice/ram:BasisQuantity": [
+    "BT-149"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:IncludedSupplyChainTradeLineItem/ram:SpecifiedLineTradeAgreement/ram:GrossPriceProductTradePrice/ram:BasisQuantity/@unitCode": [
+    "BT-150"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:IncludedSupplyChainTradeLineItem/ram:SpecifiedLineTradeAgreement/ram:GrossPriceProductTradePrice/ram:ChargeAmount": [
+    "BT-148"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:IncludedSupplyChainTradeLineItem/ram:SpecifiedLineTradeAgreement/ram:NetPriceProductTradePrice/ram:BasisQuantity": [
+    "BT-149"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:IncludedSupplyChainTradeLineItem/ram:SpecifiedLineTradeAgreement/ram:NetPriceProductTradePrice/ram:BasisQuantity/@unitCode": [
+    "BT-150"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:IncludedSupplyChainTradeLineItem/ram:SpecifiedLineTradeAgreement/ram:NetPriceProductTradePrice/ram:ChargeAmount": [
+    "BT-146"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:IncludedSupplyChainTradeLineItem/ram:SpecifiedLineTradeDelivery/ram:BilledQuantity": [
+    "BT-129"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:IncludedSupplyChainTradeLineItem/ram:SpecifiedLineTradeDelivery/ram:BilledQuantity/@unitCode": [
+    "BT-130"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:IncludedSupplyChainTradeLineItem/ram:SpecifiedLineTradeSettlement/ram:AdditionalReferencedDocument/ram:IssuerAssignedID": [
+    "BT-128"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:IncludedSupplyChainTradeLineItem/ram:SpecifiedLineTradeSettlement/ram:ApplicableTradeTax": [
+    "BG-30"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:IncludedSupplyChainTradeLineItem/ram:SpecifiedLineTradeSettlement/ram:ApplicableTradeTax/ram:CategoryCode": [
+    "BT-151"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:IncludedSupplyChainTradeLineItem/ram:SpecifiedLineTradeSettlement/ram:ApplicableTradeTax/ram:RateApplicablePercent": [
+    "BT-152"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:IncludedSupplyChainTradeLineItem/ram:SpecifiedLineTradeSettlement/ram:BillingSpecifiedPeriod": [
+    "BG-26"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:IncludedSupplyChainTradeLineItem/ram:SpecifiedLineTradeSettlement/ram:BillingSpecifiedPeriod/ram:EndDateTime/udt:DateTimeString": [
+    "BT-135"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:IncludedSupplyChainTradeLineItem/ram:SpecifiedLineTradeSettlement/ram:BillingSpecifiedPeriod/ram:StartDateTime/udt:DateTimeString": [
+    "BT-134"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:IncludedSupplyChainTradeLineItem/ram:SpecifiedLineTradeSettlement/ram:ReceivableSpecifiedTradeAccountingAccount/ram:ID": [
+    "BT-133"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:IncludedSupplyChainTradeLineItem/ram:SpecifiedLineTradeSettlement/ram:SpecifiedTradeAllowanceCharge": [
+    "BG-27",
+    "BG-28"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:IncludedSupplyChainTradeLineItem/ram:SpecifiedLineTradeSettlement/ram:SpecifiedTradeAllowanceCharge/ram:ActualAmount": [
+    "BT-136",
+    "BT-141"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:IncludedSupplyChainTradeLineItem/ram:SpecifiedLineTradeSettlement/ram:SpecifiedTradeAllowanceCharge/ram:BasisAmount": [
+    "BT-137",
+    "BT-142"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:IncludedSupplyChainTradeLineItem/ram:SpecifiedLineTradeSettlement/ram:SpecifiedTradeAllowanceCharge/ram:CalculationPercent": [
+    "BT-138",
+    "BT-143"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:IncludedSupplyChainTradeLineItem/ram:SpecifiedLineTradeSettlement/ram:SpecifiedTradeAllowanceCharge/ram:Reason": [
+    "BT-139",
+    "BT-144"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:IncludedSupplyChainTradeLineItem/ram:SpecifiedLineTradeSettlement/ram:SpecifiedTradeAllowanceCharge/ram:ReasonCode": [
+    "BT-140",
+    "BT-145"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:IncludedSupplyChainTradeLineItem/ram:SpecifiedLineTradeSettlement/ram:SpecifiedTradeSettlementLineMonetarySummation/ram:LineTotalAmount": [
+    "BT-131"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:IncludedSupplyChainTradeLineItem/ram:SpecifiedTradeProduct": [
+    "BG-31"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:IncludedSupplyChainTradeLineItem/ram:SpecifiedTradeProduct/ram:ApplicableProductCharacteristic": [
+    "BG-32"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:IncludedSupplyChainTradeLineItem/ram:SpecifiedTradeProduct/ram:ApplicableProductCharacteristic/ram:Description": [
+    "BT-160"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:IncludedSupplyChainTradeLineItem/ram:SpecifiedTradeProduct/ram:ApplicableProductCharacteristic/ram:Value": [
+    "BT-161"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:IncludedSupplyChainTradeLineItem/ram:SpecifiedTradeProduct/ram:BuyerAssignedID": [
+    "BT-156"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:IncludedSupplyChainTradeLineItem/ram:SpecifiedTradeProduct/ram:Description": [
+    "BT-154"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:IncludedSupplyChainTradeLineItem/ram:SpecifiedTradeProduct/ram:DesignatedProductClassification/ram:ClassCode": [
+    "BT-158"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:IncludedSupplyChainTradeLineItem/ram:SpecifiedTradeProduct/ram:GlobalID": [
+    "BT-157"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:IncludedSupplyChainTradeLineItem/ram:SpecifiedTradeProduct/ram:Name": [
+    "BT-153"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:IncludedSupplyChainTradeLineItem/ram:SpecifiedTradeProduct/ram:OriginTradeCountry/ram:ID": [
+    "BT-159"
+   ],
+   "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:IncludedSupplyChainTradeLineItem/ram:SpecifiedTradeProduct/ram:SellerAssignedID": [
+    "BT-155"
+   ]
+  }
+ },
+ "groups": {
+  "BG-1": [
+   "BT-21",
+   "BT-22"
+  ],
+  "BG-10": [
+   "BT-59",
+   "BT-60",
+   "BT-61"
+  ],
+  "BG-11": [
+   "BT-62",
+   "BT-63",
+   "BG-12"
+  ],
+  "BG-12": [
+   "BT-64",
+   "BT-65",
+   "BT-66",
+   "BT-67",
+   "BT-68",
+   "BT-69",
+   "BT-164"
+  ],
+  "BG-13": [
+   "BT-70",
+   "BT-71",
+   "BT-72",
+   "BG-15"
+  ],
+  "BG-14": [
+   "BT-73",
+   "BT-74"
+  ],
+  "BG-15": [
+   "BT-75",
+   "BT-76",
+   "BT-77",
+   "BT-78",
+   "BT-79",
+   "BT-80",
+   "BT-165"
+  ],
+  "BG-16": [
+   "BT-81",
+   "BT-82",
+   "BT-83",
+   "BG-17",
+   "BG-18",
+   "BG-19"
+  ],
+  "BG-17": [
+   "BT-84",
+   "BT-85",
+   "BT-86"
+  ],
+  "BG-18": [
+   "BT-87",
+   "BT-88"
+  ],
+  "BG-19": [
+   "BT-89",
+   "BT-90",
+   "BT-91"
+  ],
+  "BG-2": [
+   "BT-23",
+   "BT-24"
+  ],
+  "BG-20": [
+   "BT-92",
+   "BT-93",
+   "BT-94",
+   "BT-95",
+   "BT-96",
+   "BT-97",
+   "BT-98"
+  ],
+  "BG-21": [
+   "BT-99",
+   "BT-100",
+   "BT-101",
+   "BT-102",
+   "BT-103",
+   "BT-104",
+   "BT-105"
+  ],
+  "BG-22": [
+   "BT-106",
+   "BT-107",
+   "BT-108",
+   "BT-109",
+   "BT-110",
+   "BT-111",
+   "BT-112",
+   "BT-113",
+   "BT-114",
+   "BT-115"
+  ],
+  "BG-23": [
+   "BT-116",
+   "BT-117",
+   "BT-118",
+   "BT-119",
+   "BT-120",
+   "BT-121"
+  ],
+  "BG-24": [
+   "BT-122",
+   "BT-123",
+   "BT-124",
+   "BT-125"
+  ],
+  "BG-25": [
+   "BT-126",
+   "BT-127",
+   "BT-128",
+   "BT-129",
+   "BT-130",
+   "BT-131",
+   "BT-132",
+   "BT-133",
+   "BG-DEX-01",
+   "BG-26",
+   "BG-27",
+   "BG-28",
+   "BG-29",
+   "BG-30",
+   "BG-31"
+  ],
+  "BG-26": [
+   "BT-134",
+   "BT-135"
+  ],
+  "BG-27": [
+   "BT-136",
+   "BT-137",
+   "BT-138",
+   "BT-139",
+   "BT-140"
+  ],
+  "BG-28": [
+   "BT-141",
+   "BT-142",
+   "BT-143",
+   "BT-144",
+   "BT-145"
+  ],
+  "BG-29": [
+   "BT-146",
+   "BT-147",
+   "BT-148",
+   "BT-149",
+   "BT-150"
+  ],
+  "BG-3": [
+   "BT-25",
+   "BT-26"
+  ],
+  "BG-30": [
+   "BT-151",
+   "BT-152"
+  ],
+  "BG-31": [
+   "BT-153",
+   "BT-154",
+   "BT-155",
+   "BT-156",
+   "BT-157",
+   "BT-158",
+   "BT-159",
+   "BG-32"
+  ],
+  "BG-32": [
+   "BT-160",
+   "BT-161"
+  ],
+  "BG-4": [
+   "BT-27",
+   "BT-28",
+   "BT-29",
+   "BT-30",
+   "BT-31",
+   "BT-32",
+   "BT-33",
+   "BT-34",
+   "BG-5",
+   "BG-6"
+  ],
+  "BG-5": [
+   "BT-35",
+   "BT-36",
+   "BT-37",
+   "BT-38",
+   "BT-39",
+   "BT-40",
+   "BT-162"
+  ],
+  "BG-6": [
+   "BT-41",
+   "BT-42",
+   "BT-43"
+  ],
+  "BG-7": [
+   "BT-44",
+   "BT-45",
+   "BT-46",
+   "BT-47",
+   "BT-48",
+   "BT-49",
+   "BG-8",
+   "BG-9"
+  ],
+  "BG-8": [
+   "BT-50",
+   "BT-51",
+   "BT-52",
+   "BT-53",
+   "BT-54",
+   "BT-55",
+   "BT-163"
+  ],
+  "BG-9": [
+   "BT-56",
+   "BT-57",
+   "BT-58"
+  ],
+  "BG-DEX-01": [
+   "BT-126",
+   "BT-129",
+   "BT-130",
+   "BT-131",
+   "BG-DEX-01",
+   "BG-DEX-02",
+   "BG-DEX-06",
+   "BG-DEX-07"
+  ],
+  "BG-DEX-02": [
+   "BT-153"
+  ],
+  "BG-DEX-06": [
+   "BT-151",
+   "BT-152"
+  ],
+  "BG-DEX-07": [
+   "BT-146",
+   "BT-147",
+   "BT-148",
+   "BT-149",
+   "BT-150"
+  ],
+  "BG-DEX-09": [
+   "BT-DEX-001",
+   "BT-DEX-002",
+   "BT-DEX-003"
+  ]
+ }
+}

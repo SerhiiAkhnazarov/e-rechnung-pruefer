@@ -3,8 +3,9 @@ E-Rechnung Prüfer — NOTICE (third-party components, licences and attributions
 Source code of this program (EUPL-1.2, Article 5 "Provision of Source Code"):
 https://github.com/SerhiiAkhnazarov/e-rechnung-pruefer
 
-Own code (src/, tools/, test/, patches/, .github/): European Union Public Licence 1.2 (EUPL-1.2, see
-LICENSE). Parts of src/xsd-validator.js are derived from Apache Xerces-J (A.9). Part E of this file
+Own code (src/, tools/, test/, patches/, .github/) and the legal table legal/ust-pflichtangaben.json: European
+Union Public Licence 1.2 (EUPL-1.2, see LICENSE); the table cites its sources (laws, BMF letters, the
+recommendations of KoSIT and FeRD on the Pflichtangaben in an E-Rechnung) and does not reproduce them. Parts of src/xsd-validator.js are derived from Apache Xerces-J (A.9). Part E of this file
 reproduces the licence texts and notices of the third-party components verbatim. Every compiled rule set
 (build/schemas/*.json) carries the comments of its source files outside the schema element (field "notices",
 e.g. the EUPL notice of CEN) and a modification notice (field "generator"); every bundle in vendor/ starts
@@ -65,6 +66,19 @@ A.9  Apache Xerces-J 2.12.2 as contained in OpenJDK 21 (module java.xml, package
      Modification: translated to JavaScript and adapted to this validator (2026).
 A.10 esbuild 0.28.2: the module wrapper and helper code that esbuild inserts into the bundles of A.7
      — MIT (E.5).
+A.11 KoSIT xrechnung-visualization v2026-08-31, https://github.com/itplr-kosit/xrechnung-visualization
+     (commit e158048ec6774cd4837744b21ca34dc95ba14862) — Apache License 2.0 (E.12); its LICENSE file adds the
+     same statement on the rights of CEN and DIN as A.2 (E.11).
+     Modification: the syntax binding of its stylesheets src/xsl/ubl-invoice-xr.xsl, ubl-creditnote-xr.xsl and
+     cii-xr.xsl (element path -> business term/group, from the attributes xr:src and xr:id, and the nesting of the
+     business groups) extracted into build/bt-paths.json by tools/build-bt-paths.cjs (2026); the stylesheets
+     themselves are not contained. Used by the umsatzsteuerliche Einordnung (src/vat-relevance.js).
+A.12 Adobe Core14 font metrics (AFM) of Helvetica, Helvetica-Bold and Courier, as distributed with matplotlib
+     3.10.7 (lib/matplotlib/mpl-data/fonts/pdfcorefonts) — Adobe permission notice (E.14).
+     Modification: only the character widths of the WinAnsiEncoding glyphs extracted into src/pdf-fonts.js by
+     tools/gen-pdf-fonts.cjs (2026), with the copyright notices and the permission paragraph retained in that
+     file; the AFM files themselves are not contained. Helvetica is a trademark of Linotype-Hell AG and/or its
+     subsidiaries; the fonts are not embedded (PDF standard fonts of the reader).
 
 B. Contained only in this repository (not in the program)
 
@@ -94,6 +108,12 @@ D. Used only for building and verification (fetched by tools/fetch-sources.cjs o
 - Playwright 1.56.0: Apache License 2.0; the browser builds it installs from the Playwright CDN (Chromium,
   WebKit, Firefox) are used under their own licences and are not redistributed
 - pdf.js (pdfjs-dist 6.2.108): Apache License 2.0; esbuild 0.28.2 (the build tool): MIT
+- matplotlib 3.10.7 (source of the AFM files of A.12; only lib/matplotlib/mpl-data/fonts/pdfcorefonts is
+  fetched): matplotlib licence (PSF-based), https://github.com/matplotlib/matplotlib; the AFM files carry
+  Adobe's own terms (E.14)
+- qpdf (Apache License 2.0) and poppler-utils (pdftotext, pdfinfo; GPL) from the Ubuntu package archive, and
+  Python 3 with libexpat (PSF licence, MIT) of the runner image: independent readers in the test suites
+  reports and line-numbers-vs-expat
 - veraPDF 1.30.3 (CI only, org.verapdf:validation-model-jakarta): GPL-3.0-or-later / MPL-2.0 (dual)
 - OpenJDK 21 (javax.xml.validation / Xerces as XSD reference): GPL-2.0 with Classpath Exception; its Xerces
   code: Apache License 2.0
@@ -644,3 +664,22 @@ Licensed under EDL 1.0
 This product includes software developed at
 QOS.ch (https://www.slf4j.org/).
 Licensed under MIT
+
+====================================================================================================
+E.14  Adobe Core14 AFM files — copyright notices and permission (A.12)
+Source: matplotlib v3.10.7 (commit 4aeb773422464799998d900198b35cb80e94b3e1),
+lib/matplotlib/mpl-data/fonts/pdfcorefonts/readme.txt and the Notice lines of Helvetica.afm,
+Helvetica-Bold.afm and Courier.afm (SHA-256 in src/pdf-fonts.js and build/STANDARDS_MANIFEST.json)
+====================================================================================================
+
+Helvetica.afm, Helvetica-Bold.afm: Copyright (c) 1985, 1987, 1989, 1990, 1997 Adobe Systems Incorporated.  All
+Rights Reserved.Helvetica is a trademark of Linotype-Hell AG and/or its subsidiaries.
+Courier.afm: Copyright (c) 1989, 1990, 1991, 1992, 1993, 1997 Adobe Systems Incorporated.  All Rights Reserved.
+
+This file and the 14 PostScript(R) AFM files it accompanies may be used, copied, 
+and distributed for any purpose and without charge, with or without modification, 
+provided that all copyright notices are retained; that the AFM files are not 
+distributed without this file; that all modifications to this file or any of 
+the AFM files are prominently noted in the modified file(s); and that this 
+paragraph is not modified. Adobe Systems has no responsibility or obligation 
+to support the use of the AFM files.
