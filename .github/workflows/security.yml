@@ -50,6 +50,15 @@ jobs:
               - vendor/**
               - build/**
               - dist/**
+            # network data written to a file / file data in a network request: the program has neither network nor file
+            # access (test suite security: no network API in src/; the page runs in the browser); in the tools these
+            # flows are their purpose – tools/check-published.cjs saves the published files after comparing their
+            # SHA-256, tools/check-security-txt.cjs requests the security.txt URLs of legal/security.json
+            query-filters:
+              - exclude:
+                  id: js/http-to-file-access
+              - exclude:
+                  id: js/file-access-to-http
       - uses: github/codeql-action/analyze@9b3254085494b55a0f7c4c2b3d2d52cc712ce370 # v4.39.1
         id: analyze
         with:

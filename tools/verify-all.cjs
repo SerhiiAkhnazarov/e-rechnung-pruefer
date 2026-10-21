@@ -69,7 +69,7 @@ const SUITES = [
   { name: 'ref-xerces', reference: true, cmd: SH('sh test/xsd-oracle/run-xsd-oracle.sh; ' + Q(node) + ' test/build-xsd-mutations.cjs --zugferd ' + Q(E('zugferd-corpus')) + '; sh test/xsd-oracle/run-xsd-oracle.sh xsd-mutations build/corpus/xsd-mutations; sh test/xsd-oracle/run-facturx-xsd-oracle.sh; echo "Xerces reference: $(cat build/oracle/xsd/*.jsonl | wc -l) documents, Factur-X: $(cat build/oracle/xsd-facturx/*.jsonl | wc -l) validations"'), summary: /^Xerces reference/ },
   // ---- stage 2: the product against the references and the official test material ------------------
   { name: 'manifest', cmd: [node, 'tools/verify-manifest.cjs', ext], summary: /^manifest verification:/ },
-  { name: 'engine-reproducible', cmd: ['sh', 'tools/check-engine.sh', ext, ESBUILD], summary: /^engine rebuild|applied cleanly/, all: true, needs: [E('fontoxpath')] },
+  { name: 'engine-reproducible', cmd: ['sh', 'tools/check-engine.sh', ext, ESBUILD], summary: /^(?:engine rebuild|.*applied cleanly)/, all: true, needs: [E('fontoxpath')] },
   { name: 'build-reproducible', cmd: [node, 'tools/check-reproducible.cjs', ext], summary: /^reproducible build:/ },
   // the page that the browser suites open (dist/E-Rechnung-Pruefer.html) is built from the current sources first,
   // as in CI; the final page with the status line of this run is built after the run (tools/build-standalone.cjs)
@@ -78,7 +78,7 @@ const SUITES = [
   { name: 'sbom', cmd: [node, 'test/run-sbom-tests.cjs', E('cyclonedx-specification')], summary: /^SBOM tests:/, needs: [E('cyclonedx-specification') + '/schema/bom-1.6.schema.json'] },
   // security properties of the page, its sources and the published security information (CSV injection, downloads,
   // CSP hashes, sinks, site pages, security.txt, CSAF 2.0 with the official schemas, consistency, privacy)
-  { name: 'security', cmd: [node, 'test/run-security-tests.cjs', E('xrechnung-testsuite'), E('csaf')], summary: /^security tests:/, needs: [E('csaf') + '/csaf_2.0/json_schema/csaf_json_schema.json', E('xrechnung-testsuite') + '/src/test/technical-cases/cius/01.01_comprehensive_test_ubl.xml'] },
+  { name: 'security', cmd: [node, 'test/run-security-tests.cjs', E('xrechnung-testsuite'), E('csaf')], summary: /^security tests:/, timeout: 20 * 60 * 1000, needs: [E('csaf') + '/csaf_2.0/json_schema/csaf_json_schema.json', E('xrechnung-testsuite') + '/src/test/technical-cases/cius/01.01_comprehensive_test_ubl.xml'] },
   { name: 'xpath-conformance', cmd: [node, 'test/xpath-conformance/run-fontoxpath.cjs'], summary: /^XPath conformance/ },
   { name: 'xpath-document', cmd: [node, 'test/xpath-conformance/run-fontoxpath-doc.cjs'], summary: /^XPath document battery/, all: true },
   { name: 'batch-compile', cmd: [node, 'test/check-batches.cjs'], summary: /^batches/ },
@@ -102,12 +102,12 @@ const SUITES = [
   { name: 'robustness', cmd: [node, 'test/run-robustness-tests.cjs', '--mutations', '24', ...E2E_FILES], summary: /^fuzzing:|^robustness tests:/, all: true },
   // property-based fuzzing (fast-check, test tool of package.json): CSV cells, file names, classification of
   // attachments, Base64, ZIP, XML encodings, damaged PDFs, damaged invoices, and arbitrary invoice texts through the
-  // whole processing into the CSV files (0.4.1); stopped after 30 minutes (a hang is a failure)
-  { name: 'fuzz', cmd: [node, 'test/fuzz-properties.js', ...E2E_FILES], summary: /^fuzz tests:/, timeout: 30 * 60 * 1000, needs: ['node_modules/fast-check/package.json'] },
+  // whole processing into the CSV files; stopped after 15 minutes (a hang – e.g. catastrophic backtracking – is a failure)
+  { name: 'fuzz', cmd: [node, 'test/fuzz-properties.js', ...E2E_FILES], summary: /^fuzz tests:/, timeout: 15 * 60 * 1000, needs: ['node_modules/fast-check/package.json'] },
   { name: 'xsd-selftest', cmd: [node, 'test/xsd-selftest.cjs'], summary: /^instances/ },
   ...browsers((b) => ({ name: 'xsd-browser-' + b, browser: b, cmd: [node, 'test/xsd-browser.cjs', '--browser', b], summary: /identical|differences/ })),
   { name: 'kosit-reference', cmd: [node, 'test/kosit-reference/verify.cjs'], summary: /configuration self-tests|MISMATCHES|fresh run/, all: true, needs: ['build/corpus/xr-ubl', E('saxon') + '/saxon-he-12.8.jar'] },
-  { name: 'kosit-official', cmd: [node, 'test/kosit-official.cjs', E('kosit-official')], summary: /^verified|scenario:|xsd verdict:|messages:|configuration verdict|MISMATCHES/, all: true, needs: [E('kosit-official') + '/validator-1.6.3-standalone.jar', 'build/corpus/xr-ubl'] },
+  { name: 'kosit-official', cmd: [node, 'test/kosit-official.cjs', E('kosit-official')], summary: /^(?:verified|.*(?:scenario:|xsd verdict:|messages:|configuration verdict|MISMATCHES))/, all: true, needs: [E('kosit-official') + '/validator-1.6.3-standalone.jar', 'build/corpus/xr-ubl'] },
   { name: 'pdf-extraction-vs-pdfjs', cmd: [node, 'test/run-pdf-tests.cjs', E('zugferd-corpus')], summary: /identical|PDF/i },
   { name: 'pdf-scan-fallback', cmd: [node, 'test/run-pdf-fallback-tests.cjs', E('zugferd-corpus')], summary: /identical|PDF/i },
   { name: 'pdfa3-container-checks', cmd: [node, 'test/run-pdfa3-tests.cjs', E('zugferd-corpus'), '--mustang', E('mustangproject'), '--json', 'build/pdfa3-results.json'], summary: /^PDF\/A-3 container checks:/ },
@@ -154,7 +154,8 @@ const fp = compute({ saxonJar: path.join(ext, 'saxon', 'saxon-he-12.8.jar') });
 console.log('fingerprint ' + fp.id + (fp.git.commit ? ' (git ' + fp.git.commit.slice(0, 12) + (fp.git.dirty ? ', uncommitted changes' : '') + ')' : ''));
 fs.mkdirSync(reports, { recursive: true });
 const summaryFile = path.join(reports, 'VERIFICATION.json');
-const previous = fs.existsSync(summaryFile) ? JSON.parse(fs.readFileSync(summaryFile, 'utf8')) : null;
+let previous = null;
+try { previous = JSON.parse(fs.readFileSync(summaryFile, 'utf8')); } catch (e) { /* no earlier report, or not readable */ }
 const results = {};
 // suites not run this time are kept only if they were produced with the same fingerprint
 if (previous && previous.fingerprint && previous.fingerprint.id === fp.id) Object.assign(results, previous.suites);

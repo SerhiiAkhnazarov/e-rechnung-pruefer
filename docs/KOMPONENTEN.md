@@ -5,7 +5,8 @@ bekannte Schwachstellen und Integrität. Die Stückliste mit allen Einzelheiten 
 `test-environment.cdx.json` (Prüfumgebung); die Bewertung bekannter Schwachstellen `security/vex.json`
 (`vex.cdx.json`, CSAF-VEX). Laufende Überwachung: OSV-Scanner bei jedem Push und wöchentlich (Check-Runs
 „vulnerability scan“, „vulnerability scan (weekly)“), neue Versionen der Quellen wöchentlich (`drift.yml`, bewusst nicht
-übernommene Versionen mit Begründung in `build/drift-acknowledged.json`), Dependabot für Actions und Testwerkzeuge.
+übernommene Versionen mit Begründung in `build/drift-acknowledged.json`), Dependabot für Actions und Testwerkzeuge
+(`package.json` und `package-lock.json`).
 
 Prüfmethode: neueste Version über die Tags der Quell-Repositorys (`git ls-remote`, 21.10.2026); bekannte Schwachstellen
 über OSV-Scanner 2.7.0 (Datenbank osv.dev; lokal zusätzlich mit der GitHub Advisory Database vom 21.10.2026) für das
@@ -40,6 +41,9 @@ Commit bzw. die SHA-256 jeder Quelle (`build/STANDARDS_MANIFEST.json`, geprüft 
 | Playwright (Browser der Tests) | 1.64.1 | 1.64.1 | Apache-2.0 | aktuell; Browser vom offiziellen CDN; ohne Installationsskripte installiert |
 | pdf.js (`pdfjs-dist`, unabhängiger PDF-Leser) | 6.4.299 | 6.4.299 | Apache-2.0 | aktuell |
 | esbuild (Nachbau der Engine) | 0.28.2 | 0.28.2 | MIT | aktuell; bewusst fest, damit das Bundle byte-gleich bleibt |
+| fast-check (eigenschaftsbasiertes Fuzzing, `test/fuzz-properties.js`) | 4.10.2 | 4.10.2 | MIT | aktuell; mit Herkunftsnachweis (npm provenance) veröffentlicht |
+| pure-rand (Zufallszahlen für fast-check) | 8.4.2 | 8.4.2 | MIT | aktuell |
+| npm-Pakete insgesamt (`package-lock.json`) | 44 Pakete, davon 38 plattformabhängige optionale (esbuild, @napi-rs/canvas) | – | MIT / Apache-2.0 | jedes mit SHA-512 aus registry.npmjs.org, installiert mit `npm ci --ignore-scripts`, Signaturen geprüft (`npm audit signatures`); `npm audit` am 21.10.2026: keine Funde |
 | Saxon HE (Referenz für XPath und Schematron) | 12.8 | 12.9 (im KoSIT-Validator enthalten) | MPL-2.0 | SHA-256 geprüft; die Erwartungswerte der Tests sind mit 12.8 festgelegt, der offizielle Validator läuft mit 12.9 |
 | KoSIT-Validator (offizielle Referenz) | 1.6.3 | 1.6.3 (2.0.0 nur Vorabversionen) | Apache-2.0 | SHA-256 geprüft, byte-gleich mit Maven Central |
 | veraPDF (PDF/A-Referenz) | 1.30.3 | 1.30.3 | GPL-3.0-or-later / MPL-2.0 | Prüfsummen durch Maven geprüft |

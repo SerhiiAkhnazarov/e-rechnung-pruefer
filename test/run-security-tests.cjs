@@ -17,7 +17,8 @@
  *  5. the static pages of the site (dist/site-pages): no script, Content-Security-Policy with the hash of their style,
  *     every link to the site resolves to a published file; the workflows (.github/workflows): no trigger that gives
  *     write permissions to code of others, read-only top-level permissions, no checkout of a ref from the event, no
- *     expression inside a run script, the publication only after the complete verification of the same commit;
+ *     expression inside a run script, the publication only after the complete verification of the same commit; the
+ *     test tools only from package-lock.json (npm ci, SHA-512 of every package, registry signatures verified);
  *  6. security.txt (RFC 9116, BSI TR-03183-3 4.2): fields, values, Expires more than 30 days and at most a year ahead;
  *  7. CSAF 2.0 (tools/make-csaf.cjs): every document and the provider metadata against the official schemas (Python
  *     jsonschema, test/sbom-oracle/validate_csaf.py), the mandatory tests of CSAF 2.0 section 6.1 that apply to them and
@@ -236,6 +237,20 @@ const EVALUATED = (cell) => /^\s*[=+\-@＝＋－＠]|^[\t\r]/.test(cell) && !/^[
     const b64 = raw.toString('base64').replace(/(.{76})/g, '$1\r\n');
     check('Base64 ' + len + ' bytes with line breaks = Buffer.from', Buffer.from(FileSafety.decodeBase64(b64)).equals(raw));
   }
+  // the content detection runs on up to 4 KiB of text from the file: linear time for any text (CodeQL js/redos found an
+  // exponential pattern for comment-heavy prologs before the release of 0.4.0), and HTML/SVG still recognised behind
+  // an XML declaration and comments, also in upper case
+  {
+    const hostile = ['<!--' + '--><!--'.repeat(5000) + 'x', '<?xml version="1.0"?>' + '<!--'.repeat(3000), '<svg ' + 'xmlns '.repeat(3000), '<html ' + ' '.repeat(8000) + 'xmlns'];
+    const t0 = Date.now();
+    const ids = hostile.map((t) => FileSafety.detect(B(t)).id);
+    const ms = Date.now() - t0;
+    check('content detection of hostile text in linear time (' + hostile.length + ' files, ' + ms + ' ms)', ms < 2000, ms + ' ms ' + ids.join(','));
+    const svg = FileSafety.detect(B('<?xml version="1.0"?>\n' + '<!-- comment -->\n'.repeat(40) + '<SVG xmlns="http://www.w3.org/2000/svg"><script/></SVG>')).id;
+    const html = FileSafety.detect(B('<!-- generated -->\n<!DOCTYPE html><html><script>x()</script></html>')).id;
+    check('SVG behind an XML declaration and 40 comments recognised (upper case element)', svg === 'svg', svg);
+    check('HTML behind a comment recognised', html === 'html', html);
+  }
 
   // =============================================================================================================
   section = 'page';
@@ -328,7 +343,8 @@ const EVALUATED = (cell) => /^\s*[=+\-@＝＋－＠]|^[\t\r]/.test(cell) && !/^[
   const ROOT_FILES = ['index.html', 'E-Rechnung-Pruefer.html', 'BUILD_INFO.json', 'sbom.cdx.json', 'vex.cdx.json', 'STANDARDS_MANIFEST.json', 'VERIFICATION.json', 'test-environment.cdx.json'];
   const verifyYml = read('.github/workflows/verify.yml');
   const pagesJob = (/\n  pages:\n([\s\S]*?)(?=\n  [a-z][\w-]*:\n|$)/.exec(verifyYml) || [null, ''])[1];
-  for (const f of ROOT_FILES) check('the job pages publishes ' + f, new RegExp('site/' + f.replace(/\./g, '\\.') + '\\b').test(pagesJob));
+  const reEscape = (t) => t.replace(/[\\^$.*+?()[\]{}|]/g, '\\$&');
+  for (const f of ROOT_FILES) check('the job pages publishes ' + f, new RegExp('site/' + reEscape(f) + '\\b').test(pagesJob));
   check('the job pages publishes the site pages including .well-known (hidden files)', /cp -R dist\/site-pages\/\. site\//.test(pagesJob) && /include-hidden-files: true/.test(pagesJob));
   const published = new Set(siteFiles.concat(ROOT_FILES));
   const resolves = (u) => { const rel = u.slice(sec.site.length).split('#')[0]; return rel === '' || published.has(rel) || published.has(rel.replace(/\/?$/, '/index.html')) || (rel.endsWith('/') && published.has(rel + 'index.html')); };
@@ -382,6 +398,19 @@ const EVALUATED = (cell) => /^\s*[=+\-@＝＋－＠]|^[\t\r]/.test(cell) && !/^[
     check(f + ': no expression inside a run script (' + scripts.length + ' scripts; values only through env)', injected.length === 0, injected.map((r) => r.trim().slice(0, 80)).join(' | '));
   }
   check('the publication is a job of verify.yml (no separate pages workflow started by another one)', !workflows.includes('pages.yml') && pagesJob.length > 0);
+  // the test tools: only from the lock file, with the registry signatures verified
+  const allScripts = workflows.flatMap((f) => runScripts(read('.github/workflows/' + f)));
+  const npmInstalls = allScripts.filter((r) => /\bnpm (?:install|i|add)\b/.test(r));
+  const npmCi = allScripts.filter((r) => /\bnpm ci\b/.test(r));
+  check('test tools installed only with npm ci from package-lock.json (no npm install)', npmInstalls.length === 0 && npmCi.length > 0, npmInstalls.map((r) => r.trim().slice(0, 80)).join(' | '));
+  check('every npm ci without install scripts and followed by npm audit signatures', npmCi.every((r) => /npm ci --ignore-scripts\b/.test(r) && /npm ci[^\n]*\n\s*npm audit signatures\b/.test(r)), npmCi.length);
+  const lock = JSON.parse(read('package-lock.json'));
+  const pkg = JSON.parse(read('package.json'));
+  const lockPackages = Object.entries(lock.packages).filter(([k]) => k);
+  check('package-lock.json: lockfile version 3, the exact versions of package.json', lock.lockfileVersion === 3 && JSON.stringify(lock.packages[''].devDependencies) === JSON.stringify(pkg.devDependencies) &&
+    Object.entries(pkg.devDependencies).every(([n, v]) => lock.packages['node_modules/' + n] && lock.packages['node_modules/' + n].version === v));
+  const unpinned = lockPackages.filter(([, v]) => !/^https:\/\/registry\.npmjs\.org\//.test(v.resolved || '') || !/^sha512-[A-Za-z0-9+/]{86}==$/.test(v.integrity || ''));
+  check('package-lock.json: every package (' + lockPackages.length + ') from registry.npmjs.org with SHA-512 integrity', lockPackages.length > 0 && unpinned.length === 0, unpinned.map(([k]) => k).join(', '));
   check('the job pages runs only after every verification job and only for a push to main', /needs: \[verify, kosit-jar-maven, pdfa-verapdf, windows, platforms\]/.test(pagesJob) && /if: github\.event_name == 'push' && github\.ref == 'refs\/heads\/main'/.test(pagesJob));
   check('the job pages builds the page that the job verify tested (programSha256 compared)', /a\.programSha256 !== t\.programSha256/.test(pagesJob) && /download-artifact@[0-9a-f]{40}/.test(pagesJob));
   check('every published file is attested and read back after the deployment', /attest-build-provenance@[0-9a-f]{40}/.test(pagesJob) && /attest-sbom@[0-9a-f]{40}/.test(pagesJob) && /check-published\.cjs "\$\{PAGE_URL\}" --commit "\$\{GITHUB_SHA\}" --local site/.test(pagesJob));
@@ -427,11 +456,13 @@ const EVALUATED = (cell) => /^\s*[=+\-@＝＋－＠]|^[\t\r]/.test(cell) && !/^[
     const broken = JSON.parse(docsList[0].text);
     delete broken.document.tracking.id;
     broken.document.category = '';
-    const tmp = path.join(os.tmpdir(), 'csaf-broken-' + process.pid + '.json');
+    // in a directory of its own (fs.mkdtempSync: unique name, permissions of the user only)
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'csaf-broken-'));
+    const tmp = path.join(tmpDir, 'csaf-broken.json');
     fs.writeFileSync(tmp, JSON.stringify(broken));
     const py = process.platform === 'win32' ? 'python' : 'python3';
     const r = spawnSync(py, ['-I', path.join(__dirname, 'sbom-oracle', 'validate_csaf.py'), csafDir].concat(docsList.map((d) => d.path), [metaFile, tmp]), { encoding: 'utf8' });
-    fs.rmSync(tmp, { force: true });
+    fs.rmSync(tmpDir, { recursive: true, force: true });
     const out = (r.stdout || '') + (r.stderr || '');
     console.log(out.trim().split('\n').slice(0, 6).map((l) => '  ' + l).join('\n'));
     for (const d of docsList) check('official CSAF 2.0 schema: ' + d.year + '/' + d.file + ' valid', out.includes(d.path + ': valid'), out.slice(0, 400));

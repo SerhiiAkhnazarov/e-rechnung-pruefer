@@ -9,7 +9,9 @@
 #   released XRechnung configuration, and the browser tests in Chromium, WebKit and Firefox. The
 #   release gate tools/verify-manifest.cjs --reports --strict requires every suite to have run and
 #   passed with the fingerprint of the current inputs. Then the bill of materials of this environment and the
-#   search for known vulnerabilities (OSV-Scanner) in the program and in this environment.
+#   search for known vulnerabilities (OSV-Scanner) in the program and in this environment. The test tools come from
+#   package-lock.json (npm ci: exact versions, SHA-512 of every package, no install scripts), their registry signatures
+#   are verified (npm audit signatures).
 # Job "kosit-jar-maven": the KoSIT validator JAR used above (GitHub release asset) must be byte-identical
 #   to the copy on Maven Central (org.kosit:validator:1.6.3:standalone, checked with the repository .sha1).
 # Job "pdfa-verapdf": full PDF/A-3 validation of the ZUGFeRD corpus with veraPDF 1.30.3 (library
@@ -25,7 +27,6 @@
 # Job "pages": publication on GitHub Pages — only for a push to main, and only when every job above passed for this
 #   commit. Part of this workflow on purpose: no workflow started by another one (workflow_run) runs with write
 #   permissions, and the published page is built from the commit this run checked out and verified.
-# Job "test-tools-lock": the lock file of the test tools (package-lock.json), as long as the repository has none.
 # Every job publishes its result as a check run of the commit ("verification report", "vulnerability scan", "KoSIT JAR
 # vs. Maven Central", "veraPDF report", "Windows report", "platform comparison", "pages report"; .github/scripts/check-run.cjs):
 # per suite status and summary, and the end of the report of every suite that did not pass — readable with
@@ -59,9 +60,10 @@ jobs:
           distribution: temurin
           java-version: '21'
           check-latest: true
-      - name: Test tools (package.json / package-lock.json, no install scripts; browsers from the official Playwright CDN; qpdf and poppler for the PDF files)
+      - name: Test tools (package-lock.json, no install scripts, registry signatures verified; browsers from the official Playwright CDN; qpdf and poppler for the PDF files)
         run: |
-          if [ -f package-lock.json ]; then npm ci --ignore-scripts --no-audit --no-fund; else npm install --no-save --ignore-scripts --no-audit --no-fund; fi
+          npm ci --ignore-scripts --no-audit --no-fund
+          npm audit signatures
           npm ls --all --omit=optional || true
           npx playwright install --with-deps chromium webkit firefox
           sudo apt-get install -y --no-install-recommends qpdf poppler-utils python3-jsonschema
@@ -290,9 +292,10 @@ jobs:
           check-latest: true
       - name: Working tree = repository (line endings of every file as committed)
         run: git ls-files --eol | awk '{ i = substr($1, 3); w = substr($2, 3); if (i != w) { n++; print } } END { print (n + 0) " files with line endings other than in the repository"; exit (n > 0) }'
-      - name: Test tools (package.json / package-lock.json, no install scripts; Microsoft Edge and Google Chrome of the runner image, no browser download)
+      - name: Test tools (package-lock.json, no install scripts, registry signatures verified; Microsoft Edge and Google Chrome of the runner image, no browser download)
         run: |
-          if [ -f package-lock.json ]; then npm ci --ignore-scripts --no-audit --no-fund; else npm install --no-save --ignore-scripts --no-audit --no-fund; fi
+          npm ci --ignore-scripts --no-audit --no-fund
+          npm audit signatures
       - name: Fetch all pinned sources and release artefacts (SHA-256 checked)
         run: node tools/fetch-sources.cjs ext
       - name: Peppol rule sets for the Peppol import test (compiled from the pinned source, never shipped)
@@ -500,45 +503,5 @@ jobs:
           rc=0
           node .github/scripts/check-run.cjs --name "pages report" --sha "${GITHUB_SHA}" \
             --gate "${outcome}" --gate-label "Deployment (actions/deploy-pages) und Abruf der veröffentlichten Dateien (tools/check-published.cjs)" --attach pages-report.txt > check-run.json || rc=$?
-          gh api -X POST "repos/${GITHUB_REPOSITORY}/check-runs" --input check-run.json > /dev/null || echo "::warning::check run could not be published"
-          exit "${rc}"
-
-  test-tools-lock:
-    # the lock file of the test tools (package-lock.json: exact versions and SHA-512 integrity of every package) as long
-    # as the repository has none: generated from package.json by npm, published as check run "test tools lock" (file
-    # and npm audit in full) to be reviewed and committed; the jobs above then install with npm ci
-    runs-on: ubuntu-24.04
-    timeout-minutes: 10
-    permissions:
-      contents: read # checkout
-      checks: write  # check run "test tools lock"
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
-        with:
-          node-version: '22'
-          check-latest: true
-      - name: package-lock.json from package.json (npm, no install scripts) and npm audit
-        if: hashFiles('package-lock.json') == ''
-        id: lock
-        run: |
-          set -e -o pipefail
-          npm --version
-          npm install --package-lock-only --ignore-scripts --no-audit --no-fund
-          node -e "const l = require('./package-lock.json'); const p = Object.entries(l.packages).filter(([k]) => k); console.log('lockfileVersion ' + l.lockfileVersion + ', ' + p.length + ' packages, ' + p.filter(([, v]) => /^sha512-/.test(v.integrity || '')).length + ' with SHA-512 integrity'); for (const [k, v] of p) console.log('  ' + k.replace(/^node_modules\//, '') + ' ' + v.version + (v.optional ? ' (optional)' : ''))" | tee lock-summary.txt
-          npm audit --package-lock-only --audit-level=low > npm-audit.txt 2>&1 || echo "::warning::npm audit reports known vulnerabilities in the test tools"
-          cat npm-audit.txt
-      - name: Publish the lock file as check run "test tools lock"
-        if: always() && steps.lock.outcome != 'skipped'
-        env:
-          GH_TOKEN: ${{ github.token }}
-          LOCK: ${{ steps.lock.outcome }}
-        run: |
-          rc=0
-          node .github/scripts/check-run.cjs --name "test tools lock" --sha "${GITHUB_SHA}" \
-            --gate "${LOCK}" --gate-label "npm install --package-lock-only, npm audit" \
-            --attach package-lock.json --attach lock-summary.txt --attach npm-audit.txt > check-run.json || rc=$?
           gh api -X POST "repos/${GITHUB_REPOSITORY}/check-runs" --input check-run.json > /dev/null || echo "::warning::check run could not be published"
           exit "${rc}"

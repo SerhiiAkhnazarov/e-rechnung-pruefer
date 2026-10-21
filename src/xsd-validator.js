@@ -795,7 +795,7 @@
           i++;
           const sub = charClass();
           needV = true;
-          return '[' + (negated ? '^' : '') + body + ']' .replace(/^\[/, '[') + '--' + sub;
+          return '[' + (negated ? '^' : '') + body + ']--' + sub;
         }
         if (c === '\\') { body += escapeSeq(true); first = false; continue; }
         if (c === '-' && !first && src[i + 1] !== ']' && src[i + 1] !== undefined) {

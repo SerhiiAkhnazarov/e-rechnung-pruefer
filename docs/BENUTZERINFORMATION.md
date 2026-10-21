@@ -80,8 +80,9 @@ darauf hin, dass sie keine Sicherheitsupdates mehr erhält.
 **Sichere Inbetriebnahme und Verwendung:** Rufen Sie den Prüfer unter https://serhiiakhnazarov.github.io/e-rechnung-pruefer/
 auf oder laden Sie die Datei aus den Releases (https://github.com/SerhiiAkhnazarov/e-rechnung-pruefer/releases/latest)
 und vergleichen Sie ihre SHA-256-Prüfsumme mit `SHA256SUMS.txt`; mit der GitHub-Befehlszeile prüft
-`gh attestation verify E-Rechnung-Pruefer.html -R SerhiiAkhnazarov/e-rechnung-pruefer` zusätzlich die Herkunft. Es
-sind keine Einstellungen, Konten oder Installationen nötig.
+`gh attestation verify E-Rechnung-Pruefer.html -R SerhiiAkhnazarov/e-rechnung-pruefer` zusätzlich die Herkunft (ohne
+Abruf über die GitHub-API mit `--bundle E-Rechnung-Pruefer-<Version>.intoto.jsonl` aus dem Release). Es sind keine
+Einstellungen, Konten oder Installationen nötig.
 
 **Änderungen und Datensicherheit:** Verändern Sie die Datei nicht; eine geänderte Datei verliert die Prüfsummen ihrer
 Skripte und damit den Schutz der Content-Security-Policy – oder sie läuft nicht mehr.

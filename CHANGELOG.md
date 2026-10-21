@@ -29,15 +29,21 @@ Sicherheit – Schwachstellen gesucht und beseitigt
   gespeicherten Fassungen, die älter als sechs Monate sind.
 - Unabhängige Sicherheitsprüfung vor der Veröffentlichung: zwei Funde behoben, keine veröffentlichte Version betroffen
   (aktive Inhalte ohne lesbare Querverweistabelle nicht erkannt; EICAR-Erkennung auf 128 Byte begrenzt).
-- **Eigenschaftsbasiertes Fuzzing** (fast-check, neue Testreihe `fuzz`, `test/fuzz-properties.js`): 13 Eigenschaften
-  mit über 22 000 erzeugten Eingaben je Lauf (fester Startwert, reproduzierbar; ein Fehlschlag wird auf ein minimales
+- Statische Analyse vor der Veröffentlichung (CodeQL, security-extended): Die Erkennung von SVG-Dateien hinter
+  Kommentaren hatte exponentielle Laufzeit (ReDoS) – eine Anlage, die mit `<!--` und vielen `--><!--` beginnt, hätte den
+  Browsertab blockiert; ersetzt durch Prüfungen mit linearer Laufzeit (HTML und SVG werden jetzt auch hinter Kommentaren
+  erkannt). Ohne Sicherheitsauswirkung behoben: vollständiges Maskieren von Variablennamen in regulären Ausdrücken
+  (`src/sch-compiler.js`), eine wirkungslose Ersetzung (`src/xsd-validator.js`); eingebettete Skripte und Daten
+  enthalten weder `</script` noch `<script` (JSON: `\u003c`), der Build erkennt Tags unabhängig von der Schreibweise.
+- **Eigenschaftsbasiertes Fuzzing** (fast-check, neue Testreihe `fuzz`, `test/fuzz-properties.js`): 14 Eigenschaften
+  mit 23 560 erzeugten Eingaben je Lauf (fester Startwert, reproduzierbar; ein Fehlschlag wird auf ein minimales
   Gegenbeispiel verkleinert) – CSV-Dateien (kein eingeschleuster Zellen- oder Zeilenumbruch, keine ausführbare Formel,
   auch für beliebige Texte in einer echten Rechnung durch die ganze Verarbeitung), angebotene Dateinamen, Einstufung
-  von Anlagen, Base64, ZIP-Inhaltsverzeichnisse, Zeichenkodierungen, beschädigte PDF-Dateien und Rechnungen. Dabei
-  gefunden und behoben (ohne Sicherheitsauswirkung): Angebotene Dateinamen konnten ungepaarte Surrogate enthalten (aus
-  UTF-16-Namen eingebetteter PDF-Dateien), nach dem Kürzen auf 120 Zeichen mit einem Punkt enden oder ein
-  Surrogatpaar trennen, und eine zweite Bereinigung änderte manche Namen erneut; Namen in ZIP-Archiven verloren ein
-  führendes U+FEFF.
+  von Anlagen, Inhaltserkennung in linearer Zeit, Base64, ZIP-Inhaltsverzeichnisse, Zeichenkodierungen, beschädigte
+  PDF-Dateien und Rechnungen. Dabei gefunden und behoben (ohne Sicherheitsauswirkung): Angebotene Dateinamen konnten
+  ungepaarte Surrogate enthalten (aus UTF-16-Namen eingebetteter PDF-Dateien), nach dem Kürzen auf 120 Zeichen mit
+  einem Punkt enden oder ein Surrogatpaar trennen, und eine zweite Bereinigung änderte manche Namen erneut; Namen in
+  ZIP-Archiven verloren ein führendes U+FEFF.
 
 Sicherheitsinformationen, Stücklisten, Cyber Resilience Act
 - Richtlinie zur koordinierten Offenlegung nach BSI TR-03183-3 und ISO/IEC 29147 (`SECURITY.md`), Meldeseite,
@@ -55,8 +61,9 @@ Sicherheitsinformationen, Stücklisten, Cyber Resilience Act
 
 Lieferkette und Prüfumgebung
 - Alle GitHub Actions auf Commits festgelegt, Checkout ohne gespeicherte Anmeldedaten, geringste Rechte je Job;
-  Node 22 und Java 21 in der jeweils neuesten Fassung; Testwerkzeuge in festen Versionen aus `package.json`, ohne
-  Installationsskripte (Playwright 1.64.1, pdf.js 6.4.299, esbuild 0.28.2, fast-check 4.10.2).
+  Node 22 und Java 21 in der jeweils neuesten Fassung; Testwerkzeuge nur aus der Lockdatei `package-lock.json`
+  (`npm ci`: Version und SHA-512 jedes der 44 Pakete), ohne Installationsskripte, mit geprüften Signaturen der
+  npm-Registry (`npm audit signatures`) – Playwright 1.64.1, pdf.js 6.4.299, esbuild 0.28.2, fast-check 4.10.2.
 - Veröffentlichung ohne `workflow_run`: Die Seite auf GitHub Pages veröffentlicht der Job `pages` des Workflows
   `verify` – nur bei einem Push auf main und nur, wenn alle Prüfjobs desselben Laufs bestanden sind (kein Workflow mit
   Schreibrechten, den ein anderer startet; OpenSSF Scorecard „Dangerous-Workflow“). Die Testreihe `security` prüft alle
@@ -71,9 +78,10 @@ Lieferkette und Prüfumgebung
 - Schwachstellensuche mit OSV-Scanner bei jedem Push und wöchentlich (Programm samt Vorläufern und Prüfumgebung;
   unbewertete Funde des Programms brechen ab; Check-Run „vulnerability scan“, Voraussetzung für ein Release); CodeQL
   für Programm und Workflows; OpenSSF Scorecard; Dependabot mit sieben Tagen Wartezeit.
-- Neue Testreihen `security` (465 Prüfungen), `security-browser-*` (fünf Browser) und `fuzz`; `sbom` erweitert
-  (494 Prüfungen); `peppol-import-*` verlangt das dauerhafte Speichern der offiziellen Regelwerke; `e2e-*` prüft,
-  dass das Stylesheet der Seite angewendet wird.
+- Neue Testreihen `security` (472 Prüfungen), `security-browser-*` (fünf Browser, 28 Prüfungen) und `fuzz`; `sbom`
+  erweitert (494 Prüfungen); `peppol-import-*` verlangt das dauerhafte Speichern der offiziellen Regelwerke; `e2e-*`
+  prüft, dass das Stylesheet der Seite angewendet wird (WebKit weist den Stil zurück, den Playwright für Bildschirmfotos
+  einfügt – erwartet unter der Content-Security-Policy).
 
 ## 0.3.1 (2026-10-21)
 

@@ -58,12 +58,12 @@
     ],
     "title": "E-Rechnung Prüfer: CSV-Formelinjektion in den CSV-Exporten (Versionen 0.2.0 bis 0.3.1)",
     "tracking": {
-      "current_release_date": "2026-10-21T19:00:00Z",
+      "current_release_date": "2026-10-21T20:33:00Z",
       "id": "E-RECHNUNG-PRUEFER-SA-2026-001",
-      "initial_release_date": "2026-10-21T19:00:00Z",
+      "initial_release_date": "2026-10-21T20:33:00Z",
       "revision_history": [
         {
-          "date": "2026-10-21T19:00:00Z",
+          "date": "2026-10-21T20:33:00Z",
           "number": "1",
           "summary": "Erstveröffentlichung"
         }
@@ -239,11 +239,11 @@
           "url": "https://owasp.org/www-community/attacks/CSV_Injection"
         }
       ],
-      "release_date": "2026-10-21T19:00:00Z",
+      "release_date": "2026-10-21T20:33:00Z",
       "remediations": [
         {
           "category": "vendor_fix",
-          "date": "2026-10-21T19:00:00Z",
+          "date": "2026-10-21T20:33:00Z",
           "details": "Aktualisierung auf Version 0.4.0: Zellen, die eine Tabellenkalkulation als Formel lesen würde (Beginn mit =, +, -, @, deren Vollbreitenformen, Tabulator oder Wagenrücklauf), werden mit vorangestelltem Apostroph als Text geschrieben, wie von OWASP empfohlen; reine Zahlen bleiben Zahlen. Die Web-Fassung erhält die Korrektur durch Neuladen der Seite; eine gespeicherte Datei ist durch die aktuelle Datei zu ersetzen (Web-Fassung oder neuestes Release). Die Version steht in der Fußzeile der Seite.",
           "product_ids": [
             "CSAFPID-0001",

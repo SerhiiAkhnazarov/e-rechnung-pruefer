@@ -21,7 +21,8 @@ const opt = (n) => { const i = args.indexOf(n); return i >= 0 ? args[i + 1] : nu
 const all = (n) => args.flatMap((a, i) => (a === n && i + 1 < args.length ? [args[i + 1]] : []));
 const MAX = 65000; // GitHub: 65 535 characters per output field
 const cut = (s, n) => (s.length > n ? s.slice(0, n - 1) + '…' : s);
-const cell = (s) => String(s == null ? '' : s).replace(/\|/g, '\\|').replace(/\r?\n/g, ' ');
+// a Markdown table cell: backslashes first, then the pipes that would end the cell, line breaks as spaces
+const cell = (s) => String(s == null ? '' : s).replace(/\\/g, '\\\\').replace(/\|/g, '\\|').replace(/\r?\n/g, ' ');
 const readTail = (file, lines) => {
   try { return fs.readFileSync(file, 'utf8').split('\n').slice(-lines).join('\n'); } catch (e) { return '(' + file + ': ' + e.code + ')'; }
 };

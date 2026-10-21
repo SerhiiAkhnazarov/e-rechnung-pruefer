@@ -65,16 +65,16 @@ Meldeverfahren nach Art. 14: `docs/CRA/MELDEVERFAHREN-ART14.md`. Sorgfaltsprüfu
 | Bedrohung | Angriffsweg | Maßnahme | Nachweis | Restrisiko |
 |---|---|---|---|---|
 | Abfluss von Rechnungsdaten | Netzwerkzugriff der Seite | Content-Security-Policy `default-src 'none'; connect-src 'none'; form-action 'none'; base-uri 'none'; object-src 'none'`, kein Nachladen; `referrer` `no-referrer` | Testreihen `robustness-browser-*` (jede Anfrage aufgezeichnet) und `security-browser-*` (`fetch` und Bilder anderer Sites abgewiesen, bevor eine Anfrage das Netz erreicht) | Browser-Erweiterungen, Schadsoftware auf dem Gerät |
-| Ausführung fremden Codes in der Seite (XSS) | HTML/Skript in Rechnungsinhalten, Dateinamen, Anlagen | Ausgabe nur als Text (`textContent`), kein HTML aus Zeichenketten; nur die Skripte der Seite laufen (SHA-256 jedes Skripts und Stils in der CSP, kein `'unsafe-inline'`, kein `'unsafe-eval'`); Trusted Types erzwungen (`require-trusted-types-for 'script'`, einzige Richtlinie `pruefer-xml` für `DOMParser` mit `application/xml`); der Build bricht bei Inline-Ereignissen, Stilattributen und Skripten mit Attributen ab | Testreihen `security` (Prüfsummen, keine Senken im Quelltext) und `security-browser-*` (Zeichenkette an `innerHTML` → `TypeError`, `eval` abgewiesen, eingeschleustes Skript läuft nicht) | Browser ohne Trusted Types (die CSP-Prüfsummen schützen weiterhin) |
-| Schadsoftware in Anlagen | Anlagen der Rechnung (BG-24) und im PDF eingebettete Dateien | nie geöffnet; Einstufung nach Inhalt (Signaturen, ZIP-Inhaltsverzeichnis), Endung und angegebenem Typ: Programme, Skripte, HTML/SVG, Office mit Makros, Archive mit Programmen, Verknüpfungen, Datenträgerabbilder, PDF mit JavaScript oder Launch, EICAR-Testdatei → „Gefährlich“, Download erst nach zweitem Klick als „….gesperrt“; Office, Archive, RTF, abweichender Typ → „Vorsicht“ mit Begründung; sichere Dateinamen (keine Steuer- und Richtungszeichen, keine reservierten Windows-Namen) | Testreihen `security` (Einstufung, Dateinamen), `security-browser-*` (EICAR-Datei des ZUGFeRD-Korpus) | eine harmlos wirkende Datei mit unbekannter Schadsoftware; der Nutzer öffnet eine Datei trotz Warnung |
-| Formeln in CSV-Exporten (CWE-1236) | Rechnungsdaten und Dateinamen in den CSV-Dateien | Zellen, die eine Tabellenkalkulation als Formel liest, beginnen mit einem Apostroph (seit 0.4.0; Sicherheitshinweis E-RECHNUNG-PRUEFER-SA-2026-001 für 0.2.0–0.3.1) | Testreihen `reports`, `security` (präparierte Rechnungen durch die ganze Verarbeitung) | CSV-Dateien aus älteren Versionen |
+| Ausführung fremden Codes in der Seite (XSS) | HTML/Skript in Rechnungsinhalten, Dateinamen, Anlagen | Ausgabe nur als Text (`textContent`), kein HTML aus Zeichenketten; nur die Skripte der Seite laufen (SHA-256 jedes Skripts und Stils in der CSP, kein `'unsafe-inline'`, kein `'unsafe-eval'`); Trusted Types erzwungen (`require-trusted-types-for 'script'`, einzige Richtlinie `pruefer-xml` für `DOMParser` mit `application/xml`); der Build bricht bei Inline-Ereignissen, Stilattributen und Skripten mit Attributen ab; eingebettete Skripte und Daten enthalten weder `</script` noch `<script` (JSON: `\u003c`) | Testreihen `security` (Prüfsummen, keine Senken im Quelltext) und `security-browser-*` (Zeichenkette an `innerHTML` → `TypeError`, `eval` abgewiesen, eingeschleustes Skript läuft nicht, eingeschleuster Stil wirkt nicht, der Stil der Seite wirkt) | Browser ohne Trusted Types (die CSP-Prüfsummen schützen weiterhin) |
+| Schadsoftware in Anlagen | Anlagen der Rechnung (BG-24) und im PDF eingebettete Dateien | nie geöffnet; Einstufung nach Inhalt (Signaturen, ZIP-Inhaltsverzeichnis), Endung und angegebenem Typ: Programme, Skripte, HTML/SVG, Office mit Makros, Archive mit Programmen, Verknüpfungen, Datenträgerabbilder, PDF mit JavaScript oder Launch, EICAR-Testdatei → „Gefährlich“, Download erst nach zweitem Klick als „….gesperrt“; Office, Archive, RTF, abweichender Typ → „Vorsicht“ mit Begründung; sichere Dateinamen (keine Steuer- und Richtungszeichen, keine ungepaarten Surrogate, keine reservierten Windows-Namen) | Testreihen `security` (Einstufung, Dateinamen), `fuzz` (Eigenschaften für beliebige Dateien und Namen), `security-browser-*` (EICAR-Datei des ZUGFeRD-Korpus) | eine harmlos wirkende Datei mit unbekannter Schadsoftware; der Nutzer öffnet eine Datei trotz Warnung |
+| Formeln in CSV-Exporten (CWE-1236) | Rechnungsdaten und Dateinamen in den CSV-Dateien | Zellen, die eine Tabellenkalkulation als Formel liest, beginnen mit einem Apostroph (seit 0.4.0; Sicherheitshinweis E-RECHNUNG-PRUEFER-SA-2026-001 für 0.2.0–0.3.1) | Testreihen `reports`, `security` (präparierte Rechnungen durch die ganze Verarbeitung), `fuzz` (beliebige Texte in einer Rechnung durch die ganze Verarbeitung; jede CSV-Datei mit strengem Leser) | CSV-Dateien aus älteren Versionen |
 | Aktive Inhalte in PDF-Rechnungen | JavaScript, Start- und Zusatzaktionen | gemeldet (Prüfungen PDFA3-ACTIONS, PDFA3-AA, PDF-JAVASCRIPT, auch ohne lesbare Querverweistabelle); Sicherheitshinweis im Ergebnis und im Prüfprotokoll | Testreihe `pdfa3-container-checks` (synthetische PDFs), veraPDF-Vergleich, `security-browser-*` | das Öffnen der PDF in einem Programm mit aktiviertem JavaScript |
 | Lesen lokaler Dateien | externe XML-Entitäten (XXE) | jede Dokumenttyp-Deklaration wird vor dem Parsen abgewiesen, wie im KoSIT-Validator | Testreihen `robustness`, `robustness-browser-*`, `kosit-official` | – |
-| Hängen / Absturz | Entity-Expansion, tiefe Verschachtelung, PDF-Dekompressionsbomben, große Dateien | DOCTYPE abgewiesen; Tiefe > 5 000 abgewiesen; entpackte PDF-Ströme ≤ 64 MiB je Strom, ≤ 256 MiB je Dokument; Datei ≤ 100 MB | Testreihen `robustness`, `robustness-browser-*` | große gültige Dokumente bleiben langsam (nur der eigene Tab) |
+| Hängen / Absturz | Entity-Expansion, tiefe Verschachtelung, PDF-Dekompressionsbomben, große Dateien, Texte, die reguläre Ausdrücke in exponentielle Laufzeit treiben (ReDoS) | DOCTYPE abgewiesen; Tiefe > 5 000 abgewiesen; entpackte PDF-Ströme ≤ 64 MiB je Strom, ≤ 256 MiB je Dokument; Datei ≤ 100 MB; reguläre Ausdrücke auf Dateiinhalten nur mit linearer Laufzeit (CodeQL `js/redos`, `js/polynomial-redos`) | Testreihen `robustness`, `robustness-browser-*`, `fuzz` (beschädigte PDF-Dateien und Rechnungen, wiederholte Muster), `security` | große gültige Dokumente bleiben langsam (nur der eigene Tab) |
 | Manipulierte gespeicherte Regelwerke | ein anderes Dokument desselben Ursprungs schreibt in den Browserspeicher | gespeichert und verwendet nur, wenn byte-gleich mit der geprüften Fassung (SHA-256 in der Seite); sonst gelöscht und gemeldet | Testreihen `security-browser-*`, `peppol-import-*` | – |
 | Falsches Ergebnis durch manipulierte Regelwerke oder Programmteile | Lieferkette (Quellen, Build) | Quellen festgelegt (Commit bzw. SHA-256, `build/STANDARDS_MANIFEST.json`), bei jedem Lauf geprüft; reproduzierbarer Build; Abgleich mit dem offiziellen KoSIT-Validator | Testreihen `manifest`, `engine-reproducible`, `build-reproducible`, `kosit-official` | Kompromittierung eines Quellprojekts vor dem Festlegen |
-| Manipulierte Werkzeuge der Prüfumgebung | GitHub Actions, npm-Pakete, heruntergeladene Programme | Actions auf Commits festgelegt; Testwerkzeuge mit festen Versionen (package.json, Lockdatei), ohne Installationsskripte; OSV-Scanner nur mit geprüfter SHA-256; Anmeldedaten des Checkouts nicht gespeichert; geringste Rechte je Job; Dependabot mit sieben Tagen Wartezeit | Testreihe `sbom` (Festlegung), Workflow `security` (CodeQL für Workflows), OpenSSF Scorecard | Kompromittierung von GitHub selbst |
-| Manipulierte Download-Datei | Verteilung | nur über HTTPS; Releases nur aus geprüften Commits (sieben Check-Runs); `SHA256SUMS.txt`; Herkunftsnachweis jeder veröffentlichten Datei (GitHub Artifact Attestation, Sigstore); Abruf und Byte-Vergleich jeder veröffentlichten Datei nach dem Deployment | Check-Runs „pages report“, „release report“ | Nutzer prüfen Prüfsumme oder Herkunft nicht |
+| Manipulierte Werkzeuge der Prüfumgebung | GitHub Actions, npm-Pakete, heruntergeladene Programme, Workflows mit Schreibrechten | Actions auf Commits festgelegt; Testwerkzeuge nur aus `package-lock.json` (`npm ci`: Version und SHA-512 jedes Pakets), ohne Installationsskripte, Signaturen der npm-Registry geprüft (`npm audit signatures`); OSV-Scanner nur mit geprüfter SHA-256; Anmeldedaten des Checkouts nicht gespeichert; geringste Rechte je Job; kein Workflow, den ein anderer mit Schreibrechten startet (`workflow_run`), keine Ausdrücke in Skripten; Dependabot mit sieben Tagen Wartezeit | Testreihen `sbom` (Festlegung) und `security` (Workflows, Lockdatei), Workflow `security` (CodeQL für Workflows, Check-Run „code scanning (actions)“), OpenSSF Scorecard | Kompromittierung von GitHub selbst |
+| Manipulierte Download-Datei | Verteilung | nur über HTTPS; Releases nur aus geprüften Commits (neun Check-Runs, darunter CodeQL ohne offenen Befund); `SHA256SUMS.txt`; Herkunftsnachweis jeder veröffentlichten Datei (GitHub Artifact Attestation, Sigstore), im Release auch als Bundle-Datei für die Prüfung ohne GitHub-API; Abruf und Byte-Vergleich jeder veröffentlichten Datei nach dem Deployment | Check-Runs „pages report“, „release report“ | Nutzer prüfen Prüfsumme oder Herkunft nicht |
 | Bekannte Schwachstellen in Komponenten | Drittkomponenten und deren Vorläufer | Stückliste mit Herkunft (`sbom.cdx.json`), Bewertung in `security/vex.json`; OSV-Scanner bei jedem Push und wöchentlich (Programm und Prüfumgebung), unbewertete Funde des Programms brechen ab; wöchentlicher Versionsabgleich der Quellen (`drift.yml`) | Check-Runs „vulnerability scan“, „vulnerability scan (weekly)“, „drift report“ | eine Schwachstelle wird erst bekannt, wenn sie veröffentlicht ist |
 | Versteckte Zeichen im Quelltext („Trojan Source“) | Richtungs- und Formatzeichen in Code und Texten | verboten; Escape-Sequenzen, wo Tests sie brauchen | Testreihe `security` | – |
 | Geheimnisse im Repository | Zugangsdaten in Commits | keine Geheimnisse nötig (nur das Token der Workflows); Secret Scanning mit Push Protection; Prüfung der gesamten Historie mit gitleaks 8.30.1 am 21.10.2026: keine Funde | GitHub Secret Scanning | – |
@@ -85,7 +85,7 @@ Meldeverfahren nach Art. 14: `docs/CRA/MELDEVERFAHREN-ART14.md`. Sorgfaltsprüfu
 | | Anforderung | Umsetzung |
 |---|---|---|
 | (1) | angemessenes Cybersicherheitsniveau aufgrund der Risiken | Abschnitt 3 |
-| (2 a) | ohne bekannte ausnutzbare Schwachstellen | OSV-Scanner bei jedem Push und wöchentlich; keine unbewertete bekannte Schwachstelle (`vex.cdx.json`) |
+| (2 a) | ohne bekannte ausnutzbare Schwachstellen | OSV-Scanner bei jedem Push und wöchentlich; keine unbewertete bekannte Schwachstelle (`vex.cdx.json`); CodeQL (security-extended) ohne offenen Befund (Check-Runs „code scanning (…)“); eigenschaftsbasiertes Fuzzing in jedem Lauf |
 | (2 b) | sichere Standardkonfiguration | keine Konfiguration, keine Konten; Netzwerk gesperrt |
 | (2 c) | Behebung durch Sicherheitsupdates | neue Version; GitHub Pages bei jedem Aufruf aktuell; gespeicherte Dateien: Hinweis nach sechs Monaten (keine automatische Aktualisierung, weil keine Netzwerkverbindung – bewusste Schutzmaßnahme) |
 | (2 d) | Schutz vor unbefugtem Zugriff | keine Rechnungsdaten außerhalb des Browsertabs, keine Konten, keine Schnittstellen |
@@ -105,7 +105,7 @@ Meldeverfahren nach Art. 14: `docs/CRA/MELDEVERFAHREN-ART14.md`. Sorgfaltsprüfu
 |---|---|---|
 | (1) | Schwachstellen und Komponenten erfassen, Stückliste | `sbom.cdx.json` (CycloneDX 1.6 nach BSI TR-03183-2, Lieferumfang vollständig aufgelöst), `test-environment.cdx.json` (Prüfumgebung) |
 | (2) | Schwachstellen unverzüglich beheben, Sicherheitsupdates nach Möglichkeit getrennt von Funktionsupdates | `SECURITY.md` Abschnitte 4 und 8 (Korrekturversion x.y.z+1) |
-| (3) | regelmäßige Prüfungen | alle Testreihen bei jeder Änderung; CodeQL (Programm und Workflows); OSV-Scanner wöchentlich; OpenSSF Scorecard |
+| (3) | regelmäßige Prüfungen | alle Testreihen bei jeder Änderung, darunter eigenschaftsbasiertes Fuzzing (`fuzz`, fast-check); CodeQL (Programm und Workflows) mit den Ergebnissen als Check-Runs; OSV-Scanner wöchentlich; OpenSSF Scorecard |
 | (4) | Veröffentlichung behobener Schwachstellen | GitHub Security Advisories, CSAF 2.0 (`/.well-known/csaf/`), Seite „Sicherheitshinweise“, EUVD auf Antrag über CERT.at |
 | (5) | Richtlinie zur koordinierten Offenlegung | `SECURITY.md`, Seite `cvd-policy/` ohne JavaScript |
 | (6) | Austausch von Informationen über Schwachstellen erleichtern | `security.txt` (RFC 9116) mit Kontakt, Richtlinie und CSAF; CSAF und VEX maschinenlesbar |
@@ -118,9 +118,20 @@ Meldeverfahren nach Art. 14: `docs/CRA/MELDEVERFAHREN-ART14.md`. Sorgfaltsprüfu
 |---|---|---|---|---|
 | E-RECHNUNG-PRUEFER-SA-2026-001 | CSV-Formelinjektion in den CSV-Exporten (CWE-1236), CVSS 4.0: 5.1, CVSS 3.1: 6.1 | 0.2.0, 0.3.0, 0.3.1 | 0.4.0 | CSAF 2.0 mit 0.4.0; GitHub Security Advisory durch den Hersteller |
 
-Vor der Veröffentlichung von 0.4.0 bei der unabhängigen Sicherheitsprüfung gefunden und behoben (keine veröffentlichte
-Version betroffen, daher kein Sicherheitshinweis, TR-03183-3 4.4.10 a): Aktive Inhalte eines PDF ohne lesbare
-Querverweistabelle wurden nicht erkannt; die Erkennung der EICAR-Testdatei war auf 128 Byte begrenzt.
+Vor der Veröffentlichung von 0.4.0 gefunden und behoben (keine veröffentlichte Version betroffen, daher kein
+Sicherheitshinweis, TR-03183-3 4.4.10 a):
+
+* bei der unabhängigen Sicherheitsprüfung: Aktive Inhalte eines PDF ohne lesbare Querverweistabelle wurden nicht
+  erkannt; die Erkennung der EICAR-Testdatei war auf 128 Byte begrenzt;
+* durch CodeQL (`js/redos`): Die Erkennung von SVG-Dateien hinter Kommentaren hatte exponentielle Laufzeit – eine
+  Anlage, die mit `<!--` und vielen `--><!--` beginnt, hätte den Browsertab blockiert (die Einstufung von Anlagen ist
+  neu in 0.4.0); ersetzt durch Prüfungen mit linearer Laufzeit, Regressionstests in `security` und `fuzz`. Dazu ohne
+  Sicherheitsauswirkung: unvollständiges Maskieren beim Einsetzen von Variablennamen in reguläre Ausdrücke
+  (`src/sch-compiler.js`; Namen sind NCNames), eine wirkungslose Ersetzung (`src/xsd-validator.js`), Prüfungen des Builds
+  und der Tests (Groß-/Kleinschreibung von Tags, temporäre Dateien, Zeitpunkt von Dateiprüfungen);
+* durch das Fuzzing (ohne Sicherheitsauswirkung): angebotene Dateinamen mit ungepaarten Surrogaten, mit einem Punkt am
+  Ende nach dem Kürzen oder mit getrenntem Surrogatpaar, eine zweite Bereinigung änderte manche Namen erneut; Namen in
+  ZIP-Archiven verloren ein führendes U+FEFF.
 
 ## 7. Maßnahmen des Anbieters (Einstellungen des Repositorys)
 
@@ -128,13 +139,25 @@ Diese Schritte kann nur der Inhaber des Repositorys ausführen; der Stand wird �
 
 * Dependabot alerts und Dependabot security updates einschalten; Secret Scanning für generische Muster
   („non-provider patterns“) einschalten.
-* Regelsatz für `main`: kein Force-Push, kein Löschen.
+* Regelsatz für `main`: kein Force-Push, kein Löschen (OpenSSF Scorecard „Branch-Protection“).
 * Den öffentlichen Spiegel `pw-webkit-mirror` auf privat stellen (nicht Teil des Projekts).
 * Optional: Benutzer-Repository `SerhiiAkhnazarov.github.io` mit `.well-known/security.txt` (gleicher Inhalt wie
   die Datei des Projekts), damit `security.txt` auch im Pfad `/.well-known/` der Domain liegt (RFC 9116) und die
   CSAF-Verteilung die Rolle „CSAF provider“ erfüllt (Anforderung 8).
 * Den Sicherheitshinweis E-RECHNUNG-PRUEFER-SA-2026-001 als GitHub Security Advisory anlegen und veröffentlichen
   (über die Programmierschnittstelle nicht möglich).
+* Optional: OpenSSF Best Practices Badge (https://www.bestpractices.dev/, Anmeldung mit dem GitHub-Konto; OpenSSF
+  Scorecard „CII-Best-Practices“).
 * Bei Aufnahme einer Geschäftstätigkeit: Postanschrift in Impressum und Herstellerangaben, ein Postfach auf eigener
   Domain (CERT.at bestätigt Konten der Meldeplattform nicht für Freemail-Adressen), Registrierung auf der zentralen
   Meldeplattform der ENISA, Konformitätsbewertung (Modul A) vor dem 11.12.2027.
+
+## 8. OpenSSF Scorecard
+
+Ergebnis für Commit `57df27f` (21.10.2026, Scorecard 5.6.0, https://scorecard.dev/viewer/?uri=github.com/SerhiiAkhnazarov/e-rechnung-pruefer):
+5,1 von 10. Seitdem behoben: „Dangerous-Workflow“ (Veröffentlichung ohne `workflow_run`), „Pinned-Dependencies“
+(Testwerkzeuge nur mit `npm ci` aus der Lockdatei), „Fuzzing“ (fast-check). Erreicht: SAST, Token-Permissions,
+Security-Policy, License, Binary-Artifacts, Dependency-Update-Tool, Vulnerabilities (je 10). Offen, nicht durch Änderungen
+am Code zu beheben: „Branch-Protection“ und „CII-Best-Practices“ (Abschnitt 7), „Signed-Releases“ (bewertet ab dem ersten
+Release mit Bundle-Datei), „Maintained“ (Repository jünger als 90 Tage), „Code-Review“ und „Contributors“ (ein einzelner
+Entwickler; jede Änderung durchläuft stattdessen alle Testreihen und Check-Runs).

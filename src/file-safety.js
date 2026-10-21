@@ -103,6 +103,18 @@
     return s.replace(/^\s+/, '');
   }
 
+  /** the text where the first element starts: without an XML declaration, comments and white space before it (at most
+   * 64 comments; a loop over indexOf, linear in the length) */
+  function afterProlog(t) {
+    t = t.replace(/^<\?xml[^>]*\?>\s*/, '');
+    for (let k = 0; k < 64 && t.startsWith('<!--'); k++) {
+      const end = t.indexOf('-->', 4);
+      if (end < 0) break;
+      t = t.slice(end + 3).replace(/^\s+/, '');
+    }
+    return t;
+  }
+
   /** printable text? (no NUL bytes, at most 2 % control characters in the first 8 KiB) */
   function looksLikeText(b) {
     const n = Math.min(b.length, 8192);
@@ -153,8 +165,13 @@
     if (startsWith(b, [0x7b, 0x5c, 0x72, 0x74, 0x66])) return { id: 'rtf' };
     const head = textHead(b);
     const lowHead = head.slice(0, 4096).toLowerCase();
-    if (/^<!doctype\s+html|^<html[\s>]|^<head[\s>]|^<body[\s>]|^<script[\s>]|^<iframe[\s>]/.test(lowHead) || (/^<\?xml/.test(lowHead) && /<html[\s>][^]*xmlns\s*=\s*["']http:\/\/www\.w3\.org\/1999\/xhtml/.test(lowHead))) return { id: 'html' };
-    if (/^(<\?xml[^>]*\?>\s*)?(<!--[^]*?-->\s*)*<svg[\s>]/.test(lowHead) || /<svg[\s>][^]*xmlns\s*=\s*["']http:\/\/www\.w3\.org\/2000\/svg/.test(lowHead)) return { id: 'svg' };
+    // only tests that take linear time on these 4 KiB of possibly hostile text (no nested or adjacent quantifiers that
+    // can match the same characters: a comment-heavy prolog must not freeze the page, CodeQL js/redos)
+    const start = afterProlog(lowHead);
+    const xhtml = () => { const i = lowHead.search(/<html[\s>]/); return i >= 0 && /xmlns\s*=\s*["']http:\/\/www\.w3\.org\/1999\/xhtml/.test(lowHead.slice(i)); };
+    const svgNs = () => { const i = lowHead.search(/<svg[\s>]/); return i >= 0 && /xmlns\s*=\s*["']http:\/\/www\.w3\.org\/2000\/svg/.test(lowHead.slice(i)); };
+    if (/^<!doctype\s+html|^<(?:html|head|body|script|iframe)[\s>]/i.test(start) || (/^<\?xml/i.test(lowHead) && xhtml())) return { id: 'html' };
+    if (/^<svg[\s>]/i.test(start) || svgNs()) return { id: 'svg' };
     if (/^<\?xml|^<[A-Za-z_][\w.:-]*[\s>/]/.test(head)) return { id: 'xml' };
     if (looksLikeText(b)) return { id: 'text' };
     return { id: 'unknown' };

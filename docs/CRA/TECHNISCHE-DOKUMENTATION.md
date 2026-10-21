@@ -65,10 +65,10 @@ Content-Security-Policy mit `default-src 'none'`, SHA-256 jedes Skripts und Stil
 | Software-Stückliste | `sbom.cdx.json` (CycloneDX 1.6, BSI TR-03183-2 v2.1.0): GitHub Pages und jedes Release; Erzeugung `tools/make-sbom.cjs`, Prüfung Testreihe `sbom` |
 | Richtlinie zur koordinierten Offenlegung | `SECURITY.md`, https://serhiiakhnazarov.github.io/e-rechnung-pruefer/cvd-policy/ |
 | Nachweis der Kontaktadresse | https://serhiiakhnazarov.github.io/e-rechnung-pruefer/security-contact/, `security.txt` (RFC 9116), private Schwachstellenmeldung auf GitHub (eingeschaltet), E-Mail ahnazarovser@gmail.com |
-| Sichere Verteilung von Updates | HTTPS (GitHub Pages, GitHub Releases); Releases nur aus Commits, deren Prüfungen alle bestanden haben (`release.yml`); `SHA256SUMS.txt`; Herkunftsnachweis jeder veröffentlichten Datei (GitHub Artifact Attestation, Sigstore; `gh attestation verify`); jede veröffentlichte Datei wird nach dem Deployment abgerufen und byte-genau verglichen (`tools/check-published.cjs`) |
+| Sichere Verteilung von Updates | HTTPS (GitHub Pages, GitHub Releases); Releases nur aus Commits, deren Prüfungen alle bestanden haben (`release.yml`); `SHA256SUMS.txt`; Herkunftsnachweis jeder veröffentlichten Datei (GitHub Artifact Attestation, Sigstore; `gh attestation verify`), im Release zusätzlich als Bundle-Datei `E-Rechnung-Pruefer-<Version>.intoto.jsonl` für die Prüfung ohne GitHub-API; jede veröffentlichte Datei wird nach dem Deployment abgerufen und byte-genau verglichen (`tools/check-published.cjs`); veröffentlicht nur vom Job `pages` desselben Laufs, der alle Prüfungen ausgeführt hat |
 | Bewertung von Schwachstellen in Komponenten | `security/vex.json` → `vex.cdx.json` (CycloneDX VEX) und CSAF-VEX-Dokument |
 | Veröffentlichung behobener Schwachstellen | CSAF 2.0 unter `/.well-known/csaf/` (Rolle „CSAF publisher“), Seite „Sicherheitshinweise“, GitHub Security Advisories |
-| Suche nach bekannten Schwachstellen | OSV-Scanner bei jedem Push (Check-Run „vulnerability scan“) und wöchentlich (`security.yml`); CodeQL; OpenSSF Scorecard |
+| Suche nach bekannten und unbekannten Schwachstellen | OSV-Scanner bei jedem Push (Check-Run „vulnerability scan“) und wöchentlich (`security.yml`); CodeQL (security-extended, Programm und Workflows; Check-Runs „code scanning (javascript-typescript)“ und „code scanning (actions)“); eigenschaftsbasiertes Fuzzing (Testreihe `fuzz`, fast-check); OpenSSF Scorecard |
 | Meldung an CSIRT und ENISA | `docs/CRA/MELDEVERFAHREN-ART14.md` |
 
 ### (c) Herstellung, Überwachung und deren Validierung
@@ -80,7 +80,9 @@ erzeugt und in jedem CI-Lauf byte-gleich reproduziert (Testreihen `engine-reprod
 (`.github/workflows/verify.yml`): alle Testreihen auf Linux und Windows, darunter der Vergleich mit dem offiziellen
 KoSIT-Validator 1.6.3, mit Saxon HE 12.8, JDK 21 Xerces und veraPDF 1.30.3, die Browser Chromium, WebKit, Firefox,
 Microsoft Edge und Google Chrome; der Freigabeschritt verlangt, dass jede Testreihe mit dem Fingerabdruck der aktuellen
-Eingaben gelaufen und bestanden ist. Überwachung: wöchentlicher Versionsabgleich der Quellen und Ablaufprüfung von
+Eingaben gelaufen und bestanden ist. Die Testwerkzeuge kommen nur aus `package-lock.json` (`npm ci`, SHA-512 jedes
+Pakets, Signaturen der npm-Registry geprüft); die Veröffentlichung auf GitHub Pages ist ein Job desselben Laufs und folgt
+nur, wenn alle Prüfjobs bestanden sind. Überwachung: wöchentlicher Versionsabgleich der Quellen und Ablaufprüfung von
 `security.txt` (`drift.yml`), wöchentliche Schwachstellensuche (`security.yml`), Dependabot (sieben Tage Wartezeit).
 
 ## 3. Bewertung der Cybersicherheitsrisiken
@@ -112,15 +114,16 @@ und Zertifizierungsschemata wurden nicht angewandt. Angewandt (freiwillig, ganz 
 | CycloneDX 1.6 (ECMA-424) | SBOM, VEX, Stückliste der Prüfumgebung |
 | FIRST CVSS 4.0 und 3.1 | Schweregrade |
 | W3C Content Security Policy Level 3, Trusted Types | Schutz der Seite |
-| OWASP CSV Injection | Neutralisierung der CSV-Zellen |
+| OWASP CSV Injection | Neutralisierung der CSV-Zellen (Testreihen `security`, `fuzz`) |
+| OpenSSF Scorecard | Bewertung der Sicherheitspraktiken des Repositorys (`docs/SICHERHEIT.md`, Abschnitt 8) |
 | ISO 19005-3 (PDF/A-3), veraPDF-Regeln | Containerprüfungen (`docs/PDFA3-CHECKS.md`) |
 
 ## 6. Prüfberichte
 
 Je Commit die Check-Runs „verification report“, „Windows report“, „platform comparison“, „veraPDF report“, „KoSIT JAR
-vs. Maven Central“, „vulnerability scan“ und „pages report“
-(`GET /repos/SerhiiAkhnazarov/e-rechnung-pruefer/commits/{sha}/check-runs`); `VERIFICATION.json` (alle Testreihen mit
-Fingerabdruck der Eingaben) auf GitHub Pages und in jedem Release.
+vs. Maven Central“, „vulnerability scan“, „pages report“, „code scanning (javascript-typescript)“ und „code scanning
+(actions)“ (`GET /repos/SerhiiAkhnazarov/e-rechnung-pruefer/commits/{sha}/check-runs`); `VERIFICATION.json` (alle
+Testreihen mit Fingerabdruck der Eingaben) auf GitHub Pages und in jedem Release.
 
 ## 7. EU-Konformitätserklärung
 

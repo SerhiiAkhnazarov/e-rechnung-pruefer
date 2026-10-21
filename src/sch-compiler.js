@@ -235,7 +235,9 @@ function inlineCalls(expr, inlinable, depth) {
         let body = fn.body;
         const names = new Set(fn.params.map((p) => p.name));
         for (const v of body.matchAll(/\blet \$([A-Za-z_][\w.-]*) :=|, \$([A-Za-z_][\w.-]*) :=/g)) names.add(v[1] || v[2]);
-        for (const name of names) body = body.replace(new RegExp('\\$' + name.replace(/[.-]/g, '\\$&') + '(?![\\w.-])', 'g'), '$' + name + suffix);
+        // every character with a meaning in a regular expression escaped (variable names are NCNames: only '.' and '-'
+        // occur, the complete set keeps the expression exact for any name)
+        for (const name of names) body = body.replace(new RegExp('\\$' + name.replace(/[\\^$.*+?()[\]{}|-]/g, '\\$&') + '(?![\\w.-])', 'g'), '$' + name + suffix);
         const binds = fn.params.map((p, i) => '$' + p.name + suffix + ' := (' + convertArgument(args[i], p.as) + ')');
         let replacement = '(let ' + binds.join(', ') + ' return (' + body + '))';
         if (fn.as && /^xs:[A-Za-z]+$/.test(fn.as.trim())) replacement = fn.as.trim() + replacement;

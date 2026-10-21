@@ -208,8 +208,12 @@ async function zugferd() {
     } else {
       // the two Qvalia "Large_Invoice" samples (25 MB and 61 MB UBL) are reader stress tests, not
       // rule tests; they would dominate every Saxon/engine run and are left out above 5 MB
-      if (fs.statSync(p).size > 5 * 1024 * 1024) { skippedLarge.push(rel); continue; }
-      xml = fs.readFileSync(p, 'utf8');
+      // size and content from the same open file (no check-then-read)
+      const fd = fs.openSync(p, 'r');
+      try {
+        if (fs.fstatSync(fd).size > 5 * 1024 * 1024) { skippedLarge.push(rel); continue; }
+        xml = fs.readFileSync(fd, 'utf8');
+      } finally { fs.closeSync(fd); }
     }
     if (xml.charCodeAt(0) === 0xfeff) xml = xml.slice(1);
     let doc;

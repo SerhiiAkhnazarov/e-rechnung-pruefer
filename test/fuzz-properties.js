@@ -18,7 +18,9 @@
  *  3. classification src/file-safety.js classify: every file gets a verdict without exception; a file that starts with
  *                    the signature of a program, a script, a shortcut or the EICAR test file, a name with a
  *                    dangerous extension or with characters that reverse the writing direction is "danger" and
- *                    offered only as "….gesperrt"; the offered name is always a safe file name
+ *                    offered only as "….gesperrt"; the offered name is always a safe file name; the content detection
+ *                    takes linear time on hostile text (repeated units that drive regular expressions into
+ *                    catastrophic backtracking)
  *  4. base64         src/file-safety.js decodeBase64: decodes what Node encodes (Base64 and Base64url), also with line
  *                    breaks and other characters outside the alphabet in between; never throws on any text
  *  5. zip            src/file-safety.js zipNames / detect: the names of a ZIP archive are read exactly from its central
@@ -255,6 +257,19 @@ async function within(promise, what) {
     if (FileSafety.DANGEROUS_EXTENSIONS.has(extOf(c.safeName)) && c.risk !== 'danger') throw new Error('dangerous extension not blocked: ' + c.safeName);
     if (BIDI.test(String(name)) && c.risk !== 'danger') throw new Error('bidirectional control not blocked');
     return true;
+  }));
+
+  // the content detection on hostile text: a prefix, a unit repeated up to 1 500 times (the form that drives a regular
+  // expression into catastrophic backtracking), a suffix – every file within a second
+  const HOSTILE = ['<!--', '-->', '--><!--', '--', '-', '<', '>', '<?xml version="1.0"?>', '?>', '<svg', '<svg ', '<html ', '<!doctype html', ' ', '\n', 'xmlns', 'xmlns=', '="', '"',
+    'http://www.w3.org/2000/svg', 'http://www.w3.org/1999/xhtml', 'a', '<a>'];
+  await property('classification: content detection in linear time on hostile text', runs(1000), fc.property(fc.constantFrom('', '<?xml version="1.0"?>', '<!--', '<svg ', '<html '), arrayOf(fc.constantFrom(...HOSTILE), 4, 1), fc.integer({ min: 1, max: 1500 }), fc.constantFrom('', 'x', '<svg>', '-->', '"'), (prefix, unit, n, suffix) => {
+    const t = (prefix + unit.join('').repeat(n) + suffix).slice(0, 8192);
+    const t0 = Date.now();
+    const d = FileSafety.detect(latin1Bytes(t));
+    const ms = Date.now() - t0;
+    if (ms > 1000) throw new Error(ms + ' ms for ' + t.length + ' characters (' + JSON.stringify(unit) + ' x ' + n + ')');
+    return d.id in FileSafety.TYPE_LABEL;
   }));
 
   // 4. Base64 ------------------------------------------------------------------------------------------------

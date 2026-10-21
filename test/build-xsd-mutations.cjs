@@ -706,9 +706,13 @@ function main() {
       while (idx[p] < pools[p].length) {
         const f = pools[p][idx[p]++];
         progressed = true;
-        if (fs.statSync(f).size > MAX_BASE_BYTES) continue;     // the 25/61 MB PEPPOL samples: x25 mutations each would dominate the run
+        // size and content from the same open file (no check-then-read)
+        const fd = fs.openSync(f, 'r');
+        let text;
+        try { text = fs.fstatSync(fd).size > MAX_BASE_BYTES ? null : fs.readFileSync(fd, 'utf8'); } finally { fs.closeSync(fd); }
+        if (text === null) continue;     // the 25/61 MB PEPPOL samples: x25 mutations each would dominate the run
         let doc;
-        try { doc = slimdom.parseXmlDocument(fs.readFileSync(f, 'utf8')); } catch (e) { continue; }
+        try { doc = slimdom.parseXmlDocument(text); } catch (e) { continue; }
         const ns = doc.documentElement.namespaceURI;
         if (ns !== NS_INV && ns !== NS_CN && ns !== NS_CII) continue;
         if (!modelFor(ns).validator.validate(doc).valid) continue;

@@ -4,7 +4,8 @@
 # (page = BUILD_INFO.json, verification report of this commit from GitHub Actions with every suite passed,
 # standards manifest). Preconditions, checked before anything is created:
 #   - every check run of the commit passed: "verification report", "Windows report", "platform comparison",
-#     "veraPDF report", "KoSIT JAR vs. Maven Central", "vulnerability scan", "pages report";
+#     "veraPDF report", "KoSIT JAR vs. Maven Central", "vulnerability scan", "pages report" (workflow verify) and
+#     "code scanning (javascript-typescript)", "code scanning (actions)" (workflow security: no open CodeQL result);
 #   - the version (first "## x.y.z" of CHANGELOG.md) has no release yet (tag vx.y.z).
 # Assets: E-Rechnung-Pruefer.html, BUILD_INFO.json, VERIFICATION.json, STANDARDS_MANIFEST.json, sbom.cdx.json, vex.cdx.json,
 # test-environment.cdx.json, SHA256SUMS.txt (GitHub adds the source code of the tag as zip and tar.gz), and
@@ -55,7 +56,7 @@ jobs:
           gh api "repos/${GITHUB_REPOSITORY}/commits/${SHA}/check-runs?per_page=100" --paginate \
             --jq '.check_runs[] | [.name, .conclusion, .completed_at, .html_url] | @tsv' > check-runs.tsv
           missing=0
-          for name in "verification report" "Windows report" "platform comparison" "veraPDF report" "KoSIT JAR vs. Maven Central" "vulnerability scan" "pages report"; do
+          for name in "verification report" "Windows report" "platform comparison" "veraPDF report" "KoSIT JAR vs. Maven Central" "vulnerability scan" "pages report" "code scanning (javascript-typescript)" "code scanning (actions)"; do
             row="$(awk -F '\t' -v n="${name}" '$1 == n' check-runs.tsv | sort -t "$(printf '\t')" -k3 | tail -n 1)"
             conclusion="$(printf '%s' "${row}" | cut -f2)"
             echo "${name}: ${conclusion:-missing} $(printf '%s' "${row}" | cut -f4)"
@@ -107,7 +108,7 @@ jobs:
             awk -v v="${VERSION}" '/^## / { if (p) exit; if ($2 == v) { p = 1; next } } p' CHANGELOG.md
             echo
             echo "---"
-            echo "Prüfnachweise dieses Stands (Commit ${SHA}): Check-Runs „verification report“, „Windows report“, „platform comparison“, „veraPDF report“, „KoSIT JAR vs. Maven Central“, „vulnerability scan“, „pages report“ – \`GET /repos/${GITHUB_REPOSITORY}/commits/${SHA}/check-runs\`."
+            echo "Prüfnachweise dieses Stands (Commit ${SHA}): Check-Runs „verification report“, „Windows report“, „platform comparison“, „veraPDF report“, „KoSIT JAR vs. Maven Central“, „vulnerability scan“, „pages report“, „code scanning (javascript-typescript)“, „code scanning (actions)“ – \`GET /repos/${GITHUB_REPOSITORY}/commits/${SHA}/check-runs\`."
             echo "Die Datei E-Rechnung-Pruefer.html ist byte-gleich mit ${PAGE_URL} (SHA-256 in SHA256SUMS.txt). Herkunftsnachweis: \`gh attestation verify E-Rechnung-Pruefer.html -R ${GITHUB_REPOSITORY}\`, ohne Abruf über die GitHub-API mit \`--bundle E-Rechnung-Pruefer-${VERSION}.intoto.jsonl\` (Sigstore-Bundles der Nachweise: Herkunft jeder Datei nach SLSA v1, Stückliste des Programms)."
           } > release-notes.md
           cat release-notes.md

@@ -201,12 +201,14 @@ else {
   const broken = JSON.parse(text);
   delete broken.components[0].name;           // name is required
   broken.components[1].licenses = [{ license: { id: 'Not-An-SPDX-Id' } }];
-  const tmp = path.join(os.tmpdir(), 'sbom-broken-' + process.pid + '.json');
+  // in a directory of its own (fs.mkdtempSync: unique name, permissions of the user only)
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'sbom-broken-'));
+  const tmp = path.join(tmpDir, 'sbom-broken.json');
   fs.writeFileSync(tmp, JSON.stringify(broken));
   const py = process.platform === 'win32' ? 'python' : 'python3';
   const docs = [sbomFile, vexFile].concat(fs.existsSync(envFile) ? [envFile] : []);
   const r = spawnSync(py, ['-I', path.join(__dirname, 'sbom-oracle', 'validate_cdx.py'), path.join(specDir, 'schema')].concat(docs, [tmp]), { encoding: 'utf8' });
-  fs.rmSync(tmp, { force: true });
+  fs.rmSync(tmpDir, { recursive: true, force: true });
   const out = (r.stdout || '') + (r.stderr || '');
   console.log(out.trim().split('\n').slice(0, 8).map((l) => '  ' + l).join('\n'));
   for (const d of docs) check('official CycloneDX 1.6 schema: ' + path.basename(d) + ' valid', out.includes(d + ': valid'), out.slice(0, 300));

@@ -145,7 +145,8 @@ Die Seite auf GitHub Pages ist bei jedem Aufruf die neueste Version. Eine herunt
 aktualisiert sich nicht von selbst, weil der Prüfer keine Netzwerkverbindung aufbaut; die Seite weist auf das Ende des
 Unterstützungszeitraums hin und darauf, dass eine gespeicherte Fassung älter als sechs Monate ist. Jede Datei eines
 Releases ist mit SHA-256 in `SHA256SUMS.txt` aufgeführt und mit einer Herkunftsbescheinigung (GitHub Artifact
-Attestation, Sigstore) versehen; Prüfung: `gh attestation verify E-Rechnung-Pruefer.html -R SerhiiAkhnazarov/e-rechnung-pruefer`.
+Attestation, Sigstore) versehen; Prüfung: `gh attestation verify E-Rechnung-Pruefer.html -R SerhiiAkhnazarov/e-rechnung-pruefer`,
+ohne Abruf über die GitHub-API mit `--bundle E-Rechnung-Pruefer-<Version>.intoto.jsonl` (Datei des Releases).
 
 ## 9. Abweichungen von der BSI TR-03183-3
 

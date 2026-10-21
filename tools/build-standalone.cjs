@@ -59,11 +59,17 @@ const vat = { legal: vatLegal, paths: { syntax: btPaths.syntax, groups: btPaths.
 const manifest = JSON.parse(read('build/STANDARDS_MANIFEST.json'));
 
 function safeJson(obj) {
-  // JSON inside <script>: forbid "</script" and U+2028/2029
-  return JSON.stringify(obj).replace(/<\//g, '<\\/').replace(/\u2028/g, '\\u2028').replace(/\u2029/g, '\\u2029');
+  // JSON inside <script>: the '<' of "</", "<!--" and "<script" as \u003c (nothing the HTML parser reads as the end of the
+  // element or as a nested script; HTML Living Standard, "Restrictions for contents of script elements") and U+2028/2029
+  // escaped; the values are unchanged
+  return JSON.stringify(obj).replace(/<(?=\/|!--|script)/gi, '\\u003c').replace(/\u2028/g, '\\u2028').replace(/\u2029/g, '\\u2029');
 }
 function safeJs(code, name) {
+  // inside a script element the HTML parser ends the element at "</script", and after "<!--" it treats "<script" followed
+  // by white space, "/" or ">" as a nested script whose end does not end the element (HTML Living Standard,
+  // "Restrictions for contents of script elements"): neither may occur in embedded code
   if (/<\/script/i.test(code)) throw new Error(name + ' contains </script');
+  if (/<script[\s/>]/i.test(code)) throw new Error(name + ' contains <script');
   return code;
 }
 
@@ -225,14 +231,26 @@ for (const [k, v] of Object.entries(parts)) {
 // and of the inline style; nothing else may run or style the page, no connection, no form, no plug-in; Trusted Types
 const scriptHashes = [], styleHashes = [];
 const b64 = (t) => "'sha256-" + crypto.createHash('sha256').update(t, 'utf8').digest('base64') + "'";
-for (const m of html.matchAll(/<script(\s[^>]*)?>([\s\S]*?)<\/script>/g)) {
+// (case-insensitive, end tags with white space or attributes: as the HTML parser reads them; embedded code and JSON
+// contain neither "<script" nor "</script" – safeJs, safeJson – so every start tag is one of the matched elements)
+const scripts = Array.from(html.matchAll(/<script(\s[^>]*)?>([\s\S]*?)<\/script[^>]*>/gi));
+const styles = Array.from(html.matchAll(/<style(\s[^>]*)?>([\s\S]*?)<\/style[^>]*>/gi));
+if ((html.match(/<script[\s>]/gi) || []).length !== scripts.length || (html.match(/<style[\s>]/gi) || []).length !== styles.length) throw new Error('script or style elements the Content-Security-Policy hashes cannot be determined for');
+for (const m of scripts) {
   const attrs = m[1] || '';
-  if (/\stype="application\/json"/.test(attrs)) continue;
+  if (/^\s+type="application\/json"(\s+id="[a-z-]+")?\s*$/.test(attrs)) continue;
   if (attrs.trim()) throw new Error('inline script with attributes other than type="application/json": ' + attrs);
   scriptHashes.push(b64(m[2]));
 }
-for (const m of html.matchAll(/<style>([\s\S]*?)<\/style>/g)) styleHashes.push(b64(m[1]));
-if (/\sstyle="/.test(html) || /\son[a-z]+="/i.test(html.replace(/<script[\s\S]*?<\/script>/g, ''))) throw new Error('inline style attribute or event handler attribute in the page (not allowed by the Content-Security-Policy)');
+for (const m of styles) {
+  if ((m[1] || '').trim()) throw new Error('inline style element with attributes: ' + m[1]);
+  styleHashes.push(b64(m[2]));
+}
+// the markup outside script and style elements: no style attribute, no event handler attribute
+let markup = '', last = 0;
+for (const m of scripts.concat(styles).sort((a, b) => a.index - b.index)) { markup += html.slice(last, m.index); last = m.index + m[0].length; }
+markup += html.slice(last);
+if (/\sstyle\s*=/i.test(markup) || /\son[a-z]+\s*=/i.test(markup)) throw new Error('inline style attribute or event handler attribute in the page (not allowed by the Content-Security-Policy)');
 const CSP = "default-src 'none'; script-src " + scriptHashes.join(' ') + '; style-src ' + styleHashes.join(' ') + "; connect-src 'none'; form-action 'none'; base-uri 'none'; object-src 'none'; require-trusted-types-for 'script'; trusted-types pruefer-xml";
 html = html.split('__CSP__').join(CSP);
 const programSha256 = sha(html);
