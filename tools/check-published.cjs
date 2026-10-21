@@ -7,10 +7,12 @@
  *   2. BUILD_INFO.json: "programSha256" present (the page without its build note = the program tested in the
  *      CI jobs, tools/build-standalone.cjs), "fingerprint" = fingerprint id of VERIFICATION.json;
  *   3. VERIFICATION.json: produced on GitHub Actions for --commit, every suite passed (none failed, none not run);
- *   4. STANDARDS_MANIFEST.json: SHA-256 = "manifestSha256" of BUILD_INFO.json.
+ *   4. STANDARDS_MANIFEST.json: SHA-256 = "manifestSha256" of BUILD_INFO.json;
+ *   5. sbom.cdx.json (CycloneDX 1.6, tools/make-sbom.cjs): the SBOM of this page – version and SHA-256 of the page,
+ *      programSha256 and manifestSha256 as in BUILD_INFO.json.
  * GitHub Pages answers through a CDN (cached for up to 10 minutes): every request carries ?commit=<sha>, and the
  * check is repeated (--retries, --wait seconds) until the files of that commit are served.
- * --out <dir>: writes the four files and SHA256SUMS.txt there (the assets of a release, release.yml).
+ * --out <dir>: writes the five files and SHA256SUMS.txt there (the assets of a release, release.yml).
  *
  * Usage: node tools/check-published.cjs <base-url> --commit <sha> [--expect-sha256 <hex>] [--out <dir>]
  *          [--retries 20] [--wait 30]
@@ -35,7 +37,7 @@ if (!/^(https:\/\/|http:\/\/(127\.0\.0\.1|localhost)(:\d+)?\/)/.test(base) || !c
   process.exit(2);
 }
 const sha = (b) => crypto.createHash('sha256').update(b).digest('hex');
-const FILES = ['E-Rechnung-Pruefer.html', 'index.html', 'BUILD_INFO.json', 'VERIFICATION.json', 'STANDARDS_MANIFEST.json'];
+const FILES = ['E-Rechnung-Pruefer.html', 'index.html', 'BUILD_INFO.json', 'VERIFICATION.json', 'STANDARDS_MANIFEST.json', 'sbom.cdx.json'];
 
 async function fetchAll() {
   const got = {};
@@ -75,6 +77,17 @@ function check(got) {
   if (info.fingerprint !== fp.id) problems.push('BUILD_INFO.json fingerprint ' + info.fingerprint + ' != VERIFICATION.json ' + fp.id);
   const manSha = sha(got['STANDARDS_MANIFEST.json']);
   if (manSha !== info.manifestSha256) problems.push('SHA-256 of STANDARDS_MANIFEST.json ' + manSha + ' != BUILD_INFO.json manifestSha256 ' + info.manifestSha256);
+  let bom = null;
+  try { bom = JSON.parse(got['sbom.cdx.json'].toString('utf8')); } catch (e) { problems.push('sbom.cdx.json: ' + e.message); }
+  if (bom) {
+    const top = (bom.metadata && bom.metadata.component) || {};
+    const prop = (n) => ((top.properties || []).find((p) => p.name === n) || {}).value;
+    lines.push('sbom.cdx.json: CycloneDX ' + bom.specVersion + ', ' + (bom.components || []).length + ' components, version ' + top.version);
+    if (bom.bomFormat !== 'CycloneDX' || bom.specVersion !== '1.6') problems.push('sbom.cdx.json is not CycloneDX 1.6');
+    if (top.version !== info.version) problems.push('sbom.cdx.json version ' + top.version + ' != BUILD_INFO.json ' + info.version);
+    if (!top.hashes || !top.hashes[0] || top.hashes[0].content !== pageSha) problems.push('sbom.cdx.json: SHA-256 of the program differs from the page');
+    if (prop('e-rechnung-pruefer:programSha256') !== info.programSha256 || prop('e-rechnung-pruefer:manifestSha256') !== info.manifestSha256) problems.push('sbom.cdx.json: programSha256 / manifestSha256 differ from BUILD_INFO.json');
+  }
   return { problems, lines };
 }
 

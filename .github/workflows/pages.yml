@@ -62,6 +62,7 @@ jobs:
             cp dist/E-Rechnung-Pruefer.html site/index.html
             cp dist/E-Rechnung-Pruefer.html site/E-Rechnung-Pruefer.html
             cp dist/BUILD_INFO.json site/BUILD_INFO.json
+            cp dist/sbom.cdx.json site/sbom.cdx.json
             cp build/STANDARDS_MANIFEST.json site/STANDARDS_MANIFEST.json
             cp build/reports/VERIFICATION.json site/VERIFICATION.json
           } 2>&1 | tee pages-build.txt

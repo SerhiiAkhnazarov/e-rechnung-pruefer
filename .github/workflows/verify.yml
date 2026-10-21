@@ -15,8 +15,8 @@
 #   org.verapdf:validation-model-jakarta from Maven Central via tools/verapdf/VeraMrr.java, strict
 #   checksums; = the veraPDF version of Mustangproject), compared with the container checks
 #   (src/pdfa3-checks.js). Procedure and rule mapping: docs/PDFA3-CHECKS.md.
-# Job "windows": Windows, the platform the product is made for — the five browser suites (XSD in the browser,
-#   end to end, files written by the page, Peppol import, run time) in Microsoft Edge and Google Chrome as installed on the runner image
+# Job "windows": Windows, the platform the product is made for — the six browser suites (XSD in the browser,
+#   end to end, files written by the page, hostile files, Peppol import, run time) in Microsoft Edge and Google Chrome as installed on the runner image
 #   (Playwright channels msedge / chrome), with the corpus, the Xerces reference and the page built on Windows
 #   from byte-identical inputs (checkout without line-ending conversion).
 # Job "platforms": the Linux and the Windows run verified the same inputs (filesId) and the same program
@@ -51,8 +51,9 @@ jobs:
         run: |
           npm install --no-save --no-audit --no-fund playwright@1.56.0 pdfjs-dist@6.2.108 esbuild@0.28.2
           npx playwright install --with-deps chromium webkit firefox
-          sudo apt-get install -y --no-install-recommends qpdf poppler-utils
+          sudo apt-get install -y --no-install-recommends qpdf poppler-utils python3-jsonschema
           qpdf --version | head -n 1; pdftotext -v 2>&1 | head -n 1; python3 -c 'import pyexpat; print(pyexpat.EXPAT_VERSION)'
+          python3 -c 'import importlib.metadata as m; print("jsonschema " + m.version("jsonschema"))'
       - name: Fetch all pinned sources and release artefacts (SHA-256 checked)
         run: node tools/fetch-sources.cjs ext
       - name: KoSIT merge step (XRechnung + whitelisted Peppol rules) and rule compilation
@@ -219,7 +220,7 @@ jobs:
       run:
         shell: bash
     env:
-      WINDOWS_SUITES: manifest,ref-corpus,ref-xerces,xml-encoding,page-build,xsd-browser-edge-win,xsd-browser-chrome-win,e2e-edge-win,e2e-chrome-win,reports-browser-edge-win,reports-browser-chrome-win,peppol-import-edge-win,peppol-import-chrome-win,performance-edge-win,performance-chrome-win
+      WINDOWS_SUITES: manifest,ref-corpus,ref-xerces,xml-encoding,page-build,xsd-browser-edge-win,xsd-browser-chrome-win,e2e-edge-win,e2e-chrome-win,reports-browser-edge-win,reports-browser-chrome-win,robustness-browser-edge-win,robustness-browser-chrome-win,peppol-import-edge-win,peppol-import-chrome-win,performance-edge-win,performance-chrome-win
     steps:
       - name: Check out without line-ending conversion (inputs byte-identical with the repository, same filesId as on Linux)
         run: |

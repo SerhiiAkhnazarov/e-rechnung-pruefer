@@ -185,7 +185,7 @@
   const ASSESS_TONE = { accept: 'ok', reject: 'bad', 'not-processable': 'warn', 'not-applicable': 'neutral', incomplete: 'warn' };
   const ASSESS_TEXT = {
     accept: 'Keine Format- oder Geschäftsregelfehler (Prüfung wie KoSIT-Validator).',
-    reject: 'Technisch fehlerhaft: Format- oder Geschäftsregelfehler (der KoSIT-Validator empfiehlt die Zurückweisung; öffentliche Auftraggeber können sie zurückweisen).',
+    reject: 'Technisch fehlerhaft: Format- oder Geschäftsregelfehler (der KoSIT-Validator empfiehlt die Zurückweisung; für Rechnungen an öffentliche Auftraggeber gelten daneben deren Vorschriften, BMF-Schreiben vom 15.10.2026, Rn. 24 und 25).',
     'not-processable': 'Nicht vollständig verarbeitbar – nicht automatisiert annehmen.',
     'not-applicable': 'Keine Geschäftsregeln anwendbar (kein unterstütztes E-Rechnungsformat).',
     incomplete: 'Keine Fehler in den geprüften Regelwerken; die Prüfung ist unvollständig (Regelwerk fehlt).',
@@ -280,7 +280,7 @@
     const doc = PdfWriter.createDocument(metaOf(r, Object.assign({}, ctx, { now }), (label(TYPE_CODES, typeCode) || 'Rechnung') + ' ' + first(m, 'BT-1') + ' (Lesefassung)'));
     const fl = PdfWriter.createFlow(doc, {});
     const W = fl.width;
-    fl.text('Lesefassung einer elektronischen Rechnung – rechtlich maßgeblich ist der strukturierte XML-Teil (BMF-Schreiben vom 15.10.2024, Rz. 31).', { size: 7.5, color: C.neutral, after: 6 });
+    fl.text('Lesefassung einer elektronischen Rechnung – rechtlich maßgeblich ist der strukturierte XML-Teil (BMF-Schreiben vom 15.10.2024, Rn. 31).', { size: 7.5, color: C.neutral, after: 6 });
     // seller | buyer side by side
     const partyLines = (list) => list.filter(Boolean);
     const sellerL = partyLines([first(m, 'BT-27'), first(m, 'BT-28') && first(m, 'BT-28') !== first(m, 'BT-27') ? first(m, 'BT-28') : '', first(m, 'BT-35'), first(m, 'BT-36'), first(m, 'BT-162'), [first(m, 'BT-38'), first(m, 'BT-37')].filter(Boolean).join(' '), first(m, 'BT-40'), first(m, 'BT-31') ? 'USt-IdNr. ' + first(m, 'BT-31') : '', first(m, 'BT-32') ? 'Steuernummer ' + first(m, 'BT-32') : '', [first(m, 'BT-41'), first(m, 'BT-42'), first(m, 'BT-43')].filter(Boolean).join(' · ')]);

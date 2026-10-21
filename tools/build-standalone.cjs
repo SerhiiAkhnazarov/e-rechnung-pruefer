@@ -198,4 +198,6 @@ const comps = {};
 for (const f of ['vendor/fontoxpath.iife.min.js', 'src/schematron.js', 'src/pdf-embedded.js', 'src/invoice-model.js', 'src/sha256.js', 'src/xml-encoding.js', 'src/xsd-validator.js', 'src/pdfa3-checks.js', 'src/sch-compiler.js', 'src/vat-relevance.js', 'src/pdf-fonts.js', 'src/pdf-writer.js', 'src/reports.js', 'src/pruefer-core.js', 'src/app.js', 'legal/ust-pflichtangaben.json', 'build/bt-paths.json']) comps[path.basename(f)] = { bytes: fs.statSync(path.join(root, f)).size, sha256: sha(read(f)) };
 const info = Object.assign({}, build, { file: path.basename(outFile), bytes: Buffer.byteLength(html), sha256: sha(html), programSha256, embeddedRuleSets: Object.keys(schemas), embeddedXsdModels: Object.keys(xsd), components: comps });
 fs.writeFileSync(path.join(root, 'dist', 'BUILD_INFO.json'), JSON.stringify(info, null, 2));
+// software bill of materials of this page (CycloneDX 1.6, tools/make-sbom.cjs; published with the page and the release)
+fs.writeFileSync(path.join(root, 'dist', 'sbom.cdx.json'), require('./make-sbom.cjs').makeSbom(info, JSON.parse(read('build/STANDARDS_MANIFEST.json'))));
 console.log(`${outFile}: ${(info.bytes / 1024 / 1024).toFixed(2)} MB, SHA-256 ${info.sha256}, program SHA-256 ${programSha256}; rule sets ${Object.keys(schemas).join(', ')}; XSD ${Object.keys(xsd).join(', ')}`);

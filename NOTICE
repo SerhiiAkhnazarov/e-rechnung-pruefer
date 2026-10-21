@@ -117,6 +117,9 @@ D. Used only for building and verification (fetched by tools/fetch-sources.cjs o
 - veraPDF 1.30.3 (CI only, org.verapdf:validation-model-jakarta): GPL-3.0-or-later / MPL-2.0 (dual)
 - OpenJDK 21 (javax.xml.validation / Xerces as XSD reference): GPL-2.0 with Classpath Exception; its Xerces
   code: Apache License 2.0
+- CycloneDX specification 1.6.2 (JSON schemas bom-1.6, spdx, jsf-0.82; https://github.com/CycloneDX/specification):
+  Apache License 2.0; Python package jsonschema (MIT) – validation of the software bill of materials
+  (dist/sbom.cdx.json, tools/make-sbom.cjs) in the test suite sbom
 - Test corpora: KoSIT xrechnung-testsuite (Apache 2.0), ZUGFeRD/corpus (Apache 2.0), CEN test files (EUPL-1.2),
   Peppol examples and unit tests (used as test input only, not redistributed)
 

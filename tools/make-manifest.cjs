@@ -134,6 +134,11 @@ const sources = {
     files: ['Helvetica.afm', 'Helvetica-Bold.afm', 'Courier.afm', 'readme.txt'].map((f) => fileEntry(E('matplotlib') + '/lib/matplotlib/mpl-data/fonts/pdfcorefonts/' + f)),
     note: 'tools/gen-pdf-fonts.cjs extracts the WinAnsiEncoding character widths into src/pdf-fonts.js; the AFM files themselves are not contained in the program or the repository (sparse checkout of lib/matplotlib/mpl-data/fonts/pdfcorefonts).',
   }),
+  'CycloneDX specification 1.6.2 (JSON schemas; validation of the SBOM in the tests only, not shipped)': Object.assign(repoInfo(E('cyclonedx-specification')), {
+    licence: 'Apache-2.0',
+    files: ['schema/bom-1.6.schema.json', 'schema/spdx.schema.json', 'schema/jsf-0.82.schema.json', 'LICENSE'].map((f) => fileEntry(E('cyclonedx-specification') + '/' + f)),
+    note: 'test/run-sbom-tests.cjs validates dist/sbom.cdx.json (tools/make-sbom.cjs) against bom-1.6.schema.json with the Python package jsonschema (test/sbom-oracle/validate_cdx.py, Draft 7 with format checks); the schemas are not contained in the program or the repository.',
+  }),
   'Release artefacts (fetched by tools/fetch-sources.cjs, SHA-256 checked before use; local runs and CI)': {
     artefacts: [
       { name: 'KoSIT validator 1.6.3 (standalone JAR, contains Saxon HE 12.9)', url: 'https://github.com/itplr-kosit/validator/releases/download/v1.6.3/validator-1.6.3-standalone.jar', sha256: '799e64befca97d4080e03608c80b85dd5a5ecc5f4ae4f35d1116ec2855b9a7c9', licence: 'Apache-2.0', alsoOn: 'Maven Central org.kosit:validator:1.6.3:jar:standalone (CI job kosit-jar-maven compares both byte by byte)' },

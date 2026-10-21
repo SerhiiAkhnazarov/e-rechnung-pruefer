@@ -497,15 +497,19 @@
   }
 
   function documentOrderIndex(doc) {
+    // pre-order (node, then its attributes, then its children), iteratively: no recursion depth limit
     const index = new Map();
     let i = 0;
-    (function walk(n) {
+    let n = doc;
+    while (n) {
       index.set(n, i++);
       if (n.nodeType === 1 && n.attributes) {
         for (let a = 0; a < n.attributes.length; a++) index.set(n.attributes[a], i++);
       }
-      for (let c = n.firstChild; c; c = c.nextSibling) walk(c);
-    })(doc);
+      if (n.firstChild) { n = n.firstChild; continue; }
+      while (n && n !== doc && !n.nextSibling) n = n.parentNode;
+      n = n && n !== doc ? n.nextSibling : null;
+    }
     return index;
   }
 

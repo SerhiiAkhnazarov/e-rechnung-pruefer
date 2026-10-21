@@ -8,21 +8,42 @@ Umsatzsteuerliche Einordnung – Abgleich mit dem Original des BMF-Schreibens vo
   kein staatliches Validierungswerkzeug, keine Empfehlung bestimmter Anwendungen“ – sie stehen weder in diesem noch
   im Schreiben vom 15.10.2025. Der Hinweis zum Validierungsbericht gibt jetzt Rn. 35a des Schreibens vom 15.10.2025
   wieder (gelesen in einer Kopie mit Kopfzeile, GZ und DOK).
-- Mit Randnummern belegt: Geschäftsregelfehler nur mit Bezug zu einer Pflichtangabe ein Inhaltsfehler, die Datei
-  bleibt umsatzsteuerlich prinzipiell eine E-Rechnung (Rn. 22, 23); Endrechnung mit BT-113 und BT-22 oder
-  eingebettetem Anhang bis 30.06.2030 (Rn. 3, 4); Empfehlung der Zuordnungstabelle von KoSIT und FeRD (Rn. 8, 9,
-  Fundstellen in `legal/ust-pflichtangaben.json`); allgemeiner Hinweis auf Entgeltminderungen (Rn. 15, 16);
-  Berichtigung (Rn. 20, 21); Leistungsbeschreibung (Rn. 10–12, nicht geprüft – Hinweis in der Übersicht).
-- Neu: Folge für den Vorsteuerabzug nach Abschn. 15.11 Abs. 3 Satz 2 UStAE n. F. im Urteil „Pflichtangabe fehlt“;
-  Hinweis zu Anlagen (BG-24: Pflichtangaben im strukturierten Teil, Anlagen bei Endrechnung, Bauleistung,
-  Bruttopreisrechnung – BMF-Schreiben vom 15.10.2025, Rn. 35; vom 15.10.2026, Rn. 4, 14, 19); bei einer möglichen
-  Endrechnung zeigt die Übersicht, ob eine Bemerkung (BT-22) und eingebettete Anlagen vorhanden sind; Berichtigung durch
-  Gutschrift des Leistungsempfängers (Abschn. 14.11 Abs. 2 Satz 7 UStAE n. F.).
+- Mit Randnummern belegt: ein Geschäftsregelfehler hat nur dann einen Inhaltsfehler zur Folge, wenn er eine
+  Pflichtangabe betrifft, die Datei bleibt umsatzsteuerlich prinzipiell eine E-Rechnung, für ihre Ordnungsmäßigkeit
+  sind richtige und vollständige Pflichtangaben erforderlich (Rn. 22, 23); Endrechnung bis 30.06.2030: Summe in
+  BT-113 mit den Einzelheiten in BT-22 (Rn. 3) oder Absetzung in einem eingebetteten Anhang (Rn. 4); Empfehlung der
+  Zuordnungstabelle von KoSIT und FeRD (Rn. 8, 9, Fundstellen in `legal/ust-pflichtangaben.json`); allgemeiner
+  Hinweis auf Entgeltminderungen (Rn. 15, 16); Berichtigung (Rn. 20, 21); Leistungsbeschreibung (Rn. 10–12, nicht
+  geprüft – Hinweis in der Übersicht); Rechnungen an öffentliche Auftraggeber (Rn. 24, 25).
+- Neu: Folge für den Vorsteuerabzug nach Abschn. 15.11 Abs. 3 Satz 2 UStAE n. F.; Hinweis zu Anlagen (BG-24:
+  Pflichtangaben im strukturierten Teil, Anlagen bei Endrechnung, Bauleistung, Bruttopreisrechnung – BMF-Schreiben
+  vom 15.10.2025, Rn. 35; vom 15.10.2026, Rn. 4, 14, 19); bei einer möglichen Endrechnung zeigt die Übersicht, ob eine
+  Bemerkung (BT-22) und eingebettete Anlagen vorhanden sind; Berichtigung durch Gutschrift des Leistungsempfängers
+  (Abschn. 14.11 Abs. 2 Satz 7 UStAE n. F.).
+- Zweite unabhängige Durchsicht (21.10.2026): 13 Feststellungen umgesetzt, u. a. Bedingungen der Gesetzestexte
+  (§ 14 Abs. 1 Satz 6 Nr. 2, Abs. 2 Satz 2 Nr. 1 und 3, Abs. 5 Satz 2, Abs. 7 Satz 2 UStG, § 14a Abs. 7 UStG),
+  „Rn.“ statt „Rz.“ für das Schreiben vom 15.10.2024, nicht belegtes Merkmal „auch bei Kleinbeträgen“ entfernt.
 - § 14 Abs. 4 Satz 1 Nr. 6a UStG: erstmals für Rechnungen, die nach dem 31.12.2027 ausgestellt werden (§ 27 Abs. 41
   UStG n. F.; übereinstimmend EY, Ebner Stolz, FGS, NWB) – unverändert umgesetzt, Quellenlage in
   `docs/UST-EINORDNUNG.md`.
 - Tests: jedes im Programm zitierte BMF-Schreiben ist eine Quelle der Tabelle; jede zitierte Randnummer des
   Schreibens vom 15.10.2026 existiert (1–28); neue Fälle für Anlagen, Endrechnung und Berichtigung.
+
+Sicherheit – `SECURITY.md`, `docs/SICHERHEIT.md`
+- Meldeweg für Schwachstellen (vertraulich über GitHub), Ziele für Antwort und Korrektur, koordinierte Offenlegung,
+  unterstützte Version; Einordnung nach der Verordnung (EU) 2024/2847 (Cyber Resilience Act), Risikobewertung und
+  Abgleich mit Anhang I.
+- Robustheit gegen feindliche Dateien: Elemente tiefer als 5 000 Ebenen werden abgewiesen (Grenze wie Chromium; zuvor
+  Stapelüberlauf in Node bei 100 000 Ebenen), die Dokumentreihenfolge der Schematron-Auswertung ohne Rekursion,
+  entpackte PDF-Datenströme höchstens 64 MiB je Strom und 256 MiB je Dokument (Dekompressionsbomben), Dateien über
+  100 MB werden nicht gelesen.
+- Neue Testreihen: `robustness` (Entity-Expansion, externe Entitäten mit lokalem Server, Verschachtelung,
+  PDF-Dekompressionsbomben, PDF-Struktur, beschädigte Dateien, Mutations-Fuzzing von 8 Dokumenten),
+  `robustness-browser-*` (dieselben Dateien in der Seite in Chromium, WebKit, Firefox, Edge und Chrome: keine Anfrage
+  außer der Seite, kein Dateiinhalt, keine Ausnahme), `sbom`.
+- Stückliste (SBOM) `sbom.cdx.json`, CycloneDX 1.6, mit jeder Seite gebaut (`tools/make-sbom.cjs`), auf GitHub Pages
+  und an jedem Release; geprüft gegen das offizielle CycloneDX-Schema (CycloneDX/specification 1.6.2 im Manifest,
+  Python-Paket jsonschema), gegen NOTICE Teil A und das Manifest, reproduzierbar.
 
 ## 0.3.0 (2026-10-20)
 

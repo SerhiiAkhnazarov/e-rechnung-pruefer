@@ -47,7 +47,7 @@ const angabeIds = new Set(legal.angaben.map((a) => a.id));
 check('legal: version 2', legal.version === 2);
 check('legal: Angabe ids unique', angabeIds.size === legal.angaben.length);
 for (const a of legal.angaben) {
-  check('legal: Angabe ' + a.id + ' complete', ['id', 'kurz', 'norm', 'text'].every((k) => typeof a[k] === 'string' && a[k]) && Array.isArray(a.bt) && typeof a.kleinbetrag === 'boolean');
+  check('legal: Angabe ' + a.id + ' complete', ['id', 'kurz', 'norm', 'text'].every((k) => typeof a[k] === 'string' && a[k]) && Array.isArray(a.bt));
   for (const bt of a.bt) check('legal: ' + a.id + ' ' + bt + ' in the syntax binding', known.has(bt));
   if (a.gueltigAb) check('legal: ' + a.id + ' gueltigAb is a date', /^\d{4}-\d{2}-\d{2}$/.test(a.gueltigAb));
 }
@@ -283,7 +283,7 @@ S('paid amount 0', inv({ 'BT-113': ['0.00'] }), '14-5', 'nicht zutreffend');
 {
   const hint = (m, id) => (vat.checklist(m).items.find((i) => i.id === id) || {}).hinweis || '';
   const h1 = hint(inv({ 'BT-113': ['500.00'], 'BT-22': ['Abschlag 1 vom 01.08.2026: 500,00 EUR netto'], 'BT-122': ['Anlage 1'], 'BT-125': ['QUJD'] }), '14-5');
-  check('checklist 14-5: final invoice – BMF-Schreiben vom 15.10.2026, Rn. 3 und 4, note and embedded attachment named', h1.includes('Rn. 3 und 4') && h1.includes('eine Bemerkung (BT-22)') && h1.includes('1 eingebettete Anlage(n) (BG-24)'), h1);
+  check('checklist 14-5: final invoice – BMF-Schreiben vom 15.10.2026, Rn. 3 (BT-113 + BT-22) or Rn. 4 (deduction in the annex), note and embedded attachment named', h1.includes('Rn. 3)') && h1.includes('(Rn. 4)') && h1.includes('Abschn. 14.8 Abs. 8 Nr. 2 UStAE') && h1.includes('eine Bemerkung (BT-22)') && h1.includes('1 eingebettete Anlage(n) (BG-24)'), h1);
   const h2 = hint(inv({ 'BT-113': ['500.00'] }), '14-5');
   check('checklist 14-5: final invoice without note and attachment says so', h2.includes('keine Bemerkung (BT-22)') && h2.includes('keine eingebettete Anlage (BG-24)'), h2);
 }

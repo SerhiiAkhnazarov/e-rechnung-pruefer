@@ -102,10 +102,13 @@ Check-Run „verification report“):
 | PDF-Extraktion gegen pdf.js, ZUGFeRD-Korpus | 151 / 151 (auch bei zerstörter Querverweistabelle) |
 | PDF/A-3-Container-Prüfungen | 151 Korpus-PDFs wie erwartet, 3 394 / 3 394 Mutationen erkannt, Mustang-Parität 15 / 15 (davon 1 Fall strenger als Mustang: `/AFRelationship /Unspecified` an der Rechnungs-XML, `docs/PDFA3-CHECKS.md`) |
 | Rechnungsdaten gegen die offizielle KoSIT-Visualisierung (xrechnung-visualization, Saxon HE 12.8) | 4 157 Dokumente, 164 Geschäftsbegriffe, 184 676 Vergleiche: alle Werte identisch auf 2 072 / 2 072 schemagültigen Dokumenten (für schemaungültige ist das KoSIT-Ergebnis nicht definiert) |
-| Umsatzsteuerliche Einordnung | 3 714 / 3 714 Prüfungen: Rechtstabelle, begründete Erwartungen je Regel, jeder Status der Übersicht und jedes Urteil an konstruierten Rechnungen, 3 140 Korpusdokumente mit 5 096 Befunden konsistent eingeordnet |
+| Umsatzsteuerliche Einordnung | 3 728 / 3 728 Prüfungen: Rechtstabelle, begründete Erwartungen je Regel, jeder Status der Übersicht und jedes Urteil an konstruierten Rechnungen, 3 140 Korpusdokumente mit 5 096 Befunden konsistent eingeordnet |
 | Dateien: CSV, JSON, Prüfprotokoll und Lesefassung (PDF), Anlagen | 1 977 Dokumente, 3 952 PDF: `qpdf --check`, Text über poppler (`pdftotext`, `pdfinfo`) und pdf.js; CSV mit strengem Leser gegen die Daten; 173 Anlagen gleich dem Base64-Decoder von Node; 20 702 / 20 702 Prüfungen |
 | Zeilennummern der Befunde gegen libexpat (Python) | 7 795 Dokumente, 878 914 Elemente, 4 646 Befunde: 0 Abweichungen |
 | SHA-256 (`src/sha256.js`) gegen OpenSSL | 8 928 / 8 928 Eingaben (172 MiB) |
+| Feindliche und beschädigte Dateien (`test/run-robustness-tests.cjs`) | 228 / 228 Prüfungen: Entity-Expansion (Billion Laughs, quadratisch), externe Entitäten (lokale Datei, Netzadresse eines lokalen Servers: keine Verbindung), Verschachtelung 5 000 / 5 001 / 200 000 Ebenen, PDF-Dekompressionsbomben (200 MiB in einem Strom, 6 × 60 MiB), PDF-Arrays 100 000 tief, falsche `/Length`, abgeschnittene XML und PDF, Zufallsbytes; 192 mutierte Fassungen von 8 Dokumenten (Fuzzing mit festem Startwert): jede mit Urteil, ohne Ausnahme, unter 60 s |
+| Dieselben feindlichen Dateien in der Seite (`test/robustness-browser.cjs`), fünf Browser | je 34 / 34 Prüfungen: Ergebnis zu jeder Datei, Seite bleibt bedienbar, keine Anfrage außer der Seite selbst, keine Verbindung zum lokalen Server, kein Dateiinhalt, keine Ausnahme in der Seite; Datei über 100 MB nicht gelesen |
+| Stückliste `sbom.cdx.json` (`test/run-sbom-tests.cjs`) | 67 / 67 Prüfungen: gültig nach dem offiziellen CycloneDX-1.6-Schema (Python jsonschema; Gegenprobe mit fehlerhaftem Dokument), 15 Komponenten = NOTICE Teil A mit Commit und SHA-256 jeder verwendeten Quelldatei, reproduzierbar |
 | Browser: Linux – Chromium, WebKit (Engine von Safari), Firefox; Windows – Microsoft Edge, Google Chrome | XSD-Prüfung im Browser 1 053 / 1 053 identisch mit Node (Urteil, Codes, Fundstellen); Ende-zu-Ende-Prüfung im Browser = Node; jede Datei der Seite (Protokoll, Lesefassung, CSV, JSON, XML, Anlagen) byte-gleich mit Node, SHA-256 der Seite gleich OpenSSL; Peppol-Import im Browser inhaltsgleich mit dem Node-Build (JSON ohne die Herkunftsfelder `sources`/`importedFrom`) |
 | Reproduzierbarkeit | Engine-Bundles aus Upstream + Patches, alle Regelwerke, XSD-Modelle, Szenarien, Syntaxbindung (`build/bt-paths.json`), Zeichenbreiten (`src/pdf-fonts.js`): byte-gleich; die Seite: unter Linux und Windows dasselbe Programm (`programSha256` in `BUILD_INFO.json` = SHA-256 der Seite ohne den Build-Vermerk mit Datum und Prüfstatus) |
 
@@ -132,7 +135,7 @@ gestartet) veröffentlicht genau diese Dateien als Release, wenn alle Check-Runs
 ## Bauen und prüfen
 
 Voraussetzungen: Node 22, JDK 21 (Referenzen), Git, curl, unzip, Python 3 (Referenz der Zeilennummern:
-libexpat), qpdf und poppler-utils (Prüfung der PDF-Dateien). Dieselben Schritte wie im CI-Job `verify`:
+libexpat; Paket jsonschema für die Prüfung der Stückliste), qpdf und poppler-utils (Prüfung der PDF-Dateien). Dieselben Schritte wie im CI-Job `verify`:
 
 ```sh
 npm install --no-save --no-audit --no-fund playwright@1.56.0 pdfjs-dist@6.2.108 esbuild@0.28.2   # Testwerkzeuge
@@ -140,7 +143,7 @@ npx playwright install --with-deps chromium webkit firefox   # Browser vom offiz
 node tools/fetch-sources.cjs ext                    # alle Quellen in den gepinnten Ständen (SHA-256 geprüft)
 sh tools/merge-xrechnung-sch.sh ext                 # KoSIT-Merge-Schritt (XRechnung + Peppol-Whitelist)
 sh tools/compile-rules.sh ext                       # Regelwerke (byte-gleich mit build/schemas; Peppol nur lokal)
-node tools/build-standalone.cjs --version 0.3.1     # dist/E-Rechnung-Pruefer.html + dist/BUILD_INFO.json
+node tools/build-standalone.cjs --version 0.3.1     # dist/E-Rechnung-Pruefer.html, dist/BUILD_INFO.json, dist/sbom.cdx.json
 node tools/verify-all.cjs --ext ext --skip pdfa-verapdf   # vollständige Prüfung (veraPDF: CI-Job pdfa-verapdf)
 node tools/verify-manifest.cjs ext --reports --strict     # Freigabe
 node tools/pruefer-cli.cjs rechnung.xml             # dieselbe Prüfung auf der Kommandozeile (JSON)
@@ -156,6 +159,18 @@ Liegen die Testwerkzeuge an anderer Stelle: `PLAYWRIGHT_MODULE`, `PDFJS_MODULE` 
 `ESBUILD_BINARY` (`test/resolve-tool.cjs`, `tools/verify-all.cjs`).
 
 Neue Versionen der Regelwerke: `docs/BUILD-RULES.md`.
+
+## Sicherheit
+
+* Schwachstellen bitte vertraulich melden: `SECURITY.md` (GitHub „Report a vulnerability“, Ziele für Antwort und
+  Korrektur, koordinierte Offenlegung).
+* Die Seite baut keine Netzwerkverbindung auf (Content-Security-Policy `connect-src 'none'`), führt keine Inhalte der
+  Rechnung aus und begrenzt Verschachtelung, entpackte PDF-Datenströme und Dateigröße; geprüft mit feindlichen
+  Dateien in allen fünf Browsern und mit Mutations-Fuzzing (Testreihen `robustness`, `robustness-browser-*`).
+* Stückliste (SBOM) im Format CycloneDX 1.6: `sbom.cdx.json` neben der Seite auf GitHub Pages und an jedem Release
+  (`tools/make-sbom.cjs`; gegen das offizielle CycloneDX-Schema geprüft, Testreihe `sbom`).
+* Einordnung nach der Verordnung (EU) 2024/2847 (Cyber Resilience Act), Risikobewertung, Abgleich mit Anhang I:
+  `docs/SICHERHEIT.md`.
 
 ## Lizenz
 

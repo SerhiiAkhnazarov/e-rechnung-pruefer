@@ -86,6 +86,8 @@
 
   // ---------- analysis (src/pruefer-core.js: the same pipeline as the command-line version) ----------
   // (line numbers of the findings are assigned in the core as well: PrueferCore.elementLineIndex)
+  // the largest file that is read (src/pdf-embedded.js bounds the decoded streams of a PDF in addition)
+  const MAX_FILE_BYTES = 100 * 1024 * 1024;
   async function analyzeFile(file, progress) {
     const bytes = new Uint8Array(await file.arrayBuffer());
     return PrueferCore.analyzeBytes(CORE_ENV, bytes, file.name, progress);
@@ -107,7 +109,7 @@
   // ---------- rendering ----------
   const ASSESSMENT = {
     accept: { cls: 'ok', text: 'Keine Format- oder Geschäftsregelfehler (Prüfung wie KoSIT-Validator)', short: 'OK' },
-    reject: { cls: 'bad', text: 'Technisch fehlerhaft: Format- oder Geschäftsregelfehler – der KoSIT-Validator empfiehlt die Zurückweisung (öffentliche Auftraggeber können sie zurückweisen). Die umsatzsteuerliche Bedeutung steht darunter.', short: 'Fehler' },
+    reject: { cls: 'bad', text: 'Technisch fehlerhaft: Format- oder Geschäftsregelfehler – der KoSIT-Validator empfiehlt die Zurückweisung; für Rechnungen an öffentliche Auftraggeber gelten daneben deren Vorschriften (BMF-Schreiben vom 15.10.2026, Rn. 24 und 25). Die umsatzsteuerliche Bedeutung steht darunter.', short: 'Fehler' },
     'not-processable': { cls: 'warn', text: 'Das Dokument konnte nicht vollständig verarbeitet werden und sollte nicht automatisiert angenommen werden', short: 'Nicht prüfbar' },
     'not-applicable': { cls: 'neutral', text: 'Keine Geschäftsregeln anwendbar (kein unterstütztes E-Rechnungsformat)', short: 'Nicht anwendbar' },
     incomplete: { cls: 'warn', text: 'Keine Fehler in den geprüften Regelwerken – die Prüfung ist jedoch unvollständig, weil ein Regelwerk fehlt (siehe unten)', short: 'Unvollständig' },
@@ -256,7 +258,7 @@
 
   function renderChecklist(pane, r) {
     const p = r.ust.pflichtangaben;
-    pane.append(h('p', { class: 'small' }, 'Ob die Rechnungspflichtangaben im strukturierten Teil der E-Rechnung vorhanden sind (BMF-Schreiben vom 15.10.2025, Rn. 35: alle Pflichtangaben gehören in den strukturierten Teil; Zuordnung zu den Geschäftsbegriffen nach den Empfehlungen von KoSIT und FeRD). Geprüft wird das Vorhandensein, nicht die Richtigkeit; die Werte stehen so da, wie sie in der XML stehen.'));
+    pane.append(h('p', { class: 'small' }, 'Ob die Rechnungspflichtangaben im strukturierten Teil der E-Rechnung vorhanden sind (BMF-Schreiben vom 15.10.2025, Rn. 35: alle Pflichtangaben gehören in den strukturierten Teil; Zuordnung zu den Geschäftsbegriffen nach der Zuordnungstabelle von KoSIT und FeRD, deren Verwendung die Finanzverwaltung empfiehlt – BMF-Schreiben vom 15.10.2026, Rn. 8). Geprüft wird das Vorhandensein, nicht die Richtigkeit; die Werte stehen so da, wie sie in der XML stehen.'));
     if (p.kleinbetrag) pane.append(h('p', { class: 'note' }, VAT.legal.hinweise.kleinbetrag));
     if (p.kleinunternehmer) pane.append(h('p', { class: 'note' }, VAT.legal.hinweise.kleinunternehmer));
     pane.append(h('div', { class: 'table-scroll' }, h('table', { class: 'data checklist' },
@@ -312,7 +314,7 @@
         return h('li', null, [a.id, a.desc, a.file, a.mime, a.uri].filter(Boolean).join(' · '),
           f ? [' ', h('button', { class: 'btn secondary small-btn', type: 'button', 'data-action': 'attachment', onclick: () => download(f.name, f.bytes, 'application/octet-stream') }, 'Herunterladen (' + fmtBytes(f.bytes.length) + ')')] : null);
       })));
-      pane.append(h('p', { class: 'tiny muted' }, 'Anlagen tragen keine Pflichtangaben: Diese müssen im strukturierten Teil stehen (BMF-Schreiben vom 15.10.2025, Rn. 35). Anlagen werden unverändert gespeichert und nicht geöffnet.'));
+      pane.append(h('p', { class: 'tiny muted' }, 'Pflichtangaben gehören in den strukturierten Teil (BMF-Schreiben vom 15.10.2025, Rn. 35); eingebettete Anlagen werden derzeit nur in bestimmten Fällen nicht beanstandet – Endrechnung, Bauleistung, Bruttopreisrechnung (BMF-Schreiben vom 15.10.2026, Rn. 4, 14 und 19). Anlagen werden unverändert gespeichert und nicht geöffnet.'));
     }
     if (m.precedingInvoices.length) pane.append(h('p', { class: 'small' }, 'Vorausgegangene Rechnungen: ' + m.precedingInvoices.map((p) => p.id + (p.date ? ' (' + fmtDate(p.date) + ')' : '')).join(', ')));
     if (m.notes.length) pane.append(h('h3', { text: 'Bemerkungen' }), h('ul', null, m.notes.map((n) => h('li', { class: 'small pre', text: n }))));
@@ -410,7 +412,10 @@
       await new Promise((res) => setTimeout(res, 20));
       let r;
       try {
-        r = await analyzeFile(file, (msg) => { status.textContent = file.name + ': ' + msg; });
+        if (file.size > MAX_FILE_BYTES) {
+          // not read at all: a file of this size is no e-invoice, and reading it could exhaust the memory of the tab
+          r = { name: file.name, size: file.size, kind: 'unknown', warnings: ['Datei größer als ' + Math.round(MAX_FILE_BYTES / 1048576) + ' MB – nicht geprüft (Schutz vor Überlastung des Browsers).'], assessment: 'not-processable', timing: {} };
+        } else r = await analyzeFile(file, (msg) => { status.textContent = file.name + ': ' + msg; });
       } catch (e) {
         r = { name: file.name, size: file.size, kind: 'unknown', warnings: ['Unerwarteter Fehler: ' + (e && e.message || e)], assessment: 'not-processable', timing: {} };
         console.error(e);

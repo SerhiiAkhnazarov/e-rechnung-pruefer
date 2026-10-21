@@ -9,10 +9,10 @@ ordnungsgemäß ist, ist eine andere Frage: Nach dem BMF-Schreiben vom 15.10.202
 E-Rechnung eine sonstige Rechnung (Rn. 6a), ein **Geschäftsregelfehler** zu anderen Inhalten als den
 Pflichtangaben ist umsatzsteuerlich unbeachtlich (Rn. 35a). Das BMF-Schreiben vom 15.10.2026 bestätigt das: Ein
 Geschäftsregelfehler hat nur dann einen Inhaltsfehler zur Folge, wenn er eine **Rechnungspflichtangabe** betrifft
-(Rn. 22); die technische Sichtweise, nach der jede verletzte Geschäftsregel aus der Datei „keine E-Rechnung“ macht,
+(Rn. 22); die technische Sichtweise, nach der jede verletzte Geschäftsregel aus dem Kern-Datenmodell aus der Datei „keine E-Rechnung“ macht,
 ist für umsatzsteuerliche Fragen nicht maßgebend (Rn. 23). Für die Zuordnung der Pflichtangaben zu den
-Geschäftsbegriffen empfiehlt die Finanzverwaltung die Tabelle von KoSIT und FeRD (Rn. 8) – genau diese verwendet der
-Prüfer (Abschnitt 3). Der Prüfer ordnet deshalb jeden Befund ein, gibt je Rechnung ein Gesamturteil und zeigt, ob die
+Geschäftsbegriffen empfiehlt die Finanzverwaltung die Tabelle von KoSIT und FeRD (Rn. 8) – auf ihr beruht die Zuordnung
+des Prüfers (Abweichungen: Abschnitt 3). Der Prüfer ordnet deshalb jeden Befund ein, gibt je Rechnung ein Gesamturteil und zeigt, ob die
 Pflichtangaben im strukturierten Teil vorhanden sind. **Er ersetzt keine Steuerberatung und keine inhaltliche
 Rechnungsprüfung.**
 
@@ -25,9 +25,9 @@ Rechnungsprüfung.**
 | § 14a Abs. 1, 3, 4, 5, 6, 7; § 15 Abs. 1 Satz 1 Nr. 1 Satz 2 und Nr. 4; §§ 22a, 22c; § 27 Abs. 38 UStG | Übersicht, Texte | gesetze-im-internet.de (über die unabhängige Durchsicht, Abschnitt 8) |
 | §§ 31 (Abs. 2, 4, 5), 33, 34, 34a UStDV | Anschrift, Kalendermonat, Berichtigung, Kleinbetrag, Fahrausweise, Kleinunternehmer | gesetze-im-internet.de |
 | Art. 219a, 230 MwStSystRL | Hinweis ausländischer Verkäufer, Steuer in Euro | NWB (EUR-Lex nicht vollständig abrufbar) |
-| BMF-Schreiben vom 15.10.2024 (GZ III C 2 - S 7287-a/23/10001 :007), Rz. 7, 22, 25, 30–33, 35, 48, 49, 57, 59, 60 | Urteile, Hinweise | Kopie des Schreibens (bak.de); bundesfinanzministerium.de war nicht abrufbar |
+| BMF-Schreiben vom 15.10.2024 (GZ III C 2 - S 7287-a/23/10001 :007), Rn. 7, 22, 25, 30–33, 35, 48, 49, 57, 59, 60 (das BMF zählt nach Randnummern „Rn.“; so zitiert es auch das Schreiben vom 15.10.2026) | Urteile, Hinweise | Kopien des Schreibens (bak.de; altbayerischer.de); bundesfinanzministerium.de sperrt automatische Abrufe (robots.txt) |
 | BMF-Schreiben vom 15.10.2025 (GZ III C 2 - S 7287-a/00019/007/243, DOK COO.7005.100.4.13163130, BStBl 2025 I S. 1806), Rn. 6a, 6b, 35, 35a | Klassen, Urteile, Hinweise „Anlagen“ und „Validierungsbericht“ | Kopie des Schreibens mit Kopfzeile (GZ, DOK): `steuerschroeder.de/blog/wp-content/uploads/2025/10/2025-10-15-einfuehrung-obligatorische-e-rechnung.pdf`, Rn. 35 und 35a satzweise gelesen; bundesfinanzministerium.de sperrt automatische Abrufe (robots.txt). Die Randnummern 6a, 6b, 35, 35a bestätigt das Schreiben vom 15.10.2026 (Rn. 10, 22) |
-| BMF-Schreiben vom 15.10.2026 (GZ III C 5 - S 7287-a/00019/021/017, DOK COO.7005.100.3.15923106) | Rn. 3, 4 (Endrechnung: BT-113 mit Einzelheiten in BT-22 oder eingebettetem, ausdrücklich genanntem Anhang, bis 30.06.2030), Rn. 8, 9 (Zuordnungstabelle KoSIT/FeRD), Rn. 10–12 (Leistungsbeschreibung), Rn. 14, 19 (Anlagen bei Bauleistungen, Bruttopreisrechnungen), Rn. 15, 16 (Entgeltminderung), Rn. 20, 21 (Berichtigung), Rn. 22, 23 (Geschäftsregelfehler); Abschnitt II Nr. 3 (Abschn. 14.11 Abs. 2 Satz 7 UStAE), Nr. 4 (Abschn. 15.11 Abs. 3 Satz 2 UStAE); Anwendungsregelung | **Original** (PDF, 10 Seiten, „Nur per E-Mail“, SHA-256 `af65d13f4d06bec52c425a0a021b2526f5acaa70a8c8b8fc628d9785547b12e6`), vom Betreiber am 21.10.2026 bereitgestellt und vollständig gelesen; Fundstelle `bundesfinanzministerium.de/…/Umsatzsteuer-Anwendungserlass/2026-10-15-obligatorische-elektronische-rechnung.pdf` (Titel der Seite in der Websuche bestätigt) |
+| BMF-Schreiben vom 15.10.2026 (GZ III C 5 - S 7287-a/00019/021/017, DOK COO.7005.100.3.15923106) | Rn. 3, 4 (Endrechnung, bis 30.06.2030: Absetzung als Summe in BT-113 mit den Einzelheiten in BT-22, oder Absetzung in einem eingebetteten, unstrukturierten Anhang nach Abschn. 14.8 Abs. 8 Nr. 2 UStAE mit ausdrücklichem Hinweis), Rn. 8, 9 (Zuordnungstabelle KoSIT/FeRD), Rn. 10–12 (Leistungsbeschreibung), Rn. 14, 19 (Anlagen bei Bauleistungen, Bruttopreisrechnungen), Rn. 15, 16 (Entgeltminderung), Rn. 20, 21 (Berichtigung), Rn. 22, 23 (Geschäftsregelfehler); Abschnitt II Nr. 3 (Abschn. 14.11 Abs. 2 Satz 7 UStAE), Nr. 4 (Abschn. 15.11 Abs. 3 Satz 2 UStAE); Anwendungsregelung | **Original** (PDF, 10 Seiten, „Nur per E-Mail“, SHA-256 `af65d13f4d06bec52c425a0a021b2526f5acaa70a8c8b8fc628d9785547b12e6`), vom Betreiber am 21.10.2026 bereitgestellt und vollständig gelesen; Fundstelle `bundesfinanzministerium.de/…/Umsatzsteuer-Anwendungserlass/2026-10-15-obligatorische-elektronische-rechnung.pdf` (Titel der Seite in der Websuche bestätigt) |
 | KoSIT / FeRD: „Empfehlungen zu Pflichtangaben in einer E-Rechnung gemäß UStG“ (Online-Fassung `xeinkauf.de/xrechnung/ustg/`, geändert 18.09.2026; PDF vom 25.07.2025) – die Finanzverwaltung empfiehlt, sie in der jeweils aktuellen Version zugrunde zu legen (BMF-Schreiben vom 15.10.2026, Rn. 8); Fundstellen nach Rn. 9: `xeinkauf.de/aktuelles/xrechnung/pflichtangaben-nach-ustg-en16931` (Meldung vom 28.07.2025, verweist auf die Online-Fassung) und `www.ferd-net.de/faqs/pflichtangaben-in-e-rechnungen` (PDF vom 25.07.2025) | Zuordnung der Pflichtangaben zu den Geschäftsbegriffen (Abschnitt 3) | xeinkauf.de, ferd-net.de (am 21.10.2026: keine neuere Fassung) |
 | BFH, Urteile vom 17.12.2008, XI R 62/07, und vom 1.3.2018, V R 18/17 | Hinweis zum Leistungszeitpunkt | Sekundärquellen (NWB, Deubner) |
 
@@ -36,7 +36,7 @@ Rechnungsprüfung.**
 | Klasse | wann | Bedeutung |
 |---|---|---|
 | `format` – Formatfehler | XML Schema, Zeichenkodierung, nicht wohlgeformt | keine E-Rechnung, sondern sonstige Rechnung (Rn. 6a). Ausnahme in der Begründung: „XRechnung nicht in UTF-8“ ist eine Einschätzung des Werkzeugs (der KoSIT-Validator meldet das nicht) |
-| `container` – PDF-Container | Vorgaben an den PDF-Teil einer hybriden Rechnung | maßgeblich ist der XML-Teil (Rz. 31); ein abweichender PDF-Teil kann eine weitere Rechnung sein (Rz. 32, § 14c UStG) – das vergleicht das Werkzeug nicht |
+| `container` – PDF-Container | Vorgaben an den PDF-Teil einer hybriden Rechnung | maßgeblich ist der XML-Teil (Rn. 31); ein abweichender PDF-Teil kann eine weitere Rechnung sein (Rn. 32, § 14c UStG) – das vergleicht das Werkzeug nicht |
 | `pflicht` – Pflichtangabe | die Regel betrifft nach der Zuordnung einen Geschäftsbegriff, der eine Pflichtangabe trägt oder zu ihrer Berechnung gehört | nicht ordnungsmäßig, wenn die Angabe fehlt oder unrichtig ist (Rn. 35a) |
 | `ohne-bezug` – keine Pflichtangabe | die Regel betrifft nur andere Geschäftsbegriffe | umsatzsteuerlich unbeachtlich (Rn. 35a), technisch dennoch fehlerhaft |
 | `zusatz` – keine Pflichtangabe | die Regel meldet ein Element, das die EN 16931 nicht vorsieht (UBL-CR, CII-SR, „marked as not used“) | wird nicht ausgewertet |
@@ -51,28 +51,30 @@ nur für Rechnungen ab diesem Datum (BT-2; ohne Datum vorsichtshalber immer).
 
 ## 3. Zuordnung der Pflichtangaben (Geschäftsbegriffe)
 
-Grundlage ist die Zuordnungstabelle von KoSIT und FeRD (Abschnitt 1). Die Zuordnung ist bewusst **weiter** als die
+Grundlage ist die Zuordnungstabelle von KoSIT und FeRD (Abschnitt 1). Welche Angaben eine Kleinbetragsrechnung
+(§ 33 UStDV) oder die Rechnung eines Kleinunternehmers (§ 34a UStDV) enthalten muss, entscheidet die Übersicht
+(Abschnitt 6), nicht diese Tabelle. Die Zuordnung ist bewusst **weiter** als die
 Tabelle, wo ein Begriff zur Berechnung einer Angabe gehört (z. B. Basisbetrag und Prozentsatz eines Nachlasses für
 das Entgelt): dann gilt ein Fehler als „Pflichtangabe“ statt als unbeachtlich.
 
-| Angabe | Norm | Geschäftsbegriffe | auch bei Kleinbeträgen |
-|---|---|---|---|
-| `nr1v` | § 14 Abs. 4 Satz 1 Nr. 1 (Leistender) | BT-27, BT-28, BT-35, BT-36, BT-162, BT-37, BT-38, BT-39, BT-40 | ja |
-| `nr1e` | § 14 Abs. 4 Satz 1 Nr. 1 (Leistungsempfänger) | BT-44, BT-45, BT-50, BT-51, BT-163, BT-52, BT-53, BT-54, BT-55 | nein |
-| `nr2` | Nr. 2 | BT-31, BT-32 | nein |
-| `nr3` | Nr. 3 | BT-2 | ja |
-| `nr4` | Nr. 4 | BT-1 | nein |
-| `nr5` | Nr. 5 | BT-129, BT-130, BT-153 bis BT-161 (Artikelinformation BG-31 mit Merkmalen BG-32) | ja |
-| `nr6` | Nr. 6 | BT-72, BT-73, BT-74, BT-134, BT-135, BT-7 (Vereinnahmung bei Anzahlungen) | nein |
-| `nr6a` | Nr. 6a für Rechnungen ab 1.1.2028 | BT-8 | ja |
-| `nr7` | Nr. 7 | BT-5, BT-20, BT-92 bis BT-97, BT-99 bis BT-103, BT-106 bis BT-109, BT-112, BT-116, BT-118, BT-119, BT-131, BT-136 bis BT-139, BT-141 bis BT-143, BT-146 bis BT-151 | ja |
-| `nr8` | Nr. 8 | BT-6, BT-95, BT-96, BT-102, BT-103, BT-110, BT-111, BT-112, BT-117 bis BT-121, BT-151, BT-152 | ja |
-| `nr9` | Nr. 9 | – (Bemerkung, BG-1) | ja |
-| `nr10` | Nr. 10 i. V. m. Abs. 2 Satz 5 | BT-3 | ja |
-| `14-5` | § 14 Abs. 5 Satz 2 | über `regeln`: BT-113, BT-115, wenn ein bereits gezahlter Betrag angegeben ist | ja |
-| `14a` | § 14a Abs. 1, 3, 4, 5, 6, 7 | BT-31, BT-48, BT-120, BT-121 | ja |
-| `22c` | § 22c | BT-62 bis BT-69, BT-164 | ja |
-| `31-5` | § 31 Abs. 5 UStDV | BT-25, BT-26 | ja |
+| Angabe | Norm | Geschäftsbegriffe |
+|---|---|---|
+| `nr1v` | § 14 Abs. 4 Satz 1 Nr. 1 (Leistender) | BT-27, BT-28, BT-35, BT-36, BT-162, BT-37, BT-38, BT-39, BT-40 |
+| `nr1e` | § 14 Abs. 4 Satz 1 Nr. 1 (Leistungsempfänger) | BT-44, BT-45, BT-50, BT-51, BT-163, BT-52, BT-53, BT-54, BT-55 |
+| `nr2` | Nr. 2 | BT-31, BT-32 |
+| `nr3` | Nr. 3 | BT-2 |
+| `nr4` | Nr. 4 | BT-1 |
+| `nr5` | Nr. 5 | BT-129, BT-130, BT-153 bis BT-161 (Artikelinformation BG-31 mit Merkmalen BG-32) |
+| `nr6` | Nr. 6 | BT-72, BT-73, BT-74, BT-134, BT-135, BT-7 (Vereinnahmung bei Anzahlungen) |
+| `nr6a` | Nr. 6a für Rechnungen ab 1.1.2028 | BT-8 |
+| `nr7` | Nr. 7 | BT-5, BT-20, BT-92 bis BT-97, BT-99 bis BT-103, BT-106 bis BT-109, BT-112, BT-116, BT-118, BT-119, BT-131, BT-136 bis BT-139, BT-141 bis BT-143, BT-146 bis BT-151 |
+| `nr8` | Nr. 8 | BT-6, BT-95, BT-96, BT-102, BT-103, BT-110, BT-111, BT-112, BT-117 bis BT-121, BT-151, BT-152 |
+| `nr9` | Nr. 9 | – (Bemerkung, BG-1) |
+| `nr10` | Nr. 10 i. V. m. Abs. 2 Satz 5 | BT-3 |
+| `14-5` | § 14 Abs. 5 Satz 2 | über `regeln`: BT-113, BT-115, wenn ein bereits gezahlter Betrag angegeben ist |
+| `14a` | § 14a Abs. 1, 3, 4, 5, 6, 7 | BT-31, BT-48, BT-120, BT-121 |
+| `22c` | § 22c | BT-62 bis BT-69, BT-164 |
+| `31-5` | § 31 Abs. 5 UStDV | BT-25, BT-26 |
 
 Abweichung von der Tabelle bei Nr. 6: KoSIT/FeRD nennen für den Leistungszeitpunkt BT-72, BG-14 und BG-26; BT-7 und
 BT-8 ordnen sie der Nr. 6a zu. Der Prüfer ordnet Befunde zu BT-7 vorsichtshalber **auch** der Nr. 6 zu, weil bei
@@ -80,8 +82,9 @@ Anzahlungsrechnungen der Zeitpunkt der Vereinnahmung anzugeben ist (§ 14 Abs. 4
 Übersicht zählt BT-7 nur bei Anzahlungsrechnungen (Code 386, 500) als Leistungs- bzw. Vereinnahmungszeitpunkt.
 
 Bemerkungen (BG-1, BT-21/BT-22) trägt die Tabelle von KoSIT/FeRD bei mehreren Angaben als mögliche Träger (Hinweis
-„Gutschrift“, Steuerbefreiung, § 14a Abs. 6 und 7, Fiskalvertretung, Nr. 6a, Nr. 9). Regeln zu Bemerkungen sind
-Formatregeln; sie werden deshalb **nicht** diesen Angaben zugeordnet. Die Übersicht (Abschnitt 6) wertet die
+„Gutschrift“, Steuerbefreiung, § 14a Abs. 6 und 7, Fiskalvertretung, Nr. 6a, Nr. 9). Regeln zu Bemerkungen prüfen
+nur deren Form (z. B. den Code des Betreffs), nicht den Inhalt; sie werden deshalb **nicht** diesen Angaben
+zugeordnet. Die Übersicht (Abschnitt 6) wertet die
 Bemerkungen dagegen aus.
 
 ## 4. Regeln mit eigener Zuordnung (`regeln`)
@@ -106,20 +109,23 @@ Ein Test stellt sicher, dass jede Zeile, deren Begründung „keine Pflichtangab
 | Urteil | Bedingung (in dieser Reihenfolge) |
 |---|---|
 | `keine-xml` – Keine E-Rechnung | kein strukturierter Teil (PDF ohne Rechnungs-XML, andere Datei) |
-| `nicht-pruefbar` – Nicht einordenbar | ZIP (nicht entpackt), XML ohne UBL/CII-Rechnung, fehlende oder unbekannte Spezifikationskennung (BT-24): andere vereinbarte Formate sind zulässig (§ 14 Abs. 1 Satz 6 Nr. 2 UStG, Rz. 33) |
+| `nicht-pruefbar` – Nicht einordenbar | ZIP (nicht entpackt), XML ohne UBL/CII-Rechnung, fehlende oder unbekannte Spezifikationskennung (BT-24): andere vereinbarte Formate sind zulässig (§ 14 Abs. 1 Satz 6 Nr. 2 UStG, Rn. 33) |
 | `format` – Keine E-Rechnung (Formatfehler) | Zeichenkodierung, nicht wohlgeformt, XML-Schema-Fehler |
-| `kein-profil` – Keine E-Rechnung (Profil) | ZUGFeRD/Factur-X MINIMUM, BASIC WL, ZUGFeRD 1.0 (Rz. 25, 30) |
+| `kein-profil` – Keine E-Rechnung (Profil) | ZUGFeRD/Factur-X MINIMUM, BASIC WL, ZUGFeRD 1.0 (Rn. 25, 30) |
 | `pflicht` – Pflichtangaben betroffen | ein Fehler der Klasse `pflicht` oder `unbestimmt` |
 | `luecke` – Pflichtangabe fehlt | kein solcher Fehler, aber die Übersicht zeigt eine fehlende Pflichtangabe (Rn. 35) |
 | `unvollstaendig` | Verarbeitungsfehler oder fehlendes Regelwerk |
 | `technisch` – Fehler ohne USt-Bedeutung | nur Fehler der Klassen `ohne-bezug`/`zusatz` |
 | `ok` – Keine Format- oder Regelfehler | keine Fehler (mit Zusatz, wenn Angaben zu prüfen sind) |
 
-Folgen bei `pflicht`/`luecke`: nicht ordnungsmäßige Rechnung (Rn. 35a); der Vorsteuerabzug setzt eine nach §§ 14, 14a
+Folgen bei `pflicht`/`luecke`: Liegt tatsächlich ein Verstoß gegen die Pflichtangaben vor, ist die Rechnung nicht
+ordnungsmäßig (Rn. 35a); Rechnungen ohne die vollständigen Angaben nach § 14 Abs. 4 Satz 1 Nr. 1 bis 8 und 10 UStG
+berechtigen nicht zum Vorsteuerabzug, es sei denn, sie werden nachträglich vervollständigt (Abschn. 15.11 Abs. 3
+Satz 2 UStAE n. F.); der Vorsteuerabzug setzt eine nach §§ 14, 14a
 UStG ausgestellte Rechnung voraus (§ 15 Abs. 1 Satz 1 Nr. 1 Satz 2 UStG) – nicht bei Steuerschuldnerschaft des
 Leistungsempfängers (§ 15 Abs. 1 Satz 1 Nr. 4 UStG, eigener Hinweis); eine Berichtigung wirkt unter den übrigen
-Voraussetzungen zurück (Rz. 49). Hinweise je nach Lage: Übergangsregelung des § 27 Abs. 38 UStG und Schutz des
-Empfängers (Rz. 59), Ausnahmen von der E-Rechnungspflicht, ausländischer Verkäufer (§ 14 Abs. 7 UStG, Art. 219a
+Voraussetzungen zurück (Rn. 49). Hinweise je nach Lage: Übergangsregelung des § 27 Abs. 38 UStG und Schutz des
+Empfängers (Rn. 59), Ausnahmen von der E-Rechnungspflicht, ausländischer Verkäufer (§ 14 Abs. 7 UStG, Art. 219a
 MwStSystRL) oder Käufer, Kleinbetragsrechnung, Kleinunternehmer, hybride Rechnung, XRechnung-Kodierung, unvollständige
 Prüfung. Warnungen und Hinweise der Regelwerke sind keine Fehler und ändern das Urteil nicht.
 
@@ -161,9 +167,9 @@ Daten nicht erkennbar). **Kleinunternehmer**: nur Kategorie E mit Hinweis auf §
   E-Rechnungspflicht (Rn. 2), die Kenntnis der Unternehmereigenschaft im Massengeschäft (Rn. 5–7), Rechnungen an die
   öffentliche Verwaltung (Rn. 24, 25) und Bescheide über öffentlich-rechtliche Abgaben (Rn. 26, 27). Hinweise geben
   die Übersicht (Nr. 5, Nr. 7, § 14 Abs. 5, § 31 Abs. 5 UStDV) und das Urteil (Anlagen).
-* Für bis zum 31.12.2026 ausgestellte E-Rechnungen, die den Schreiben vom 15.10.2024 und 15.10.2025 entsprechen,
-  werden die zusätzlichen Vorgaben des Schreibens vom 15.10.2026 – auch für den Vorsteuerabzug – nicht beanstandet
-  (Anwendungsregelung).
+* Es wird – auch für den Vorsteuerabzug – nicht beanstandet, wenn eine bis zum 31.12.2026 ausgestellte E-Rechnung den
+  Schreiben vom 15.10.2024 und 15.10.2025 entspricht, nicht aber den zusätzlichen Vorgaben des Schreibens vom
+  15.10.2026 (Anwendungsregelung).
 
 ## 8. Nachweise und unabhängige Durchsicht
 
@@ -187,6 +193,15 @@ Daten nicht erkennbar). **Kleinunternehmer**: nur Kategorie E mit Hinweis auf §
   (Abschn. 14.11 Abs. 2 Satz 7 UStAE n. F.), die Fundstellen der Zuordnungstabelle nach Rn. 9. Bestätigt ohne Änderung:
   die Einordnung der Geschäftsregelfehler (Rn. 22, 23), die Endrechnung (Rn. 3, 4), der allgemeine Hinweis auf
   Entgeltminderungen (Rn. 16). Das Schreiben erwähnt § 14 Abs. 4 Satz 1 Nr. 6a UStG nicht.
+* Zweite unabhängige Durchsicht am 21.10.2026 (eigener Prüfer ohne Kenntnis der Entstehung; Original des Schreibens
+  vom 15.10.2026, Kopien der Schreiben von 2024 und 2025, gesetze-im-internet.de, xeinkauf.de, Verordnung (EU)
+  2024/2847): keine Aussage ist einem Schreiben zugeschrieben, das sie nicht enthält; 13 Feststellungen, alle umgesetzt –
+  u. a. Rn. 23 als notwendige, nicht hinreichende Bedingung, „nur dann“ in Rn. 22, Rn. 4 als Alternative (Absetzung im
+  Anhang), bedingte Folgen bei `pflicht`, Wortlaut der Anwendungsregelung, „Rn.“ statt „Rz.“ für das Schreiben von 2024,
+  die nicht belegte Spalte „auch bei Kleinbeträgen“ entfernt, die Bedingungen von § 14 Abs. 1 Satz 6 Nr. 2 („oder mit
+  ihr interoperabel“), Abs. 2 Satz 2 Nr. 1 (Gebiete nach § 1 Abs. 3), Abs. 5 Satz 2, Abs. 7 Satz 2 (Gutschrift),
+  § 14b Abs. 1 Satz 5 (§ 14 Abs. 2 Satz 2 Nr. 3), § 14a Abs. 7 (Steuerschuldnerschaft des letzten Abnehmers), die
+  Aussage über öffentliche Auftraggeber jetzt mit Rn. 24 und 25 belegt, CRA-Einzelheiten in `docs/SICHERHEIT.md`.
 
 ## 9. Pflege
 

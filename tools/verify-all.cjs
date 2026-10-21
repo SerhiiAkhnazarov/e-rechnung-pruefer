@@ -74,6 +74,8 @@ const SUITES = [
   // the page that the browser suites open (dist/E-Rechnung-Pruefer.html) is built from the current sources first,
   // as in CI; the final page with the status line of this run is built after the run (tools/build-standalone.cjs)
   { name: 'page-build', cmd: [node, 'tools/build-standalone.cjs', '--version', changelogVersion()], summary: /SHA-256/ },
+  // the SBOM of that page (tools/make-sbom.cjs, written by the page build): official CycloneDX 1.6 schema, NOTICE part A
+  { name: 'sbom', cmd: [node, 'test/run-sbom-tests.cjs', E('cyclonedx-specification')], summary: /^SBOM tests:/, needs: [E('cyclonedx-specification') + '/schema/bom-1.6.schema.json'] },
   { name: 'xpath-conformance', cmd: [node, 'test/xpath-conformance/run-fontoxpath.cjs'], summary: /^XPath conformance/ },
   { name: 'xpath-document', cmd: [node, 'test/xpath-conformance/run-fontoxpath-doc.cjs'], summary: /^XPath document battery/, all: true },
   { name: 'batch-compile', cmd: [node, 'test/check-batches.cjs'], summary: /^batches/ },
@@ -92,6 +94,9 @@ const SUITES = [
   { name: 'reports', cmd: [node, 'test/run-reports-tests.cjs', ...REPORT_FILES], summary: /^readers:|^reports tests:/, all: true },
   { name: 'line-numbers-vs-expat', cmd: [node, 'test/run-line-tests.cjs'], summary: /^reference:|^line numbers vs expat:/, all: true },
   { name: 'sha256-vs-node-crypto', cmd: [node, 'test/run-sha256-tests.cjs'], summary: /^SHA-256/ },
+  // hostile and damaged files (entity expansion, external entities, nesting, PDF decompression bombs, mutation
+  // fuzzing of the E2E documents): a result without exception, no file or network access, bounded memory (0.3.1)
+  { name: 'robustness', cmd: [node, 'test/run-robustness-tests.cjs', '--mutations', '24', ...E2E_FILES], summary: /^fuzzing:|^robustness tests:/, all: true },
   { name: 'xsd-selftest', cmd: [node, 'test/xsd-selftest.cjs'], summary: /^instances/ },
   ...browsers((b) => ({ name: 'xsd-browser-' + b, browser: b, cmd: [node, 'test/xsd-browser.cjs', '--browser', b], summary: /identical|differences/ })),
   { name: 'kosit-reference', cmd: [node, 'test/kosit-reference/verify.cjs'], summary: /configuration self-tests|MISMATCHES|fresh run/, all: true, needs: ['build/corpus/xr-ubl', E('saxon') + '/saxon-he-12.8.jar'] },
@@ -106,16 +111,18 @@ const SUITES = [
     summary: /^veraPDF comparison \(mrr-3b\.xml\):/, needs: ['build/verapdf/mrr-3b.xml', 'build/pdfa3-results.json'] },
   ...browsers((b) => ({ name: 'e2e-' + b, browser: b, cmd: [node, 'test/e2e-browser.cjs', '--browser', b, '--screenshot', 'build/shots/' + b, ...E2E_FILES], summary: new RegExp('^E2E ' + b) })),
   ...browsers((b) => ({ name: 'reports-browser-' + b, browser: b, cmd: [node, 'test/e2e-reports-browser.cjs', '--browser', b, ...REPORT_FILES], summary: new RegExp('^E2E reports ' + b) })),
+  ...browsers((b) => ({ name: 'robustness-browser-' + b, browser: b, cmd: [node, 'test/robustness-browser.cjs', '--browser', b], summary: new RegExp('^verdicts in |^E2E robustness ' + b), all: true })),
   ...browsers((b) => ({ name: 'peppol-import-' + b, browser: b, cmd: [node, 'test/peppol-import-browser.cjs', '--browser', b, E('peppol-bis-invoice-3'),
     ...['base-example.xml', 'Allowance-example.xml', 'vat-category-E.xml', 'base-creditnote-correction.xml'].map((f) => E('peppol-bis-invoice-3') + '/rules/examples/' + f)],
     summary: /^PEPPOL IMPORT/, needs: ['build/schemas/PEPPOL-UBL.json', 'build/schemas/PEPPOL-CII.json'] })),
   ...browsers((b) => ({ name: 'performance-' + b, browser: b, cmd: [node, 'test/perf.cjs', E('xrechnung-testsuite'), '--browser', b], summary: /lines,|^cold start|^performance/, all: true })),
-  // ---- Windows (CI job "windows"): the four browser suites in Microsoft Edge and Google Chrome as installed on the
+  // ---- Windows (CI job "windows"): the six browser suites in Microsoft Edge and Google Chrome as installed on the
   // machine (Playwright channels msedge / chrome, no browser download) – the platform the product is made for.
   // Recorded only on Windows; the Linux run neither runs nor lists them (VERIFICATION.json of the job verify).
   ...windows((id, ch) => ({ name: 'xsd-browser-' + id + '-win', cmd: [node, 'test/xsd-browser.cjs', '--browser', 'chromium', '--channel', ch], summary: /identical|differences/ })),
   ...windows((id, ch) => ({ name: 'e2e-' + id + '-win', cmd: [node, 'test/e2e-browser.cjs', '--browser', 'chromium', '--channel', ch, '--screenshot', 'build/shots/' + id + '-win', ...E2E_FILES], summary: new RegExp('^E2E ' + ch) })),
   ...windows((id, ch) => ({ name: 'reports-browser-' + id + '-win', cmd: [node, 'test/e2e-reports-browser.cjs', '--browser', 'chromium', '--channel', ch, ...REPORT_FILES], summary: new RegExp('^E2E reports ' + ch) })),
+  ...windows((id, ch) => ({ name: 'robustness-browser-' + id + '-win', cmd: [node, 'test/robustness-browser.cjs', '--browser', 'chromium', '--channel', ch], summary: new RegExp('^verdicts in |^E2E robustness ' + ch), all: true })),
   ...windows((id, ch) => ({ name: 'peppol-import-' + id + '-win', cmd: [node, 'test/peppol-import-browser.cjs', '--browser', 'chromium', '--channel', ch, E('peppol-bis-invoice-3'),
     ...['base-example.xml', 'Allowance-example.xml', 'vat-category-E.xml', 'base-creditnote-correction.xml'].map((f) => E('peppol-bis-invoice-3') + '/rules/examples/' + f)],
     summary: /^PEPPOL IMPORT/, needs: ['build/schemas/PEPPOL-UBL.json', 'build/schemas/PEPPOL-CII.json'] })),

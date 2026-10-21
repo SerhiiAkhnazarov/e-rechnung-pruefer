@@ -282,6 +282,31 @@
     }
   }
 
+  // the deepest element nesting Chromium's XML parser accepts (5000 elements; 5001 is "Excessive node nesting")
+  const MAX_DEPTH = 5000;
+  /** maximum element nesting depth of a document (root element = 1), iteratively; stops once `cap` is exceeded */
+  function maxElementDepth(doc, cap) {
+    let max = 0, depth = 0;
+    let n = doc.documentElement;
+    while (n) {
+      depth++;
+      if (depth > max) { max = depth; if (max > cap) return max; }
+      let c = n.firstChild;
+      while (c && c.nodeType !== 1) c = c.nextSibling;
+      if (c) { n = c; continue; }
+      // no element child: next element sibling, else up
+      for (;;) {
+        let s = n.nextSibling;
+        while (s && s.nodeType !== 1) s = s.nextSibling;
+        if (s) { depth--; n = s; break; }
+        n = n.parentNode;
+        depth--;
+        if (!n || n.nodeType !== 1) { n = null; break; }
+      }
+    }
+    return max;
+  }
+
   function sortFindings(list) {
     return list.sort((a, b) => LEVEL_ORDER[a.level] - LEVEL_ORDER[b.level] || (SOURCE_ORDER[a.source] || 0) - (SOURCE_ORDER[b.source] || 0) || String(a.id).localeCompare(String(b.id)) || String(a.location || '').localeCompare(String(b.location || '')));
   }
@@ -366,6 +391,15 @@
     result.timing.parse = Math.round(now() - tParse);
     if (!parsed.doc) { result.xml.parseError = parsed.error; result.warnings.push('XML ist nicht wohlgeformt: ' + parsed.error); return finish('not-processable'); }
     const doc = parsed.doc;
+    // nesting depth: a document with elements nested deeper than MAX_DEPTH levels is refused like one that is not
+    // well-formed – Chromium's XML parser refuses it as well ("Excessive node nesting", same limit), no UBL or CII
+    // invoice comes anywhere near it, and the recursive steps of the validation would otherwise exhaust the stack
+    if (maxElementDepth(doc, MAX_DEPTH) > MAX_DEPTH) {
+      const msg = 'Elemente tiefer als ' + MAX_DEPTH + ' Ebenen verschachtelt – nicht verarbeitet (Schutz vor Überlastung; keine UBL- oder CII-Rechnung ist so tief verschachtelt)';
+      result.xml.parseError = msg;
+      result.warnings.push('XML ist nicht verarbeitbar: ' + msg);
+      return finish('not-processable');
+    }
     Object.defineProperty(result, 'doc', { value: doc, enumerable: false });
 
     const syntax = env.InvoiceModel.detectSyntax(doc);
@@ -423,5 +457,5 @@
     return finish(assessment);
   }
 
-  return { analyzeBytes, analyzeDocument, profileFor, rulesetEntry, elementLineIndex, elementsInDocumentOrder, LEVEL_ORDER };
+  return { analyzeBytes, analyzeDocument, profileFor, rulesetEntry, elementLineIndex, elementsInDocumentOrder, maxElementDepth, MAX_DEPTH, LEVEL_ORDER };
 });

@@ -13,7 +13,8 @@
  * updated or slightly damaged files. The last definition of an object number wins (incremental
  * updates append newer definitions).
  *
- * Inflate: DecompressionStream('deflate') (browser + Node 18+), falling back to pako if present.
+ * Inflate: DecompressionStream('deflate') (browser + Node 18+), falling back to pako if present; the output is
+ * bounded (64 MiB per stream, 256 MiB per document – protection against decompression bombs, see limits).
  *
  * API (async): extractEmbeddedFiles(bytes: Uint8Array) ->
  *   { files: [{ name, bytes, mimeType, description, afRelationship, filter, objectNumber }],
@@ -200,31 +201,57 @@
     return latin1(b, 0, b.length);
   }
 
-  async function inflate(bytes) {
+  // Limits against decompression bombs (a few kilobytes of FlateDecode data can expand to gigabytes): one decoded
+  // stream at most MAX_STREAM_BYTES, all streams of one document together at most MAX_DOCUMENT_BYTES (the page reads
+  // files of up to 100 MB, src/app.js).
+  const MAX_STREAM_BYTES = 64 * 1024 * 1024;
+  const MAX_DOCUMENT_BYTES = 256 * 1024 * 1024;
+  const LIMIT_TEXT = 'decoded stream exceeds the limit of ';
+  // the budget of a document is kept per warnings array: every entry point (extractEmbeddedFiles, loadDocument,
+  // the container checks) passes one array through all decoding steps of one document
+  const budgets = new WeakMap();
+  function budgetOf(warnings) {
+    if (!warnings || typeof warnings !== 'object') return { left: MAX_DOCUMENT_BYTES };
+    let b = budgets.get(warnings);
+    if (!b) { b = { left: MAX_DOCUMENT_BYTES }; budgets.set(warnings, b); }
+    return b;
+  }
+  const mib = (n) => Math.round(n / 1048576) + ' MiB';
+
+  /** inflate with an upper bound of the output size (throws once the output would exceed `limit` bytes) */
+  async function inflate(bytes, limit) {
+    limit = typeof limit === 'number' ? limit : MAX_STREAM_BYTES;
     if (typeof DecompressionStream === 'function') {
+      let tooLarge = false;
       try {
         const ds = new DecompressionStream('deflate');
         const writer = ds.writable.getWriter();
-        writer.write(bytes);
-        writer.close();
+        writer.write(bytes).catch(() => {});
+        writer.close().catch(() => {});
         const chunks = [];
+        let len = 0;
         const reader = ds.readable.getReader();
         for (;;) {
           const { value, done } = await reader.read();
           if (done) break;
+          len += value.length;
+          if (len > limit) { tooLarge = true; reader.cancel().catch(() => {}); break; }
           chunks.push(value);
         }
-        let len = 0;
-        for (const c of chunks) len += c.length;
+        if (tooLarge) throw new Error(LIMIT_TEXT + mib(limit) + ' (protection against decompression bombs)');
         const out = new Uint8Array(len);
         let o = 0;
         for (const c of chunks) { out.set(c, o); o += c.length; }
         return out;
       } catch (e) {
-        if (typeof pako === 'undefined') throw e;
+        if (tooLarge || typeof pako === 'undefined') throw e;
       }
     }
-    if (typeof pako !== 'undefined') return pako.inflate(bytes);
+    if (typeof pako !== 'undefined') {
+      const out = pako.inflate(bytes);
+      if (out.length > limit) throw new Error(LIMIT_TEXT + mib(limit) + ' (protection against decompression bombs)');
+      return out;
+    }
     throw new Error('no inflate implementation available');
   }
 
@@ -275,12 +302,22 @@
     if (parms instanceof Map) parms = [parms];
     if (!Array.isArray(parms)) parms = [];
     const names = [];
+    const budget = budgetOf(warnings);
     for (let i = 0; i < filters.length; i++) {
       const f = resolve(filters[i]);
       const fname = f instanceof Name ? f.name : String(f);
       names.push(fname);
       if (fname === 'FlateDecode' || fname === 'Fl') {
-        data = await inflate(data);
+        const limit = Math.min(MAX_STREAM_BYTES, budget.left);
+        const documentLimit = 'decoded streams of this document exceed the limit of ' + mib(MAX_DOCUMENT_BYTES) + ' (protection against decompression bombs)';
+        if (limit <= 0) throw new Error(documentLimit);
+        try {
+          data = await inflate(data, limit);
+        } catch (e) {
+          if (limit < MAX_STREAM_BYTES && String(e && e.message).startsWith(LIMIT_TEXT)) throw new Error(documentLimit);
+          throw e;
+        }
+        budget.left -= data.length;
         const p = resolve(parms[i]);
         if (p instanceof Map && p.get('Predictor')) data = applyPredictor(data, p, resolve);
       } else if (fname === 'ASCIIHexDecode' || fname === 'AHx') {
@@ -826,6 +863,7 @@
 
   return {
     extractEmbeddedFiles, pickInvoiceXml, loadDocument,
+    limits: { MAX_STREAM_BYTES, MAX_DOCUMENT_BYTES },
     // primitives for the container checks (src/pdfa3-checks.js)
     util: { Ref, Name, nameOf, pdfString, nameTreeEntries, makeResolver, streamBytes, decodeStream, scanObjects, expandObjectStreams, latin1, rootElementName },
     _internal: { Lexer, scanObjects, parseXmp },

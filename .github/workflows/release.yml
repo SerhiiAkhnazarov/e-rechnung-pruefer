@@ -6,7 +6,7 @@
 #   - every check run of the commit passed: "verification report", "Windows report", "platform comparison",
 #     "veraPDF report", "KoSIT JAR vs. Maven Central", "pages report";
 #   - the version (first "## x.y.z" of CHANGELOG.md) has no release yet (tag vx.y.z).
-# Assets: E-Rechnung-Pruefer.html, BUILD_INFO.json, VERIFICATION.json, STANDARDS_MANIFEST.json, SHA256SUMS.txt
+# Assets: E-Rechnung-Pruefer.html, BUILD_INFO.json, VERIFICATION.json, STANDARDS_MANIFEST.json, sbom.cdx.json, SHA256SUMS.txt
 # (GitHub adds the source code of the tag as zip and tar.gz). Release notes: the CHANGELOG section of the version.
 # The result is recorded as check run "release report" of the commit.
 name: release
@@ -78,7 +78,7 @@ jobs:
         run: |
           set -e
           gh release create "${{ steps.pre.outputs.tag }}" release/E-Rechnung-Pruefer.html release/BUILD_INFO.json release/VERIFICATION.json \
-            release/STANDARDS_MANIFEST.json release/SHA256SUMS.txt \
+            release/STANDARDS_MANIFEST.json release/sbom.cdx.json release/SHA256SUMS.txt \
             --target "${{ steps.pre.outputs.sha }}" --title "E-Rechnung Prüfer ${{ steps.pre.outputs.version }}" --notes-file release-notes.md
           gh release view "${{ steps.pre.outputs.tag }}" --json url,tagName,assets --jq '"release: " + .url, (.assets[] | .name + " " + (.size | tostring) + " bytes")' | tee release-view.txt
       - name: Publish the result as check run "release report"
