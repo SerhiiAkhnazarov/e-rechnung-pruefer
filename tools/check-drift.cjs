@@ -27,7 +27,9 @@ const ackFile = path.join(root, 'build', 'drift-acknowledged.json');
 const ack = fs.existsSync(ackFile) ? JSON.parse(fs.readFileSync(ackFile, 'utf8')) : {};
 
 // repositories that define what the product checks (test corpora and tools are reported, not failed)
-const PRODUCT = ['einvoicing-en16931', 'xrechnung-schematron', 'validator-configuration-xrechnung', 'peppol-bis-invoice-3', 'mustangproject', 'validator'];
+// (xrechnung-visualization: its stylesheets give the syntax binding of the business terms, build/bt-paths.json – the
+// data shown and the VAT classification depend on it)
+const PRODUCT = ['einvoicing-en16931', 'xrechnung-schematron', 'validator-configuration-xrechnung', 'peppol-bis-invoice-3', 'mustangproject', 'validator', 'xrechnung-visualization'];
 const lines = [];
 const log = (s) => { lines.push(s); console.log(s); };
 let drift = 0;

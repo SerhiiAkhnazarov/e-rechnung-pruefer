@@ -8,8 +8,8 @@ Umsatzsteuerliche Einordnung – Abgleich mit dem Original des BMF-Schreibens vo
   kein staatliches Validierungswerkzeug, keine Empfehlung bestimmter Anwendungen“ – sie stehen weder in diesem noch
   im Schreiben vom 15.10.2025. Der Hinweis zum Validierungsbericht gibt jetzt Rn. 35a des Schreibens vom 15.10.2025
   wieder (gelesen in einer Kopie mit Kopfzeile, GZ und DOK).
-- Mit Randnummern belegt: ein Geschäftsregelfehler hat nur dann einen Inhaltsfehler zur Folge, wenn er eine
-  Pflichtangabe betrifft, die Datei bleibt umsatzsteuerlich prinzipiell eine E-Rechnung, für ihre Ordnungsmäßigkeit
+- Mit Randnummern belegt: Ein Geschäftsregelfehler hat nur dann einen Inhaltsfehler zur Folge, wenn er eine
+  Pflichtangabe betrifft; die Datei bleibt umsatzsteuerlich prinzipiell eine E-Rechnung; für ihre Ordnungsmäßigkeit
   sind richtige und vollständige Pflichtangaben erforderlich (Rn. 22, 23); Endrechnung bis 30.06.2030: Summe in
   BT-113 mit den Einzelheiten in BT-22 (Rn. 3) oder Absetzung in einem eingebetteten Anhang (Rn. 4); Empfehlung der
   Zuordnungstabelle von KoSIT und FeRD (Rn. 8, 9, Fundstellen in `legal/ust-pflichtangaben.json`); allgemeiner
@@ -26,7 +26,7 @@ Umsatzsteuerliche Einordnung – Abgleich mit dem Original des BMF-Schreibens vo
 - § 14 Abs. 4 Satz 1 Nr. 6a UStG: erstmals für Rechnungen, die nach dem 31.12.2027 ausgestellt werden (§ 27 Abs. 41
   UStG n. F.; übereinstimmend EY, Ebner Stolz, FGS, NWB) – unverändert umgesetzt, Quellenlage in
   `docs/UST-EINORDNUNG.md`.
-- Tests: jedes im Programm zitierte BMF-Schreiben ist eine Quelle der Tabelle; jede zitierte Randnummer des
+- Tests: Jedes im Programm zitierte BMF-Schreiben ist eine Quelle der Tabelle; jede zitierte Randnummer des
   Schreibens vom 15.10.2026 existiert (1–28); neue Fälle für Anlagen, Endrechnung und Berichtigung.
 
 Sicherheit – `SECURITY.md`, `docs/SICHERHEIT.md`
@@ -38,16 +38,41 @@ Sicherheit – `SECURITY.md`, `docs/SICHERHEIT.md`
   KoSIT ablehnt (Abweichung, ohne Fall im Korpus); im CI schloss Firefox 142 den Tab bei einer Datei mit
   Entity-Expansion („Billion Laughs“). Neuer Vergleichssatz `doctype` in der Testreihe `kosit-official`.
 - Robustheit gegen feindliche Dateien: Elemente tiefer als 5 000 Ebenen werden abgewiesen (Grenze wie Chromium; zuvor
-  Stapelüberlauf in Node bei 100 000 Ebenen), die Dokumentreihenfolge der Schematron-Auswertung ohne Rekursion,
-  entpackte PDF-Datenströme höchstens 64 MiB je Strom und 256 MiB je Dokument (Dekompressionsbomben), Dateien über
-  100 MB werden nicht gelesen.
+  Stapelüberlauf in Node bei 100 000 Ebenen), die Dokumentreihenfolge der Schematron-Auswertung wird ohne
+  Rekursion bestimmt, entpackte PDF-Datenströme sind auf 64 MiB je Strom und 256 MiB je Dokument begrenzt (Schutz vor
+  Dekompressionsbomben), Dateien über 100 MB werden nicht gelesen.
 - Neue Testreihen: `robustness` (Entity-Expansion, externe Entitäten mit lokalem Server, Verschachtelung,
   PDF-Dekompressionsbomben, PDF-Struktur, beschädigte Dateien, Mutations-Fuzzing von 8 Dokumenten),
-  `robustness-browser-*` (dieselben Dateien in der Seite in Chromium, WebKit, Firefox, Edge und Chrome: keine Anfrage
-  außer der Seite, kein Dateiinhalt, keine Ausnahme), `sbom`.
+  `robustness-browser-*` (11 dieser Dateien und eine über 100 MB in der Seite, in Chromium, WebKit, Firefox, Edge und
+  Chrome: keine Anfrage außer der Seite, kein Dateiinhalt, keine Ausnahme), `sbom`.
 - Stückliste (SBOM) `sbom.cdx.json`, CycloneDX 1.6, mit jeder Seite gebaut (`tools/make-sbom.cjs`), auf GitHub Pages
-  und an jedem Release; geprüft gegen das offizielle CycloneDX-Schema (CycloneDX/specification 1.6.2 im Manifest,
+  und in jedem Release; geprüft gegen das offizielle CycloneDX-Schema (CycloneDX/specification 1.6.2 im Manifest,
   Python-Paket jsonschema), gegen NOTICE Teil A und das Manifest, reproduzierbar.
+
+Dritte unabhängige Durchsicht – Sprache und Belege aller sichtbaren Texte
+- Drei Prüfer ohne Kenntnis der Entstehung (Oberfläche und Dateien, Rechtstexte, Dokumente): 312 Hinweise, jeder gegen
+  die Quelle geprüft; umgesetzt bis auf 7, die einer festen Bezeichnung widersprechen (Produktname, „Rechnungsart“ für
+  BT-3 wie in der KoSIT-Visualisierung, Schreibweise „ZUGFeRD / Factur-X“, Datumsschreibweise, Tausenderpunkt bei
+  Mengen wie bei Beträgen).
+- Rechtlich berichtigt: Echtheit, Unversehrtheit und Lesbarkeit stehen in § 14 Abs. 3 UStG (bisher: Abs. 1), in
+  Österreich in § 11 Abs. 2 UStG 1994 und der E-Rechnung-UStV; BMF-Schreiben vom 15.10.2024, Rn. 59 als
+  Nichtbeanstandung (bisher als Rechtsfolge); BMF-Schreiben vom 15.10.2026, Rn. 20 mit der Bedingung „sofern eine
+  Pflicht zur Ausstellung einer E-Rechnung besteht“; Empfänger nach § 14 Abs. 2 Satz 2 Nr. 3 UStG (Nr. 9) ohne die
+  juristischen Personen der Nr. 2; EDI-Übergang nach § 27 Abs. 38 Nr. 3 UStG für Umsätze des Jahres 2027; Rn. 24 und
+  25 in der Quellenangabe; „eine der Kennungen“ bei BR-S/-Z/-E/-AE/-IC/-G-02 bis -04; UTF-8-Pflicht nur für
+  XRechnung; Beschwerderecht nach Art. 77 DSGVO im Wortlaut.
+- Anzeige: Einzahl und Mehrzahl („1 Warnung“, „1 Position“, „1 Tag“), Großschreibung nach Doppelpunkt, deutsche Zahlen
+  in den Rechnungsdaten (Steuersatz, Menge, Prozent), Dateigrößen in kB/MB mit Dezimalkomma, Dateigrenze genau 100 MB,
+  deutsche Meldungen des XMP-Lesers und deutsche Anführungszeichen, Format „XML“/„PDF“ statt interner Werte,
+  Zeiträume mit nur einem Ende („ab …“, „bis …“); die Empfehlung zur Zurückweisung wird nur noch dort dem
+  KoSIT-Validator zugeschrieben, wo er sie gibt (Schema- und Geschäftsregelfehler).
+- Neu: „Geladene Regelwerke löschen“ entfernt selbst geladene Peppol-Regelwerke aus dem Speicher und dem localStorage
+  (Testreihen `peppol-import-*`).
+- Tests: Jede zitierte Randnummer des Schreibens vom 15.10.2026 steht in seiner Quellenangabe; Einzahl und Mehrzahl in
+  Übersicht und Prüfprotokoll; keine „(n)“-Formen in den Texten des Korpus.
+- Abgleich mit neuen Versionen (`drift.yml`): `xrechnung-visualization` zählt jetzt zu den Quellen des Produkts
+  (Syntaxbindung); deren Bugfix vom 13.10.2026 ist geprüft – er ändert nur die HTML-Darstellung, nicht die
+  Syntaxbindung (`build/drift-acknowledged.json`).
 
 ## 0.3.0 (2026-10-20)
 
@@ -55,7 +80,7 @@ Umsatzsteuerliche Einordnung (Deutschland) – `docs/UST-EINORDNUNG.md`
 - Jeder Befund wird eingeordnet: Formatfehler (keine E-Rechnung, BMF-Schreiben vom 15.10.2025, Rn. 6a),
   PDF-Container, Geschäftsregelfehler mit Bezug zu einer Rechnungspflichtangabe (§ 14 Abs. 4 Satz 1 Nr. 1–10 und
   ab 1.1.2028 Nr. 6a, § 14 Abs. 5 Satz 2, § 14a, § 22c UStG, § 31 Abs. 5 UStDV) oder ohne diesen Bezug
-  (umsatzsteuerlich unbeachtlich, Rn. 35a; BMF-Schreiben vom 15.10.2026), „prüfen“, wo die betroffene Angabe nicht
+  (umsatzsteuerlich unbeachtlich, BMF-Schreiben vom 15.10.2025, Rn. 35a; BMF-Schreiben vom 15.10.2026), „prüfen“, wo die betroffene Angabe nicht
   feststellbar ist – nie „unbeachtlich“ im Zweifel. Zuordnung der Pflichtangaben zu den Geschäftsbegriffen nach den
   Empfehlungen von KoSIT und FeRD, auf die das BMF-Schreiben vom 15.10.2026 verweist; Syntaxbindung aus der
   KoSIT-Visualisierung (`build/bt-paths.json`, reproduzierbar). Daten: `legal/ust-pflichtangaben.json`.
@@ -64,7 +89,7 @@ Umsatzsteuerliche Einordnung (Deutschland) – `docs/UST-EINORDNUNG.md`
   USt-Bedeutung, keine Fehler, unvollständig – mit Übergangsregelung (§ 27 Abs. 38 UStG), Ausnahmen von der
   E-Rechnungspflicht, Kleinbetragsrechnung (§ 33 UStDV), Kleinunternehmer (§ 34a UStDV), Steuerschuldnerschaft
   des Leistungsempfängers (§ 15 Abs. 1 Satz 1 Nr. 4 UStG), hybride Rechnungen (BMF-Schreiben vom 15.10.2024,
-  Rz. 31, 32), Folgen nach § 15 Abs. 1 Satz 1 Nr. 1 Satz 2 UStG und Rückwirkung der Berichtigung (Rz. 49).
+  Rn. 31, 32), Folgen nach § 15 Abs. 1 Satz 1 Nr. 1 Satz 2 UStG und Rückwirkung der Berichtigung (Rn. 49).
 - Übersicht „Pflichtangaben“: ob jede Pflichtangabe im strukturierten Teil vorhanden ist (vorhanden, fehlt,
   prüfen, entfällt, nicht zutreffend), mit Gutschrift-Codes, Endrechnung (BT-113), § 14a Abs. 1, 3, 4, 6, 7,
   Fiskalvertretung im Inland, Steuer in Euro (Art. 230 MwStSystRL) und den beiden BFH-Urteilen zum
@@ -86,16 +111,16 @@ Dateien
   `src/pdf-fonts.js`, reproduzierbar; NOTICE A.12, E.14); gleiche Bytes in jedem Browser und in Node.
 
 Rechnungsdaten
-- Datenmodell neu (`src/invoice-model.js`): Syntaxbindung wie die KoSIT-Visualisierung, alle Geschäftsbegriffe
+- Datenmodell neu (`src/invoice-model.js`): Syntaxbindung wie in der KoSIT-Visualisierung, alle Geschäftsbegriffe
   der Kopf-, Parteien-, Liefer-, Zahlungs-, Steuer- und Positionsdaten mit Nachlässen, Zuschlägen, Merkmalen und
   Anlagen; Datumswerte nach ihrem Format; Beträge ohne Rundung.
 - Zeilennummern der Befunde im gemeinsamen Prüfablauf (Browser und Kommandozeile gleich; Zeilenenden nach
-  XML 1.0 §2.11).
+  XML 1.0, Abschnitt 2.11).
 
 Nachweise (neue Testreihen)
 - `invoice-model-vs-kosit`: Werte des Datenmodells gegen die offizielle KoSIT-Visualisierung (Saxon HE 12.8),
-  4 157 Dokumente, 164 Geschäftsbegriffe, 184 676 Vergleiche, 0 Abweichungen auf den 2 072 schemagültigen
-  Dokumenten (auf schemaungültigen ist das KoSIT-Ergebnis nicht definiert).
+  4 157 Dokumente, 164 Geschäftsbegriffe, 184 676 Vergleiche, 0 Abweichungen bei den 2 072 schemagültigen
+  Dokumenten (für schemaungültige ist das KoSIT-Ergebnis nicht definiert).
 - `vat-relevance`: Rechtstabelle (jeder Geschäftsbegriff in der Syntaxbindung, jede Regel im Regelwerk),
   Einordnung mit von Hand begründeten Erwartungen, Übersicht und Urteil an konstruierten Rechnungen für jeden
   Status, Korpus mit Konsistenz von Urteil, Befunden und Übersicht.
@@ -113,8 +138,9 @@ Recht
 - `LICENSE`: kanonischer Text der EUPL-1.2 (wie choosealicense.com/SPDX, ohne vorangestellten Kopf), damit
   GitHub die Lizenz erkennt (vorher „Other“); Lizenz unverändert.
 - `NOTICE`: A.11 KoSIT xrechnung-visualization (Apache-2.0, Syntaxbindung), A.12 und E.14 Adobe-AFM-Zeichenbreiten
-  (Erlaubnis von Adobe), Testwerkzeuge qpdf, poppler, Python/libexpat, matplotlib (Quelle der AFM-Dateien).
-- Texte der Einordnung ohne Zusicherung einer Eignung: das BMF empfiehlt keine Validierungsanwendungen; das
+  (Erlaubnis von Adobe), Testwerkzeuge qpdf, poppler, Python/libexpat sowie matplotlib als Quelle der AFM-Dateien.
+- Texte der Einordnung ohne Zusicherung einer Eignung: Das BMF empfiehlt keine Validierungsanwendungen (in 0.3.1 als
+  nicht belegt entfernt); das
   Protokoll dokumentiert die Prüfung, die Eignung beurteilt der Anwender.
 
 ## 0.2.0 (2026-10-20)

@@ -124,13 +124,13 @@ async function run(env, bytes, name) {
   console.log('  (bomb: ' + bomb200.length + ' bytes deflate -> 200 MiB)');
   await T('PDF decompression bomb (one embedded file of 200 MiB)', pdf({ 'factur-x.xml': { deflated: bomb200 } }), {
     ext: '.pdf', verdict: 'keine-xml', maxRss: 400 * 1048576,
-    test: (r) => (r.pdf && r.pdf.warnings || []).some((w) => /exceeds the limit of 64 MiB/.test(w)), testName: 'refused with the stream limit',
+    test: (r) => (r.pdf && r.pdf.warnings || []).some((w) => /überschreitet die Grenze von 64 MiB/.test(w)), testName: 'refused with the stream limit',
   });
   const bomb60 = zeroBomb(60 * 1048576);
   const six = {}; for (let i = 1; i <= 6; i++) six['anlage-' + i + '.bin'] = { deflated: bomb60 };
   await T('PDF with six streams of 60 MiB (360 MiB together)', pdf(six), {
     ext: '.pdf', maxRss: 900 * 1048576,
-    test: (r) => (r.pdf && r.pdf.warnings || []).some((w) => /decoded streams of this document exceed the limit of 256 MiB/.test(w)) && (r.pdf.attachments || []).length === 4, testName: 'four decoded, the rest refused with the document limit',
+    test: (r) => (r.pdf && r.pdf.warnings || []).some((w) => /entpackte Datenströme dieses Dokuments überschreiten die Grenze von 256 MiB/.test(w)) && (r.pdf.attachments || []).length === 4, testName: 'four decoded, the rest refused with the document limit',
   });
   if (seedXml) {
     const xml = fs.readFileSync(seedXml);

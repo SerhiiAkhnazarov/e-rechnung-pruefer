@@ -64,7 +64,7 @@
 
   const REF = {
     iso: 'ISO 19005-3:2012 (PDF/A-3), Normtext nicht im Repository; die Regel wird im CI-Job pdfa-verapdf von veraPDF geprüft (test/compare-verapdf.cjs)',
-    spec: 'ZUGFeRD 2.x / Factur-X 1.0x Spezifikation (Spezifikationstext nicht im Repository)',
+    spec: 'Spezifikation ZUGFeRD 2.x / Factur-X 1.0x (Spezifikationstext nicht im Repository)',
     m: 'Mustangproject c1618af86e68 ',
   };
   const MV = REF.m + 'validator/src/main/java/org/mustangproject/validator/PDFValidator.java';
@@ -77,33 +77,33 @@
   // Check catalogue
   // ---------------------------------------------------------------------------------------------
   const CHECKS = {
-    'PDFA3-HEADER': { level: 'error', title: 'Dateikopf %PDF-1.n (n = 0…7) ab Byte 0', reference: REF.iso + ', 6.1.2 (File header); Mustang prüft nur %PDF am Dateianfang: ' + MV + ' l. 89-93 (section 20)' },
+    'PDFA3-HEADER': { level: 'error', title: 'Dateikopf %PDF-1.n (n = 0…7) ab Byte 0', reference: REF.iso + ', 6.1.2 (File header); Mustang prüft nur %PDF am Dateianfang: ' + MV + ' Z. 89–93 (section 20)' },
     'PDFA3-HEADER-BINARY': { level: 'error', title: 'Binärkommentar (mindestens 4 Bytes > 127) nach dem Dateikopf', reference: REF.iso + ', 6.1.2 (File header)' },
     'PDFA3-TRAILER-ID': { level: 'error', title: 'Dateikennung /ID im Trailer', reference: REF.iso + ', 6.1.3 (File trailer)' },
-    'PDFA3-ENCRYPT': { level: 'error', title: 'keine Verschlüsselung (/Encrypt im Trailer verboten)', reference: REF.iso + ', 6.1.3 (File trailer); Mustang: nur über veraPDF (' + MV + ' l. 99-133, l. 348-350)' },
-    'PDFA3-XMP-CATALOG': { level: 'error', title: 'XMP-Metadatenstrom im Dokumentkatalog (/Metadata), als XML lesbar', reference: REF.iso + ', 6.6.2.1; ' + MV + ' l. 155-157 (section 17 "Invalid XMP Metadata not found"), l. 284-287 (section 28 "Could not parse XMP metadata"); XMP wird aus dem Katalog gelesen: ' + MI + ' l. 191-198' },
-    'PDFA3-PDFAID-PART': { level: 'error', title: 'pdfaid:part = 3', reference: REF.iso + ', 6.6.4 (Version and conformance level identification); ' + MV + ' l. 352-358 (section 23 "Not a PDF/A-3", Flavour aus veraPDF)' },
-    'PDFA3-PDFAID-CONFORMANCE': { level: 'error', title: 'pdfaid:conformance = A, B oder U', reference: REF.iso + ', 6.6.4; ' + MV + ' l. 59 (PDFA_3_A, PDFA_3_B, PDFA_3_U)' },
-    'FX-XMP-NAMESPACE': { level: 'error', title: 'Factur-X/ZUGFeRD-Eigenschaften im Namensraum urn:factur-x:… / urn:zugferd:… / urn:ferd:…', reference: REF.spec + '; Namensräume: ' + ME + ' l. 221-231 (getNamespaceForVersion). Mustang selbst sucht namensraumunabhängig (local-name()): ' + MV + ' l. 179-180' },
-    'FX-XMP-DOCUMENTTYPE': { level: 'error', title: 'fx:DocumentType vorhanden und = INVOICE', reference: MV + ' l. 204-225 (section 13 "DocumentType not found", section 14 "DocumentType invalid"); Wert INVOICE: ' + REF.m + 'library/src/main/java/org/mustangproject/ZUGFeRD/XMPSchemaZugferd.java l. 71' },
-    'FX-XMP-DOCUMENTFILENAME': { level: 'error', title: 'fx:DocumentFileName vorhanden, zulässiger Wert', reference: MV + ' l. 226-257 (section 21 "DocumentFileName not found", section 19 "DocumentFileName contains invalid value", section 17 notice "Potentially incorrectly named XML file attachments")' },
-    'FX-XMP-VERSION': { level: 'error', title: 'fx:Version vorhanden, zulässiger Wert', reference: MV + ' l. 258-283 (section 15 "Version not found", section 16 "Version contains invalid value")' },
-    'FX-XMP-CONFORMANCELEVEL': { level: 'error', title: 'fx:ConformanceLevel vorhanden, zulässiger Wert', reference: MV + ' l. 179-202 (section 11 "ConformanceLevel not found", section 12 "ConformanceLevel contains invalid value")' },
-    'FX-XMP-EXTENSION-SCHEMA': { level: 'error', title: 'PDF/A-Erweiterungsschema (pdfaExtension:schemas) deklariert Namensraum, Präfix und die vier Eigenschaften', reference: REF.iso + ', 6.6.2.3 (Extension schemas); Mustang schreibt das Schema: ' + MX + ' l. 114-157' },
-    'FX-ATTACHMENT-PRESENT': { level: 'error', title: 'Rechnungs-XML als eingebettete Datei vorhanden', reference: REF.m + 'validator/src/main/java/org/mustangproject/validator/ZUGFeRDValidator.java l. 291-298 ("XML could not be extracted", section 17)' },
-    'FX-ATTACHMENT-UNIQUE': { level: 'warning', title: 'genau eine Rechnungs-XML eingebettet', reference: REF.spec + '; Mustang liest jede Anlage mit gültigem Namen und überschreibt die vorige (' + MI + ' l. 295-302: setRawXML pro Treffer) — bei mehreren ist nicht bestimmt, welche gilt' },
-    'FX-ATTACHMENT-NAME': { level: 'error', title: 'Dateiname der Rechnungs-XML (factur-x.xml, zugferd-invoice.xml, xrechnung.xml; ZUGFeRD 1.0: ZUGFeRD-invoice.xml)', reference: MI + ' l. 286-298 (validFilenames, case-sensitiv); Zuordnung Version/Profil -> Name: ' + ME + ' l. 252-264 (getFilenameForVersion)' },
-    'FX-FILENAME-MATCH': { level: 'error', title: 'fx:DocumentFileName = Name der eingebetteten Rechnungs-XML', reference: REF.spec + ' (DocumentFileName bezeichnet die Anlage); Mustang schreibt beide aus demselben Wert: ' + ME + ' l. 581-583 und l. 695-708; Mustang-Validator vergleicht nicht' },
-    'FX-LEVEL-PROFILE': { level: 'error', title: 'fx:ConformanceLevel passt zum Profil der XML (GuidelineSpecifiedDocumentContextParameter/ram:ID)', reference: REF.spec + '; Zuordnung Profil -> XMP-Name: ' + MP + ' l. 43-51 (getXMPName), ' + REF.m + 'library/src/main/java/org/mustangproject/ZUGFeRD/Profiles.java l. 34-50; Profilkennungen: build/rulesets.json; Mustang-Validator vergleicht nicht' },
-    'PDFA3-NAMETREE': { level: 'error', title: 'Rechnungs-XML im Namensbaum /Names /EmbeddedFiles', reference: 'ISO 32000-1, 7.7.4 / 7.11.4 (Embedded file streams); Mustang liest Anlagen nur aus dem Namensbaum: ' + MI + ' l. 200-222; Erzeugung: ' + ME + ' l. 430-446' },
-    'PDFA3-AF-CATALOG': { level: 'error', title: 'Katalog-/AF-Array referenziert die Dateispezifikation der Rechnung', reference: REF.iso + ', 6.8 (associated files) / ' + REF.spec + '; Mustang: ' + ME + ' l. 448-464' },
-    'PDFA3-FILESPEC-F-UF': { level: 'error', title: 'Dateispezifikation mit /F und /UF', reference: REF.iso + ', 6.8; Mustang: ' + ME + ' l. 403-408' },
-    'PDFA3-AFRELATIONSHIP': { level: 'error', title: '/AFRelationship vorhanden; Rechnungs-XML: Data, Alternative oder Source', reference: REF.iso + ', 6.8 (Pflichtschlüssel AFRelationship, Werte nach ISO 32000-2); Werte für die Rechnung: ' + REF.spec + ', Mustang ' + REF.m + 'library/src/main/java/org/mustangproject/FileAttachment.java l. 80-95' },
-    'FX-AFRELATIONSHIP-PROFILE': { level: 'info', title: 'AFRelationship passend zum Profil (MINIMUM/BASIC WL: Data, sonst Alternative oder Source)', reference: 'ZUGFeRD 2.1.1 Technischer Anhang Teil A, 2.2.2 "Data Relationship" (Text nicht im Repository), umgesetzt in ' + ME + ' l. 697-704; nur Hinweis: die offiziellen Beispiele (corpus ZUGFeRDv2/correct/symtrax = FeRD ZUGFeRD 2.1, FNFE-factur-x-examples) verwenden /Data auch für BASIC, EN 16931 und EXTENDED' },
-    'PDFA3-DESC': { level: 'info', title: 'Dateispezifikation mit /Desc (optional)', reference: 'ISO 32000-1, 7.11.3 (Desc optional); Mustang setzt /Desc: ' + ME + ' l. 409' },
-    'PDFA3-EF-SUBTYPE': { level: 'error', title: 'EmbeddedFile-Strom mit /Subtype (MIME-Typ); Rechnung: text/xml (/text#2Fxml)', reference: REF.iso + ', 6.8 (MIME-Typ Pflicht); text/xml: ' + REF.spec + ', Mustang ' + ME + ' l. 707-708 und l. 415' },
-    'PDFA3-EF-PARAMS-MODDATE': { level: 'warning', title: 'EmbeddedFile-Strom mit /Params /ModDate', reference: REF.spec + ' (Änderungsdatum der Anlage); Mustang setzt ModDate immer: ' + ME + ' l. 419; ob ISO 19005-3 dies verlangt, zeigt der veraPDF-Vergleich im CI' },
-    'PDFA3-FULL-VALIDATION': { level: 'info', title: 'keine vollständige Prüfung gegen ISO 19005-3', reference: 'docs/PDFA3-CHECKS.md, Abschnitt "Nicht geprüft"; vollständige Prüfung: veraPDF (CI-Job pdfa-verapdf); Mustang verwendet dafür veraPDF: ' + MV + ' l. 97-137' },
+    'PDFA3-ENCRYPT': { level: 'error', title: 'Keine Verschlüsselung (/Encrypt im Trailer verboten)', reference: REF.iso + ', 6.1.3 (File trailer); Mustang: nur über veraPDF (' + MV + ' Z. 99–133, Z. 348–350)' },
+    'PDFA3-XMP-CATALOG': { level: 'error', title: 'XMP-Metadatenstrom im Dokumentkatalog (/Metadata), als XML lesbar', reference: REF.iso + ', 6.6.2.1; ' + MV + ' Z. 155–157 (section 17 "Invalid XMP Metadata not found"), Z. 284–287 (section 28 "Could not parse XMP metadata"); XMP wird aus dem Katalog gelesen: ' + MI + ' Z. 191–198' },
+    'PDFA3-PDFAID-PART': { level: 'error', title: 'pdfaid:part = 3', reference: REF.iso + ', 6.6.4 (Version and conformance level identification); ' + MV + ' Z. 352–358 (section 23 "Not a PDF/A-3", Flavour aus veraPDF)' },
+    'PDFA3-PDFAID-CONFORMANCE': { level: 'error', title: 'pdfaid:conformance = A, B oder U', reference: REF.iso + ', 6.6.4; ' + MV + ' Z. 59 (PDFA_3_A, PDFA_3_B, PDFA_3_U)' },
+    'FX-XMP-NAMESPACE': { level: 'error', title: 'Factur-X-/ZUGFeRD-Eigenschaften im Namensraum urn:factur-x:… / urn:zugferd:… / urn:ferd:…', reference: REF.spec + '; Namensräume: ' + ME + ' Z. 221–231 (getNamespaceForVersion). Mustang selbst sucht namensraumunabhängig (local-name()): ' + MV + ' Z. 179–180' },
+    'FX-XMP-DOCUMENTTYPE': { level: 'error', title: 'fx:DocumentType vorhanden und = INVOICE', reference: MV + ' Z. 204–225 (section 13 "DocumentType not found", section 14 "DocumentType invalid"); Wert INVOICE: ' + REF.m + 'library/src/main/java/org/mustangproject/ZUGFeRD/XMPSchemaZugferd.java Z. 71' },
+    'FX-XMP-DOCUMENTFILENAME': { level: 'error', title: 'fx:DocumentFileName vorhanden, zulässiger Wert', reference: MV + ' Z. 226–257 (section 21 "DocumentFileName not found", section 19 "DocumentFileName contains invalid value", section 17 notice "Potentially incorrectly named XML file attachments")' },
+    'FX-XMP-VERSION': { level: 'error', title: 'fx:Version vorhanden, zulässiger Wert', reference: MV + ' Z. 258–283 (section 15 "Version not found", section 16 "Version contains invalid value")' },
+    'FX-XMP-CONFORMANCELEVEL': { level: 'error', title: 'fx:ConformanceLevel vorhanden, zulässiger Wert', reference: MV + ' Z. 179–202 (section 11 "ConformanceLevel not found", section 12 "ConformanceLevel contains invalid value")' },
+    'FX-XMP-EXTENSION-SCHEMA': { level: 'error', title: 'PDF/A-Erweiterungsschema (pdfaExtension:schemas) deklariert Namensraum, Präfix und die vier Eigenschaften', reference: REF.iso + ', 6.6.2.3 (Extension schemas); Mustang schreibt das Schema: ' + MX + ' Z. 114–157' },
+    'FX-ATTACHMENT-PRESENT': { level: 'error', title: 'Rechnungs-XML als eingebettete Datei vorhanden', reference: REF.m + 'validator/src/main/java/org/mustangproject/validator/ZUGFeRDValidator.java Z. 291–298 ("XML could not be extracted", section 17)' },
+    'FX-ATTACHMENT-UNIQUE': { level: 'warning', title: 'Genau eine Rechnungs-XML eingebettet', reference: REF.spec + '; Mustang liest jede Anlage mit gültigem Namen und überschreibt die vorige (' + MI + ' Z. 295–302: setRawXML pro Treffer) – bei mehreren ist nicht bestimmt, welche gilt' },
+    'FX-ATTACHMENT-NAME': { level: 'error', title: 'Dateiname der Rechnungs-XML (factur-x.xml, zugferd-invoice.xml, xrechnung.xml; ZUGFeRD 1.0: ZUGFeRD-invoice.xml)', reference: MI + ' Z. 286–298 (validFilenames, Groß-/Kleinschreibung wird unterschieden); Zuordnung Version/Profil → Name: ' + ME + ' Z. 252–264 (getFilenameForVersion)' },
+    'FX-FILENAME-MATCH': { level: 'error', title: 'fx:DocumentFileName = Name der eingebetteten Rechnungs-XML', reference: REF.spec + ' (DocumentFileName bezeichnet die Anlage); Mustang schreibt beide aus demselben Wert: ' + ME + ' Z. 581–583 und Z. 695–708; Mustang-Validator vergleicht nicht' },
+    'FX-LEVEL-PROFILE': { level: 'error', title: 'fx:ConformanceLevel passt zum Profil der XML (GuidelineSpecifiedDocumentContextParameter/ram:ID)', reference: REF.spec + '; Zuordnung Profil → XMP-Name: ' + MP + ' Z. 43–51 (getXMPName), ' + REF.m + 'library/src/main/java/org/mustangproject/ZUGFeRD/Profiles.java Z. 34–50; Profilkennungen: build/rulesets.json; Mustang-Validator vergleicht nicht' },
+    'PDFA3-NAMETREE': { level: 'error', title: 'Rechnungs-XML im Namensbaum /Names /EmbeddedFiles', reference: 'ISO 32000-1, 7.7.4 / 7.11.4 (Embedded file streams); Mustang liest Anlagen nur aus dem Namensbaum: ' + MI + ' Z. 200–222; Erzeugung: ' + ME + ' Z. 430–446' },
+    'PDFA3-AF-CATALOG': { level: 'error', title: '/AF-Array des Katalogs referenziert die Dateispezifikation der Rechnung', reference: REF.iso + ', 6.8 (associated files) / ' + REF.spec + '; Mustang: ' + ME + ' Z. 448–464' },
+    'PDFA3-FILESPEC-F-UF': { level: 'error', title: 'Dateispezifikation mit /F und /UF', reference: REF.iso + ', 6.8; Mustang: ' + ME + ' Z. 403–408' },
+    'PDFA3-AFRELATIONSHIP': { level: 'error', title: '/AFRelationship vorhanden; Rechnungs-XML: Data, Alternative oder Source', reference: REF.iso + ', 6.8 (Pflichtschlüssel AFRelationship, Werte nach ISO 32000-2); Werte für die Rechnung: ' + REF.spec + ', Mustang ' + REF.m + 'library/src/main/java/org/mustangproject/FileAttachment.java Z. 80–95' },
+    'FX-AFRELATIONSHIP-PROFILE': { level: 'info', title: 'AFRelationship passend zum Profil (MINIMUM/BASIC WL: Data, sonst Alternative oder Source)', reference: 'ZUGFeRD 2.1.1 Technischer Anhang Teil A, 2.2.2 „Data Relationship“ (Text nicht im Repository), umgesetzt in ' + ME + ' Z. 697–704; nur Hinweis: Die offiziellen Beispiele (corpus ZUGFeRDv2/correct/symtrax = FeRD ZUGFeRD 2.1, FNFE-factur-x-examples) verwenden /Data auch für BASIC, EN 16931 und EXTENDED' },
+    'PDFA3-DESC': { level: 'info', title: 'Dateispezifikation mit /Desc (optional)', reference: 'ISO 32000-1, 7.11.3 (Desc optional); Mustang setzt /Desc: ' + ME + ' Z. 409' },
+    'PDFA3-EF-SUBTYPE': { level: 'error', title: 'EmbeddedFile-Strom mit /Subtype (MIME-Typ); Rechnung: text/xml (/text#2Fxml)', reference: REF.iso + ', 6.8 (MIME-Typ Pflicht); text/xml: ' + REF.spec + ', Mustang ' + ME + ' Z. 707–708 und Z. 415' },
+    'PDFA3-EF-PARAMS-MODDATE': { level: 'warning', title: 'EmbeddedFile-Strom mit /Params /ModDate', reference: REF.spec + ' (Änderungsdatum der Anlage); Mustang setzt ModDate immer: ' + ME + ' Z. 419; ob ISO 19005-3 dies verlangt, zeigt der veraPDF-Vergleich im CI' },
+    'PDFA3-FULL-VALIDATION': { level: 'info', title: 'Keine vollständige Prüfung gegen ISO 19005-3', reference: 'docs/PDFA3-CHECKS.md, Abschnitt „Nicht geprüft“; vollständige Prüfung: veraPDF (CI-Job pdfa-verapdf); Mustang verwendet dafür veraPDF: ' + MV + ' Z. 97–137' },
   };
 
   // ---------------------------------------------------------------------------------------------
@@ -112,7 +112,7 @@
   // well-formedness: '&' must start one of the predefined entity or a character reference (no DTD)
   const BAD_AMP = /&(?!(?:#x[0-9a-fA-F]+|#[0-9]+|lt|gt|amp|quot|apos);)/;
   function decodeEntities(s, strict) {
-    if (strict && BAD_AMP.test(s)) throw new Error('"&" ohne gültige Entity-Referenz');
+    if (strict && BAD_AMP.test(s)) throw new Error('„&“ ohne gültige Entity-Referenz');
     return s.replace(/&(#x[0-9a-fA-F]+|#[0-9]+|lt|gt|amp|quot|apos);/g, (m, e) => {
       if (e[0] === '#') { const cp = e[1] === 'x' ? parseInt(e.slice(2), 16) : parseInt(e.slice(1), 10); try { return String.fromCodePoint(cp); } catch (x) { return m; } }
       return { lt: '<', gt: '>', amp: '&', quot: '"', apos: "'" }[e];
@@ -124,29 +124,29 @@
     const stack = [{ el: rootEl, nsmap: { xml: 'http://www.w3.org/XML/1998/namespace' } }];
     let i = 0;
     const n = text.length;
-    const fail = (msg) => { throw new Error(msg + ' at offset ' + i); };
+    const fail = (msg) => { throw new Error(msg + ' an Position ' + i); };
     while (i < n) {
       const lt = text.indexOf('<', i);
       const top = stack[stack.length - 1];
       if (lt < 0) { top.el.text += decodeEntities(text.slice(i), true); break; }
       if (lt > i) top.el.text += decodeEntities(text.slice(i, lt), true);
       i = lt;
-      if (text.startsWith('<?', i)) { const e = text.indexOf('?>', i); if (e < 0) fail('unterminated PI'); i = e + 2; continue; }
-      if (text.startsWith('<!--', i)) { const e = text.indexOf('-->', i); if (e < 0) fail('unterminated comment'); i = e + 3; continue; }
-      if (text.startsWith('<![CDATA[', i)) { const e = text.indexOf(']]>', i); if (e < 0) fail('unterminated CDATA'); top.el.text += text.slice(i + 9, e); i = e + 3; continue; }
-      if (text.startsWith('<!', i)) { const e = text.indexOf('>', i); if (e < 0) fail('unterminated declaration'); i = e + 1; continue; }
+      if (text.startsWith('<?', i)) { const e = text.indexOf('?>', i); if (e < 0) fail('Verarbeitungsanweisung nicht abgeschlossen'); i = e + 2; continue; }
+      if (text.startsWith('<!--', i)) { const e = text.indexOf('-->', i); if (e < 0) fail('Kommentar nicht abgeschlossen'); i = e + 3; continue; }
+      if (text.startsWith('<![CDATA[', i)) { const e = text.indexOf(']]>', i); if (e < 0) fail('CDATA-Abschnitt nicht abgeschlossen'); top.el.text += text.slice(i + 9, e); i = e + 3; continue; }
+      if (text.startsWith('<!', i)) { const e = text.indexOf('>', i); if (e < 0) fail('Deklaration nicht abgeschlossen'); i = e + 1; continue; }
       if (text[i + 1] === '/') {
         const e = text.indexOf('>', i);
-        if (e < 0) fail('unterminated end tag');
+        if (e < 0) fail('End-Tag nicht abgeschlossen');
         const qn = text.slice(i + 2, e).trim();
-        if (stack.length < 2 || stack[stack.length - 1].qn !== qn) fail('mismatched end tag </' + qn + '>');
+        if (stack.length < 2 || stack[stack.length - 1].qn !== qn) fail('End-Tag </' + qn + '> passt nicht zum Start-Tag');
         stack.pop();
         i = e + 1;
         continue;
       }
       // start tag
       const m = /^<([A-Za-z_][\w.\-]*(?::[A-Za-z_][\w.\-]*)?)/.exec(text.slice(i, i + 256));
-      if (!m) fail('invalid tag');
+      if (!m) fail('ungültiges Tag');
       const qn = m[1];
       i += m[0].length;
       const rawAttrs = [];
@@ -154,9 +154,9 @@
         while (i < n && /\s/.test(text[i])) i++;
         if (text[i] === '>' || text.startsWith('/>', i)) break;
         const am = /^([A-Za-z_][\w.\-]*(?::[A-Za-z_][\w.\-]*)?)\s*=\s*("([^"]*)"|'([^']*)')/.exec(text.slice(i, i + 65536));
-        if (!am) fail('invalid attribute');
+        if (!am) fail('ungültiges Attribut');
         const av = am[3] !== undefined ? am[3] : am[4];
-        if (av.indexOf('<') >= 0) fail('"<" in attribute value');
+        if (av.indexOf('<') >= 0) fail('„<“ im Attributwert');
         rawAttrs.push([am[1], decodeEntities(av, true)]);
         i += am[0].length;
       }
@@ -164,14 +164,14 @@
       i += selfClose ? 2 : 1;
       const nsmap = Object.assign({}, top.nsmap);
       for (const [k, v] of rawAttrs) { if (k === 'xmlns') nsmap[''] = v; else if (k.startsWith('xmlns:')) nsmap[k.slice(6)] = v; }
-      const split = (q, isAttr) => { const c = q.indexOf(':'); const p = c < 0 ? '' : q.slice(0, c); const l = c < 0 ? q : q.slice(c + 1); const ns = c < 0 ? (isAttr ? null : nsmap[''] || null) : nsmap[p]; if (c >= 0 && ns === undefined) fail('undeclared prefix ' + p); return { prefix: p, local: l, ns }; };
+      const split = (q, isAttr) => { const c = q.indexOf(':'); const p = c < 0 ? '' : q.slice(0, c); const l = c < 0 ? q : q.slice(c + 1); const ns = c < 0 ? (isAttr ? null : nsmap[''] || null) : nsmap[p]; if (c >= 0 && ns === undefined) fail('nicht deklariertes Präfix ' + p); return { prefix: p, local: l, ns }; };
       const nm = split(qn, false);
       const el = { local: nm.local, ns: nm.ns, prefix: nm.prefix, attrs: [], children: [], text: '', parent: top.el };
       for (const [k, v] of rawAttrs) { if (k === 'xmlns' || k.startsWith('xmlns:')) continue; const a = split(k, true); el.attrs.push({ local: a.local, ns: a.ns, value: v }); }
       top.el.children.push(el);
       if (!selfClose) stack.push({ el, nsmap, qn });
     }
-    if (stack.length > 1) throw new Error('unclosed element <' + stack[stack.length - 1].qn + '>');
+    if (stack.length > 1) throw new Error('nicht geschlossenes Element <' + stack[stack.length - 1].qn + '>');
     return rootEl;
   }
 
@@ -278,7 +278,7 @@
       const lm = /^%PDF-\d\.\d(?:\r\n|\r|\n)%([^\r\n]*)/.exec(head);
       const high = lm ? Array.from(lm[1]).filter((c) => c.charCodeAt(0) > 127).length : 0;
       facts.headerBinaryBytes = high;
-      if (!lm || high < 4) add('PDFA3-HEADER-BINARY', 'error', 'Nach dem Dateikopf fehlt der Binärkommentar (% gefolgt von mindestens vier Bytes > 127)' + (lm ? '; gefunden: ' + high + ' solche Bytes' : '') + '.');
+      if (!lm || high < 4) add('PDFA3-HEADER-BINARY', 'error', 'Nach dem Dateikopf fehlt der Binärkommentar (% gefolgt von mindestens vier Bytes > 127)' + (lm ? '; gefunden: ' + high + (high === 1 ? ' solches Byte' : ' solche Bytes') : '') + '.');
       else pass('PDFA3-HEADER-BINARY');
     } else na('PDFA3-HEADER-BINARY');
 
@@ -352,10 +352,10 @@
       const known = Array.from(nsSeen).filter((ns) => FX_NAMESPACES[ns] || ns === FX_NAMESPACE_RC);
       fxNs = known[0] || null;
       facts.fxNamespace = fxNs || (nsSeen.size ? Array.from(nsSeen)[0] : null);
-      if (!nsSeen.size) add('FX-XMP-NAMESPACE', 'error', 'Die XMP-Metadaten enthalten keine Factur-X/ZUGFeRD-Eigenschaften (DocumentType, DocumentFileName, Version, ConformanceLevel).');
-      else if (!fxNs) add('FX-XMP-NAMESPACE', 'error', 'Die Factur-X/ZUGFeRD-Eigenschaften stehen im unbekannten Namensraum ' + Array.from(nsSeen).join(', ') + '.');
+      if (!nsSeen.size) add('FX-XMP-NAMESPACE', 'error', 'Die XMP-Metadaten enthalten keine Factur-X-/ZUGFeRD-Eigenschaften (DocumentType, DocumentFileName, Version, ConformanceLevel).');
+      else if (!fxNs) add('FX-XMP-NAMESPACE', 'error', 'Die Factur-X-/ZUGFeRD-Eigenschaften stehen ' + (nsSeen.size === 1 ? 'im unbekannten Namensraum ' : 'in den unbekannten Namensräumen ') + Array.from(nsSeen).join(', ') + '.');
       else if (fxNs === FX_NAMESPACE_RC) add('FX-XMP-NAMESPACE', 'warning', 'Namensraum ' + FX_NAMESPACE_RC + ' ist der Vorabversions-Namensraum (Release Candidate) von ZUGFeRD 1.0, kein Namensraum einer veröffentlichten Version.');
-      else if (known.length > 1) add('FX-XMP-NAMESPACE', 'warning', 'Factur-X/ZUGFeRD-Eigenschaften in mehreren Namensräumen: ' + known.join(', ') + '.');
+      else if (known.length > 1) add('FX-XMP-NAMESPACE', 'warning', 'Factur-X-/ZUGFeRD-Eigenschaften in mehreren Namensräumen: ' + known.join(', ') + '.');
       else pass('FX-XMP-NAMESPACE');
       for (const p of FX_PROPS) {
         const vals = fxNs ? any[p].filter((v) => v.ns === fxNs) : any[p];
@@ -390,7 +390,7 @@
       const usedNs = facts.fxNamespace;
       if (usedNs) {
         const decl = schemas.find((s) => s.namespaceURI === usedNs);
-        if (!schemas.length) add('FX-XMP-EXTENSION-SCHEMA', 'error', 'Die XMP-Metadaten enthalten kein PDF/A-Erweiterungsschema (pdfaExtension:schemas); die Factur-X/ZUGFeRD-Eigenschaften sind damit in PDF/A nicht zulässig.');
+        if (!schemas.length) add('FX-XMP-EXTENSION-SCHEMA', 'error', 'Die XMP-Metadaten enthalten kein PDF/A-Erweiterungsschema (pdfaExtension:schemas); die Factur-X-/ZUGFeRD-Eigenschaften sind damit in PDF/A nicht zulässig.');
         else if (!decl) add('FX-XMP-EXTENSION-SCHEMA', 'error', 'Das PDF/A-Erweiterungsschema deklariert den Namensraum ' + usedNs + ' nicht (deklariert: ' + schemas.map((s) => s.namespaceURI).join(', ') + ').');
         else {
           const usedProps = FX_PROPS.filter((p) => any[p].some((v) => v.ns === usedNs));
@@ -399,7 +399,7 @@
           for (const el of descendants(xmpDoc)) { if (el.ns === usedNs) prefixes.add(el.prefix); }
           if (missing.length) add('FX-XMP-EXTENSION-SCHEMA', 'error', 'Das PDF/A-Erweiterungsschema für ' + usedNs + ' deklariert die Eigenschaft(en) ' + missing.join(', ') + ' nicht.');
           else if (!decl.prefix) add('FX-XMP-EXTENSION-SCHEMA', 'error', 'Das PDF/A-Erweiterungsschema für ' + usedNs + ' enthält kein pdfaSchema:prefix.');
-          else if (prefixes.size && !prefixes.has(decl.prefix)) add('FX-XMP-EXTENSION-SCHEMA', 'warning', 'Das Erweiterungsschema deklariert das Präfix "' + decl.prefix + '", verwendet wird "' + Array.from(prefixes).join('", "') + '".');
+          else if (prefixes.size && !prefixes.has(decl.prefix)) add('FX-XMP-EXTENSION-SCHEMA', 'warning', 'Das Erweiterungsschema deklariert das Präfix „' + decl.prefix + '“, verwendet wird „' + Array.from(prefixes).join('“, „') + '“.');
           else pass('FX-XMP-EXTENSION-SCHEMA');
         }
       } else na('FX-XMP-EXTENSION-SCHEMA');
@@ -414,7 +414,7 @@
     const invoiceFile = byXmpName || PdfEmbedded.pickInvoiceXml(extracted.files);
     const invoiceLike = extracted.files.filter(isInvoiceLike);
     if (!invoiceFile) na('FX-ATTACHMENT-UNIQUE');
-    else if (invoiceLike.length > 1) add('FX-ATTACHMENT-UNIQUE', 'warning', 'Das PDF enthält ' + invoiceLike.length + ' Rechnungs-XML-Dateien (' + invoiceLike.map((f) => f.name).join(', ') + '); maßgeblich ist nach fx:DocumentFileName "' + invoiceFile.name + '". Empfänger können eine andere Datei auswerten.');
+    else if (invoiceLike.length > 1) add('FX-ATTACHMENT-UNIQUE', 'warning', 'Das PDF enthält ' + invoiceLike.length + ' Rechnungs-XML-Dateien (' + invoiceLike.map((f) => f.name).join(', ') + '); maßgeblich ist nach fx:DocumentFileName „' + invoiceFile.name + '“. Empfänger können eine andere Datei auswerten.');
     else pass('FX-ATTACHMENT-UNIQUE');
     // file specifications of the name tree
     const names = catalog ? resolve(catalog.get('Names')) : null;
@@ -453,18 +453,18 @@
       // --- file name -------------------------------------------------------------------------------
       if (!INVOICE_FILENAMES.includes(name)) {
         const ci = INVOICE_FILENAMES.find((x) => x.toLowerCase() === String(name).toLowerCase());
-        add('FX-ATTACHMENT-NAME', 'error', 'Die Rechnungs-XML ist als "' + name + '" eingebettet' + (ci ? ' (Groß-/Kleinschreibung weicht von "' + ci + '" ab)' : '') + '; zulässig sind factur-x.xml (Factur-X / ZUGFeRD 2.1+), zugferd-invoice.xml (ZUGFeRD 2.0), xrechnung.xml (Profil XRECHNUNG) und ZUGFeRD-invoice.xml (ZUGFeRD 1.0). Empfänger wie Mustang lesen die XML unter diesem Namen nicht.');
+        add('FX-ATTACHMENT-NAME', 'error', 'Die Rechnungs-XML ist als „' + name + '“ eingebettet' + (ci ? ' (Groß-/Kleinschreibung weicht von „' + ci + '“ ab)' : '') + '; zulässig sind factur-x.xml (Factur-X / ZUGFeRD 2.1+), zugferd-invoice.xml (ZUGFeRD 2.0), xrechnung.xml (Profil XRECHNUNG) und ZUGFeRD-invoice.xml (ZUGFeRD 1.0). Empfänger wie Mustang lesen die XML unter diesem Namen nicht.');
       } else {
         const nsInfo = fxNs ? FX_NAMESPACES[fxNs] : null;
         if (name === 'ZUGFeRD-invoice.xml') add('FX-ATTACHMENT-NAME', 'info', 'ZUGFeRD-invoice.xml ist der Dateiname von ZUGFeRD 1.0 (veraltet; ZUGFeRD 2.x/Factur-X: factur-x.xml).');
-        if (nsInfo && !nsInfo.fileNames.includes(name)) add('FX-ATTACHMENT-NAME', 'warning', 'Der Dateiname "' + name + '" passt nicht zum XMP-Namensraum ' + fxNs + ' (' + nsInfo.family + ': ' + nsInfo.fileNames.join(' / ') + ').');
+        if (nsInfo && !nsInfo.fileNames.includes(name)) add('FX-ATTACHMENT-NAME', 'warning', 'Der Dateiname „' + name + '“ passt nicht zum XMP-Namensraum ' + fxNs + ' (' + nsInfo.family + ': ' + nsInfo.fileNames.join(' / ') + ').');
         else if (name === 'xrechnung.xml' && fx.ConformanceLevel && fx.ConformanceLevel !== 'XRECHNUNG') add('FX-ATTACHMENT-NAME', 'warning', 'xrechnung.xml ist nur für das Profil XRECHNUNG vorgesehen; fx:ConformanceLevel = "' + fx.ConformanceLevel + '".');
         else if (name === 'factur-x.xml' && fx.ConformanceLevel === 'XRECHNUNG') add('FX-ATTACHMENT-NAME', 'info', 'Profil XRECHNUNG mit Dateiname factur-x.xml; ab ZUGFeRD 2.1.1 ist für XRECHNUNG auch xrechnung.xml zulässig (Mustang erzeugt xrechnung.xml).');
         else pass('FX-ATTACHMENT-NAME');
       }
       // --- DocumentFileName = embedded name -------------------------------------------------------
       if (!xmpDoc || fx.DocumentFileName === null || fx.DocumentFileName === undefined) na('FX-FILENAME-MATCH');
-      else if (fx.DocumentFileName !== name) add('FX-FILENAME-MATCH', 'error', 'fx:DocumentFileName = "' + fx.DocumentFileName + '", die Rechnungs-XML ist jedoch als "' + name + '" eingebettet.');
+      else if (fx.DocumentFileName !== name) add('FX-FILENAME-MATCH', 'error', 'fx:DocumentFileName = "' + fx.DocumentFileName + '", die Rechnungs-XML ist jedoch als „' + name + '“ eingebettet.');
       else pass('FX-FILENAME-MATCH');
       // --- ConformanceLevel vs. profile -------------------------------------------------------------
       const prof = profileIdOf(invoiceFile.bytes);
@@ -475,19 +475,19 @@
       if (!xmpDoc || !fx.ConformanceLevel) na('FX-LEVEL-PROFILE');
       else if (!prof) add('FX-LEVEL-PROFILE', 'warning', 'Die Profilkennung der Rechnungs-XML (GuidelineSpecifiedDocumentContextParameter/ID) wurde nicht gefunden; fx:ConformanceLevel ist nicht abgleichbar.');
       else if (prof.syntax === 'UBL') add('FX-LEVEL-PROFILE', 'error', 'Die eingebettete Rechnung ist UBL (CustomizationID ' + prof.id + '); ZUGFeRD/Factur-X betten CII (CrossIndustryInvoice) ein, fx:ConformanceLevel "' + fx.ConformanceLevel + '" bezeichnet ein CII-Profil.');
-      else if (!exp) add('FX-LEVEL-PROFILE', 'warning', 'Profilkennung "' + prof.id + '" ist keinem ZUGFeRD/Factur-X-Profil zugeordnet; fx:ConformanceLevel "' + fx.ConformanceLevel + '" nicht abgleichbar.');
+      else if (!exp) add('FX-LEVEL-PROFILE', 'warning', 'Profilkennung „' + prof.id + '“ ist keinem ZUGFeRD-/Factur-X-Profil zugeordnet; fx:ConformanceLevel „' + fx.ConformanceLevel + '“ ist nicht abgleichbar.');
       else if (exp.levels.includes(fx.ConformanceLevel)) pass('FX-LEVEL-PROFILE');
       else if (exp.tolerated.includes(fx.ConformanceLevel)) add('FX-LEVEL-PROFILE', 'warning', 'fx:ConformanceLevel = "' + fx.ConformanceLevel + '", die XML trägt die Profilkennung ' + prof.id + ' (erwartet: ' + exp.levels.join(' / ') + '). Der Wert ist inhaltlich nicht falsch, entspricht aber nicht der aktuellen Spezifikation.');
-      else add('FX-LEVEL-PROFILE', 'error', 'fx:ConformanceLevel = "' + fx.ConformanceLevel + '" widerspricht dem Profil der eingebetteten XML (' + prof.id + ' => ' + exp.levels.join(' / ') + ').');
+      else add('FX-LEVEL-PROFILE', 'error', 'fx:ConformanceLevel = "' + fx.ConformanceLevel + '" widerspricht dem Profil der eingebetteten XML (' + prof.id + ' → ' + exp.levels.join(' / ') + ').');
       // --- name tree / AF ------------------------------------------------------------------------
-      if (!invSpec || invSpec.outsideTree) add('PDFA3-NAMETREE', 'error', 'Die Dateispezifikation der Rechnungs-XML "' + name + '" ist nicht im Namensbaum /Names /EmbeddedFiles eingetragen.');
+      if (!invSpec || invSpec.outsideTree) add('PDFA3-NAMETREE', 'error', 'Die Dateispezifikation der Rechnungs-XML „' + name + '“ ist nicht im Namensbaum /Names /EmbeddedFiles eingetragen.');
       else pass('PDFA3-NAMETREE');
       if (!Array.isArray(afArr)) add('PDFA3-AF-CATALOG', 'error', 'Der Dokumentkatalog hat kein /AF-Array (Associated Files); die Rechnungs-XML ist dem Dokument nicht zugeordnet.');
       else if (!invSpec || !((invSpec.ref !== null && afRefs.includes(invSpec.ref)) || afDicts.includes(invSpec.dict))) {
         // a different file specification object in /AF that points to the same EmbeddedFile stream
         const twinIdx = afDicts.findIndex((d) => efRefOf(d) === invoiceFile.objectNumber);
-        if (twinIdx >= 0) add('PDFA3-AF-CATALOG', 'warning', 'Das /AF-Array des Katalogs referenziert für "' + name + '" eine zweite Dateispezifikation' + (afArr[twinIdx] instanceof Ref ? ' (Objekt ' + afArr[twinIdx].num + ')' : '') + ', nicht die des Namensbaums' + (invSpec && invSpec.ref !== null ? ' (Objekt ' + invSpec.ref + ')' : '') + '; beide verweisen auf denselben Dateistrom (Objekt ' + invoiceFile.objectNumber + '). Die im Namensbaum eingetragene Dateispezifikation ist damit keine zugeordnete Datei (Associated File).');
-        else add('PDFA3-AF-CATALOG', 'error', 'Das /AF-Array des Katalogs referenziert die Dateispezifikation der Rechnungs-XML "' + name + '" nicht.');
+        if (twinIdx >= 0) add('PDFA3-AF-CATALOG', 'warning', 'Das /AF-Array des Katalogs referenziert für „' + name + '“ eine zweite Dateispezifikation' + (afArr[twinIdx] instanceof Ref ? ' (Objekt ' + afArr[twinIdx].num + ')' : '') + ', nicht die des Namensbaums' + (invSpec && invSpec.ref !== null ? ' (Objekt ' + invSpec.ref + ')' : '') + '; beide verweisen auf denselben Dateistrom (Objekt ' + invoiceFile.objectNumber + '). Die im Namensbaum eingetragene Dateispezifikation ist damit keine zugeordnete Datei (Associated File).');
+        else add('PDFA3-AF-CATALOG', 'error', 'Das /AF-Array des Katalogs referenziert die Dateispezifikation der Rechnungs-XML „' + name + '“ nicht.');
       }
       else pass('PDFA3-AF-CATALOG');
     }
@@ -500,9 +500,9 @@
     for (const s of specs) {
       const sp = s.dict;
       const isInv = invSpec && sp === invSpec.dict;
-      const label = (isInv ? 'Rechnungs-XML ' : 'Anlage ') + '"' + (specName(sp) || s.key || '?') + '"';
+      const label = (isInv ? 'Rechnungs-XML ' : 'Anlage ') + '„' + (specName(sp) || s.key || '?') + '“';
       const hasF = sp.has('F'), hasUF = sp.has('UF');
-      if (!hasF || !hasUF) add('PDFA3-FILESPEC-F-UF', 'error', label + ': der Dateispezifikation fehlt ' + (!hasF && !hasUF ? '/F und /UF' : !hasF ? '/F' : '/UF') + '.');
+      if (!hasF || !hasUF) add('PDFA3-FILESPEC-F-UF', 'error', label + ': Der Dateispezifikation ' + (!hasF && !hasUF ? 'fehlen /F und /UF' : !hasF ? 'fehlt /F' : 'fehlt /UF') + '.');
       else pass('PDFA3-FILESPEC-F-UF');
       const rel = nameOf(resolve(sp.get('AFRelationship')));
       if (!sp.has('AFRelationship')) add('PDFA3-AFRELATIONSHIP', 'error', label + ': /AFRelationship fehlt (Pflicht in PDF/A-3).');
@@ -512,25 +512,25 @@
       if (isInv) {
         const lvl = fx.ConformanceLevel || facts.expectedLevel;
         if (!rel || !AFREL_INVOICE.includes(rel) || !lvl) na('FX-AFRELATIONSHIP-PROFILE');
-        else if ((lvl === 'MINIMUM' || lvl === 'BASIC WL') && rel !== 'Data') add('FX-AFRELATIONSHIP-PROFILE', 'info', label + ': Profil ' + lvl + ' ist keine vollständige Rechnung im Sinne von EN 16931; vorgesehen ist /AFRelationship /Data, gefunden /' + rel + '.');
-        else if (!(lvl === 'MINIMUM' || lvl === 'BASIC WL') && rel === 'Data') add('FX-AFRELATIONSHIP-PROFILE', 'info', label + ': für das Profil ' + lvl + ' sieht ZUGFeRD 2.1.1 /AFRelationship /Alternative (oder /Source) vor, gefunden /Data (in den offiziellen Beispielen ebenfalls üblich).');
+        else if ((lvl === 'MINIMUM' || lvl === 'BASIC WL') && rel !== 'Data') add('FX-AFRELATIONSHIP-PROFILE', 'info', label + ': Das Profil ' + lvl + ' bildet keine vollständige Rechnung im Sinne der EN 16931 ab; vorgesehen ist /AFRelationship /Data, gefunden /' + rel + '.');
+        else if (!(lvl === 'MINIMUM' || lvl === 'BASIC WL') && rel === 'Data') add('FX-AFRELATIONSHIP-PROFILE', 'info', label + ': Für das Profil ' + lvl + ' sieht ZUGFeRD 2.1.1 /AFRelationship /Alternative (oder /Source) vor, gefunden /Data (in den offiziellen Beispielen ebenfalls üblich).');
         else pass('FX-AFRELATIONSHIP-PROFILE');
       }
-      if (!sp.has('Desc')) add('PDFA3-DESC', 'info', label + ': keine Beschreibung (/Desc) — optional.');
+      if (!sp.has('Desc')) add('PDFA3-DESC', 'info', label + ': keine Beschreibung (/Desc) – optional.');
       else pass('PDFA3-DESC');
       // the EmbeddedFile stream
       const efNum = efRefOf(sp);
       const efObj = efNum !== null ? doc.objects.get(efNum) : null;
       const efDict = efObj && efObj.dict ? efObj.dict : null;
-      if (!efDict) { add('PDFA3-EF-SUBTYPE', 'error', label + ': der eingebettete Dateistrom (/EF) ist nicht auffindbar.'); continue; }
+      if (!efDict) { add('PDFA3-EF-SUBTYPE', 'error', label + ': Der eingebettete Dateistrom (/EF) ist nicht auffindbar.'); continue; }
       const sub = resolve(efDict.get('Subtype'));
       const mime = nameOf(sub);
-      if (!mime) add('PDFA3-EF-SUBTYPE', 'error', label + ': dem EmbeddedFile-Strom fehlt /Subtype (MIME-Typ).');
-      else if (!/^[A-Za-z0-9!#$&^_.+\-]+\/[A-Za-z0-9!#$&^_.+\-]+$/.test(mime)) add('PDFA3-EF-SUBTYPE', 'error', label + ': /Subtype "' + mime + '" ist kein MIME-Typ.');
+      if (!mime) add('PDFA3-EF-SUBTYPE', 'error', label + ': Dem EmbeddedFile-Strom fehlt /Subtype (MIME-Typ).');
+      else if (!/^[A-Za-z0-9!#$&^_.+\-]+\/[A-Za-z0-9!#$&^_.+\-]+$/.test(mime)) add('PDFA3-EF-SUBTYPE', 'error', label + ': /Subtype „' + mime + '“ ist kein MIME-Typ.');
       else if (isInv && mime !== 'text/xml') add('PDFA3-EF-SUBTYPE', 'warning', label + ': /Subtype = ' + mime + '; für die Rechnungs-XML ist text/xml (/text#2Fxml) vorgesehen.');
       else pass('PDFA3-EF-SUBTYPE');
       const params = resolve(efDict.get('Params'));
-      if (!(params instanceof Map)) add('PDFA3-EF-PARAMS-MODDATE', 'warning', label + ': dem EmbeddedFile-Strom fehlt /Params (mit /ModDate).');
+      if (!(params instanceof Map)) add('PDFA3-EF-PARAMS-MODDATE', 'warning', label + ': Dem EmbeddedFile-Strom fehlt /Params (mit /ModDate).');
       else if (!params.has('ModDate')) add('PDFA3-EF-PARAMS-MODDATE', 'warning', label + ': /Params des EmbeddedFile-Stroms enthält kein /ModDate.');
       else pass('PDFA3-EF-PARAMS-MODDATE');
     }

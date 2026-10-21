@@ -22,9 +22,11 @@
   // ---------- code lists (labels for display; the code itself is always shown as well) ----------
   const TYPE_CODES = { 326: 'Teilrechnung', 380: 'Rechnung', 381: 'Gutschrift / Rechnungskorrektur (Credit Note)', 383: 'Belastungsanzeige', 384: 'Korrigierte Rechnung', 386: 'Vorauszahlungsrechnung', 389: 'Selbst ausgestellte Rechnung (Gutschrift nach § 14 Abs. 2 Satz 5 UStG)', 393: 'Factoring-Rechnung', 751: 'Rechnungsinformation für Buchungszwecke', 875: 'Abschlagsrechnung (Bauleistung)', 876: 'Teilschlussrechnung (Bauleistung)', 877: 'Schlussrechnung (Bauleistung)' };
   const VAT_CATEGORIES = { S: 'Normaler Steuersatz', AA: 'Ermäßigter Steuersatz', Z: 'Nullsatz', E: 'Steuerbefreit', AE: 'Steuerschuldnerschaft des Leistungsempfängers', K: 'Innergemeinschaftliche Lieferung', G: 'Ausfuhr (außerhalb der EU)', O: 'Nicht steuerbar', L: 'IGIC (Kanarische Inseln)', M: 'IPSI (Ceuta, Melilla)', B: 'Split Payment (Italien)' };
-  const PAYMENT_MEANS = { 1: 'Nicht definiert', 10: 'Bargeld', 20: 'Scheck', 30: 'Überweisung', 31: 'Überweisung', 42: 'Zahlung auf Bankkonto', 48: 'Bankkarte', 49: 'Lastschrift', 54: 'Kreditkarte', 55: 'Debitkarte', 57: 'Dauerauftrag', 58: 'SEPA-Überweisung', 59: 'SEPA-Lastschrift', 68: 'Online-Zahlungsdienst', 97: 'Verrechnung', ZZZ: 'Gegenseitig vereinbart' };
-  const UNITS = { C62: 'Stück', H87: 'Stück', EA: 'Stück', XPP: 'Stück', HUR: 'Std.', MIN: 'Min.', DAY: 'Tag(e)', WEE: 'Woche(n)', MON: 'Monat(e)', ANN: 'Jahr(e)', KGM: 'kg', GRM: 'g', TNE: 't', MTR: 'm', CMT: 'cm', MMT: 'mm', KMT: 'km', MTK: 'm²', MTQ: 'm³', LTR: 'l', MLT: 'ml', KWH: 'kWh', SET: 'Satz', PR: 'Paar', LS: 'Pauschale', E48: 'Leistungseinheit', P1: '%', XBX: 'Karton', XPK: 'Packung', XPA: 'Packen', XRO: 'Rolle', XBO: 'Flasche', NAR: 'Anzahl', D64: 'Block' };
+  const PAYMENT_MEANS = { 1: 'Nicht definiert', 10: 'Bargeld', 20: 'Scheck', 30: 'Überweisung', 31: 'Debit Transfer', 42: 'Zahlung auf Bankkonto', 48: 'Bankkarte', 49: 'Lastschrift', 54: 'Kreditkarte', 55: 'Debitkarte', 57: 'Dauerauftrag', 58: 'SEPA-Überweisung', 59: 'SEPA-Lastschrift', 68: 'Online-Zahlungsdienst', 97: 'Verrechnung', ZZZ: 'Gegenseitig vereinbart' };
+  const UNITS = { C62: 'Stück', H87: 'Stück', EA: 'Stück', XPP: 'Stück', HUR: 'Std.', MIN: 'Min.', DAY: 'Tag(e)', WEE: 'Woche(n)', MON: 'Monat(e)', ANN: 'Jahr(e)', KGM: 'kg', GRM: 'g', TNE: 't', MTR: 'm', CMT: 'cm', MMT: 'mm', KMT: 'km', MTK: 'm²', MTQ: 'm³', LTR: 'l', MLT: 'ml', KWH: 'kWh', SET: 'Satz', PR: 'Paar', LS: 'Pauschale(n)', E48: 'Leistungseinheit(en)', P1: '%', XBX: 'Karton', XPK: 'Packung(en)', XPA: 'Packen', XRO: 'Rolle(n)', XBO: 'Flasche(n)', NAR: 'Artikel', D64: 'Block' };
   const label = (table, code) => (code && table[code] ? table[code] : '');
+  // units whose name changes with the number (singular, plural): the reading copy writes "1 Tag", "3 Tage"
+  const UNIT_FORMS = { DAY: ['Tag', 'Tage'], WEE: ['Woche', 'Wochen'], MON: ['Monat', 'Monate'], ANN: ['Jahr', 'Jahre'], LS: ['Pauschale', 'Pauschalen'], E48: ['Leistungseinheit', 'Leistungseinheiten'], XPK: ['Packung', 'Packungen'], XRO: ['Rolle', 'Rollen'], XBO: ['Flasche', 'Flaschen'] };
   const withLabel = (table, code) => (code ? (table[code] ? table[code] + ' (' + code + ')' : code) : '');
 
   // ---------- value formatting (exact, from the strings of the document) ----------
@@ -57,6 +59,13 @@
   /** YYYY-MM-DD (also with a time-zone suffix) -> TT.MM.JJJJ; anything else unchanged */
   const date = (v) => { const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(v || ''); return m ? m[3] + '.' + m[2] + '.' + m[1] : (v || ''); };
   const first = (model, id) => ((model && model.bt && model.bt[id]) || [])[0] || '';
+  /** '3 Tage', '1 Tag'; 'ab 01.01.2026', 'bis 31.01.2026' for a period with one end only */
+  const plural = (n, one, many) => n + ' ' + (Number(n) === 1 ? one : many);
+  const days = (d) => plural(d, 'Tag', 'Tage');
+  const period = (a, b) => (a && b ? date(a) + ' – ' + date(b) : a ? 'ab ' + date(a) : b ? 'bis ' + date(b) : '');
+  /** kind of a file without a recognised format (r.kind) */
+  const KIND = { xml: 'XML', pdf: 'PDF', zip: 'ZIP-Archiv', unknown: 'unbekannt' };
+  const kindLabel = (k) => (k ? KIND[k] || k : '');
   const all = (model, id) => ((model && model.bt && model.bt[id]) || []).join(' | ');
 
   const ASSESSMENT = { accept: 'Keine Fehler', reject: 'Fehler gefunden', 'not-processable': 'Nicht prüfbar', 'not-applicable': 'Nicht anwendbar', incomplete: 'Unvollständig' };
@@ -80,9 +89,9 @@
   const routeLabel = (r) => (r.scenario ? 'KoSIT: ' + r.scenario.name : r.rulesetFamily || '');
 
   function findingsCsv(results, vat) {
-    const rows = [['Datei', 'SHA-256', 'Format', 'Profil', 'Prüfweg', 'Ergebnis (technisch)', 'USt-Einordnung', 'Stufe', 'Quelle', 'Regel', 'Regelwerk', 'Meldung', 'Stelle', 'Zeile', 'USt-Bedeutung der Regel', 'Geschäftsbegriffe']];
+    const rows = [['Datei', 'SHA-256', 'Format', 'Profil', 'Prüfweg', 'Ergebnis (technisch)', 'USt-Einordnung', 'Stufe', 'Quelle', 'Regel', 'Regelwerk', 'Meldung', 'Stelle', 'Zeile', 'USt-Bedeutung', 'Geschäftsbegriffe']];
     for (const r of results) {
-      const base = [r.name, r.sha256 || '', r.syntax || r.kind, r.profile ? r.profile.label : '', routeLabel(r), ASSESSMENT[r.assessment] || r.assessment, r.ust ? r.ust.kurz : ''];
+      const base = [r.name, r.sha256 || '', r.syntax || kindLabel(r.kind), r.profile ? r.profile.label : '', routeLabel(r), ASSESSMENT[r.assessment] || r.assessment, r.ust ? r.ust.kurz : ''];
       if (!r.allFindings || !r.allFindings.length) rows.push(base.concat(['', '', '', '', (r.warnings || []).join(' | '), '', '', '', '']));
       for (const f of r.allFindings || []) rows.push(base.concat([LEVEL[f.level], SOURCE[f.source] || '', f.id, f.schema, f.text, f.location || '', f.line || '', ustLabel(f, vat), f.ust ? f.ust.bt.join(' ') : '']));
     }
@@ -97,11 +106,11 @@
     const vatKey = (v) => (v.cat || '?') + '|' + canonicalDecimal(v.rate);
     for (const r of withModel) for (const v of r.model.vat) { const k = vatKey(v); if (!keys.includes(k)) keys.push(k); }
     keys.sort((a, b) => { const [ca, ra] = a.split('|'), [cb, rb] = b.split('|'); const oa = CAT_ORDER.indexOf(ca), ob = CAT_ORDER.indexOf(cb); return (oa < 0 ? 99 : oa) - (ob < 0 ? 99 : ob) || Number(rb || 0) - Number(ra || 0); });
-    const head = ['Datei', 'SHA-256', 'Ergebnis (technisch)', 'USt-Einordnung', 'Rechnungsart (BT-3)', 'Rechnungsnummer (BT-1)', 'Rechnungsdatum (BT-2)', 'Leistungsdatum (BT-72)', 'Leistungszeitraum von (BT-73)', 'Leistungszeitraum bis (BT-74)', 'Fälligkeitsdatum (BT-9)', 'Währung (BT-5)', 'Käuferreferenz/Leitweg-ID (BT-10)', 'Bestellnummer (BT-13)', 'Vertragsnummer (BT-12)', 'Projektreferenz (BT-11)', 'Vorausgegangene Rechnung (BT-25)',
-      'Verkäufer Name (BT-27)', 'Verkäufer USt-IdNr. (BT-31)', 'Verkäufer Steuernummer (BT-32)', 'Verkäufer Straße (BT-35)', 'Verkäufer PLZ (BT-38)', 'Verkäufer Ort (BT-37)', 'Verkäufer Land (BT-40)', 'Verkäufer E-Mail (BT-43)',
-      'Käufer Name (BT-44)', 'Käufer USt-IdNr. (BT-48)', 'Käufer Straße (BT-50)', 'Käufer PLZ (BT-53)', 'Käufer Ort (BT-52)', 'Käufer Land (BT-55)',
+    const head = ['Datei', 'SHA-256', 'Ergebnis (technisch)', 'USt-Einordnung', 'Rechnungsart (BT-3)', 'Rechnungsnummer (BT-1)', 'Rechnungsdatum (BT-2)', 'Liefer-/Leistungsdatum (BT-72)', 'Leistungszeitraum von (BT-73)', 'Leistungszeitraum bis (BT-74)', 'Fälligkeitsdatum (BT-9)', 'Währung (BT-5)', 'Käuferreferenz/Leitweg-ID (BT-10)', 'Bestellnummer (BT-13)', 'Vertragsnummer (BT-12)', 'Projektreferenz (BT-11)', 'Vorausgegangene Rechnung (BT-25)',
+      'Verkäufer: Name (BT-27)', 'Verkäufer: USt-IdNr. (BT-31)', 'Verkäufer: Steuernummer (BT-32)', 'Verkäufer: Straße (BT-35)', 'Verkäufer: PLZ (BT-38)', 'Verkäufer: Ort (BT-37)', 'Verkäufer: Land (BT-40)', 'Verkäufer: E-Mail (BT-43)',
+      'Käufer: Name (BT-44)', 'Käufer: USt-IdNr. (BT-48)', 'Käufer: Straße (BT-50)', 'Käufer: PLZ (BT-53)', 'Käufer: Ort (BT-52)', 'Käufer: Land (BT-55)',
       'Summe Positionen netto (BT-106)', 'Summe Nachlässe (BT-107)', 'Summe Zuschläge (BT-108)', 'Gesamtbetrag netto (BT-109)', 'Umsatzsteuer (BT-110)', 'Gesamtbetrag brutto (BT-112)', 'Bereits gezahlt (BT-113)', 'Rundung (BT-114)', 'Fälliger Betrag (BT-115)',
-      'Zahlungsart (BT-81)', 'IBAN (BT-84)', 'BIC (BT-86)', 'Kontoinhaber (BT-85)', 'Verwendungszweck (BT-83)', 'Zahlungsbedingungen (BT-20)', 'Skonto (BT-20, XRechnung-Format)', 'USt-Aufschlüsselung (BG-23)']
+      'Zahlungsart (BT-81)', 'IBAN (BT-84)', 'BIC (BT-86)', 'Kontoinhaber (BT-85)', 'Verwendungszweck (BT-83)', 'Zahlungsbedingungen (BT-20)', 'Skonto / Verzug (BT-20, XRechnung-Format)', 'USt-Aufschlüsselung (BG-23)']
       .concat(keys.flatMap((k) => { const [c, rate] = k.split('|'); const t = c + (rate !== '' ? ' ' + decimalComma(rate) + ' %' : ''); return ['Bemessungsgrundlage ' + t + ' (BT-116)', 'Steuerbetrag ' + t + ' (BT-117)']; }));
     const rows = [head];
     for (const r of withModel) {
@@ -111,7 +120,7 @@
         f('BT-27'), f('BT-31'), f('BT-32'), f('BT-35'), f('BT-38'), f('BT-37'), f('BT-40'), f('BT-43'),
         f('BT-44'), f('BT-48'), f('BT-50'), f('BT-53'), f('BT-52'), f('BT-55'),
         a('BT-106'), a('BT-107'), a('BT-108'), a('BT-109'), a('BT-110'), a('BT-112'), a('BT-113'), a('BT-114'), a('BT-115'),
-        f('BT-81'), all(m, 'BT-84'), all(m, 'BT-86'), all(m, 'BT-85'), f('BT-83'), all(m, 'BT-20'), m.skonto.map((s) => (s.type === 'SKONTO' ? 'Skonto ' : 'Verzug ') + s.days + ' Tage ' + decimalComma(s.percent) + ' %' + (s.base ? ' von ' + decimalComma(s.base) : '')).join(' | '),
+        f('BT-81'), all(m, 'BT-84'), all(m, 'BT-86'), all(m, 'BT-85'), f('BT-83'), all(m, 'BT-20'), m.skonto.map((s) => (s.type === 'SKONTO' ? 'Skonto ' : 'Verzug ') + days(s.days) + ', ' + decimalComma(s.percent) + ' %' + (s.base ? ' von ' + decimalComma(s.base) : '')).join(' | '),
         m.vat.map((v) => (v.cat || '?') + (v.rate !== '' ? ' ' + decimalComma(v.rate) + ' %' : '') + ': ' + decimalComma(v.taxable) + ' / ' + decimalComma(v.tax)).join(' | ')];
       for (const k of keys) {
         const rowsK = m.vat.filter((v) => vatKey(v) === k);
@@ -184,8 +193,8 @@
   const VERDICT_TONE = { ok: 'ok', technisch: 'info', pflicht: 'bad', luecke: 'bad', 'nicht-pruefbar': 'warn', format: 'bad', 'kein-profil': 'bad', 'keine-xml': 'bad', unvollstaendig: 'warn' };
   const ASSESS_TONE = { accept: 'ok', reject: 'bad', 'not-processable': 'warn', 'not-applicable': 'neutral', incomplete: 'warn' };
   const ASSESS_TEXT = {
-    accept: 'Keine Format- oder Geschäftsregelfehler (Prüfung wie KoSIT-Validator).',
-    reject: 'Technisch fehlerhaft: Format- oder Geschäftsregelfehler (der KoSIT-Validator empfiehlt die Zurückweisung; für Rechnungen an öffentliche Auftraggeber gelten daneben deren Vorschriften, BMF-Schreiben vom 15.10.2026, Rn. 24 und 25).',
+    accept: 'Keine Format- oder Geschäftsregelfehler.',
+    reject: 'Technisch fehlerhaft – Format-, PDF-Container- oder Geschäftsregelfehler (bei Schema- und Geschäftsregelfehlern empfiehlt der KoSIT-Validator die Zurückweisung). Für Rechnungen an öffentliche Auftraggeber gelten daneben die Vorschriften zur elektronischen Rechnungsstellung gegenüber öffentlichen Auftraggebern (BMF-Schreiben vom 15.10.2026, Rn. 24 und 25).',
     'not-processable': 'Nicht vollständig verarbeitbar – nicht automatisiert annehmen.',
     'not-applicable': 'Keine Geschäftsregeln anwendbar (kein unterstütztes E-Rechnungsformat).',
     incomplete: 'Keine Fehler in den geprüften Regelwerken; die Prüfung ist unvollständig (Regelwerk fehlt).',
@@ -224,15 +233,15 @@
       ['Dateiname', r.name], ['Größe', r.size !== undefined ? grouped(r.size) + ' Byte' : ''],
       ['SHA-256 der Datei', r.sha256 || '', 'F3'], ['SHA-256 der eingebetteten XML', r.xmlSha256 || '', 'F3'],
       ['Eingebettete XML (PDF)', r.pdf && r.pdf.invoiceAttachment ? r.pdf.invoiceAttachment : ''],
-      ['Syntax', r.syntax || r.kind || ''], ['Spezifikationskennung (BT-24)', r.profile ? r.profile.id || '– fehlt –' : ''], ['Erkanntes Profil', r.profile ? r.profile.label : ''],
-      ['Prüfweg', r.route === 'kosit' && r.scenario ? 'wie KoSIT-Validator, Szenario „' + r.scenario.name + '“' : r.ruleSets && r.ruleSets.length ? 'Profilregeln (' + (r.rulesetFamily || r.route) + ')' : '–'],
+      ['Syntax', r.syntax || kindLabel(r.kind)], ['Spezifikationskennung (BT-24)', r.profile ? r.profile.id || '– fehlt –' : ''], ['Erkanntes Profil', r.profile ? r.profile.label : ''],
+      ['Prüfweg', r.route === 'kosit' && r.scenario ? 'wie beim KoSIT-Validator, Szenario „' + r.scenario.name + '“' : r.ruleSets && r.ruleSets.length ? 'Profilregeln (' + (r.rulesetFamily || r.route) + ')' : '–'],
       ['XML-Schema', r.xsd ? r.xsd.schema + ': ' + (r.xsd.valid === true ? 'gültig' : r.xsd.valid === false ? r.xsd.errorCount + ' Fehler' : 'nicht geprüft') : ''],
       ['Regelwerke', (r.ruleSetsRun || r.ruleSets || []).join(', ')],
     ], { labelWidth: 140 });
 
     const tone = ASSESS_TONE[r.assessment] || 'neutral';
     fl.heading('Ergebnis der technischen Prüfung', 2);
-    fl.box([{ text: (ASSESSMENT[r.assessment] || r.assessment) + ': ' + (ASSESS_TEXT[r.assessment] || ''), font: 'F2' }, { text: r.counts ? r.counts.error + ' Fehler, ' + r.counts.warning + ' Warnungen, ' + r.counts.information + ' Hinweise' + ((r.processingErrors || []).length ? ', ' + r.processingErrors.length + ' Verarbeitungsfehler' : '') : '' }].filter((p) => p.text), BG[tone], C[tone]);
+    fl.box([{ text: (ASSESSMENT[r.assessment] || r.assessment) + ': ' + (ASSESS_TEXT[r.assessment] || ''), font: 'F2' }, { text: r.counts ? r.counts.error + ' Fehler, ' + plural(r.counts.warning, 'Warnung', 'Warnungen') + ', ' + plural(r.counts.information, 'Hinweis', 'Hinweise') + ((r.processingErrors || []).length ? ', ' + r.processingErrors.length + ' Verarbeitungsfehler' : '') : '' }].filter((p) => p.text), BG[tone], C[tone]);
     for (const w of r.warnings || []) fl.text('Hinweis: ' + w, { size: 8.5, color: C.warn });
 
     if (r.ust) {
@@ -266,7 +275,7 @@
     fl.kv([['Werkzeug', (build.name || 'E-Rechnung Prüfer') + ' ' + (build.version || '') + (build.date ? ' (Build ' + build.date + ')' : '')], ['Prüfstand (Fingerprint)', build.fingerprint || '', 'F3'], ['Nachweis der Testreihen', build.verification || '']], { labelWidth: 130 });
     if (build.standards) fl.table([{ title: 'Regelwerk / Schema', width: 0.42 }, { title: 'Version', width: 0.3 }, { title: 'SHA-256 (Anfang)', width: 0.28, font: 'F3' }], build.standards.map((s) => [s.name, s.version, s.sha256 ? s.sha256.slice(0, 24) + '…' : '']), { size: 7.5 });
     fl.text('Aufbewahrung: Bewahren Sie dieses Protokoll zusammen mit der Rechnung auf; die SHA-256-Prüfsumme belegt, auf welche Datei es sich bezieht. ' + (ctx.vat && ctx.vat.hinweise && ctx.vat.hinweise.validierungsbericht ? ctx.vat.hinweise.validierungsbericht + ' ' : '') + 'Dieses Protokoll ersetzt keine steuerliche Beratung.', { size: 8, color: C.neutral });
-    if (doc.stats.replaced) fl.text(doc.stats.replaced + ' Zeichen außerhalb von Windows-1252 sind in diesem PDF ersetzt; maßgeblich ist die XML.', { size: 7.5, color: C.neutral });
+    if (doc.stats.replaced) fl.text(doc.stats.replaced + ' Zeichen außerhalb von Windows-1252 ' + (doc.stats.replaced === 1 ? 'ist' : 'sind') + ' in diesem PDF ersetzt; maßgeblich ist die XML.', { size: 7.5, color: C.neutral });
     return doc.finish(footer(doc, fl.left, 'Prüfprotokoll · ' + (build.name || 'E-Rechnung Prüfer') + ' ' + (build.version || '') + ' · SHA-256 ' + (r.sha256 || '').slice(0, 16) + '…'));
   }
 
@@ -290,18 +299,18 @@
     const y1 = col('Verkäufer', sellerL, fl.left), y2 = col('Käufer', buyerL, fl.left + W / 2 + 7);
     fl.gap(yTop - Math.min(y1, y2) + 8);
     fl.heading((label(TYPE_CODES, typeCode) || 'Rechnung') + ' ' + first(m, 'BT-1'), 1);
-    const period = first(m, 'BT-73') || first(m, 'BT-74') ? date(first(m, 'BT-73')) + ' – ' + date(first(m, 'BT-74')) : '';
-    fl.kv([['Rechnungsnummer', first(m, 'BT-1')], ['Rechnungsdatum', date(first(m, 'BT-2'))], ['Rechnungsart', withLabel(TYPE_CODES, typeCode)], ['Liefer-/Leistungsdatum', date(first(m, 'BT-72'))], ['Leistungszeitraum', period], ['Fälligkeitsdatum', date(first(m, 'BT-9'))], ['Käuferreferenz / Leitweg-ID', first(m, 'BT-10')], ['Bestellnummer', first(m, 'BT-13')], ['Auftragsnummer', first(m, 'BT-14')], ['Vertragsnummer', first(m, 'BT-12')], ['Projektreferenz', first(m, 'BT-11')], ['Lieferscheinnummer', first(m, 'BT-16')], ['Vorausgegangene Rechnung', m.precedingInvoices.map((p) => p.id + (p.date ? ' vom ' + date(p.date) : '')).join(', ')], ['Währung', cur]], { labelWidth: 140 });
+    const invoicePeriod = period(first(m, 'BT-73'), first(m, 'BT-74'));
+    fl.kv([['Rechnungsnummer', first(m, 'BT-1')], ['Rechnungsdatum', date(first(m, 'BT-2'))], ['Rechnungsart', withLabel(TYPE_CODES, typeCode)], ['Liefer-/Leistungsdatum', date(first(m, 'BT-72'))], ['Leistungszeitraum', invoicePeriod], ['Fälligkeitsdatum', date(first(m, 'BT-9'))], ['Käuferreferenz / Leitweg-ID', first(m, 'BT-10')], ['Bestellnummer', first(m, 'BT-13')], ['Auftragsnummer', first(m, 'BT-14')], ['Vertragsnummer', first(m, 'BT-12')], ['Projektreferenz', first(m, 'BT-11')], ['Lieferscheinnummer', first(m, 'BT-16')], ['Vorausgegangene Rechnung', m.precedingInvoices.map((p) => p.id + (p.date ? ' vom ' + date(p.date) : '')).join(', ')], ['Währung', cur]], { labelWidth: 140 });
     if (m.delivery.length) fl.kv([['Lieferung an', [first(m, 'BT-70'), first(m, 'BT-75'), [first(m, 'BT-78'), first(m, 'BT-77')].filter(Boolean).join(' '), first(m, 'BT-80')].filter(Boolean).join(', ')]], { labelWidth: 140 });
     if (m.payeeParty.length) fl.kv([['Zahlungsempfänger', first(m, 'BT-59')]], { labelWidth: 140 });
     if (m.taxRep.length) fl.kv([['Steuervertreter', [first(m, 'BT-62'), first(m, 'BT-63') ? 'USt-IdNr. ' + first(m, 'BT-63') : '', [first(m, 'BT-67'), first(m, 'BT-66')].filter(Boolean).join(' ')].filter(Boolean).join(', ')]], { labelWidth: 140 });
 
     fl.heading('Positionen (' + m.lines.length + ')', 2);
     fl.table([{ title: 'Pos.', width: 0.06 }, { title: 'Bezeichnung', width: 0.42 }, { title: 'Menge', width: 0.13, align: 'right' }, { title: 'Einzelpreis', width: 0.14, align: 'right' }, { title: 'USt', width: 0.09, align: 'right' }, { title: 'Netto', width: 0.16, align: 'right' }],
-      m.lines.map((l) => [l.id, [l.name, l.desc, l.sellerId ? 'Art.-Nr. ' + l.sellerId : '', l.period || l.periodEnd ? 'Zeitraum ' + date(l.period) + ' – ' + date(l.periodEnd) : '', l.allowances.map((x) => (x.indicator === 'true' ? 'Zuschlag ' : 'Nachlass ') + amount(x.amount, cur) + (x.reason ? ' (' + x.reason + ')' : '')).join('; '), l.note].filter(Boolean).join('\n'), quantity(l.qty) + ' ' + (label(UNITS, l.unit) || l.unit), amount(l.price, '') + (l.baseQty && l.baseQty !== '1' ? ' / ' + quantity(l.baseQty) : ''), [l.vatCat, l.vatRate !== '' ? quantity(l.vatRate) + ' %' : ''].filter(Boolean).join(' '), amount(l.net, '')]),
+      m.lines.map((l) => [l.id, [l.name, l.desc, l.sellerId ? 'Art.-Nr. ' + l.sellerId : '', l.period || l.periodEnd ? 'Zeitraum ' + period(l.period, l.periodEnd) : '', l.allowances.map((x) => (x.indicator === 'true' ? 'Zuschlag ' : 'Nachlass ') + amount(x.amount, cur) + (x.reason ? ' (' + x.reason + ')' : '')).join('; '), l.note].filter(Boolean).join('\n'), quantity(l.qty) + ' ' + (UNIT_FORMS[l.unit] ? UNIT_FORMS[l.unit][canonicalDecimal(l.qty) === '1' ? 0 : 1] : label(UNITS, l.unit) || l.unit), amount(l.price, '') + (l.baseQty && canonicalDecimal(l.baseQty) !== '1' ? ' / ' + quantity(l.baseQty) : ''), [l.vatCat, l.vatRate !== '' ? quantity(l.vatRate) + ' %' : ''].filter(Boolean).join(' '), amount(l.net, '')]),
       { size: 8 });
     if (m.allowances.length) {
-      fl.heading('Nachlässe und Zuschläge auf Rechnungsebene', 3);
+      fl.heading('Nachlässe und Zuschläge auf Dokumentebene', 3);
       fl.table([{ title: 'Art', width: 0.15 }, { title: 'Grund', width: 0.45 }, { title: 'USt', width: 0.15, align: 'right' }, { title: 'Betrag', width: 0.25, align: 'right' }], m.allowances.map((a) => [a.indicator === 'true' ? 'Zuschlag' : 'Nachlass', [a.reasonCode, a.reason].filter(Boolean).join(' – '), [a.vatCat, a.vatRate !== '' ? quantity(a.vatRate) + ' %' : ''].filter(Boolean).join(' '), amount(a.amount, cur)]), { size: 8 });
     }
     fl.heading('Beträge', 2);
@@ -312,12 +321,12 @@
       fl.table([{ title: 'Kategorie', width: 0.4 }, { title: 'Satz', width: 0.12, align: 'right' }, { title: 'Bemessungsgrundlage', width: 0.24, align: 'right' }, { title: 'Steuerbetrag', width: 0.24, align: 'right' }], m.vat.map((v) => [withLabel(VAT_CATEGORIES, v.cat) + (v.reason || v.reasonCode ? '\n' + [v.reasonCode, v.reason].filter(Boolean).join(' – ') : ''), v.rate !== '' ? quantity(v.rate) + ' %' : '', amount(v.taxable, ''), amount(v.tax, '')]), { size: 8 });
     }
     fl.heading('Zahlung', 2);
-    fl.kv([['Zahlungsart', withLabel(PAYMENT_MEANS, first(m, 'BT-81')) + (first(m, 'BT-82') ? ' – ' + first(m, 'BT-82') : '')], ['IBAN / Konto', all(m, 'BT-84')], ['BIC', all(m, 'BT-86')], ['Kontoinhaber', all(m, 'BT-85')], ['Verwendungszweck', first(m, 'BT-83')], ['Mandatsreferenz', first(m, 'BT-89')], ['Gläubiger-ID', first(m, 'BT-90')], ['Zahlungsbedingungen', all(m, 'BT-20')], ['Skonto', m.skonto.map((s) => (s.type === 'SKONTO' ? 'Skonto ' : 'Verzugszinsen ') + s.days + ' Tage, ' + quantity(s.percent) + ' %' + (s.base ? ' auf ' + amount(s.base, cur) : '')).join('; ')]], { labelWidth: 140 });
+    fl.kv([['Zahlungsart', withLabel(PAYMENT_MEANS, first(m, 'BT-81')) + (first(m, 'BT-82') ? ' – ' + first(m, 'BT-82') : '')], ['IBAN / Konto', all(m, 'BT-84')], ['BIC', all(m, 'BT-86')], ['Kontoinhaber', all(m, 'BT-85')], ['Verwendungszweck', first(m, 'BT-83')], ['Mandatsreferenz', first(m, 'BT-89')], ['Gläubiger-ID', first(m, 'BT-90')], ['Zahlungsbedingungen', all(m, 'BT-20')], ['Skonto / Verzug', m.skonto.map((s) => (s.type === 'SKONTO' ? 'Skonto ' : 'Verzug ') + days(s.days) + ', ' + quantity(s.percent) + ' %' + (s.base ? ' auf ' + amount(s.base, cur) : '')).join('; ')]], { labelWidth: 140 });
     if (m.notes.length) { fl.heading('Bemerkungen', 2); for (const n of m.notes) fl.text(n, { size: 8.5 }); }
     if (m.attachments.length) { fl.heading('Rechnungsbegründende Unterlagen', 2); for (const a of m.attachments) fl.text([a.id, a.desc, a.file, a.uri].filter(Boolean).join(' · '), { size: 8.5 }); }
-    if (doc.stats.replaced) fl.text(doc.stats.replaced + ' Zeichen außerhalb von Windows-1252 sind in dieser Lesefassung ersetzt; maßgeblich ist die XML.', { size: 7.5, color: C.neutral });
-    return doc.finish(footer(doc, fl.left, 'Lesefassung von „' + r.name + '“ (SHA-256 ' + (r.sha256 || '').slice(0, 16) + '…) · erstellt am ' + now.toISOString().slice(0, 10) + ' mit ' + (((ctx.build || {}).name) || 'E-Rechnung Prüfer') + ' ' + (((ctx.build || {}).version) || '')));
+    if (doc.stats.replaced) fl.text(doc.stats.replaced + ' Zeichen außerhalb von Windows-1252 ' + (doc.stats.replaced === 1 ? 'ist' : 'sind') + ' in dieser Lesefassung ersetzt; maßgeblich ist die XML.', { size: 7.5, color: C.neutral });
+    return doc.finish(footer(doc, fl.left, 'Lesefassung von „' + r.name + '“ (SHA-256 ' + (r.sha256 || '').slice(0, 16) + '…) · erstellt am ' + stamp(now).slice(0, 10) + ' mit ' + (((ctx.build || {}).name) || 'E-Rechnung Prüfer') + ' ' + (((ctx.build || {}).version) || '')));
   }
 
-  return { findingsCsv, invoicesCsv, linesCsv, jsonReport, protocolPdf, invoicePdf, attachmentFiles, fileName, base64Bytes, amount, quantity, canonicalDecimal, date, decimalComma, ustLabel, stamp, TYPE_CODES, VAT_CATEGORIES, PAYMENT_MEANS, UNITS, ASSESS_TEXT };
+  return { findingsCsv, invoicesCsv, linesCsv, jsonReport, protocolPdf, invoicePdf, attachmentFiles, fileName, base64Bytes, amount, quantity, canonicalDecimal, date, decimalComma, ustLabel, stamp, kindLabel, TYPE_CODES, VAT_CATEGORIES, PAYMENT_MEANS, UNITS, UNIT_FORMS, ASSESS_TEXT };
 });

@@ -58,10 +58,10 @@
     }
     parseObject(depth) {
       depth = depth || 0;
-      if (depth > 200) throw new Error('nesting too deep');
+      if (depth > 200) throw new Error('zu tief verschachtelt');
       this.skipWs();
       const b = this.b;
-      if (this.pos >= b.length) throw new Error('unexpected end');
+      if (this.pos >= b.length) throw new Error('unerwartetes Dateiende');
       const c = b[this.pos];
       if (c === 0x3c) { // <
         if (b[this.pos + 1] === 0x3c) return this.parseDict(depth);
@@ -206,7 +206,7 @@
   // files of up to 100 MB, src/app.js).
   const MAX_STREAM_BYTES = 64 * 1024 * 1024;
   const MAX_DOCUMENT_BYTES = 256 * 1024 * 1024;
-  const LIMIT_TEXT = 'decoded stream exceeds the limit of ';
+  const LIMIT_TEXT = 'entpackter Datenstrom überschreitet die Grenze von ';
   // the budget of a document is kept per warnings array: every entry point (extractEmbeddedFiles, loadDocument,
   // the container checks) passes one array through all decoding steps of one document
   const budgets = new WeakMap();
@@ -238,7 +238,7 @@
           if (len > limit) { tooLarge = true; reader.cancel().catch(() => {}); break; }
           chunks.push(value);
         }
-        if (tooLarge) throw new Error(LIMIT_TEXT + mib(limit) + ' (protection against decompression bombs)');
+        if (tooLarge) throw new Error(LIMIT_TEXT + mib(limit) + ' (Schutz vor Dekompressionsbomben)');
         const out = new Uint8Array(len);
         let o = 0;
         for (const c of chunks) { out.set(c, o); o += c.length; }
@@ -249,10 +249,10 @@
     }
     if (typeof pako !== 'undefined') {
       const out = pako.inflate(bytes);
-      if (out.length > limit) throw new Error(LIMIT_TEXT + mib(limit) + ' (protection against decompression bombs)');
+      if (out.length > limit) throw new Error(LIMIT_TEXT + mib(limit) + ' (Schutz vor Dekompressionsbomben)');
       return out;
     }
-    throw new Error('no inflate implementation available');
+    throw new Error('kein Verfahren zum Entpacken (inflate) verfügbar');
   }
 
   function applyPredictor(data, parms, resolve) {
@@ -263,7 +263,7 @@
     const columns = num(resolve(parms.get('Columns'))) || 1;
     const bpp = Math.ceil((colors * bpc) / 8);
     const rowLen = Math.ceil((colors * bpc * columns) / 8);
-    if (pred === 2) throw new Error('TIFF predictor not supported');
+    if (pred === 2) throw new Error('TIFF-Prädiktor nicht unterstützt');
     // PNG predictors
     const rows = Math.floor(data.length / (rowLen + 1));
     const out = new Uint8Array(rows * rowLen);
@@ -281,7 +281,7 @@
           case 2: x += b; break;
           case 3: x += Math.floor((a + b) / 2); break;
           case 4: { const p = a + b - c; const pa = Math.abs(p - a), pb = Math.abs(p - b), pc = Math.abs(p - c); x += pa <= pb && pa <= pc ? a : pb <= pc ? b : c; break; }
-          default: throw new Error('bad PNG filter type ' + ft);
+          default: throw new Error('ungültiger PNG-Filtertyp ' + ft);
         }
         row[i] = x & 0xff;
       }
@@ -309,7 +309,7 @@
       names.push(fname);
       if (fname === 'FlateDecode' || fname === 'Fl') {
         const limit = Math.min(MAX_STREAM_BYTES, budget.left);
-        const documentLimit = 'decoded streams of this document exceed the limit of ' + mib(MAX_DOCUMENT_BYTES) + ' (protection against decompression bombs)';
+        const documentLimit = 'entpackte Datenströme dieses Dokuments überschreiten die Grenze von ' + mib(MAX_DOCUMENT_BYTES) + ' (Schutz vor Dekompressionsbomben)';
         if (limit <= 0) throw new Error(documentLimit);
         try {
           data = await inflate(data, limit);
@@ -328,7 +328,7 @@
       } else if (fname === 'ASCII85Decode' || fname === 'A85') {
         data = ascii85(data);
       } else {
-        throw new Error('unsupported stream filter ' + fname);
+        throw new Error('nicht unterstützter Filter ' + fname);
       }
     }
     return { data, filters: names };
@@ -398,7 +398,7 @@
         }
         all.push(obj);
       } catch (e) {
-        warnings.push('object ' + num + ' at offset ' + numStart + ' could not be parsed: ' + e.message);
+        warnings.push('Objekt ' + num + ' an Position ' + numStart + ' nicht lesbar: ' + e.message);
       }
     }
     // resolve stream lengths: an indirect /Length may have several candidate definitions (an
@@ -555,7 +555,7 @@
       } catch (err) { bad++; }
     }
     if (bad && !objects.size) return null;
-    if (bad) warnings.push(bad + ' cross-reference entries point to invalid offsets');
+    if (bad) warnings.push(bad + (bad === 1 ? ' Eintrag der Querverweistabelle zeigt' : ' Einträge der Querverweistabelle zeigen') + ' auf ungültige Positionen');
     // load objects stored in object streams
     const resolve = makeResolver(objects);
     const parsedStreams = new Map(); // objstm num -> {data, header, first}
@@ -582,7 +582,7 @@
         const value = lx.parseObject(0);
         objects.set(n, { num: n, gen: 0, offset: ps.offset, value, dict: value instanceof Map ? value : null, raw: null, streamStart: -1, inObjStm: e.inStream });
       } catch (err) {
-        warnings.push('object ' + n + ' in object stream ' + e.inStream + ' could not be read: ' + err.message);
+        warnings.push('Objekt ' + n + ' im Objektstrom ' + e.inStream + ' nicht lesbar: ' + err.message);
       }
     }
     return { objects, trailer };
@@ -628,7 +628,7 @@
     if (end < 0) {
       // fall back to searching for "endstream"
       const idx = findAll(bytes.subarray(obj.streamStart), [0x65, 0x6e, 0x64, 0x73, 0x74, 0x72, 0x65, 0x61, 0x6d]);
-      if (!idx.length) { warnings.push('object ' + obj.num + ': endstream not found'); return null; }
+      if (!idx.length) { warnings.push('Objekt ' + obj.num + ': „endstream“ nicht gefunden'); return null; }
       end = obj.streamStart + idx[0];
       // strip trailing EOL
       if (bytes[end - 1] === 0x0a) end--;
@@ -661,11 +661,11 @@
             if (existing && existing.offset > obj.offset) continue;
             objects.set(onum, { num: onum, gen: 0, offset: obj.offset, value, dict: value instanceof Map ? value : null, raw: null, streamStart: -1, inObjStm: obj.num });
           } catch (e) {
-            warnings.push('object ' + onum + ' in object stream ' + obj.num + ' could not be parsed: ' + e.message);
+            warnings.push('Objekt ' + onum + ' im Objektstrom ' + obj.num + ' nicht lesbar: ' + e.message);
           }
         }
       } catch (e) {
-        warnings.push('object stream ' + obj.num + ' could not be decoded: ' + e.message);
+        warnings.push('Objektstrom ' + obj.num + ' nicht entpackbar: ' + e.message);
       }
     }
   }
@@ -721,7 +721,7 @@
       const viaXref = await loadViaXref(bytes, warnings);
       if (viaXref) { objects = viaXref.objects; trailer = viaXref.trailer; }
     } catch (e) {
-      warnings.push('cross-reference data unusable (' + e.message + '); falling back to scanning');
+      warnings.push('Querverweisdaten unbrauchbar (' + e.message + '); die Datei wird vollständig durchsucht');
     }
     if (!objects) {
       method = 'scan';
@@ -734,7 +734,7 @@
   async function extractEmbeddedFiles(bytes) {
     if (!(bytes instanceof Uint8Array)) bytes = new Uint8Array(bytes);
     const warnings = [];
-    if (latin1(bytes, 0, Math.min(1024, bytes.length)).indexOf('%PDF-') < 0) warnings.push('no %PDF- header found in the first 1024 bytes');
+    if (latin1(bytes, 0, Math.min(1024, bytes.length)).indexOf('%PDF-') < 0) warnings.push('Kein Dateikopf %PDF- in den ersten 1024 Bytes');
     const loaded = await loadDocument(bytes, warnings);
     let objects = loaded.objects, method = loaded.method;
     const trailer = loaded.trailer;
@@ -750,15 +750,15 @@
           if (sp instanceof Map) namedSpecs.push({ key, spec: sp });
         }
       }
-      if (catalog instanceof Map && catalog.has('Encrypt')) warnings.push('document is encrypted');
-      if (trailer.has('Encrypt')) warnings.push('document declares /Encrypt (not allowed in PDF/A-3); embedded files may be unreadable');
+      if (catalog instanceof Map && catalog.has('Encrypt')) warnings.push('Das Dokument ist verschlüsselt');
+      if (trailer.has('Encrypt')) warnings.push('Das Dokument deklariert /Encrypt (in PDF/A-3 nicht zulässig); eingebettete Dateien sind möglicherweise nicht lesbar');
     }
     // if the xref route found no embedded files at all, try scanning as well (damaged files)
     if (method === 'xref' && !namedSpecs.length && !Array.from(objects.values()).some((o) => o.dict && nameOf(resolve(o.dict.get('Type'))) === 'EmbeddedFile')) {
       const scanned = scanObjects(bytes, []);
       await expandObjectStreams(bytes, scanned, []);
       if (Array.from(scanned.values()).some((o) => o.dict && nameOf(makeResolver(scanned)(o.dict.get('Type'))) === 'EmbeddedFile')) {
-        warnings.push('embedded files found only by scanning the file (cross-reference data incomplete)');
+        warnings.push('Eingebettete Dateien nur durch Durchsuchen der Datei gefunden (Querverweisdaten unvollständig)');
         objects = scanned; resolve = makeResolver(objects); method = 'scan';
       }
     }
@@ -806,7 +806,7 @@
           modDate: params instanceof Map ? pdfString(resolve(params.get('ModDate'))) : null,
         });
       } catch (e) {
-        warnings.push('embedded file (object ' + o.num + (info.name ? ', ' + info.name : '') + ') could not be decoded: ' + e.message);
+        warnings.push('Eingebettete Datei (Objekt ' + o.num + (info.name ? ', ' + info.name : '') + ') nicht entpackbar: ' + e.message);
       }
     }
     files.sort((a, b) => a.objectNumber - b.objectNumber);
@@ -826,7 +826,7 @@
         xmp = Object.assign({ raw: text, objectNumber: o.num }, parsed);
         if (parsed.zugferd) break; // the one carrying ZUGFeRD data wins
       } catch (e) {
-        warnings.push('XMP metadata (object ' + o.num + ') could not be decoded: ' + e.message);
+        warnings.push('XMP-Metadaten (Objekt ' + o.num + ') nicht entpackbar: ' + e.message);
       }
     }
 

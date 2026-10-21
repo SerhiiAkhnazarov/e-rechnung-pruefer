@@ -182,7 +182,7 @@ async function checkPdf(label, bytes, expected, title, withPdfJs) {
       for (const f of list) {
         const row = fcsv[k++];
         const ok = row[col('Datei')] === r.name && row[col('SHA-256')] === (r.sha256 || '') && row[col('USt-Einordnung')] === (r.ust ? r.ust.kurz : '') &&
-          (!f || (row[col('Regel')] === (f.id || '') && row[col('Meldung')] === f.text && row[col('Zeile')] === String(f.line || '') && row[col('USt-Bedeutung der Regel')] === Reports.ustLabel(f, legal)));
+          (!f || (row[col('Regel')] === (f.id || '') && row[col('Meldung')] === f.text && row[col('Zeile')] === String(f.line || '') && row[col('USt-Bedeutung')] === Reports.ustLabel(f, legal)));
         if (!ok) { bad++; if (bad < 4) check('Prüfbericht CSV row ' + k + ' (' + r.name + ')', false, JSON.stringify(row).slice(0, 200)); }
       }
     }
@@ -245,6 +245,13 @@ async function checkPdf(label, bytes, expected, title, withPdfJs) {
   }
 
   // ---- PDF ----------------------------------------------------------------------------------------------------
+  // counts in singular and plural ("1 Warnung", not "1 Warnungen")
+  {
+    const r1 = { name: 'einzahl.xml', size: 1, sha256: 'ab'.repeat(32), kind: 'xml', assessment: 'accept', counts: { error: 0, warning: 1, information: 1 }, allFindings: [], warnings: [] };
+    await checkPdf('Prüfprotokoll with one warning and one note', Reports.protocolPdf(r1, CTX), ['0 Fehler, 1 Warnung, 1 Hinweis', 'Syntax XML'], 'Prüfprotokoll E-Rechnung – einzahl.xml', false);
+    const r2 = Object.assign({}, r1, { name: 'mehrzahl.xml', counts: { error: 2, warning: 3, information: 0 } });
+    await checkPdf('Prüfprotokoll with several warnings', Reports.protocolPdf(r2, CTX), ['2 Fehler, 3 Warnungen, 0 Hinweise'], 'Prüfprotokoll E-Rechnung – mehrzahl.xml', false);
+  }
   let pdfs = 0;
   const first = (m, id) => (m && m.bt[id] || [])[0] || '';
   for (let i = 0; i < all.length; i++) {

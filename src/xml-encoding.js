@@ -72,15 +72,15 @@
     let offset = 0;
     const b = bytes;
     if (b.length >= 4 && ((b[0] === 0x00 && b[1] === 0x00 && b[2] === 0xfe && b[3] === 0xff) || (b[0] === 0xff && b[1] === 0xfe && b[2] === 0x00 && b[3] === 0x00))) {
-      return { ok: false, text: null, encoding: 'UCS-4', declared: null, bom: 'UCS-4', errors: [{ code: 'XML-ENC-UNSUPPORTED', message: 'Das Dokument ist in UCS-4/UTF-32 kodiert (Byte-Order-Mark). Diese Kodierung wird von Browsern nicht unterstützt und ist für E-Rechnungen nicht zulässig (UTF-8 erforderlich).' }], notes };
+      return { ok: false, text: null, encoding: 'UCS-4', declared: null, bom: 'UCS-4', errors: [{ code: 'XML-ENC-UNSUPPORTED', message: 'Das Dokument ist in UCS-4/UTF-32 kodiert (Byte-Order-Mark). Diese Kodierung wird von Browsern nicht unterstützt (XRechnung verlangt UTF-8).' }], notes };
     }
     if (b.length >= 3 && b[0] === 0xef && b[1] === 0xbb && b[2] === 0xbf) { bom = 'UTF-8'; family = 'utf-8'; offset = 3; }
     else if (b.length >= 2 && b[0] === 0xfe && b[1] === 0xff) { bom = 'UTF-16BE'; family = 'utf-16be'; offset = 2; }
     else if (b.length >= 2 && b[0] === 0xff && b[1] === 0xfe) { bom = 'UTF-16LE'; family = 'utf-16le'; offset = 2; }
-    else if (b.length >= 4 && b[0] === 0x00 && b[1] === 0x3c && b[2] === 0x00 && b[3] === 0x3f) { family = 'utf-16be'; errors.push({ code: 'XML-ENC-UTF16-NOBOM', message: 'UTF-16 (Big Endian) ohne Byte-Order-Mark: nach XML 1.0 §4.3.3 müssen UTF-16-Dokumente mit dem Byte-Order-Mark beginnen.' }); }
-    else if (b.length >= 4 && b[0] === 0x3c && b[1] === 0x00 && b[2] === 0x3f && b[3] === 0x00) { family = 'utf-16le'; errors.push({ code: 'XML-ENC-UTF16-NOBOM', message: 'UTF-16 (Little Endian) ohne Byte-Order-Mark: nach XML 1.0 §4.3.3 müssen UTF-16-Dokumente mit dem Byte-Order-Mark beginnen.' }); }
+    else if (b.length >= 4 && b[0] === 0x00 && b[1] === 0x3c && b[2] === 0x00 && b[3] === 0x3f) { family = 'utf-16be'; errors.push({ code: 'XML-ENC-UTF16-NOBOM', message: 'UTF-16 (Big Endian) ohne Byte-Order-Mark: Nach XML 1.0, Abschnitt 4.3.3, müssen UTF-16-Dokumente mit dem Byte-Order-Mark beginnen.' }); }
+    else if (b.length >= 4 && b[0] === 0x3c && b[1] === 0x00 && b[2] === 0x3f && b[3] === 0x00) { family = 'utf-16le'; errors.push({ code: 'XML-ENC-UTF16-NOBOM', message: 'UTF-16 (Little Endian) ohne Byte-Order-Mark: Nach XML 1.0, Abschnitt 4.3.3, müssen UTF-16-Dokumente mit dem Byte-Order-Mark beginnen.' }); }
     else if (b.length >= 4 && b[0] === 0x4c && b[1] === 0x6f && b[2] === 0xa7 && b[3] === 0x94) {
-      return { ok: false, text: null, encoding: 'EBCDIC', declared: null, bom: null, errors: [{ code: 'XML-ENC-UNSUPPORTED', message: 'Das Dokument ist EBCDIC-kodiert; diese Kodierung wird nicht unterstützt (für E-Rechnungen ist UTF-8 erforderlich).' }], notes };
+      return { ok: false, text: null, encoding: 'EBCDIC', declared: null, bom: null, errors: [{ code: 'XML-ENC-UNSUPPORTED', message: 'Das Dokument ist EBCDIC-kodiert; diese Kodierung wird nicht unterstützt (XRechnung verlangt UTF-8).' }], notes };
     }
 
     // the XML declaration in the detected family
@@ -94,14 +94,14 @@
     let encoding;
     if (family === 'utf-16be' || family === 'utf-16le') {
       encoding = family;
-      if (declared && !/^utf-?16(le|be)?$/i.test(declared)) errors.push({ code: 'XML-ENC-MISMATCH', message: 'Die Kodierungsangabe encoding="' + declared + '" widerspricht der tatsächlichen Kodierung UTF-16 (XML 1.0 §4.3.3: schwerwiegender Fehler).' });
+      if (declared && !/^utf-?16(le|be)?$/i.test(declared)) errors.push({ code: 'XML-ENC-MISMATCH', message: 'Die Kodierungsangabe encoding="' + declared + '" widerspricht der tatsächlichen Kodierung UTF-16 (XML 1.0, Abschnitt 4.3.3: schwerwiegender Fehler).' });
     } else if (bom === 'UTF-8') {
       encoding = 'utf-8';
-      if (declared && canonical(declared) !== 'utf-8') errors.push({ code: 'XML-ENC-MISMATCH', message: 'Die Datei beginnt mit dem UTF-8-Byte-Order-Mark, die XML-Deklaration nennt aber encoding="' + declared + '" (XML 1.0 §4.3.3: schwerwiegender Fehler).' });
+      if (declared && canonical(declared) !== 'utf-8') errors.push({ code: 'XML-ENC-MISMATCH', message: 'Die Datei beginnt mit dem UTF-8-Byte-Order-Mark, die XML-Deklaration nennt aber encoding="' + declared + '" (XML 1.0, Abschnitt 4.3.3: schwerwiegender Fehler).' });
     } else if (declared) {
       const c = canonical(declared);
       if (!c) {
-        return { ok: false, text: null, encoding: declared, declared, bom, errors: errors.concat([{ code: 'XML-ENC-UNSUPPORTED', message: 'Die Kodierung "' + declared + '" ist unbekannt bzw. wird von diesem Programm nicht unterstützt.' }]), notes };
+        return { ok: false, text: null, encoding: declared, declared, bom, errors: errors.concat([{ code: 'XML-ENC-UNSUPPORTED', message: 'Die Kodierung „' + declared + '“ ist unbekannt bzw. wird von diesem Programm nicht unterstützt.' }]), notes };
       }
       if (c === 'utf-16le' || c === 'utf-16be') {
         errors.push({ code: 'XML-ENC-MISMATCH', message: 'Die XML-Deklaration nennt encoding="' + declared + '", die Datei ist aber nicht UTF-16-kodiert (kein Byte-Order-Mark, ASCII-kompatible Bytes).' });
@@ -114,7 +114,7 @@
     try {
       text = decodeWith(encoding, b, true);
     } catch (e) {
-      errors.push({ code: 'XML-ENC-INVALID-BYTES', message: 'Die Datei enthält Bytefolgen, die in der Kodierung ' + encoding.toUpperCase() + ' nicht zulässig sind (XML 1.0 §4.3.3: schwerwiegender Fehler).' });
+      errors.push({ code: 'XML-ENC-INVALID-BYTES', message: 'Die Datei enthält Bytefolgen, die in der Kodierung ' + encoding.toUpperCase() + ' nicht zulässig sind (XML 1.0, Abschnitt 4.3.3: schwerwiegender Fehler).' });
       try { text = SINGLE_BYTE[encoding] ? null : new TextDecoder(encoding).decode(b); } catch (e2) { text = null; }
     }
     if (bom) notes.push('Byte-Order-Mark ' + bom);

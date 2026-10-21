@@ -50,7 +50,7 @@
     scenarios: SCENARIOS, rulesets: RULESETS, vatData: VAT,
     ruleSet: (id) => SCHEMAS[id] || imported[id] || null,
     xsdModel: (id) => XSD_MODELS[id] || null,
-    missingReason: (id) => (BUILD.importable && BUILD.importable[id] ? 'nicht eingebettet (Lizenz) – offizielle Datei ' + BUILD.importable[id].file + ' unter „Regelwerke“ laden' : 'nicht verfügbar'),
+    missingReason: (id) => (BUILD.importable && BUILD.importable[id] ? 'nicht eingebettet (keine Weitergabelizenz) – offizielle Datei ' + BUILD.importable[id].file + ' im Abschnitt „Regelwerke laden“ auswählen' : 'nicht verfügbar'),
     parseXml: (text) => parseXml(text),
     sha256: (bytes) => sha256Hex(bytes),
     now: () => performance.now(),
@@ -74,20 +74,25 @@
     return { doc, error: null };
   }
 
+  // sizes in SI units (kB = 1000 bytes, MB = 1000 kB, as the file managers of macOS and iOS show them), decimal comma
   function fmtBytes(n) {
-    if (n < 1024) return n + ' B';
-    if (n < 1024 * 1024) return (n / 1024).toFixed(1) + ' KB';
-    return (n / 1024 / 1024).toFixed(2) + ' MB';
+    if (n < 1000) return n + ' Byte';
+    if (n < 1e6) return (n / 1000).toFixed(1).replace('.', ',') + ' kB';
+    return (n / 1e6).toFixed(2).replace('.', ',') + ' MB';
   }
+  const plural = (n, one, many) => n + ' ' + (n === 1 ? one : many);
   const fmtDate = (v) => Reports.date(v);
   const DATE_TERMS = InvoiceModel.DATE_TERMS;
   const money = (v, cur) => Reports.amount(v, cur);
+  const num = (v) => Reports.quantity(v);
+  const days = (d) => d + (String(d) === '1' ? ' Tag' : ' Tage');
+  const period = (a, b) => (a && b ? fmtDate(a) + ' – ' + fmtDate(b) : a ? 'ab ' + fmtDate(a) : 'bis ' + fmtDate(b));
   const codeLabel = (table, code) => (code ? (table[code] ? table[code] + ' (' + code + ')' : code) : '');
 
   // ---------- analysis (src/pruefer-core.js: the same pipeline as the command-line version) ----------
   // (line numbers of the findings are assigned in the core as well: PrueferCore.elementLineIndex)
-  // the largest file that is read (src/pdf-embedded.js bounds the decoded streams of a PDF in addition)
-  const MAX_FILE_BYTES = 100 * 1024 * 1024;
+  // the largest file that is read: 100 MB (src/pdf-embedded.js bounds the decoded streams of a PDF in addition)
+  const MAX_FILE_BYTES = 100 * 1000 * 1000;
   async function analyzeFile(file, progress) {
     const bytes = new Uint8Array(await file.arrayBuffer());
     return PrueferCore.analyzeBytes(CORE_ENV, bytes, file.name, progress);
@@ -108,11 +113,11 @@
 
   // ---------- rendering ----------
   const ASSESSMENT = {
-    accept: { cls: 'ok', text: 'Keine Format- oder Geschäftsregelfehler (Prüfung wie KoSIT-Validator)', short: 'OK' },
-    reject: { cls: 'bad', text: 'Technisch fehlerhaft: Format- oder Geschäftsregelfehler – der KoSIT-Validator empfiehlt die Zurückweisung; für Rechnungen an öffentliche Auftraggeber gelten daneben deren Vorschriften (BMF-Schreiben vom 15.10.2026, Rn. 24 und 25). Die umsatzsteuerliche Bedeutung steht darunter.', short: 'Fehler' },
-    'not-processable': { cls: 'warn', text: 'Das Dokument konnte nicht vollständig verarbeitet werden und sollte nicht automatisiert angenommen werden', short: 'Nicht prüfbar' },
-    'not-applicable': { cls: 'neutral', text: 'Keine Geschäftsregeln anwendbar (kein unterstütztes E-Rechnungsformat)', short: 'Nicht anwendbar' },
-    incomplete: { cls: 'warn', text: 'Keine Fehler in den geprüften Regelwerken – die Prüfung ist jedoch unvollständig, weil ein Regelwerk fehlt (siehe unten)', short: 'Unvollständig' },
+    accept: { cls: 'ok', text: 'Keine Format- oder Geschäftsregelfehler.', short: 'OK' },
+    reject: { cls: 'bad', text: 'Technisch fehlerhaft: Format-, PDF-Container- oder Geschäftsregelfehler (bei Schema- und Geschäftsregelfehlern empfiehlt der KoSIT-Validator die Zurückweisung). Für Rechnungen an öffentliche Auftraggeber gelten daneben die Vorschriften zur elektronischen Rechnungsstellung gegenüber öffentlichen Auftraggebern (BMF-Schreiben vom 15.10.2026, Rn. 24 und 25). Die umsatzsteuerliche Einordnung steht darunter.', short: 'Fehler' },
+    'not-processable': { cls: 'warn', text: 'Das Dokument konnte nicht vollständig verarbeitet werden und sollte nicht automatisiert angenommen werden.', short: 'Nicht prüfbar' },
+    'not-applicable': { cls: 'neutral', text: 'Keine Geschäftsregeln anwendbar (kein unterstütztes E-Rechnungsformat).', short: 'Nicht anwendbar' },
+    incomplete: { cls: 'warn', text: 'Keine Fehler in den geprüften Regelwerken – die Prüfung ist jedoch unvollständig, weil ein Regelwerk fehlt (siehe unten).', short: 'Unvollständig' },
   };
   const VERDICT_CLASS = { ok: 'ok', technisch: 'info', pflicht: 'bad', luecke: 'bad', 'nicht-pruefbar': 'warn', format: 'bad', 'kein-profil': 'bad', 'keine-xml': 'bad', unvollstaendig: 'warn' };
   const KLASSE_CLASS = { format: 'bad', pflicht: 'bad', unbestimmt: 'warn', container: 'neutral', 'ohne-bezug': 'ok', zusatz: 'ok' };
@@ -142,8 +147,8 @@
       const bits = [r.syntax === 'CII' ? 'UN/CEFACT CII D16B' : r.syntax === 'UBL-CreditNote' ? 'UBL 2.1 CreditNote' : r.syntax === 'UBL-Invoice' ? 'UBL 2.1 Invoice' : (r.syntax || ''), r.profile.label].filter(Boolean);
       if (r.kind === 'pdf') bits.unshift('PDF mit eingebetteter XML (' + ((r.pdf && r.pdf.invoiceAttachment) || '?') + ')');
       card.append(h('p', { class: 'small' }, h('strong', { text: 'Format: ' }), bits.join(' · ')));
-      if (r.route === 'kosit' && r.scenario) card.append(h('p', { class: 'small' }, h('strong', { text: 'Prüfung wie KoSIT-Validator, Szenario: ' }), r.scenario.name, ' – XML-Schema ', r.xsd ? r.xsd.schema : '–', ', Regelwerke: ', r.ruleSets.join(' + ')));
-      else if (r.ruleSets && r.ruleSets.length) card.append(h('p', { class: 'small' }, h('strong', { text: 'Prüfung nach Profil' + (r.rulesetFamily ? ' „' + r.rulesetFamily + '“' : '') + ': ' }), 'XML-Schema ', r.xsd ? r.xsd.schema : '–', ', Regelwerke: ', r.ruleSets.join(' + '), r.kositScenario ? '' : ' (kein KoSIT-Szenario – der XRechnung-Validator der KoSIT würde dieses Dokument nicht annehmen)'));
+      if (r.route === 'kosit' && r.scenario) card.append(h('p', { class: 'small' }, h('strong', { text: 'Prüfung wie beim KoSIT-Validator, Szenario: ' }), r.scenario.name, ' – XML-Schema ', r.xsd ? r.xsd.schema : '–', ', Regelwerke: ', r.ruleSets.join(' + ')));
+      else if (r.ruleSets && r.ruleSets.length) card.append(h('p', { class: 'small' }, h('strong', { text: 'Prüfung nach Profil' + (r.rulesetFamily ? ' „' + r.rulesetFamily + '“' : '') + ': ' }), 'XML-Schema ', r.xsd ? r.xsd.schema : '–', ', Regelwerke: ', r.ruleSets.join(' + '), r.kositScenario ? '' : ' (kein KoSIT-Szenario – der KoSIT-Validator mit der Konfiguration XRechnung würde dieses Dokument nicht annehmen)'));
       if (r.profile.note) card.append(h('p', { class: 'note' }, r.profile.note));
       if (r.legalStatus === 'not-e-invoice') card.append(h('p', { class: 'note warn-note' }, 'Rechtlicher Status: keine E-Rechnung im Sinne der EN 16931 / des § 14 Abs. 1 UStG.'));
       if (r.schematronSkipped === 'xsd-invalid') card.append(h('p', { class: 'note warn-note' }, 'Das Dokument verletzt das XML-Schema (' + r.xsd.schema + ', ' + r.xsd.errorCount + ' Fehler). Wie beim KoSIT-Validator werden die Geschäftsregeln dann nicht geprüft.'));
@@ -156,8 +161,8 @@
       const c = r.counts;
       card.append(h('div', { class: 'counts' },
         h('span', { class: 'pill error', text: c.error + ' Fehler' }),
-        h('span', { class: 'pill warning', text: c.warning + ' Warnungen' }),
-        h('span', { class: 'pill information', text: c.information + ' Hinweise' }),
+        h('span', { class: 'pill warning', text: plural(c.warning, 'Warnung', 'Warnungen') }),
+        h('span', { class: 'pill information', text: plural(c.information, 'Hinweis', 'Hinweise') }),
         h('span', { class: 'pill neutral', text: (r.processingErrors && r.processingErrors.length ? r.processingErrors.length + ' Verarbeitungsfehler' : 'keine Verarbeitungsfehler') })));
     }
 
@@ -168,7 +173,7 @@
     const invXml = r.pdf && r.pdf.files ? r.pdf.files.find((f) => f.name === r.pdf.invoiceAttachment) : null;
     if (invXml) actions.append(h('button', { class: 'btn secondary small-btn', type: 'button', 'data-action': 'xml', title: 'Die eingebettete Rechnungs-XML (strukturierter Teil) unverändert', onclick: () => download(invXml.name, invXml.bytes, 'application/xml') }, 'XML (' + invXml.name + ')'));
     const att = Reports.attachmentFiles(r);
-    if (att.length) actions.append(h('span', { class: 'small muted' }, att.length + ' Anlage(n) unter „Rechnungsdaten“'));
+    if (att.length) actions.append(h('span', { class: 'small muted' }, plural(att.length, 'Anlage', 'Anlagen') + ' unter „Rechnungsdaten“'));
     card.append(actions);
 
     // tabs
@@ -206,7 +211,7 @@
     const shown = f.level === 'error' ? tone : tone === 'bad' ? 'warn' : tone === 'warn' ? 'neutral' : tone;
     return h('div', { title: (f.level === 'error' ? '' : LEVEL_LABEL[f.level] + ', kein Fehler. ') + (klasse.text || '') },
       h('span', { class: 'pill ' + shown, text: label }),
-      u.bt && u.bt.length ? h('div', { class: 'tiny muted', text: u.bt.slice(0, 6).join(', ') + (u.bt.length > 6 ? ' …' : '') + (u.basis === 'stelle' ? ' (aus der Stelle)' : u.basis === 'regel' ? ' (Regeltabelle)' : '') }) : null);
+      u.bt && u.bt.length ? h('div', { class: 'tiny muted', text: u.bt.slice(0, 6).join(', ') + (u.bt.length > 6 ? ' …' : '') + (u.basis === 'stelle' ? ' (aus der Stelle abgeleitet)' : u.basis === 'regel' ? ' (aus der Regeltabelle)' : '') }) : null);
   }
 
   function renderFindings(pane, r) {
@@ -251,14 +256,14 @@
     if (r.allFindings.some((f) => f.ust)) {
       const cb = h('input', { type: 'checkbox', 'data-filter': 'ust' });
       cb.addEventListener('change', () => { onlyVat = cb.checked; apply(); });
-      filter.append(h('label', null, cb, ' nur umsatzsteuerlich bedeutsame'));
+      filter.append(h('label', null, cb, ' nur umsatzsteuerlich bedeutsame Befunde'));
     }
     pane.append(filter, h('div', { class: 'table-scroll' }, table));
   }
 
   function renderChecklist(pane, r) {
     const p = r.ust.pflichtangaben;
-    pane.append(h('p', { class: 'small' }, 'Ob die Rechnungspflichtangaben im strukturierten Teil der E-Rechnung vorhanden sind (BMF-Schreiben vom 15.10.2025, Rn. 35: alle Pflichtangaben gehören in den strukturierten Teil; Zuordnung zu den Geschäftsbegriffen nach der Zuordnungstabelle von KoSIT und FeRD, deren Verwendung die Finanzverwaltung empfiehlt – BMF-Schreiben vom 15.10.2026, Rn. 8). Geprüft wird das Vorhandensein, nicht die Richtigkeit; die Werte stehen so da, wie sie in der XML stehen.'));
+    pane.append(h('p', { class: 'small' }, 'Die Übersicht zeigt, ob die Rechnungspflichtangaben im strukturierten Teil der E-Rechnung vorhanden sind (BMF-Schreiben vom 15.10.2025, Rn. 35: Alle Pflichtangaben gehören in den strukturierten Teil; Zuordnung zu den Geschäftsbegriffen nach der Zuordnungstabelle von KoSIT und FeRD, deren Verwendung die Finanzverwaltung empfiehlt – BMF-Schreiben vom 15.10.2026, Rn. 8). Geprüft wird das Vorhandensein, nicht die Richtigkeit; die Werte werden so angezeigt, wie sie in der XML stehen.'));
     if (p.kleinbetrag) pane.append(h('p', { class: 'note' }, VAT.legal.hinweise.kleinbetrag));
     if (p.kleinunternehmer) pane.append(h('p', { class: 'note' }, VAT.legal.hinweise.kleinunternehmer));
     pane.append(h('div', { class: 'table-scroll' }, h('table', { class: 'data checklist' },
@@ -289,23 +294,23 @@
     const extra = [['Steuervertreter des Verkäufers (BG-11)', m.taxRep], ['Zahlungsempfänger (BG-10)', m.payeeParty], ['Lieferung (BG-13)', m.delivery]].filter(([, l]) => l.length);
     if (extra.length) pane.append(h('div', { class: 'grid2' }, extra.map(([t, l]) => h('div', null, h('h3', { text: t }), dl(l)))));
     if (m.payment.length) pane.append(h('h3', { text: 'Zahlung' }), dl(m.payment.map(show)));
-    if (m.skonto.length) pane.append(h('h3', { text: 'Skonto / Verzug (BT-20, XRechnung-Format)' }), h('ul', null, m.skonto.map((s) => h('li', null, s.type + ': ' + s.days + ' Tage, ' + s.percent + ' %' + (s.base ? ', Basisbetrag ' + money(s.base, cur) : '')))));
+    if (m.skonto.length) pane.append(h('h3', { text: 'Skonto / Verzug (BT-20, XRechnung-Format)' }), h('ul', null, m.skonto.map((s) => h('li', null, (s.type === 'SKONTO' ? 'Skonto' : 'Verzug') + ': ' + days(s.days) + ', ' + num(s.percent) + ' %' + (s.base ? ', Basisbetrag ' + money(s.base, cur) : '')))));
     if (m.vat.length) {
       pane.append(h('h3', { text: 'Umsatzsteuer-Aufschlüsselung (BG-23)' }));
-      pane.append(h('div', { class: 'table-scroll' }, h('table', { class: 'data' }, h('thead', null, h('tr', null, ['Kategorie', 'Satz %', 'Bemessungsgrundlage', 'Steuerbetrag', 'Befreiungsgrund'].map((t) => h('th', { text: t })))), h('tbody', null, m.vat.map((v) => h('tr', null, h('td', null, codeLabel(Reports.VAT_CATEGORIES, v.cat)), h('td', { class: 'num' }, v.rate), h('td', { class: 'num' }, money(v.taxable, cur)), h('td', { class: 'num' }, money(v.tax, cur)), h('td', null, [v.reasonCode, v.reason].filter(Boolean).join(' – '))))))));
+      pane.append(h('div', { class: 'table-scroll' }, h('table', { class: 'data' }, h('thead', null, h('tr', null, ['Kategorie', 'Satz %', 'Bemessungsgrundlage', 'Steuerbetrag', 'Befreiungsgrund'].map((t) => h('th', { text: t })))), h('tbody', null, m.vat.map((v) => h('tr', null, h('td', null, codeLabel(Reports.VAT_CATEGORIES, v.cat)), h('td', { class: 'num' }, num(v.rate)), h('td', { class: 'num' }, money(v.taxable, cur)), h('td', { class: 'num' }, money(v.tax, cur)), h('td', null, [v.reasonCode, v.reason].filter(Boolean).join(' – '))))))));
     }
     if (m.allowances.length) {
       pane.append(h('h3', { text: 'Nachlässe / Zuschläge auf Dokumentebene (BG-20/21)' }));
-      pane.append(h('div', { class: 'table-scroll' }, h('table', { class: 'data' }, h('thead', null, h('tr', null, ['Art', 'Betrag', 'Basis', '%', 'Grund', 'USt'].map((t) => h('th', { text: t })))), h('tbody', null, m.allowances.map((v) => h('tr', null, h('td', null, v.indicator === 'true' ? 'Zuschlag' : 'Nachlass'), h('td', { class: 'num' }, money(v.amount, cur)), h('td', { class: 'num' }, money(v.base, cur)), h('td', { class: 'num' }, v.pct), h('td', null, [v.reasonCode, v.reason].filter(Boolean).join(' – ')), h('td', null, [v.vatCat, v.vatRate ? v.vatRate + ' %' : ''].filter(Boolean).join(' '))))))));
+      pane.append(h('div', { class: 'table-scroll' }, h('table', { class: 'data' }, h('thead', null, h('tr', null, ['Art', 'Betrag', 'Basis', '%', 'Grund', 'USt'].map((t) => h('th', { text: t })))), h('tbody', null, m.allowances.map((v) => h('tr', null, h('td', null, v.indicator === 'true' ? 'Zuschlag' : 'Nachlass'), h('td', { class: 'num' }, money(v.amount, cur)), h('td', { class: 'num' }, money(v.base, cur)), h('td', { class: 'num' }, num(v.pct)), h('td', null, [v.reasonCode, v.reason].filter(Boolean).join(' – ')), h('td', null, [v.vatCat, v.vatRate ? num(v.vatRate) + ' %' : ''].filter(Boolean).join(' '))))))));
     }
     pane.append(h('h3', { text: 'Positionen (' + m.lines.length + ')' }));
     pane.append(h('div', { class: 'table-scroll' }, h('table', { class: 'data lines' }, h('thead', null, h('tr', null, ['Pos.', 'Bezeichnung', 'Menge', 'Einheit', 'Einzelpreis', 'Netto', 'USt'].map((t) => h('th', { text: t })))), h('tbody', null, m.lines.map((l) => h('tr', null,
       h('td', null, l.id),
-      h('td', null, l.name, l.desc ? h('div', { class: 'tiny muted', text: l.desc }) : null, l.sellerId ? h('div', { class: 'tiny muted', text: 'Art.-Nr. ' + l.sellerId }) : null, l.period || l.periodEnd ? h('div', { class: 'tiny muted', text: 'Zeitraum ' + fmtDate(l.period) + ' – ' + fmtDate(l.periodEnd) }) : null, l.allowances.length ? h('div', { class: 'tiny muted', text: l.allowances.map((x) => (x.indicator === 'true' ? 'Zuschlag ' : 'Nachlass ') + money(x.amount, cur) + (x.reason ? ' (' + x.reason + ')' : '')).join('; ') }) : null, l.note ? h('div', { class: 'tiny muted', text: l.note }) : null),
-      h('td', { class: 'num' }, l.qty), h('td', null, codeLabel(Reports.UNITS, l.unit)),
-      h('td', { class: 'num' }, money(l.price, cur) + (l.baseQty && l.baseQty !== '1' ? ' / ' + l.baseQty : '')),
+      h('td', null, l.name, l.desc ? h('div', { class: 'tiny muted', text: l.desc }) : null, l.sellerId ? h('div', { class: 'tiny muted', text: 'Art.-Nr. ' + l.sellerId }) : null, l.period || l.periodEnd ? h('div', { class: 'tiny muted', text: 'Zeitraum ' + period(l.period, l.periodEnd) }) : null, l.allowances.length ? h('div', { class: 'tiny muted', text: l.allowances.map((x) => (x.indicator === 'true' ? 'Zuschlag ' : 'Nachlass ') + money(x.amount, cur) + (x.reason ? ' (' + x.reason + ')' : '')).join('; ') }) : null, l.note ? h('div', { class: 'tiny muted', text: l.note }) : null),
+      h('td', { class: 'num' }, num(l.qty)), h('td', null, codeLabel(Reports.UNITS, l.unit)),
+      h('td', { class: 'num' }, money(l.price, cur) + (l.baseQty && Reports.canonicalDecimal(l.baseQty) !== '1' ? ' / ' + num(l.baseQty) : '')),
       h('td', { class: 'num' }, money(l.net, cur)),
-      h('td', null, [l.vatCat, l.vatRate ? l.vatRate + ' %' : ''].filter(Boolean).join(' '))))))));
+      h('td', null, [l.vatCat, l.vatRate ? num(l.vatRate) + ' %' : ''].filter(Boolean).join(' '))))))));
     if (m.attachments.length) {
       const files = Reports.attachmentFiles(r);
       pane.append(h('h3', { text: 'Rechnungsbegründende Unterlagen (BG-24)' }));
@@ -314,7 +319,7 @@
         return h('li', null, [a.id, a.desc, a.file, a.mime, a.uri].filter(Boolean).join(' · '),
           f ? [' ', h('button', { class: 'btn secondary small-btn', type: 'button', 'data-action': 'attachment', onclick: () => download(f.name, f.bytes, 'application/octet-stream') }, 'Herunterladen (' + fmtBytes(f.bytes.length) + ')')] : null);
       })));
-      pane.append(h('p', { class: 'tiny muted' }, 'Pflichtangaben gehören in den strukturierten Teil (BMF-Schreiben vom 15.10.2025, Rn. 35); eingebettete Anlagen werden derzeit nur in bestimmten Fällen nicht beanstandet – Endrechnung, Bauleistung, Bruttopreisrechnung (BMF-Schreiben vom 15.10.2026, Rn. 4, 14 und 19). Anlagen werden unverändert gespeichert und nicht geöffnet.'));
+      pane.append(h('p', { class: 'tiny muted' }, 'Pflichtangaben gehören in den strukturierten Teil (BMF-Schreiben vom 15.10.2025, Rn. 35); Angaben in eingebetteten Anlagen statt im strukturierten Teil werden derzeit nur in bestimmten Fällen nicht beanstandet – Endrechnung, Bauleistung, Bruttopreisrechnung (BMF-Schreiben vom 15.10.2026, Rn. 4, 14 und 19). Anlagen werden unverändert zum Herunterladen angeboten und nicht geöffnet.'));
     }
     if (m.precedingInvoices.length) pane.append(h('p', { class: 'small' }, 'Vorausgegangene Rechnungen: ' + m.precedingInvoices.map((p) => p.id + (p.date ? ' (' + fmtDate(p.date) + ')' : '')).join(', ')));
     if (m.notes.length) pane.append(h('h3', { text: 'Bemerkungen' }), h('ul', null, m.notes.map((n) => h('li', { class: 'small pre', text: n }))));
@@ -337,7 +342,7 @@
     if (r.pdf) {
       rows.push(['PDF-Leseverfahren', r.pdf.method === 'xref' ? 'Querverweistabelle (regulär)' : 'Vollständiger Scan (Querverweistabelle unbrauchbar)']);
       if (r.pdf.xmp && r.pdf.xmp.zugferd) rows.push(['ZUGFeRD/Factur-X XMP', Object.entries(r.pdf.xmp.zugferd).filter(([, v]) => v).map(([k, v]) => k + '=' + v).join(', ')]);
-      if (r.pdf.xmp && r.pdf.xmp.pdfa) rows.push(['PDF/A-Kennzeichnung (XMP)', 'PDF/A-' + r.pdf.xmp.pdfa.part + (r.pdf.xmp.pdfa.conformance || '')]);
+      if (r.pdf.xmp && r.pdf.xmp.pdfa) rows.push(['PDF/A-Kennzeichnung (XMP)', 'PDF/A-' + r.pdf.xmp.pdfa.part + (r.pdf.xmp.pdfa.conformance || '').toLowerCase()]);
       if (r.pdf.container) {
         const st = r.pdf.container.checks;
         rows.push(['Container-Prüfungen', st.filter((c) => c.status === 'pass').length + ' erfüllt, ' + st.filter((c) => c.status === 'fail').length + ' nicht erfüllt, ' + st.filter((c) => c.status === 'n/a').length + ' nicht anwendbar (vollständige PDF/A-3-Validierung: veraPDF)']);
@@ -346,7 +351,7 @@
     if (r.engineWarnings && r.engineWarnings.length) rows.push(['Hinweise der Regel-Engine', r.engineWarnings.slice(0, 5).map((w) => w.message).join(' | ')]);
     pane.append(h('div', { class: 'table-scroll' }, h('table', { class: 'data' }, h('tbody', null, rows.map(([k, v]) => h('tr', null, h('th', { text: k }), h('td', { class: 'wrap' }, v)))))));
     if (r.pdf) {
-      pane.append(h('h3', { text: 'Eingebettete Dateien der PDF (' + r.pdf.attachments.length + ')' }));
+      pane.append(h('h3', { text: 'Eingebettete Dateien des PDF (' + r.pdf.attachments.length + ')' }));
       if (!r.pdf.attachments.length) pane.append(h('p', { class: 'small muted', text: 'keine' }));
       else pane.append(h('ul', { class: 'attachments' }, r.pdf.attachments.map((a, i) => {
         const f = r.pdf.files && r.pdf.files[i];
@@ -356,7 +361,7 @@
     }
     if (r.pdf && r.pdf.container) {
       pane.append(h('h3', { text: 'PDF-Container (ZUGFeRD / Factur-X, PDF/A-3)' }));
-      pane.append(h('div', { class: 'table-scroll' }, h('table', { class: 'data' }, h('thead', null, h('tr', null, ['Prüfung', 'Ergebnis', 'Grundlage'].map((t) => h('th', { text: t })))), h('tbody', null, r.pdf.container.checks.map((c) => h('tr', null, h('td', null, c.title || c.id, h('div', { class: 'tiny mono muted', text: c.id })), h('td', null, c.status === 'pass' ? '✔ erfüllt' : c.status === 'fail' ? '✘ ' + LEVEL_LABEL[c.level === 'info' ? 'information' : c.level] : '– n. a.'), h('td', { class: 'tiny' }, c.reference || '')))))));
+      pane.append(h('div', { class: 'table-scroll' }, h('table', { class: 'data' }, h('thead', null, h('tr', null, ['Prüfung', 'Ergebnis', 'Grundlage'].map((t) => h('th', { text: t })))), h('tbody', null, r.pdf.container.checks.map((c) => h('tr', null, h('td', null, c.title || c.id, h('div', { class: 'tiny mono muted', text: c.id })), h('td', null, c.status === 'pass' ? '✔ erfüllt' : c.status === 'fail' ? '✘ ' + LEVEL_LABEL[c.level === 'info' ? 'information' : c.level] : '– nicht anwendbar'), h('td', { class: 'tiny' }, c.reference || '')))))));
     }
   }
 
@@ -372,7 +377,7 @@
       frag.append(ln, document.createTextNode(lines[i] + '\n'));
     }
     pre.append(frag);
-    if (lines.length > max) pre.append('… (' + (lines.length - max) + ' weitere Zeilen nicht angezeigt)');
+    if (lines.length > max) pre.append('… (' + plural(lines.length - max, 'weitere Zeile', 'weitere Zeilen') + ' nicht angezeigt)');
     pane.append(h('p', { class: 'small muted' }, 'Zeilen mit Befunden sind markiert.'), pre);
   }
 
@@ -388,7 +393,7 @@
       h('thead', null, h('tr', null, ['Datei', 'Format', 'Ergebnis', 'USt-Einordnung', 'Fehler', 'Warnungen', 'Hinweise'].map((t) => h('th', { text: t })))),
       h('tbody', null, results.map((r) => {
         const a = ASSESSMENT[r.assessment] || ASSESSMENT['not-processable'];
-        return h('tr', null, h('td', null, h('a', { href: '#', onclick: (e) => { e.preventDefault(); const c = document.querySelector('section.result[data-name="' + CSS.escape(r.name) + '"]'); if (c) c.scrollIntoView({ behavior: 'smooth' }); } }, r.name)), h('td', null, r.profile ? r.profile.label : (r.kind || '')), h('td', null, h('span', { class: 'badge small ' + a.cls, text: a.short })), h('td', null, r.ust ? h('span', { class: 'badge small ' + (VERDICT_CLASS[r.ust.id] || 'neutral'), text: r.ust.kurz }) : ''), h('td', { class: 'num' }, r.counts ? r.counts.error : ''), h('td', { class: 'num' }, r.counts ? r.counts.warning : ''), h('td', { class: 'num' }, r.counts ? r.counts.information : ''));
+        return h('tr', null, h('td', null, h('a', { href: '#', onclick: (e) => { e.preventDefault(); const c = document.querySelector('section.result[data-name="' + CSS.escape(r.name) + '"]'); if (c) c.scrollIntoView({ behavior: 'smooth' }); } }, r.name)), h('td', null, r.profile ? r.profile.label : Reports.kindLabel(r.kind)), h('td', null, h('span', { class: 'badge small ' + a.cls, text: a.short })), h('td', null, r.ust ? h('span', { class: 'badge small ' + (VERDICT_CLASS[r.ust.id] || 'neutral'), text: r.ust.kurz }) : ''), h('td', { class: 'num' }, r.counts ? r.counts.error : ''), h('td', { class: 'num' }, r.counts ? r.counts.warning : ''), h('td', { class: 'num' }, r.counts ? r.counts.information : ''));
       })));
     box.append(h('h2', { text: 'Übersicht (' + results.length + ' Dateien)' }), h('div', { class: 'table-scroll' }, table));
   }
@@ -414,7 +419,7 @@
       try {
         if (file.size > MAX_FILE_BYTES) {
           // not read at all: a file of this size is no e-invoice, and reading it could exhaust the memory of the tab
-          r = { name: file.name, size: file.size, kind: 'unknown', warnings: ['Datei größer als ' + Math.round(MAX_FILE_BYTES / 1048576) + ' MB – nicht geprüft (Schutz vor Überlastung des Browsers).'], assessment: 'not-processable', timing: {} };
+          r = { name: file.name, size: file.size, kind: 'unknown', warnings: ['Datei größer als ' + Math.round(MAX_FILE_BYTES / 1e6) + ' MB – nicht geprüft (Schutz vor Überlastung des Browsers).'], assessment: 'not-processable', timing: {} };
         } else r = await analyzeFile(file, (msg) => { status.textContent = file.name + ': ' + msg; });
       } catch (e) {
         r = { name: file.name, size: file.size, kind: 'unknown', warnings: ['Unerwarteter Fehler: ' + (e && e.message || e)], assessment: 'not-processable', timing: {} };
@@ -465,7 +470,7 @@
     const list = h('ul', null, Object.entries(BUILD.importable).map(([id, v]) => {
       const c = imported[id];
       return h('li', null, h('strong', { text: id }), ' – ', v.title, ': ',
-        c ? h('span', { class: c.importedFrom && c.importedFrom.verified ? 'ok-text' : 'warn-note' }, 'geladen' + (c.importedFrom ? ' (' + c.importedFrom.file + (c.importedFrom.verified ? ', SHA-256 entspricht der geprüften Version ' + v.version : ', ABWEICHENDE Version: SHA-256 ' + c.importedFrom.sha256.slice(0, 12) + '… statt ' + v.sha256.slice(0, 12) + '… – Ergebnisse nicht gegen Referenz verifiziert') + ')' : ''))
+        c ? h('span', { class: c.importedFrom && c.importedFrom.verified ? 'ok-text' : 'warn-note' }, 'geladen' + (c.importedFrom ? ' (' + c.importedFrom.file + (c.importedFrom.verified ? ', SHA-256 entspricht der geprüften Version ' + v.version : ', ABWEICHENDE Version: SHA-256 ' + c.importedFrom.sha256.slice(0, 12) + '… statt ' + v.sha256.slice(0, 12) + '… – Ergebnisse nicht mit der Referenzfassung abgeglichen') + ')' : ''))
           : h('span', { class: 'muted' }, 'nicht geladen – Bezugsquelle: ' + v.source));
     }));
     const input = h('input', { type: 'file', accept: '.sch', multiple: 'multiple' });
@@ -478,7 +483,12 @@
       input.value = '';
       renderRuleImport();
     });
-    box.append(h('p', { class: 'small' }, 'Die Regeln der Peppol BIS Billing 3.0 sind urheberrechtlich geschützt (OpenPeppol AISBL) und ohne Lizenz zur Weitergabe; sie werden deshalb nicht mitgeliefert. Laden Sie die offiziellen Dateien selbst herunter und wählen Sie sie hier aus – sie werden nur in diesem Browser gespeichert.'), list, h('label', { class: 'btn secondary' }, 'Regeldatei (.sch) laden …', input), msg);
+    // loaded rule sets can be deleted again – from memory and from the storage of the browser (legal/datenschutz.txt)
+    const clear = Object.keys(imported).length ? h('button', { class: 'btn secondary', type: 'button', 'data-action': 'clear-rules', onclick: () => {
+      for (const id of Object.keys(imported)) { delete imported[id]; try { localStorage.removeItem(STORE_PREFIX + id); } catch (e) { /* storage unavailable: memory only */ } }
+      renderRuleImport();
+    } }, 'Geladene Regelwerke löschen') : null;
+    box.append(h('p', { class: 'small' }, 'Die Regeln der Peppol BIS Billing 3.0 sind urheberrechtlich geschützt (OpenPeppol AISBL) und nicht zur Weitergabe lizenziert; sie werden deshalb nicht mitgeliefert. Laden Sie die offiziellen Dateien selbst herunter und wählen Sie sie hier aus – sie werden nur in diesem Browser gespeichert und lassen sich hier wieder löschen.'), list, h('label', { class: 'btn secondary' }, 'Regeldatei (.sch) laden …', input), clear ? ' ' : null, clear, msg);
   }
 
   function init() {

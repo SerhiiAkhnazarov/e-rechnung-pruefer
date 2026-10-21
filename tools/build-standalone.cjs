@@ -90,7 +90,7 @@ try {
       const notRun = suites.filter((x) => x.status === 'not-run');
       verification = pass + ' von ' + suites.length + ' Testreihen bestanden, ' + failed + ' fehlgeschlagen' +
         (notRun.length ? ', ' + notRun.length + ' nicht gelaufen (' + notRunReason(notRun) + ')' : '') +
-        ' – ' + (v.environment || 'local') + ', ' + v.generated.slice(0, 10);
+        ' – ' + (!v.environment || v.environment === 'local' ? 'lokal' : v.environment.replace(' run ', ' Lauf ')) + ', ' + v.generated.slice(0, 10);
       fingerprint = v.fingerprint.id;
     } else {
       verification = 'Testergebnisse gehören zu einem anderen Stand – vor Veröffentlichung tools/verify-all.cjs ausführen';
@@ -102,7 +102,7 @@ const peppolFiles = (pep.files || []);
 const importable = {};
 for (const [id, base] of [['PEPPOL-UBL', 'PEPPOL-EN16931-UBL.sch'], ['PEPPOL-CII', 'PEPPOL-EN16931-CII.sch']]) {
   const f = peppolFiles.find((x) => x.file.endsWith(base));
-  importable[id] = { file: base, title: 'Peppol BIS Billing 3.0 (' + (id.endsWith('UBL') ? 'UBL' : 'CII') + ')', version: '3.0.21 (Commit ' + c8(pep) + ')', sha256: f ? f.sha256 : null, source: 'https://docs.peppol.eu/poacc/billing/3.0/ bzw. github.com/OpenPEPPOL/peppol-bis-invoice-3 (rules/sch/' + base + ')' };
+  importable[id] = { file: base, title: 'Peppol BIS Billing 3.0 (' + (id.endsWith('UBL') ? 'UBL' : 'CII') + ')', version: '3.0.21, Commit ' + c8(pep), sha256: f ? f.sha256 : null, source: 'https://docs.peppol.eu/poacc/billing/3.0/ bzw. github.com/OpenPEPPOL/peppol-bis-invoice-3 (rules/sch/' + base + ')' };
 }
 
 const build = {
@@ -114,7 +114,7 @@ const build = {
   verification,
   standards: [
     { name: 'EN 16931 – CEN-Schematron', version: '1.3.16', detail: 'UBL 2.1 und CII D16B, Codelisten; Commit ' + c8(cen), licence: 'EUPL-1.2', sha256: schemas['EN16931-UBL'].sources[0].sha256 },
-    { name: 'XRechnung-Schematron (KoSIT)', version: scenarios.properties['xr.schematron.version.full'] + ' (XRechnung ' + scenarios.properties['xrechnung.version'] + ')', detail: 'inkl. der von KoSIT übernommenen Peppol-Regeln; Commit ' + c8(xr), licence: 'Apache-2.0', sha256: (xr.merged && xr.merged[0] && xr.merged[0].sha256) || null },
+    { name: 'XRechnung-Schematron (KoSIT)', version: scenarios.properties['xr.schematron.version.full'] + ' (XRechnung ' + scenarios.properties['xrechnung.version'] + ')', detail: 'inkl. der von der KoSIT übernommenen Peppol-Regeln; Commit ' + c8(xr), licence: 'Apache-2.0', sha256: (xr.merged && xr.merged[0] && xr.merged[0].sha256) || null },
     { name: 'KoSIT Validator-Konfiguration XRechnung', version: scenarios.properties['validator.configuration.version.full'], detail: 'Szenarien, XML-Schemata, Fehlerstufen (customLevel), Bewertung; Commit ' + c8(cfg), licence: 'Apache-2.0', sha256: scenarios.source.sha256 },
     { name: 'Factur-X / ZUGFeRD', version: 'Factur-X 1.09.2 / ZUGFeRD 2.5.2', detail: 'Profile MINIMUM, BASIC WL, BASIC, EN 16931, EXTENDED: Schematron, Codelisten, XML-Schemata (FNFE-MPE / FeRD, über Mustangproject Commit ' + c8(mus) + ')', licence: 'Apache-2.0 (FeRD: technische Artefakte)', sha256: schemas['FACTUR-X-EN16931'] ? schemas['FACTUR-X-EN16931'].sources[0].sha256 : null },
     { name: 'OASIS UBL 2.1 – XML-Schemata', version: 'os-UBL-2.1 (2013-11-04)', detail: 'Variante xsdrt wie im KoSIT-Build; über phax/ph-ubl Commit ' + c8(ubl), licence: 'OASIS-Hinweis (siehe Lizenzen)', sha256: xsd['UBL-Invoice-2.1'] ? xsd['UBL-Invoice-2.1'].sources[0].sha256 : null },
@@ -131,7 +131,7 @@ const build = {
 // licence texts shown in the app
 const notices = [
   { title: 'E-Rechnung Prüfer – NOTICE (Drittkomponenten)', text: read('NOTICE') },
-  { title: 'OASIS UBL 2.1 – Notices', text: read('legal/OASIS-NOTICE.txt') },
+  { title: 'OASIS UBL 2.1 – Hinweise (Notices)', text: read('legal/OASIS-NOTICE.txt') },
   { title: 'UN/CEFACT Cross Industry Invoice D16B – Copyright', text: read('legal/UNCEFACT-NOTICE.txt') },
   { title: 'Factur-X / ZUGFeRD (FNFE-MPE / FeRD) – Nutzungsrechte', text: read('legal/FERD-FACTURX-NOTICE.txt') },
   { title: 'Lizenz des E-Rechnung Prüfers (EUPL-1.2)', text: read('LICENSE') },

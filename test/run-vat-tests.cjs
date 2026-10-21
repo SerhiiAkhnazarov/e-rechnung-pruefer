@@ -89,6 +89,13 @@ for (const m of new Set(programText.match(/BMF-Schreiben vom \d{2}\.\d{2}\.\d{4}
   const cited = [];
   for (const t of [texts, programText]) for (const m of t.matchAll(/BMF-Schreiben vom 15\.10\.2026, Rn\. ([0-9 ,undbis]+)/g)) cited.push(...m[1].match(/\d+/g).map(Number));
   check('legal: margin numbers of the letter of 15.10.2026 cited (' + [...new Set(cited)].sort((a, b) => a - b).join(', ') + ') exist (1 to 28)', cited.length > 0 && cited.every((n) => n >= 1 && n <= 28));
+  // … and each of them – ranges ("10 bis 12") expanded – is named in the description of the source
+  const rn = (list) => list.split(/,|\bund\b/).flatMap((part) => { const r = /(\d+)\s*bis\s*(\d+)/.exec(part); return r ? Array.from({ length: +r[2] - +r[1] + 1 }, (x, i) => +r[1] + i) : (part.match(/\d+/g) || []).map(Number); });
+  const citedAll = [], listed = new Set();
+  for (const t of [texts, programText]) for (const m of t.matchAll(/BMF-Schreiben vom 15\.10\.2026, Rn\. ([0-9 ,undbis]+)/g)) citedAll.push(...rn(m[1]));
+  for (const m of ((legal.quellen.find((q) => q.id === 'bmf2026') || {}).titel || '').matchAll(/Rn\. ([0-9 ,undbis]+)/g)) for (const n of rn(m[1])) listed.add(n);
+  const unlisted = [...new Set(citedAll)].filter((n) => !listed.has(n)).sort((a, b) => a - b);
+  check('legal: every cited margin number of the letter of 15.10.2026 is named in its source description (' + [...listed].sort((a, b) => a - b).join(', ') + ')', unlisted.length === 0, 'not named: ' + unlisted.join(', '));
 }
 
 // ---------------------------------------------------------------------------------------------------------------
@@ -260,7 +267,7 @@ S('invoice of 2028 without any indication', inv({ 'BT-2': ['2028-02-01'] }), 'nr
 // Nr. 7, 8
 S('no VAT breakdown', inv({}, { vat: [] }), 'nr7', 'fehlt');
 check('checklist nr7: late-payment interest (VERZUG) is not shown as Skonto', !JSON.stringify(vat.checklist(inv({}, { skonto: [{ type: 'VERZUG', days: '30', percent: '5.00', base: null }] })).items.find((i) => i.id === 'nr7').werte).includes('Skonto'));
-check('checklist nr7: Skonto shown', JSON.stringify(vat.checklist(inv({}, { skonto: [{ type: 'SKONTO', days: '14', percent: '2.00', base: null }] })).items.find((i) => i.id === 'nr7').werte).includes('Skonto: 14 Tage 2.00 %'));
+check('checklist nr7: Skonto shown', JSON.stringify(vat.checklist(inv({}, { skonto: [{ type: 'SKONTO', days: '14', percent: '2.00', base: null }] })).items.find((i) => i.id === 'nr7').werte).includes('Skonto: 2 % bei Zahlung innerhalb von 14 Tagen'));
 S('exemption without reason', inv({}, { vat: [{ cat: 'E', rate: '0', taxable: '1000.00', tax: '0.00', reason: '', reasonCode: '' }] }), 'nr8', 'fehlt');
 S('standard rate without tax amount', inv({}, { vat: [Object.assign({}, VAT_S, { tax: '' })] }), 'nr8', 'fehlt');
 S('invoice in USD without VAT in EUR (Art. 230 MwStSystRL)', inv({ 'BT-5': ['USD'] }), 'nr8', 'prüfen');
@@ -276,6 +283,18 @@ S('credit note 381 without "Gutschrift"', inv({ 'BT-3': ['381'] }), 'nr10', 'nic
 S('credit note 381 with "Gutschrift"', inv({ 'BT-3': ['381'], 'BT-22': ['Gutschrift Nr. 5'] }), 'nr10', 'vorhanden');
 S('type code missing', inv({ 'BT-3': null }), 'nr10', 'prüfen');
 S('commercial invoice 380', inv(), 'nr10', 'nicht zutreffend');
+// numbers in the texts: singular and plural, no "(n)" forms
+{
+  const it = (m, id) => vat.checklist(m).items.find((i) => i.id === id) || {};
+  const w = (m, id, bt) => ((it(m, id).werte || []).find((x) => x[0] === bt) || [])[1] || '';
+  check('checklist nr5: "1 Position" / "2 Positionen"', w(inv(), 'nr5', 'BG-25') === '1 Position' && w(inv({}, { lines: [LINE, LINE] }), 'nr5', 'BG-25') === '2 Positionen', w(inv(), 'nr5', 'BG-25') + ' / ' + w(inv({}, { lines: [LINE, LINE] }), 'nr5', 'BG-25'));
+  const noQty = it(inv({}, { lines: [Object.assign({}, LINE, { qty: '' })] }), 'nr5').hinweis || '';
+  check('checklist nr5: "1 Position ohne Menge"', noQty.startsWith('1 Position ohne Menge (BT-129)'), noQty);
+  const bad1 = it(inv({}, { vat: [Object.assign({}, VAT_S, { tax: '' })] }), 'nr8').hinweis || '';
+  check('checklist nr8: "in 1 Aufschlüsselung"', bad1.endsWith('in 1 Aufschlüsselung.'), bad1);
+  const sk = w(inv({}, { skonto: [{ type: 'SKONTO', days: '1', percent: '2.50', base: null }] }), 'nr7', 'BT-20');
+  check('checklist nr7: Skonto "2,5 % bei Zahlung innerhalb von 1 Tag"', sk === 'Skonto: 2,5 % bei Zahlung innerhalb von 1 Tag', sk);
+}
 // § 14 Abs. 5 Satz 2
 S('paid amount (possible final invoice)', inv({ 'BT-113': ['500.00'] }), '14-5', 'prüfen');
 S('final construction invoice 877', inv({ 'BT-3': ['877'] }), '14-5', 'prüfen');
@@ -283,7 +302,7 @@ S('paid amount 0', inv({ 'BT-113': ['0.00'] }), '14-5', 'nicht zutreffend');
 {
   const hint = (m, id) => (vat.checklist(m).items.find((i) => i.id === id) || {}).hinweis || '';
   const h1 = hint(inv({ 'BT-113': ['500.00'], 'BT-22': ['Abschlag 1 vom 01.08.2026: 500,00 EUR netto'], 'BT-122': ['Anlage 1'], 'BT-125': ['QUJD'] }), '14-5');
-  check('checklist 14-5: final invoice – BMF-Schreiben vom 15.10.2026, Rn. 3 (BT-113 + BT-22) or Rn. 4 (deduction in the annex), note and embedded attachment named', h1.includes('Rn. 3)') && h1.includes('(Rn. 4)') && h1.includes('Abschn. 14.8 Abs. 8 Nr. 2 UStAE') && h1.includes('eine Bemerkung (BT-22)') && h1.includes('1 eingebettete Anlage(n) (BG-24)'), h1);
+  check('checklist 14-5: final invoice – BMF-Schreiben vom 15.10.2026, Rn. 3 (BT-113 + BT-22) or Rn. 4 (deduction in the annex), note and embedded attachment named', h1.includes('Rn. 3)') && h1.includes('(Rn. 4)') && h1.includes('Abschn. 14.8 Abs. 8 Nr. 2 UStAE') && h1.includes('eine Bemerkung (BT-22)') && h1.includes('1 eingebettete Anlage (BG-24)'), h1);
   const h2 = hint(inv({ 'BT-113': ['500.00'] }), '14-5');
   check('checklist 14-5: final invoice without note and attachment says so', h2.includes('keine Bemerkung (BT-22)') && h2.includes('keine eingebettete Anlage (BG-24)'), h2);
 }
@@ -359,6 +378,9 @@ let corpusLine = 'corpus: not run (--no-corpus)';
     const dirs = (opt('--corpus-dirs') || 'xr-ubl,xr-cii,extra-ubl,extra-cii,zugferd-ubl,zugferd-cii,cen-ubl,cen-cii,encoding').split(',');
     const klassen = {}, urteile = {}, bases = {};
     let docs = 0, findings = 0;
+    // numbers in the texts of every document: singular and plural, no "(n)" forms
+    const COUNT_FORM = /\b(Position\(en\)|Aufschlüsselung\(en\)|Anlage\(n\)|Rechnung\(en\))|\b1 (Positionen|Aufschlüsselungen|eingebettete Anlagen|Tage|Tagen)\b/;
+    let countForm = null;
     for (const d of dirs) {
       const dir = path.join(root, 'build', 'corpus', d);
       if (!fs.existsSync(dir)) { check('corpus: directory ' + d, false, 'missing (node test/build-corpus.cjs)'); continue; }
@@ -368,6 +390,7 @@ let corpusLine = 'corpus: not run (--no-corpus)';
         const where = d + '/' + f;
         if (!r.ust) { check('corpus: verdict for ' + where, false); continue; }
         urteile[r.ust.id] = (urteile[r.ust.id] || 0) + 1;
+        if (!countForm) { const t = JSON.stringify([r.ust.text, r.ust.hinweise, r.ust.pflichtangaben ? r.ust.pflichtangaben.items.map((i) => [i.werte, i.hinweis]) : []]); const m = COUNT_FORM.exec(t); if (m) countForm = where + ': …' + t.slice(Math.max(0, m.index - 40), m.index + 40) + '…'; }
         const errors = r.allFindings.filter((x) => x.level === 'error');
         for (const x of r.allFindings) {
           findings++;
@@ -395,6 +418,7 @@ let corpusLine = 'corpus: not run (--no-corpus)';
         else pass++;
       }
     }
+    check('corpus: numbers in the texts of every document in singular or plural (no "(n)" forms)', !countForm, countForm || '');
     corpusLine = 'corpus: ' + docs + ' documents, ' + findings + ' findings classified (' + Object.entries(klassen).sort((a, b) => b[1] - a[1]).map(([k, v]) => k + ' ' + v).join(', ') + '; basis ' + Object.entries(bases).sort((a, b) => b[1] - a[1]).map(([k, v]) => k + ' ' + v).join(', ') + '), verdicts ' + Object.entries(urteile).sort((a, b) => b[1] - a[1]).map(([k, v]) => k + ' ' + v).join(', ');
   }
   for (const f of failures.slice(0, 60)) console.log('FAIL ' + f);

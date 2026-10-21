@@ -99,6 +99,13 @@ const check = (ok, msg) => { console.log((ok ? '  ok   ' : '  FAIL ') + msg); if
     const exp = (n.allFindings || []).map((f) => f.id + '|' + f.level).sort();
     check(JSON.stringify(r.ids) === JSON.stringify(exp) && r.missing.length === 0, path.basename(doc) + ': ' + r.ids.length + ' findings, identical to Node with all rule sets, route ' + JSON.stringify(r.route && (r.route.ruleSets || r.route)));
   }
+  // the loaded rule sets can be deleted again: from memory and from localStorage (legal/datenschutz.txt;
+  // docs/SICHERHEIT.md, Anhang I Teil I Nr. 2 Buchst. m)
+  await page.evaluate(() => { document.getElementById('ruleimport').closest('details').open = true; }); // the section a user opens
+  await page.click('#ruleimport button[data-action="clear-rules"]');
+  const cleared = await page.evaluate(() => ({ imported: Object.keys(window.PrueferApp.imported).length, stored: (() => { try { return Object.keys(localStorage).filter((k) => k.startsWith('e-rechnung-pruefer.ruleset.')).length; } catch (e) { return 0; } })() }));
+  check(cleared.imported === 0 && cleared.stored === 0, 'loaded rule sets deleted from memory and localStorage (' + JSON.stringify(cleared) + ')');
+  check((await page.locator('#ruleimport button[data-action="clear-rules"]').count()) === 0 && /nicht geladen/.test(await page.locator('#ruleimport').textContent()), 'after deleting: no delete button, rule sets shown as not loaded');
   check(errors.length === 0, 'no page errors' + (errors.length ? ': ' + errors.join('; ') : ''));
   await browser.close();
   console.log('PEPPOL IMPORT ' + label + ': ' + (fails ? fails + ' FAILED' : 'OK'));

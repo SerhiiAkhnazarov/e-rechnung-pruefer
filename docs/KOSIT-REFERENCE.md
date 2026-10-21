@@ -479,20 +479,20 @@ Unterverzeichnis als Zusatzschlüssel). Verglichene Felder je Dokument:
 |---|---|---|
 | Szenario | `rep:scenarioMatched/s:scenario/s:name` (null bei `rep:noScenarioMatched`) | `scenario` |
 | XSD-Urteil (nur mit Szenario) | `validationStepResult[@id='val-xsd']/@valid` | `xsd.valid` |
-| Meldungen (nur schemagültig) | Multimenge `code | Level nach customLevel | Position` aus allen `val-sch.*`-Schritten; Level nach customLevel wie `rep:custom-level()` aus `//s:customLevel` des Reports | `findings[]`: `id | level | location` |
-| Bewertung (nur mit Szenario) | `rep:assessment/rep:accept|rep:reject`; Verarbeitungsfehler am Satz „nicht automatisiert angenommen werden“ erkannt | `assessment` (`not-processable` ⇔ Verarbeitungsfehler) |
+| Meldungen (nur schemagültig) | Multimenge `code \| Level nach customLevel \| Position` aus allen `val-sch.*`-Schritten; Level nach customLevel wie `rep:custom-level()` aus `//s:customLevel` des Reports | `findings[]`: `id \| level \| location` |
+| Bewertung (nur mit Szenario) | `rep:assessment/rep:accept\|rep:reject`; Verarbeitungsfehler am Satz „nicht automatisiert angenommen werden“ erkannt | `assessment` (`not-processable` ⇔ Verarbeitungsfehler) |
 
 Positionen werden auf `/local[n]/local[n]/@attr` normalisiert (ISO-Skeleton, SchXslt-EQName,
 Prüfer-Präfixnotation; `--selftest` prüft sieben Beispiele). Dokumente ohne KoSIT-Szenario werden
-vom Validator immer mit dem Fallback-Report zurückgewiesen, vom Prüfer informativ gegen EN 16931
-geprüft; für sie wird nur das Feld „Szenario“ verglichen (Bewertung = „nicht vergleichbar“, kein
-Mismatch).
+vom Validator immer mit dem Fallback-Report zurückgewiesen, vom Prüfer informativ nach dem passenden
+Regelwerk (Peppol BIS, Factur-X-Profil, EN 16931) geprüft; für sie werden nur das Feld „Szenario“ und das
+Konfigurationsurteil verglichen (Bewertung = „nicht vergleichbar“, kein Unterschied).
 
 Wie der Validator führt der Prüfer – im Browser und in `tools/pruefer-cli.cjs`, beide über
 `src/pruefer-core.js` (`analyzeBytes`) – vor den Schematron-Regeln die XSD-Prüfung aus
 (`src/xsd-validator.js`, Modell aus `build/xsd/` nach der `<validateWithXmlSchema>`-Ressource des
-Szenarios; ohne Szenario nach dem Wurzelelement) und überspringt die Schematron-Regeln bei ungültigem
-Schema (`schematronSkipped: "xsd-invalid"`, `assessment: "reject"`); das JSON enthält `xsd: {schema,
+Szenarios; ohne Szenario nach dem Wurzelelement) und überspringt die Schematron-Regeln bei schemaungültigem
+Dokument (`schematronSkipped: "xsd-invalid"`, `assessment: "reject"`); das JSON enthält `xsd: {schema,
 resource, source, valid, errorCount, errors[{code, message, location}]}`.
 
 ### 5.1 Ergebnis über den Korpus (4 158 Dokumente, Nachbau: `build/reports/kosit-reference.txt`)
@@ -525,15 +525,15 @@ reports: 4158; JSON: 4158; paired: 4158; JSON without report: 0
 MISMATCHES: 0 document(s)
 ```
 
-Dokumente ohne Szenario (2 267): der KoSIT-Validator weist sie mangels Szenario zurück; der Prüfer
+Dokumente ohne Szenario (2 267): Der KoSIT-Validator weist sie mangels Szenario zurück; der Prüfer
 nimmt sie ebenfalls nie als XRechnung/EN 16931 an („configuration verdict“ identisch für alle 4 158)
 und prüft sie stattdessen informativ nach dem passenden Regelwerk (`build/rulesets.json`: Peppol BIS,
 Factur-X-Profil, EN 16931) bzw. meldet „nicht anwendbar“. Dazu gehören die CEN-Unit-Test-Fragmente
 (ohne `CustomizationID`), Peppol-BIS-Dokumente, ZUGFeRD-Profile ohne KoSIT-Szenario (MINIMUM,
-BASIC WL, BASIC, EXTENDED, alte Kennungen), Testinstanzen mit unersetztem Token
+BASIC WL, BASIC, EXTENDED, alte Kennungen), Testinstanzen mit nicht ersetztem Platzhalter
 `@xrechnung.spec.id@` und Mutationen mit ungültiger `CustomizationID`.
 
-Paarung: jeder Bericht muss genau einem Prüfer-JSON zugeordnet sein, sonst schlägt der Vergleich
+Paarung: Jeder Bericht muss genau einem Prüfer-JSON zugeordnet sein, sonst schlägt der Vergleich
 fehl. Der Berichtsname folgt dem Original (aus `X.xml` wird `X-report.xml`, aus `X.pdf.xml`
 `X.pdf-report.xml`, aus `X.XML.xml` `X-report.xml`; `cmd/DefaultNamingStrategy.java`).
 
@@ -557,13 +557,14 @@ Konfigurationsurteil 4 158/4 158, Verarbeitungsfehler 0/0).
 Dokumenttyp-Deklarationen (seit 0.3.1): Der XML-Parser des Validators läuft mit
 `http://apache.org/xml/features/disallow-doctype-decl` (`impl/xml/ProcessorProvider.java`) und lehnt jedes
 Dokument mit DOCTYPE ab („SXXP0003 … DOCTYPE is disallowed“, Verarbeitungsfehler, REJECT) – auch eines ohne
-Entitäten. `test/kosit-official.cjs` prüft das zusätzlich an 8 Dokumenten (Verzeichnis `doctype`: das erste
-XRechnung-UBL- und -CII-Original mit DOCTYPE, mit interner Entität, nach einem Kommentar; Entity-Expansion; externe
-Entitäten): KoSIT und Prüfer melden beide einen Verarbeitungsfehler (8/8), Szenario 4 166/4 166.
+Entitäten. `test/kosit-official.cjs` prüft das zusätzlich an 8 Dokumenten im Verzeichnis `doctype`: das erste
+XRechnung-UBL- und das erste -CII-Original in je drei Fassungen (mit DOCTYPE, mit interner Entität, mit DOCTYPE nach
+einem Kommentar) sowie je ein Dokument mit Entity-Expansion und mit externen Entitäten. KoSIT und Prüfer melden beide
+einen Verarbeitungsfehler (8/8), Szenario 4 166/4 166.
 
 Korrektur einer früheren Aussage: In 0.1.0 hieß es, das Original-JAR sei nur über Maven Central
 erhältlich und daher nur im CI prüfbar. Die GitHub-Release-Dateien sind erreichbar; der Vergleich
-läuft deshalb lokal und in CI. Der CI-Job `kosit-jar-maven` prüft zusätzlich, dass das GitHub-JAR
+läuft deshalb lokal und im CI. Der CI-Job `kosit-jar-maven` prüft zusätzlich, dass das GitHub-JAR
 byte-gleich mit `org.kosit:validator:1.6.3:standalone` auf Maven Central ist.
 
 ---

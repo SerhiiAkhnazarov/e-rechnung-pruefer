@@ -41,12 +41,12 @@
       { test: (id) => id === XR['xrechnung.spec.id'], label: 'XRechnung ' + XR['xrechnung.version'] + ' (CIUS)', family: 'XRechnung', en16931: true },
       { test: (id) => id === XR['xrechnung.extension.id'], label: 'XRechnung ' + XR['xrechnung.version'] + ' Extension', family: 'XRechnung', en16931: true },
       { test: (id) => id === XR['xrechnung.cvd.id'], label: 'XRechnung ' + XR['xrechnung.version'] + ' CVD (Clean Vehicles)', family: 'XRechnung', en16931: true },
-      { test: (id) => /^urn:cen\.eu:en16931:2017#compliant#urn:xoev-de:kosit:standard:xrechnung_(\d+\.\d+)/.test(id), label: (id) => 'XRechnung ' + /xrechnung_(\d+\.\d+)/.exec(id)[1] + ' (veraltet)', family: 'XRechnung', en16931: true, note: 'Veraltete XRechnung-Version. Seit dem 1. Februar 2024 ist XRechnung 3.0.x für Rechnungen an Bundesbehörden verbindlich; die Version 2.3.1 soll nicht mehr verwendet werden (e-rechnung-bund.de). Der aktuelle KoSIT-Validator (Konfiguration ' + XR['validator.configuration.version.full'] + ') kennt nur XRechnung ' + XR['xrechnung.version'] + ' und würde dieses Dokument mangels passendem Szenario zurückweisen. Geprüft wurden hier nur die EN-16931-Regeln.' },
-      { test: (id) => id === 'urn:cen.eu:en16931:2017', label: 'EN 16931 (Kernrechnung) / ZUGFeRD-Factur-X EN 16931', family: 'EN16931', en16931: true },
+      { test: (id) => /^urn:cen\.eu:en16931:2017#compliant#urn:xoev-de:kosit:standard:xrechnung_(\d+\.\d+)/.test(id), label: (id) => 'XRechnung ' + /xrechnung_(\d+\.\d+)/.exec(id)[1] + ' (veraltet)', family: 'XRechnung', en16931: true, note: 'Veraltete XRechnung-Version. Seit dem 1. Februar 2024 ist XRechnung 3.0.x für Rechnungen an Bundesbehörden verbindlich; die Version 2.3.1 soll nicht mehr verwendet werden (e-rechnung-bund.de). Der aktuelle KoSIT-Validator (Konfiguration ' + XR['validator.configuration.version.full'] + ') kennt nur XRechnung ' + XR['xrechnung.version'] + ' und würde dieses Dokument mangels eines passenden Szenarios zurückweisen. Geprüft wurden hier nur die EN-16931-Regeln.' },
+      { test: (id) => id === 'urn:cen.eu:en16931:2017', label: 'EN 16931 (Kernrechnung) / ZUGFeRD / Factur-X EN 16931', family: 'EN16931', en16931: true },
       { test: (id) => /^urn:cen\.eu:en16931:2017#compliant#urn:(factur-x\.eu:1p0|zugferd\.de:2p0):basic$/.test(id), label: (id) => (/zugferd\.de:2p0/.test(id) ? 'ZUGFeRD 2.0 BASIC (alte Kennung)' : 'ZUGFeRD / Factur-X BASIC'), family: 'ZUGFeRD', en16931: true },
-      { test: (id) => /^urn:cen\.eu:en16931:2017#conformant#urn:(factur-x\.eu:1p0|zugferd\.de:2p0):extended$/.test(id), label: (id) => (/zugferd\.de:2p0/.test(id) ? 'ZUGFeRD 2.0 EXTENDED (alte Kennung)' : 'ZUGFeRD / Factur-X EXTENDED'), family: 'ZUGFeRD', en16931: true, note: 'EXTENDED ist eine Erweiterung der EN 16931 („conformant“): geprüft werden die Regeln des Profils EXTENDED von Factur-X 1.09.2 / ZUGFeRD 2.5.2.' },
-      { test: (id) => id === 'urn:factur-x.eu:1p0:minimum' || id === 'urn:zugferd.de:2p0:minimum', label: 'ZUGFeRD / Factur-X MINIMUM', family: 'ZUGFeRD', en16931: false, note: 'Das Profil MINIMUM enthält nicht alle Pflichtangaben der EN 16931 und ist in Deutschland keine E-Rechnung im Sinne des § 14 Abs. 1 UStG, sondern eine „sonstige Rechnung“ (BMF-Schreiben vom 15. Oktober 2024). Geprüft wurden die Regeln des Profils MINIMUM.' },
-      { test: (id) => id === 'urn:factur-x.eu:1p0:basicwl' || id === 'urn:zugferd.de:2p0:basicwl', label: 'ZUGFeRD / Factur-X BASIC WL', family: 'ZUGFeRD', en16931: false, note: 'Das Profil BASIC WL (ohne Rechnungspositionen) erfüllt die EN 16931 nicht und ist in Deutschland keine E-Rechnung im Sinne des § 14 Abs. 1 UStG, sondern eine „sonstige Rechnung“ (BMF-Schreiben vom 15. Oktober 2024). Geprüft wurden die Regeln des Profils BASIC WL.' },
+      { test: (id) => /^urn:cen\.eu:en16931:2017#conformant#urn:(factur-x\.eu:1p0|zugferd\.de:2p0):extended$/.test(id), label: (id) => (/zugferd\.de:2p0/.test(id) ? 'ZUGFeRD 2.0 EXTENDED (alte Kennung)' : 'ZUGFeRD / Factur-X EXTENDED'), family: 'ZUGFeRD', en16931: true, note: 'EXTENDED ist eine Erweiterung der EN 16931 („conformant“): Geprüft werden die Regeln des Profils EXTENDED von Factur-X 1.09.2 / ZUGFeRD 2.5.2.' },
+      { test: (id) => id === 'urn:factur-x.eu:1p0:minimum' || id === 'urn:zugferd.de:2p0:minimum', label: 'ZUGFeRD / Factur-X MINIMUM', family: 'ZUGFeRD', en16931: false, note: 'Das Profil MINIMUM enthält nicht alle Pflichtfelder der EN 16931 und ist in Deutschland keine E-Rechnung im Sinne des § 14 Abs. 1 UStG, sondern eine „sonstige Rechnung“ (BMF-Schreiben vom 15.10.2024, Rn. 25 und 30). Geprüft wurden die Regeln des Profils MINIMUM.' },
+      { test: (id) => id === 'urn:factur-x.eu:1p0:basicwl' || id === 'urn:zugferd.de:2p0:basicwl', label: 'ZUGFeRD / Factur-X BASIC WL', family: 'ZUGFeRD', en16931: false, note: 'Das Profil BASIC WL (ohne Rechnungspositionen) erfüllt die EN 16931 nicht und ist in Deutschland keine E-Rechnung im Sinne des § 14 Abs. 1 UStG, sondern eine „sonstige Rechnung“ (BMF-Schreiben vom 15.10.2024, Rn. 25 und 30). Geprüft wurden die Regeln des Profils BASIC WL.' },
       { test: (id) => /^urn:cen\.eu:en16931:2017#compliant#urn:fdc:peppol\.eu:2017:poacc:billing:3\.0/.test(id), label: 'Peppol BIS Billing 3.0', family: 'Peppol', en16931: true },
       { test: (id) => /^urn:cen\.eu:en16931:2017:compliant:factur-x\.eu:1p0:/.test(id), label: (id) => 'Factur-X ' + id.split(':').pop().toUpperCase() + ' (fehlerhafte Kennung)', family: 'ZUGFeRD', en16931: true, note: 'Fehlerhafte Profilkennung („:compliant:“ statt „#compliant#urn:“). Die Factur-X-Regeln selbst lehnen diese Kennung ab (Regel FX-SCH-A-000026).' },
       { test: (id) => /^urn:cen\.eu:en16931:2017/.test(id), label: (id) => 'EN-16931-basierte Spezifikation: ' + id, family: 'EN16931', en16931: true, note: 'Unbekannte CIUS/Extension auf Basis der EN 16931 – geprüft wurden die EN-16931-Regeln.' },
@@ -409,10 +409,10 @@
     if (dt >= 0) {
       const before = text.slice(0, dt);
       const line = before.split('\n').length, column = dt - before.lastIndexOf('\n');
-      const msg = 'Dokumenttyp-Deklaration (DOCTYPE) in Zeile ' + line + ', Spalte ' + column + ' – nicht zulässig, wie im KoSIT-Validator (XML-Parser mit disallow-doctype-decl); E-Rechnungen verwenden keine DTD';
+      const msg = 'Dokumenttyp-Deklaration (DOCTYPE) in Zeile ' + line + ', Spalte ' + column + ' – nicht zulässig wie beim KoSIT-Validator (XML-Parser mit disallow-doctype-decl); E-Rechnungen verwenden keine DTD';
       result.timing.parse = Math.round(now() - tParse);
       result.xml.parseError = msg;
-      result.warnings.push('XML ist nicht verarbeitbar: ' + msg);
+      result.warnings.push('XML ist nicht verarbeitbar: ' + msg + '.');
       return finish('not-processable');
     }
     const parsed = env.parseXml(text);
@@ -425,7 +425,7 @@
     if (maxElementDepth(doc, MAX_DEPTH) > MAX_DEPTH) {
       const msg = 'Elemente tiefer als ' + MAX_DEPTH + ' Ebenen verschachtelt – nicht verarbeitet (Schutz vor Überlastung; keine UBL- oder CII-Rechnung ist so tief verschachtelt)';
       result.xml.parseError = msg;
-      result.warnings.push('XML ist nicht verarbeitbar: ' + msg);
+      result.warnings.push('XML ist nicht verarbeitbar: ' + msg + '.');
       return finish('not-processable');
     }
     Object.defineProperty(result, 'doc', { value: doc, enumerable: false });
@@ -438,7 +438,7 @@
     }
     if (syntax === 'CII-ZUGFeRD1') {
       result.profile = { id: '', label: 'ZUGFeRD 1.0 (CrossIndustryDocument)', family: 'ZUGFeRD1', en16931: false, note: null };
-      result.warnings.push('ZUGFeRD 1.0 (rsm:CrossIndustryDocument) ist nicht EN-16931-konform und in Deutschland keine E-Rechnung im Sinne des § 14 UStG. Geschäftsregeln können nicht geprüft werden.');
+      result.warnings.push('ZUGFeRD 1.0 (rsm:CrossIndustryDocument) ist nicht EN-16931-konform und in Deutschland keine E-Rechnung im Sinne des § 14 Abs. 1 UStG. Geschäftsregeln können nicht geprüft werden.');
       return finish('not-applicable');
     }
 

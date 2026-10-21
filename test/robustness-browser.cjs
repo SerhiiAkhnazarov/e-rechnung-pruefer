@@ -56,8 +56,8 @@ const check = (name, ok, detail) => { if (ok) pass++; else { fail++; failures.pu
     ['nesting-200000.xml', I.nested(200000), { verdict: 'format' }],
     ['nesting-5000.xml', I.nested(5000), {}],
     ['random.bin', I.randomBytes(1 << 20, 0x12345678), {}],
-    ['bomb-200mib.pdf', I.pdf({ 'factur-x.xml': { deflated: bomb200 } }), { verdict: 'keine-xml', test: (r) => (r.pdf && r.pdf.warnings || []).some((w) => /exceeds the limit of 64 MiB/.test(w)), testName: 'refused with the stream limit' }],
-    ['six-60mib.pdf', I.pdf(six), { test: (r) => (r.pdf && r.pdf.warnings || []).some((w) => /exceed the limit of 256 MiB/.test(w)) && (r.pdf.attachments || []).length === 4, testName: 'four decoded, the rest refused with the document limit' }],
+    ['bomb-200mib.pdf', I.pdf({ 'factur-x.xml': { deflated: bomb200 } }), { verdict: 'keine-xml', test: (r) => (r.pdf && r.pdf.warnings || []).some((w) => /überschreitet die Grenze von 64 MiB/.test(w)), testName: 'refused with the stream limit' }],
+    ['six-60mib.pdf', I.pdf(six), { test: (r) => (r.pdf && r.pdf.warnings || []).some((w) => /überschreiten die Grenze von 256 MiB/.test(w)) && (r.pdf.attachments || []).length === 4, testName: 'four decoded, the rest refused with the document limit' }],
     ['arrays-100000.pdf', I.pdf({}, ['['.repeat(100000) + ']'.repeat(100000)]), { verdict: 'keine-xml' }],
   ];
   for (const [name, bytes] of cases) fs.writeFileSync(path.join(dir, name), bytes);

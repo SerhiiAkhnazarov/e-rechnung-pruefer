@@ -7,13 +7,14 @@ Der E-Rechnung Prüfer überträgt sie nicht und speichert sie nicht. Er lädt k
 setzt keine Cookies und verwendet keine Analyse- oder Trackingdienste.
 
 Speicherung auf Ihrem Gerät: Peppol-Regelwerke, die Sie selbst laden („Regelwerke laden (Peppol BIS Billing
-3.0)“), legt der Browser auf Ihrem Gerät ab (localStorage), damit sie beim nächsten Aufruf bereitstehen. Sie
-verlassen Ihr Gerät nicht; löschen können Sie sie in den Einstellungen Ihres Browsers (Websitedaten).
+3.0)“), legt der Browser auf Ihrem Gerät ab (localStorage), damit sie beim nächsten Aufruf bereitstehen. Die Regelwerke
+verlassen Ihr Gerät nicht; löschen können Sie sie dort mit „Geladene Regelwerke löschen“ oder in den Einstellungen
+Ihres Browsers (Websitedaten).
 
 Bereitstellung über GitHub: Die Online-Fassung und die Downloads werden von GitHub ausgeliefert (GitHub B.V.,
 Prins Bernhardplein 200, Amsterdam, Niederlande; GitHub, Inc., 88 Colin P. Kelly Jr. St., San Francisco, USA).
 Nach Angaben von GitHub wird beim Aufruf einer GitHub-Pages-Seite die IP-Adresse der Besucher zu
-Sicherheitszwecken protokolliert und gespeichert. Grundlage dieser Bereitstellung ist das berechtigte Interesse
+Sicherheitszwecken protokolliert und gespeichert. Rechtsgrundlage dieser Verarbeitung ist das berechtigte Interesse
 an einer sicheren und zuverlässigen Auslieferung (Art. 6 Abs. 1 lit. f DSGVO). GitHub nimmt am EU-U.S. Data
 Privacy Framework teil (Angemessenheitsbeschluss der Europäischen Kommission vom 10. Juli 2023, Art. 45 DSGVO).
 Näheres: Datenschutzerklärung von GitHub, docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement.
@@ -21,5 +22,6 @@ Die heruntergeladene Datei E-Rechnung-Pruefer.html arbeitet ohne Netzwerkverbind
 
 Ihre Rechte: Sie haben das Recht auf Auskunft (Art. 15 DSGVO), Berichtigung (Art. 16), Löschung (Art. 17),
 Einschränkung der Verarbeitung (Art. 18), Datenübertragbarkeit (Art. 20) und Widerspruch (Art. 21). Sie können
-sich bei einer Datenschutz-Aufsichtsbehörde beschweren, insbesondere in dem Mitgliedstaat Ihres Aufenthaltsorts;
+sich bei einer Datenschutz-Aufsichtsbehörde beschweren, insbesondere in dem Mitgliedstaat Ihres gewöhnlichen Aufenthaltsorts, Ihres Arbeitsplatzes oder des Orts des mutmaßlichen
+Verstoßes (Art. 77 DSGVO);
 in Österreich: Österreichische Datenschutzbehörde, Barichgasse 40-42, 1030 Wien, dsb@dsb.gv.at.

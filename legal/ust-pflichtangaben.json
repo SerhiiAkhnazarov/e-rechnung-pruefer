@@ -21,7 +21,7 @@
     },
     {
       "id": "ustg22a",
-      "titel": "§§ 22a, 22c UStG (Fiskalvertretung; Ausstellung von Rechnungen im Fall der Fiskalvertretung)",
+      "titel": "§§ 22a, 22c UStG (Fiskalvertretung; Ausstellung von Rechnungen im Falle der Fiskalvertretung)",
       "url": "https://www.gesetze-im-internet.de/ustg_1980/__22c.html"
     },
     {
@@ -56,17 +56,17 @@
     },
     {
       "id": "bmf2024",
-      "titel": "BMF-Schreiben vom 15.10.2024, GZ III C 2 - S 7287-a/23/10001 :007, DOK 2024/0883282 (Einführung der obligatorischen elektronischen Rechnung): Rn. 7 (reine PDF ist keine E-Rechnung), Rn. 22 (Kleinbeträge, Fahrausweise), Rn. 25 und 30 (ZUGFeRD ab 2.0.1 außer MINIMUM und BASIC-WL), Rn. 31 (hybride Formate: XML führend), Rn. 32 (abweichender PDF-Teil, § 14c UStG), Rn. 33 (vereinbarte andere Formate), Rn. 35 (Pflichtangaben im strukturierten Teil), Rn. 48 (Endrechnung, Anlage), Rn. 49 und 57 (Berichtigung, Rückwirkung), Rn. 59 (Schutz des Empfängers in der Übergangszeit), Rn. 60 (Aufbewahrung)",
+      "titel": "BMF-Schreiben vom 15.10.2024, GZ III C 2 - S 7287-a/23/10001 :007, DOK 2024/0883282 (Einführung der obligatorischen elektronischen Rechnung): Rn. 7 (reine PDF-Datei ist keine E-Rechnung), Rn. 22 (Kleinbeträge, Fahrausweise), Rn. 25 und 30 (ZUGFeRD ab 2.0.1 außer MINIMUM und BASIC-WL), Rn. 31 (hybride Formate: XML führend), Rn. 32 (abweichender PDF-Teil, § 14c UStG), Rn. 33 (vereinbarte andere Formate), Rn. 35 (Pflichtangaben im strukturierten Teil), Rn. 48 (Endrechnung, Anlage), Rn. 49 und 57 (Berichtigung, Rückwirkung), Rn. 59 (Nichtbeanstandung des Vorsteuerabzugs in der Übergangszeit), Rn. 60 (Aufbewahrung)",
       "url": "https://www.bundesfinanzministerium.de/Content/DE/Downloads/BMF_Schreiben/Steuerarten/Umsatzsteuer/2024-10-15-einfuehrung-e-rechnung.pdf?__blob=publicationFile"
     },
     {
       "id": "bmf2025",
-      "titel": "BMF-Schreiben vom 15.10.2025, GZ III C 2 - S 7287-a/00019/007/243, DOK COO.7005.100.4.13163130, BStBl 2025 I S. 1806 (ergänzt das Schreiben vom 15.10.2024): Rn. 6a (Formatfehler: keine E-Rechnung, sondern sonstige Rechnung; prüfbar mit einer geeigneten Validierungsanwendung), Rn. 6b (Geschäftsregelfehler), Rn. 35 (alle Pflichtangaben im strukturierten Teil; ein bloßer Verweis auf eine Anlage oder ein Link auf ein externes Ziel genügt nicht; ergänzende Angaben in einem enthaltenen Anhang), Rn. 35a (Verstoß gegen die Pflichtangaben = nicht ordnungsmäßige Rechnung; Geschäftsregelfehler zu anderen Inhalten sind umsatzsteuerlich unbeachtlich; eine Validierung ersetzt nicht die Prüfung durch den Empfänger; bei Beachtung der Sorgfaltspflichten Verlass auf das technische Ergebnis einer geeigneten Validierungsanwendung; Aufbewahrung des Validierungsberichts zum Nachweis)",
+      "titel": "BMF-Schreiben vom 15.10.2025, GZ III C 2 - S 7287-a/00019/007/243, DOK COO.7005.100.4.13163130, BStBl 2025 I S. 1806 (ergänzt das Schreiben vom 15.10.2024): Rn. 6a (Formatfehler: keine E-Rechnung, sondern sonstige Rechnung; prüfbar mit einer geeigneten Validierungsanwendung), Rn. 6b (Geschäftsregelfehler), Rn. 35 (alle Pflichtangaben im strukturierten Teil; ein bloßer Verweis auf eine Anlage oder ein Link auf ein externes Ziel genügt nicht; ergänzende Angaben in einem in der E-Rechnung enthaltenen Anhang), Rn. 35a (Verstoß gegen die Pflichtangaben = nicht ordnungsmäßige Rechnung; Geschäftsregelfehler zu anderen Inhalten sind umsatzsteuerlich unbeachtlich; eine Validierung ersetzt nicht die Prüfung durch den Empfänger; bei Beachtung der Sorgfaltspflichten Verlass auf das technische Ergebnis einer geeigneten Validierungsanwendung; Aufbewahrung des Validierungsberichts zum Nachweis)",
       "url": "https://www.bundesfinanzministerium.de/Content/DE/Downloads/BMF_Schreiben/Steuerarten/Umsatzsteuer/Umsatzsteuer-Anwendungserlass/2025-10-15-einfuehrung-obligatorische-e-rechnung.pdf?__blob=publicationFile"
     },
     {
       "id": "bmf2026",
-      "titel": "BMF-Schreiben vom 15.10.2026, GZ III C 5 - S 7287-a/00019/021/017, DOK COO.7005.100.3.15923106 (ergänzende Regelungen zu den Schreiben vom 15.10.2024 und 15.10.2025): Rn. 3 und 4 (Endrechnung, nicht beanstandet bis 30.06.2030: Absetzung der Teilentgelte als Summe in BT-113 mit den Einzelheiten in BT-22, oder Absetzung in einem eingebetteten, unstrukturierten Anhang nach Abschn. 14.8 Abs. 8 Nr. 2 UStAE, auf den der strukturierte Teil ausdrücklich hinweist), Rn. 8 und 9 (die Finanzverwaltung empfiehlt, die Zuordnungstabelle von KoSIT und FeRD in der jeweils aktuellen Version zugrunde zu legen), Rn. 10 bis 12 (Leistungsbeschreibung: Leistungsart, Leistungsumfang, Leistungsgehalt und ggf. Leistungsort eindeutig im strukturierten Teil), Rn. 13 und 14 (Bauleistungen), Rn. 15 und 16 (Entgeltminderungen), Rn. 17 bis 19 (Bruttopreisrechnungen), Rn. 20 und 21 (Berichtigung als E-Rechnung), Rn. 22 und 23 (ein Geschäftsregelfehler hat nur dann einen Inhaltsfehler zur Folge, wenn er eine Pflichtangabe betrifft; umsatzsteuerlich bleibt die Datei prinzipiell eine E-Rechnung), Abschnitt II Nr. 3 (Abschn. 14.11 Abs. 2 Satz 7 UStAE: Berichtigung durch Gutschrift), Abschnitt II Nr. 4 (Abschn. 15.11 Abs. 3 Satz 2 UStAE: Vorsteuerabzug nur mit den vollständigen Angaben nach § 14 Abs. 4 Satz 1 Nr. 1 bis 8 und 10 UStG), Anwendungsregelung (nicht beanstandet – auch für den Vorsteuerabzug –, wenn eine bis 31.12.2026 ausgestellte E-Rechnung den Schreiben von 2024 und 2025 entspricht, nicht aber den zusätzlichen Vorgaben dieses Schreibens)",
+      "titel": "BMF-Schreiben vom 15.10.2026, GZ III C 5 - S 7287-a/00019/021/017, DOK COO.7005.100.3.15923106 (ergänzende Regelungen zu den Schreiben vom 15.10.2024 und 15.10.2025): Rn. 3 und 4 (Endrechnung, nicht beanstandet bis 30.06.2030: Absetzung der Teilentgelte als Summe in BT-113 mit den Einzelheiten in BT-22 oder Absetzung in einem eingebetteten, unstrukturierten Anhang nach Abschn. 14.8 Abs. 8 Nr. 2 UStAE, auf den der strukturierte Teil ausdrücklich hinweist), Rn. 8 und 9 (die Finanzverwaltung empfiehlt, die Zuordnungstabelle von KoSIT und FeRD in der jeweils aktuellen Version zugrunde zu legen), Rn. 10 bis 12 (Leistungsbeschreibung: Leistungsart, Leistungsumfang, Leistungsgehalt und ggf. Leistungsort eindeutig im strukturierten Teil), Rn. 13 und 14 (Bauleistungen), Rn. 15 und 16 (Entgeltminderungen), Rn. 17 bis 19 (Bruttopreisrechnungen), Rn. 20 und 21 (Berichtigung als E-Rechnung), Rn. 22 und 23 (ein Geschäftsregelfehler hat nur dann einen Inhaltsfehler zur Folge, wenn er eine Pflichtangabe betrifft; umsatzsteuerlich bleibt die Datei prinzipiell eine E-Rechnung), Rn. 24 und 25 (Rechnungen an die öffentliche Verwaltung: daneben gelten die Vorschriften zur elektronischen Rechnungsstellung gegenüber öffentlichen Auftraggebern, z. B. die E-Rechnungsverordnung des Bundes; kein Rangverhältnis, maßgeblich ist die strengere Vorschrift), Abschnitt II Nr. 3 (Abschn. 14.11 Abs. 2 Satz 7 UStAE: Berichtigung durch Gutschrift), Abschnitt II Nr. 4 (Abschn. 15.11 Abs. 3 Satz 2 UStAE: Vorsteuerabzug nur mit den vollständigen Angaben nach § 14 Abs. 4 Satz 1 Nr. 1 bis 8 und 10 UStG), Anwendungsregelung (nicht beanstandet – auch für den Vorsteuerabzug –, wenn eine bis 31.12.2026 ausgestellte E-Rechnung den Schreiben von 2024 und 2025 entspricht, nicht aber den zusätzlichen Vorgaben dieses Schreibens)",
       "url": "https://www.bundesfinanzministerium.de/Content/DE/Downloads/BMF_Schreiben/Steuerarten/Umsatzsteuer/Umsatzsteuer-Anwendungserlass/2026-10-15-obligatorische-elektronische-rechnung.pdf?__blob=publicationFile"
     },
     {
@@ -81,12 +81,12 @@
     },
     {
       "id": "bfh2008",
-      "titel": "BFH, Urteil vom 17.12.2008, XI R 62/07: der Leistungszeitpunkt ist auch dann anzugeben, wenn er mit dem Ausstellungsdatum übereinstimmt",
+      "titel": "BFH, Urteil vom 17.12.2008, XI R 62/07: Der Leistungszeitpunkt ist auch dann anzugeben, wenn er mit dem Ausstellungsdatum übereinstimmt",
       "url": "https://datenbank.nwb.de/Dokument/333890/"
     },
     {
       "id": "bfh2018",
-      "titel": "BFH, Urteil vom 1.3.2018, V R 18/17: der Leistungszeitpunkt kann sich aus dem Ausstellungsdatum ergeben, wenn nach den Verhältnissen des Einzelfalls davon auszugehen ist, dass die Leistung im Monat der Rechnungsausstellung erbracht wurde",
+      "titel": "BFH, Urteil vom 1.3.2018, V R 18/17: Der Leistungszeitpunkt kann sich aus dem Ausstellungsdatum ergeben, wenn nach den Verhältnissen des Einzelfalls davon auszugehen ist, dass die Leistung im Monat der Rechnungsausstellung erbracht wurde",
       "url": "https://www.deubner-steuern.de/themen/umsatzsteuer/die-rechnung-im-umsatzsteuerrecht/notwendige-rechnungsangaben-bfh-erleichtert-vorsteuerabzug.html"
     }
   ],
@@ -270,7 +270,7 @@
       "norm": "§ 14 Abs. 4 Satz 1 Nr. 9 UStG",
       "text": "in den Fällen des § 14b Abs. 1 Satz 5 UStG ein Hinweis auf die Aufbewahrungspflicht des Leistungsempfängers",
       "bt": [],
-      "hinweis": "Nur in den Fällen des § 14 Abs. 2 Satz 2 Nr. 3 UStG (steuerpflichtige Werklieferung oder sonstige Leistung im Zusammenhang mit einem Grundstück an einen Nichtunternehmer oder an einen Unternehmer für seinen nichtunternehmerischen Bereich); Träger nach KoSIT/FeRD: Bemerkung (BG-1). Befunde zu Bemerkungen werden nicht dieser Angabe zugeordnet."
+      "hinweis": "Nur in den Fällen des § 14 Abs. 2 Satz 2 Nr. 3 UStG (steuerpflichtige Werklieferung oder sonstige Leistung im Zusammenhang mit einem Grundstück an einen Nichtunternehmer, der keine juristische Person ist (z. B. eine Privatperson), oder an einen Unternehmer für seinen nichtunternehmerischen Bereich); Träger nach KoSIT/FeRD: Bemerkung (BG-1). Befunde zu Bemerkungen werden nicht dieser Angabe zugeordnet."
     },
     {
       "id": "nr10",
@@ -300,7 +300,7 @@
         "BT-120",
         "BT-121"
       ],
-      "hinweis": "§ 33 Satz 3 UStDV: die Erleichterungen für Kleinbetragsrechnungen gelten nicht in den Fällen der §§ 3c, 6a und 13b UStG."
+      "hinweis": "§ 33 Satz 3 UStDV: Die Erleichterungen für Kleinbetragsrechnungen gelten nicht in den Fällen der §§ 3c, 6a und 13b UStG."
     },
     {
       "id": "22c",
@@ -361,7 +361,7 @@
           "grund": "mit bereits gezahltem Betrag (BT-113) kann die Rechnung eine Endrechnung sein, in der die vereinnahmten Teilentgelte abzusetzen sind (§ 14 Abs. 5 Satz 2 UStG; BMF-Schreiben vom 15.10.2026, Rn. 3: Absetzung als Summe über BT-113)"
         }
       ],
-      "grund": "prüft den fälligen Zahlungsbetrag (BT-115 = BT-112 − BT-113 + BT-114); ohne bereits gezahlten Betrag ist der Zahlbetrag keine Pflichtangabe"
+      "grund": "prüft den fälligen Zahlungsbetrag (BT-115 = BT-112 − BT-113 + BT-114); ohne bereits gezahlten Betrag ist der Zahlungsbetrag keine Pflichtangabe"
     },
     "BR-CO-25": {
       "bt": [
@@ -386,7 +386,7 @@
           "grund": "mit bereits gezahltem Betrag (BT-113) kann die Rechnung eine Endrechnung sein, in der die vereinnahmten Teilentgelte abzusetzen sind (§ 14 Abs. 5 Satz 2 UStG; BMF-Schreiben vom 15.10.2026, Rn. 3: Absetzung als Summe über BT-113)"
         }
       ],
-      "grund": "prüft den fälligen Zahlungsbetrag einschließlich Fremdforderungen (XRechnung Extension), wie BR-CO-16"
+      "grund": "prüft den fälligen Zahlungsbetrag einschließlich Fremdforderungen (XRechnung-Extension), wie BR-CO-16"
     },
     "BR-DE-16": {
       "bt": [
@@ -428,7 +428,7 @@
       "bt": [
         "BT-125"
       ],
-      "grund": "verlangt eindeutige Dateinamen der Anlagen (BG-24); der Dateiname betrifft keine Pflichtangabe (Pflichtangaben gehören in den strukturierten Teil, BMF-Schreiben vom 15.10.2025, Rn. 35; Inhalte von Anlagen sind nur in den zugelassenen Fällen von Bedeutung, z. B. bei Endrechnungen)"
+      "grund": "verlangt eindeutige Dateinamen der Anlagen (BG-24); der Dateiname betrifft keine Pflichtangabe (Pflichtangaben gehören in den strukturierten Teil, BMF-Schreiben vom 15.10.2025, Rn. 35; Inhalte von Anlagen sind nur in den Fällen von Bedeutung, in denen eingebettete Anlagen nicht beanstandet werden, z. B. bei Endrechnungen nach dem BMF-Schreiben vom 15.10.2026, Rn. 4)"
     },
     "BR-DEX-04": {
       "bt": [
@@ -436,7 +436,7 @@
         "BT-46",
         "BT-60"
       ],
-      "grund": "Kennungsschema einer Partei-Kennung (XRechnung Extension); Kennungen sind keine Pflichtangaben"
+      "grund": "Kennungsschema einer Partei-Kennung (XRechnung-Extension); Kennungen sind keine Pflichtangaben"
     },
     "BR-DEX-05": {
       "bt": [
@@ -444,27 +444,27 @@
         "BT-47",
         "BT-61"
       ],
-      "grund": "Kennungsschema einer Registernummer (XRechnung Extension); keine Pflichtangabe"
+      "grund": "Kennungsschema einer Registernummer (XRechnung-Extension); keine Pflichtangabe"
     },
     "BR-DEX-06": {
       "bt": [
         "BT-157"
       ],
       "nurAngaben": [],
-      "grund": "Kennungsschema einer Artikelkennung (XRechnung Extension): das Schema der Kennung berührt nicht die Bezeichnung der Leistung (BT-153), die Menge und Art trägt; keine Pflichtangabe"
+      "grund": "Kennungsschema einer Artikelkennung (XRechnung-Extension): Das Schema der Kennung berührt nicht die Bezeichnung der Leistung (BT-153), die die Art der Leistung trägt; keine Pflichtangabe"
     },
     "BR-DEX-07": {
       "bt": [
         "BT-34",
         "BT-49"
       ],
-      "grund": "Schema einer elektronischen Adresse (XRechnung Extension); keine Pflichtangabe"
+      "grund": "Schema einer elektronischen Adresse (XRechnung-Extension); keine Pflichtangabe"
     },
     "BR-DEX-08": {
       "bt": [
         "BT-71"
       ],
-      "grund": "Kennungsschema des Lieferorts (XRechnung Extension); keine Pflichtangabe"
+      "grund": "Kennungsschema des Lieferorts (XRechnung-Extension); keine Pflichtangabe"
     },
     "BR-IC-11": {
       "bt": [
@@ -472,7 +472,7 @@
         "BT-73",
         "BT-74"
       ],
-      "grund": "verlangt bei innergemeinschaftlicher Lieferung ein Liefer- oder Abrechnungsdatum (Zeitpunkt der Lieferung, § 14 Abs. 4 Satz 1 Nr. 6 UStG)"
+      "grund": "verlangt bei innergemeinschaftlicher Lieferung ein Lieferdatum (BT-72) oder einen Abrechnungszeitraum (BG-14) (Zeitpunkt der Lieferung, § 14 Abs. 4 Satz 1 Nr. 6 UStG)"
     },
     "BR-IC-12": {
       "bt": [
@@ -486,7 +486,7 @@
         "BT-32",
         "BT-63"
       ],
-      "grund": "verlangt bei Steuerkategorie „Standard rated“ die Kennungen BT-31, BT-32, BT-63; die Kategorie ist nur die Bedingung"
+      "grund": "verlangt bei Steuerkategorie „Standard rated“ eine der Kennungen BT-31, BT-32 oder BT-63; die Kategorie ist nur die Bedingung"
     },
     "BR-S-03": {
       "bt": [
@@ -494,7 +494,7 @@
         "BT-32",
         "BT-63"
       ],
-      "grund": "verlangt bei Steuerkategorie „Standard rated“ die Kennungen BT-31, BT-32, BT-63; die Kategorie ist nur die Bedingung"
+      "grund": "verlangt bei Steuerkategorie „Standard rated“ eine der Kennungen BT-31, BT-32 oder BT-63; die Kategorie ist nur die Bedingung"
     },
     "BR-S-04": {
       "bt": [
@@ -502,7 +502,7 @@
         "BT-32",
         "BT-63"
       ],
-      "grund": "verlangt bei Steuerkategorie „Standard rated“ die Kennungen BT-31, BT-32, BT-63; die Kategorie ist nur die Bedingung"
+      "grund": "verlangt bei Steuerkategorie „Standard rated“ eine der Kennungen BT-31, BT-32 oder BT-63; die Kategorie ist nur die Bedingung"
     },
     "BR-Z-02": {
       "bt": [
@@ -510,7 +510,7 @@
         "BT-32",
         "BT-63"
       ],
-      "grund": "verlangt bei Steuerkategorie „Zero rated“ die Kennungen BT-31, BT-32, BT-63; die Kategorie ist nur die Bedingung"
+      "grund": "verlangt bei Steuerkategorie „Zero rated“ eine der Kennungen BT-31, BT-32 oder BT-63; die Kategorie ist nur die Bedingung"
     },
     "BR-Z-03": {
       "bt": [
@@ -518,7 +518,7 @@
         "BT-32",
         "BT-63"
       ],
-      "grund": "verlangt bei Steuerkategorie „Zero rated“ die Kennungen BT-31, BT-32, BT-63; die Kategorie ist nur die Bedingung"
+      "grund": "verlangt bei Steuerkategorie „Zero rated“ eine der Kennungen BT-31, BT-32 oder BT-63; die Kategorie ist nur die Bedingung"
     },
     "BR-Z-04": {
       "bt": [
@@ -526,7 +526,7 @@
         "BT-32",
         "BT-63"
       ],
-      "grund": "verlangt bei Steuerkategorie „Zero rated“ die Kennungen BT-31, BT-32, BT-63; die Kategorie ist nur die Bedingung"
+      "grund": "verlangt bei Steuerkategorie „Zero rated“ eine der Kennungen BT-31, BT-32 oder BT-63; die Kategorie ist nur die Bedingung"
     },
     "BR-E-02": {
       "bt": [
@@ -534,7 +534,7 @@
         "BT-32",
         "BT-63"
       ],
-      "grund": "verlangt bei Steuerkategorie „Exempt from VAT“ die Kennungen BT-31, BT-32, BT-63; die Kategorie ist nur die Bedingung"
+      "grund": "verlangt bei Steuerkategorie „Exempt from VAT“ eine der Kennungen BT-31, BT-32 oder BT-63; die Kategorie ist nur die Bedingung"
     },
     "BR-E-03": {
       "bt": [
@@ -542,7 +542,7 @@
         "BT-32",
         "BT-63"
       ],
-      "grund": "verlangt bei Steuerkategorie „Exempt from VAT“ die Kennungen BT-31, BT-32, BT-63; die Kategorie ist nur die Bedingung"
+      "grund": "verlangt bei Steuerkategorie „Exempt from VAT“ eine der Kennungen BT-31, BT-32 oder BT-63; die Kategorie ist nur die Bedingung"
     },
     "BR-E-04": {
       "bt": [
@@ -550,7 +550,7 @@
         "BT-32",
         "BT-63"
       ],
-      "grund": "verlangt bei Steuerkategorie „Exempt from VAT“ die Kennungen BT-31, BT-32, BT-63; die Kategorie ist nur die Bedingung"
+      "grund": "verlangt bei Steuerkategorie „Exempt from VAT“ eine der Kennungen BT-31, BT-32 oder BT-63; die Kategorie ist nur die Bedingung"
     },
     "BR-AE-02": {
       "bt": [
@@ -560,7 +560,7 @@
         "BT-48",
         "BT-47"
       ],
-      "grund": "verlangt bei Steuerkategorie „Reverse charge“ die Kennungen BT-31, BT-32, BT-63, BT-48, BT-47; die Kategorie ist nur die Bedingung"
+      "grund": "verlangt bei Steuerkategorie „Reverse charge“ eine der Kennungen BT-31, BT-32 oder BT-63 sowie BT-48 oder BT-47; die Kategorie ist nur die Bedingung"
     },
     "BR-AE-03": {
       "bt": [
@@ -570,7 +570,7 @@
         "BT-48",
         "BT-47"
       ],
-      "grund": "verlangt bei Steuerkategorie „Reverse charge“ die Kennungen BT-31, BT-32, BT-63, BT-48, BT-47; die Kategorie ist nur die Bedingung"
+      "grund": "verlangt bei Steuerkategorie „Reverse charge“ eine der Kennungen BT-31, BT-32 oder BT-63 sowie BT-48 oder BT-47; die Kategorie ist nur die Bedingung"
     },
     "BR-AE-04": {
       "bt": [
@@ -580,7 +580,7 @@
         "BT-48",
         "BT-47"
       ],
-      "grund": "verlangt bei Steuerkategorie „Reverse charge“ die Kennungen BT-31, BT-32, BT-63, BT-48, BT-47; die Kategorie ist nur die Bedingung"
+      "grund": "verlangt bei Steuerkategorie „Reverse charge“ eine der Kennungen BT-31, BT-32 oder BT-63 sowie BT-48 oder BT-47; die Kategorie ist nur die Bedingung"
     },
     "BR-IC-02": {
       "bt": [
@@ -588,7 +588,7 @@
         "BT-63",
         "BT-48"
       ],
-      "grund": "verlangt bei Steuerkategorie „Intra-community supply“ die Kennungen BT-31, BT-63, BT-48; die Kategorie ist nur die Bedingung"
+      "grund": "verlangt bei Steuerkategorie „Intra-community supply“ die Kennung BT-31 oder BT-63 sowie BT-48; die Kategorie ist nur die Bedingung"
     },
     "BR-IC-03": {
       "bt": [
@@ -596,7 +596,7 @@
         "BT-63",
         "BT-48"
       ],
-      "grund": "verlangt bei Steuerkategorie „Intra-community supply“ die Kennungen BT-31, BT-63, BT-48; die Kategorie ist nur die Bedingung"
+      "grund": "verlangt bei Steuerkategorie „Intra-community supply“ die Kennung BT-31 oder BT-63 sowie BT-48; die Kategorie ist nur die Bedingung"
     },
     "BR-IC-04": {
       "bt": [
@@ -604,14 +604,14 @@
         "BT-63",
         "BT-48"
       ],
-      "grund": "verlangt bei Steuerkategorie „Intra-community supply“ die Kennungen BT-31, BT-63, BT-48; die Kategorie ist nur die Bedingung"
+      "grund": "verlangt bei Steuerkategorie „Intra-community supply“ die Kennung BT-31 oder BT-63 sowie BT-48; die Kategorie ist nur die Bedingung"
     },
     "BR-G-02": {
       "bt": [
         "BT-31",
         "BT-63"
       ],
-      "grund": "verlangt bei Steuerkategorie „Export outside the EU“ die Kennungen BT-31, BT-63; die Kategorie ist nur die Bedingung",
+      "grund": "verlangt bei Steuerkategorie „Export outside the EU“ die Kennung BT-31 oder BT-63; die Kategorie ist nur die Bedingung",
       "wenn": [
         {
           "vorhanden": "BT-32",
@@ -629,7 +629,7 @@
         "BT-31",
         "BT-63"
       ],
-      "grund": "verlangt bei Steuerkategorie „Export outside the EU“ die Kennungen BT-31, BT-63; die Kategorie ist nur die Bedingung",
+      "grund": "verlangt bei Steuerkategorie „Export outside the EU“ die Kennung BT-31 oder BT-63; die Kategorie ist nur die Bedingung",
       "wenn": [
         {
           "vorhanden": "BT-32",
@@ -647,7 +647,7 @@
         "BT-31",
         "BT-63"
       ],
-      "grund": "verlangt bei Steuerkategorie „Export outside the EU“ die Kennungen BT-31, BT-63; die Kategorie ist nur die Bedingung",
+      "grund": "verlangt bei Steuerkategorie „Export outside the EU“ die Kennung BT-31 oder BT-63; die Kategorie ist nur die Bedingung",
       "wenn": [
         {
           "vorhanden": "BT-32",
@@ -826,7 +826,7 @@
     },
     "ohne-bezug": {
       "kurz": "keine Pflichtangabe",
-      "text": "Die Regel betrifft nach der Zuordnung des Werkzeugs keine umsatzsteuerliche Pflichtangabe. Ein Geschäftsregelfehler hat nur dann einen Inhaltsfehler zur Folge, wenn er eine umsatzsteuerliche Pflichtangabe betrifft (BMF-Schreiben vom 15.10.2026, Rn. 22); Geschäftsregelfehler zu anderen Inhalten sind umsatzsteuerlich unbeachtlich (BMF-Schreiben vom 15.10.2025, Rn. 35a). Technisch ist die Rechnung dennoch fehlerhaft; für Rechnungen an öffentliche Auftraggeber gelten daneben deren Vorschriften, z. B. die E-Rechnungsverordnung des Bundes (BMF-Schreiben vom 15.10.2026, Rn. 24 und 25)."
+      "text": "Die Regel betrifft nach der Zuordnung des Werkzeugs keine umsatzsteuerliche Pflichtangabe. Ein Geschäftsregelfehler hat nur dann einen Inhaltsfehler zur Folge, wenn er eine umsatzsteuerliche Pflichtangabe betrifft (BMF-Schreiben vom 15.10.2026, Rn. 22); Geschäftsregelfehler zu anderen Inhalten sind umsatzsteuerlich unbeachtlich (BMF-Schreiben vom 15.10.2025, Rn. 35a). Technisch ist die Rechnung dennoch fehlerhaft; für Rechnungen an öffentliche Auftraggeber gelten daneben die Vorschriften zur elektronischen Rechnungsstellung gegenüber öffentlichen Auftraggebern, z. B. die E-Rechnungsverordnung des Bundes (BMF-Schreiben vom 15.10.2026, Rn. 24 und 25)."
     },
     "zusatz": {
       "kurz": "keine Pflichtangabe",
@@ -844,15 +844,15 @@
     },
     "nicht-pruefbar": {
       "kurz": "Nicht einordenbar",
-      "text": "Das Werkzeug kann nicht feststellen, ob eine E-Rechnung vorliegt: kein unterstütztes Format (unterstützt: UBL 2.1 Invoice/CreditNote und UN/CEFACT CII D16B, auch in PDF; ZIP-Archive werden nicht entpackt) oder keine bzw. eine unbekannte Spezifikationskennung (BT-24). Andere strukturierte Formate sind zulässig, wenn Aussteller und Empfänger sie vereinbart haben und die richtige und vollständige Extraktion der Angaben in ein Format möglich ist, das der EN 16931 entspricht oder mit ihr interoperabel ist (§ 14 Abs. 1 Satz 6 Nr. 2 UStG; BMF-Schreiben vom 15.10.2024, Rn. 33)."
+      "text": "Das Werkzeug kann nicht feststellen, ob eine E-Rechnung vorliegt: kein unterstütztes Format (unterstützt: UBL 2.1 Invoice/CreditNote und UN/CEFACT CII D16B, auch in PDF; ZIP-Archive werden nicht entpackt) oder keine bzw. eine unbekannte Spezifikationskennung (BT-24). Andere strukturierte Formate sind zulässig, wenn Aussteller und Empfänger sie vereinbart haben und die richtige und vollständige Extraktion der Angaben in ein Format möglich ist, das der EN 16931 entspricht oder mit dieser interoperabel ist (§ 14 Abs. 1 Satz 6 Nr. 2 UStG; BMF-Schreiben vom 15.10.2024, Rn. 33)."
     },
     "format": {
       "kurz": "Keine E-Rechnung (Formatfehler)",
-      "text": "Die Datei verstößt gegen die Syntax des Formats bzw. ihre technischen Vorgaben. Sie ist keine E-Rechnung, sondern eine sonstige Rechnung in einem anderen elektronischen Format (BMF-Schreiben vom 15.10.2025, Rn. 6a). Ist eine E-Rechnung vorgeschrieben, eine korrekte E-Rechnung anfordern (zu Übergangsregelung und Ausnahmen siehe die Hinweise)."
+      "text": "Die Datei verstößt gegen die Syntax des Formats bzw. ihre technischen Vorgaben. Sie ist keine E-Rechnung, sondern eine sonstige Rechnung in einem anderen elektronischen Format (BMF-Schreiben vom 15.10.2025, Rn. 6a). Ist eine E-Rechnung vorgeschrieben, eine korrekte E-Rechnung anfordern (zur Übergangsregelung und zu den Ausnahmen siehe die Hinweise)."
     },
     "kein-profil": {
       "kurz": "Keine E-Rechnung (Profil)",
-      "text": "Das Profil erfüllt die EN 16931 nicht: ZUGFeRD/Factur-X MINIMUM und BASIC WL sowie ZUGFeRD 1.0 gelten nicht als E-Rechnung (BMF-Schreiben vom 15.10.2024, Rn. 25 und 30: ZUGFeRD ab Version 2.0.1, ausgenommen die Profile MINIMUM und BASIC-WL), sondern als sonstige Rechnung. Ist eine E-Rechnung vorgeschrieben, eine E-Rechnung anfordern (zu Übergangsregelung und Ausnahmen siehe die Hinweise)."
+      "text": "Das Profil bzw. die Version erfüllt die EN 16931 nicht: ZUGFeRD/Factur-X MINIMUM und BASIC WL sowie ZUGFeRD 1.0 gelten nicht als E-Rechnung (BMF-Schreiben vom 15.10.2024, Rn. 25 und 30: ZUGFeRD ab Version 2.0.1, ausgenommen die Profile MINIMUM und BASIC-WL), sondern als sonstige Rechnung. Ist eine E-Rechnung vorgeschrieben, eine E-Rechnung anfordern (zur Übergangsregelung und zu den Ausnahmen siehe die Hinweise)."
     },
     "pflicht": {
       "kurz": "Pflichtangaben betroffen",
@@ -865,7 +865,7 @@
     },
     "technisch": {
       "kurz": "Fehler ohne USt-Bedeutung",
-      "text": "E-Rechnung. Nach der Zuordnung des Werkzeugs betrifft keiner der Fehler eine umsatzsteuerliche Pflichtangabe. Umsatzsteuerlich ist eine Datei mit Geschäftsregelfehlern (aber ohne Formatfehler) prinzipiell eine E-Rechnung; dass sie technisch nicht der EN 16931 entspricht, ist für umsatzsteuerliche Fragen – z. B. den Vorsteuerabzug – nicht maßgebend (BMF-Schreiben vom 15.10.2026, Rn. 22 und 23; Geschäftsregelfehler zu anderen Inhalten sind umsatzsteuerlich unbeachtlich: BMF-Schreiben vom 15.10.2025, Rn. 35a). Für ihre Ordnungsmäßigkeit ist erforderlich, dass sie die Pflichtangaben nach §§ 14, 14a UStG richtig und vollständig enthält (BMF-Schreiben vom 15.10.2026, Rn. 23). Technisch ist die Rechnung fehlerhaft; ob sie angenommen wird, ist eine Frage der Vereinbarung mit dem Aussteller, und für Rechnungen an öffentliche Auftraggeber gelten daneben deren Vorschriften, z. B. die E-Rechnungsverordnung des Bundes (BMF-Schreiben vom 15.10.2026, Rn. 24 und 25)."
+      "text": "E-Rechnung. Nach der Zuordnung des Werkzeugs betrifft keiner der Fehler eine umsatzsteuerliche Pflichtangabe. Umsatzsteuerlich ist eine Datei mit Geschäftsregelfehlern (aber ohne Formatfehler) prinzipiell eine E-Rechnung; dass sie technisch nicht der EN 16931 entspricht, ist für umsatzsteuerliche Fragen – z. B. den Vorsteuerabzug – nicht maßgebend (BMF-Schreiben vom 15.10.2026, Rn. 22 und 23; Geschäftsregelfehler zu anderen Inhalten sind umsatzsteuerlich unbeachtlich: BMF-Schreiben vom 15.10.2025, Rn. 35a). Für ihre Ordnungsmäßigkeit ist erforderlich, dass sie die Pflichtangaben nach §§ 14, 14a UStG richtig und vollständig enthält (BMF-Schreiben vom 15.10.2026, Rn. 23). Technisch ist die Rechnung fehlerhaft; ob sie angenommen wird, ist eine Frage der Vereinbarung mit dem Aussteller, und für Rechnungen an öffentliche Auftraggeber gelten daneben die Vorschriften zur elektronischen Rechnungsstellung gegenüber öffentlichen Auftraggebern, z. B. die E-Rechnungsverordnung des Bundes (BMF-Schreiben vom 15.10.2026, Rn. 24 und 25)."
     },
     "ok": {
       "kurz": "Keine Format- oder Regelfehler",
@@ -879,15 +879,15 @@
   },
   "hinweise": {
     "geltung": "Einordnung nach deutschem Umsatzsteuerrecht (§§ 14, 14a, 15 UStG, UStDV; BMF-Schreiben vom 15.10.2024, 15.10.2025 und 15.10.2026; Zuordnung der Pflichtangaben zu den Geschäftsbegriffen nach der Zuordnungstabelle von KoSIT und FeRD, deren Verwendung die Finanzverwaltung empfiehlt – BMF-Schreiben vom 15.10.2026, Rn. 8). Sie ersetzt keine Steuerberatung und keine inhaltliche Rechnungsprüfung.",
-    "uebergang": "Übergangsregelung (§ 27 Abs. 38 UStG): Für Umsätze, die vor dem 1.1.2027 ausgeführt werden, darf bis zum 31.12.2026 statt einer E-Rechnung eine Papierrechnung oder – mit Zustimmung des Empfängers – eine sonstige elektronische Rechnung ausgestellt werden; für Umsätze im Jahr 2027 bis zum 31.12.2027, wenn der Gesamtumsatz des Ausstellers (§ 19 Abs. 2 UStG) im Vorjahr höchstens 800 000 Euro betrug; im EDI-Verfahren mit Zustimmung des Empfängers für Umsätze bis Ende 2027. Der Empfänger verliert den Vorsteuerabzug nicht allein wegen des falschen Formats, wenn er annehmen durfte, dass der Aussteller die Übergangsregelung nutzen darf (BMF-Schreiben vom 15.10.2024, Rn. 59).",
+    "uebergang": "Übergangsregelung (§ 27 Abs. 38 UStG): Für Umsätze, die vor dem 1.1.2027 ausgeführt werden, darf bis zum 31.12.2026 statt einer E-Rechnung eine Papierrechnung oder – mit Zustimmung des Empfängers – eine sonstige elektronische Rechnung ausgestellt werden; für Umsätze im Jahr 2027 bis zum 31.12.2027, wenn der Gesamtumsatz des Ausstellers (§ 19 Abs. 2 UStG) im Vorjahr höchstens 800 000 Euro betrug; mittels elektronischem Datenaustausch (EDI) mit Zustimmung des Empfängers für Umsätze im Jahr 2027 ebenfalls bis zum 31.12.2027, ohne Umsatzgrenze (§ 27 Abs. 38 Nr. 3 UStG). Allein wegen der Ausstellung im falschen Format wird der Vorsteuerabzug nicht beanstandet, sofern der Empfänger anhand der ihm vorliegenden Informationen davon ausgehen konnte, dass der Aussteller die Übergangsregelung in Anspruch nehmen konnte (BMF-Schreiben vom 15.10.2024, Rn. 59).",
     "ausnahmen": "Keine E-Rechnung ist vorgeschrieben bei Kleinbetragsrechnungen bis 250 Euro, Fahrausweisen und Rechnungen von Kleinunternehmern (§§ 33, 34, 34a UStDV), bei steuerfreien Umsätzen nach § 4 Nr. 8 bis 29 UStG und wenn Leistender oder Leistungsempfänger weder im Inland noch in einem der in § 1 Abs. 3 UStG bezeichneten Gebiete ansässig ist (§ 14 Abs. 2 Satz 2 Nr. 1 UStG).",
     "ausland": "Der Verkäufer hat keinen Ländercode DE (BT-40). Eine E-Rechnungspflicht besteht nur, wenn Leistender und Leistungsempfänger im Inland oder in einem der in § 1 Abs. 3 UStG bezeichneten Gebiete ansässig sind (§ 14 Abs. 2 Satz 2 Nr. 1 UStG); schuldet der Leistungsempfänger die Steuer nach § 13b UStG und ist der Leistende im Inland nicht ansässig, gelten für die Rechnung die Vorschriften seines Mitgliedstaats, außer wenn eine Gutschrift vereinbart ist (§ 14 Abs. 7 Sätze 1 und 2 UStG; Art. 219a MwStSystRL). Die Einordnung gilt nur, soweit deutsches Recht anzuwenden ist.",
-    "kaeuferAusland": "Der Käufer hat keinen Ländercode DE (BT-55): Eine E-Rechnungspflicht besteht nur zwischen Unternehmern, die im Inland oder in einem der in § 1 Abs. 3 UStG bezeichneten Gebiete ansässig sind (§ 14 Abs. 2 Satz 2 Nr. 1 UStG).",
+    "kaeuferAusland": "Der Käufer hat keinen Ländercode DE (BT-55). Eine E-Rechnungspflicht besteht nur zwischen Unternehmern, die im Inland oder in einem der in § 1 Abs. 3 UStG bezeichneten Gebiete ansässig sind (§ 14 Abs. 2 Satz 2 Nr. 1 UStG).",
     "kleinbetrag": "Gesamtbetrag höchstens 250 Euro (BT-112): Für Kleinbetragsrechnungen genügen nach § 33 UStDV Name und Anschrift des Leistenden, Ausstellungsdatum, Menge und Art der Leistung sowie Entgelt und Steuerbetrag in einer Summe mit Steuersatz oder Hinweis auf die Steuerbefreiung; Angaben zum Leistungsempfänger, Steuernummer, Rechnungsnummer und Leistungszeitpunkt sind dann nicht erforderlich (nicht in den Fällen der §§ 3c, 6a und 13b UStG). Kleinbetragsrechnungen dürfen stets als sonstige Rechnung übermittelt werden (§ 33 Satz 4 UStDV).",
-    "kleinunternehmer": "Rechnung eines Kleinunternehmers (§ 19 UStG, Hinweis in BT-120): Nach § 34a UStDV genügen Name und Anschrift beider Beteiligten, Steuernummer, USt-IdNr. oder Kleinunternehmer-Identifikationsnummer, Ausstellungsdatum, Menge und Art der Leistung, das Entgelt als Gesamtbetrag mit Hinweis auf die Steuerbefreiung und bei Gutschriften die Angabe „Gutschrift“; Rechnungsnummer und Leistungszeitpunkt sind nicht erforderlich. Solche Rechnungen dürfen stets als sonstige Rechnung übermittelt werden.",
+    "kleinunternehmer": "Rechnung eines Kleinunternehmers (§ 19 UStG, Hinweis in BT-120): Nach § 34a UStDV genügen Name und Anschrift beider Beteiligten, Steuernummer, USt-IdNr. oder Kleinunternehmer-Identifikationsnummer, Ausstellungsdatum, Menge und Art der Leistung, das Entgelt als Gesamtbetrag mit Hinweis auf die Steuerbefreiung und bei Gutschriften die Angabe „Gutschrift“; Rechnungsnummer und Leistungszeitpunkt sind nicht erforderlich. Solche Rechnungen dürfen stets als sonstige Rechnung übermittelt werden (§ 34a Satz 4 UStDV).",
     "reverseCharge": "Steuerschuldnerschaft des Leistungsempfängers (Kategorie AE): Für den Vorsteuerabzug nach § 15 Abs. 1 Satz 1 Nr. 4 UStG ist keine Rechnung erforderlich.",
     "hybrid": "Hybride Rechnung (PDF mit XML): Maßgeblich ist der XML-Teil (BMF-Schreiben vom 15.10.2024, Rn. 31). Zeigt der PDF-Teil abweichende Rechnungsdaten, kann er eine weitere (sonstige) Rechnung darstellen (Rn. 32, § 14c UStG); der Vorsteuerabzug richtet sich nur nach dem strukturierten Teil. Ob PDF und XML übereinstimmen, prüft das Werkzeug nicht.",
-    "anlagen": "Die Rechnung enthält Anlagen (BG-24). Alle Pflichtangaben müssen im strukturierten Teil stehen; ein bloßer Verweis auf eine Anlage oder ein Link auf ein externes Ziel genügt nicht, ergänzende Angaben dürfen in einem enthaltenen Anhang stehen (BMF-Schreiben vom 15.10.2025, Rn. 35). Derzeit nicht beanstandet werden eingebettete Anlagen für die Absetzung der Teilentgelte in einer Endrechnung (bis 30.06.2030, Rn. 4), für die Aufschlüsselung einer Bauleistung nach dem Leistungsverzeichnis (Rn. 14) und für die Einzelpositionen einer Bruttopreisrechnung (bis 31.12.2027, Rn. 19), wenn der strukturierte Teil ausdrücklich bzw. eindeutig auf sie hinweist (BMF-Schreiben vom 15.10.2026). Den Inhalt der Anlagen prüft das Werkzeug nicht.",
+    "anlagen": "Die Rechnung enthält Anlagen (BG-24). Alle Pflichtangaben müssen im strukturierten Teil stehen; ein bloßer Verweis auf eine Anlage oder ein Link auf ein externes Ziel genügt nicht, ergänzende Angaben dürfen jedoch in einem in der E-Rechnung enthaltenen Anhang stehen (BMF-Schreiben vom 15.10.2025, Rn. 35). Nach dem BMF-Schreiben vom 15.10.2026 werden eingebettete Anlagen derzeit nicht beanstandet für die Absetzung der Teilentgelte in einer Endrechnung (bis 30.06.2030, Rn. 4), für die Aufschlüsselung einer Bauleistung nach dem Leistungsverzeichnis (Rn. 14) und für die Einzelpositionen einer Bruttopreisrechnung (bis 31.12.2027, Rn. 19), wenn der strukturierte Teil ausdrücklich bzw. eindeutig auf sie hinweist. Den Inhalt der Anlagen prüft das Werkzeug nicht.",
     "kodierung": "Die Zeichenkodierung ist nach den XML-Regeln lesbar, XRechnung verlangt jedoch UTF-8 (Spezifikation XRechnung 3.0.2, Abschnitt 6.1). Die Einordnung dieses Verstoßes als Formatfehler ist eine Einschätzung des Werkzeugs; der KoSIT-Validator meldet ihn nicht.",
     "validierungsbericht": "Eine Validierung ersetzt nicht die Pflicht des Empfängers, die Rechnung auf Vollständigkeit und Richtigkeit zu prüfen, sondern unterstützt ihn dabei; bei Beachtung der Sorgfaltspflichten eines ordentlichen Kaufmanns kann er sich auf das technische Ergebnis einer Validierung (Format und Geschäftsregeln) durch eine geeignete Validierungsanwendung verlassen; zum Nachweis bietet es sich an, den Validierungsbericht aufzubewahren (BMF-Schreiben vom 15.10.2025, Rn. 35a). Dieses Protokoll dokumentiert die Prüfung; ob das Werkzeug für Ihre Zwecke geeignet ist, beurteilen Sie selbst (die Übereinstimmung mit dem KoSIT-Validator ist im Quellcode-Repository nachgewiesen)."
   }

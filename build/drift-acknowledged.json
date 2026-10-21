@@ -43,5 +43,11 @@
       "reviewed": "2026-10-20",
       "reason": "pre-release of the 2.x development line (tag 2026-09-14 on branch 2.x; CHANGELOG.md of the tag: '2.0.0 - work in progress', section '2.0.0-tp2'). Not adopted for the same reason as v2.0.0-alpha1."
     }
+  },
+  "xrechnung-visualization": {
+    "v2026-10-13": {
+      "reviewed": "2026-10-21",
+      "reason": "bugfix release 'XRechnung Bugfix Visualization 2026-10-13' (CHANGELOG: fixed injection of JavaScript via BT-122 and the BT-125 filename in the HTML view). git diff v2026-08-31 v2026-10-13 changes only CHANGELOG.md, build.xml, doc/guide-for-visual-testing.md, src/xsl/xrechnung-html.xsl, src/xsl/xrechnung-viewer.js and adds a test file; the stylesheets the syntax binding is derived from (src/xsl/ubl-invoice-xr.xsl, ubl-creditnote-xr.xsl, cii-xr.xsl; build/bt-paths.json) are identical, so build/bt-paths.json would not change. The Prüfer renders no HTML from the visualization and writes every value as text (src/app.js, textContent)."
+    }
   }
 }

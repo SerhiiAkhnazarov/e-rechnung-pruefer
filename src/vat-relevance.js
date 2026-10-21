@@ -90,6 +90,10 @@
   }
 
   const uniq = (a) => [...new Set(a)];
+  /** '1 Position', '3 Positionen' */
+  const plural = (n, one, many) => n + ' ' + (Number(n) === 1 ? one : many);
+  /** a decimal of the XML in German notation without trailing zeros: '2.00' -> '2', '2.50' -> '2,5' */
+  const dec = (v) => { const m = /^\s*([+-]?\d+)(?:\.(\d*?)0*)?\s*$/.exec(String(v)); return m ? m[1] + (m[2] ? ',' + m[2] : '') : String(v); };
 
   const ELEMENT_PREFIX = new Set(['cac', 'cbc', 'ext', 'ubl', 'cn', 'rsm', 'ram', 'udt', 'qdt']);
   const ROOT_ALIAS = { 'ubl:Invoice': 'Invoice', 'cn:CreditNote': 'CreditNote', Invoice: 'Invoice', CreditNote: 'CreditNote' };
@@ -296,7 +300,7 @@
         const werte = [[nameId, val(nameId)], [tradeId, val(tradeId)], [street[0], street.map(val).filter(Boolean).join(', ')], [plz, val(plz)], [city, val(city)], [country, val(country)]];
         if (!fehlt.length && !doubt.length) out.push(item(id, 'vorhanden', werte));
         else if (!required) out.push(item(id, 'entfällt', werte, reducedText + ': Angaben zum ' + who + ' nicht erforderlich.'));
-        else if (fehlt.length) out.push(item(id, 'fehlt', werte, 'Fehlt: ' + fehlt.concat(doubt).join(', ') + '.'));
+        else if (fehlt.length) out.push(item(id, 'fehlt', werte, 'Fehlende Angaben: ' + fehlt.concat(doubt).join(', ') + '.'));
         else out.push(item(id, 'prüfen', werte, 'Nicht angegeben: ' + doubt.join(', ') + '. Ausreichend ist eine Anschrift, die sich eindeutig feststellen lässt (§ 31 Abs. 2 UStDV) – prüfen.'));
       };
       party('nr1v', 'BT-27', 'BT-28', ['BT-35', 'BT-36', 'BT-162'], 'BT-38', 'BT-37', 'BT-40', 'leistenden Unternehmer', true);
@@ -318,9 +322,9 @@
       // Nr. 5: quantity and kind of the goods / extent and kind of the service
       {
         const noName = lines.filter((l) => !l.name).length, noQty = lines.filter((l) => !l.qty).length;
-        const werte = [['BG-25', lines.length + ' Position(en)'], ['BT-153', lines.slice(0, 3).map((l) => l.name).filter(Boolean).join(' | ') + (lines.length > 3 ? ' | …' : '')]];
+        const werte = [['BG-25', plural(lines.length, 'Position', 'Positionen')], ['BT-153', lines.slice(0, 3).map((l) => l.name).filter(Boolean).join(' | ') + (lines.length > 3 ? ' | …' : '')]];
         if (!lines.length) out.push(item('nr5', 'fehlt', werte, 'Keine Rechnungsposition (BG-25).'));
-        else if (noName || noQty) out.push(item('nr5', 'fehlt', werte, [noName ? noName + ' Position(en) ohne Bezeichnung (BT-153)' : '', noQty ? noQty + ' Position(en) ohne Menge (BT-129)' : ''].filter(Boolean).join(', ') + '.'));
+        else if (noName || noQty) out.push(item('nr5', 'fehlt', werte, [noName ? plural(noName, 'Position', 'Positionen') + ' ohne Bezeichnung (BT-153)' : '', noQty ? plural(noQty, 'Position', 'Positionen') + ' ohne Menge (BT-129)' : ''].filter(Boolean).join(', ') + '.'));
         else out.push(item('nr5', 'vorhanden', werte, 'Ob die Leistungsbeschreibung die Kontrollfunktion erfüllt – Leistungsart, Leistungsumfang, Leistungsgehalt und ggf. Leistungsort eindeutig im strukturierten Teil (BMF-Schreiben vom 15.10.2026, Rn. 10 bis 12) –, prüft das Werkzeug nicht; ein bloßer Verweis auf eine Anlage genügt nicht (BMF-Schreiben vom 15.10.2025, Rn. 35).'));
       }
       // Nr. 6: time of supply (BT-72, BG-14, BG-26); BT-7 only for the receipt of advance payments (Abs. 5 Satz 1)
@@ -349,7 +353,7 @@
         const skonto = fx.skonto.filter((s) => s.type === 'SKONTO');
         if (!vat.length) out.push(item('nr7', 'fehlt', [['BG-23', '']], 'Keine Umsatzsteuer-Aufschlüsselung (BG-23).'));
         else if (vat.some((v) => !v.taxable || !v.cat)) out.push(item('nr7', 'fehlt', [['BG-23', rows.join(' | ')]], 'Aufschlüsselung ohne Bemessungsgrundlage (BT-116) oder Kategorie (BT-118).'));
-        else out.push(item('nr7', 'vorhanden', [['BG-23', rows.join(' | ')], ['BT-20', skonto.length ? 'Skonto: ' + skonto.map((s) => s.days + ' Tage ' + s.percent + ' %').join(', ') : '']], 'Im Voraus vereinbarte Minderungen (z. B. Skonto, Boni, Rabatte) müssen angegeben sein, sofern sie nicht bereits im Entgelt berücksichtigt sind (z. B. in BT-20). Nicht beanstandet wird ein Hinweis nur in allgemeiner Form auf eine schriftlich abgeschlossene Vereinbarung, sofern die Dokumente über die Entgeltminderung als Teil der Aufzeichnungen nach § 22 UStG innerhalb kurzer Zeit vorgelegt und leicht und eindeutig geprüft werden können (BMF-Schreiben vom 15.10.2026, Rn. 15 und 16).'));
+        else out.push(item('nr7', 'vorhanden', [['BG-23', rows.join(' | ')], ['BT-20', skonto.length ? 'Skonto: ' + skonto.map((s) => dec(s.percent) + ' % bei Zahlung innerhalb von ' + plural(s.days, 'Tag', 'Tagen')).join(', ') : '']], 'Im Voraus vereinbarte Minderungen des Entgelts (z. B. Skonti, Boni, Rabatte) müssen angegeben sein (z. B. in BT-20), sofern sie nicht bereits im Entgelt berücksichtigt sind; steht ihre Höhe bei der Rechnungserstellung noch nicht fest, ist eindeutig auf die Vereinbarung hinzuweisen. Nicht beanstandet wird ein Hinweis nur in allgemeiner Form auf eine schriftlich abgeschlossene Entgeltminderungsvereinbarung, sofern die Dokumente über die Entgeltminderung als Teil der Aufzeichnungen nach § 22 UStG innerhalb kurzer Zeit vorgelegt und leicht und eindeutig geprüft werden können (BMF-Schreiben vom 15.10.2026, Rn. 15 und 16).'));
       }
       // Nr. 8: rate and tax amount, or reference to the exemption; Art. 230 MwStSystRL: VAT in euros
       {
@@ -359,29 +363,29 @@
         const foreign = has('BT-5') && val('BT-5') !== 'EUR' && vat.some((v) => !exempt.has(v.cat));
         const werte = [['BG-23', rows.join(' | ')], ['BT-110', val('BT-110')]].concat(foreign ? [['BT-6', val('BT-6')], ['BT-111', val('BT-111')]] : []);
         if (!vat.length) out.push(item('nr8', 'fehlt', [['BG-23', '']], 'Keine Umsatzsteuer-Aufschlüsselung (BG-23).'));
-        else if (bad.length) out.push(item('nr8', 'fehlt', werte, 'Steuersatz/Steuerbetrag (BT-119/BT-117) oder Hinweis auf die Steuerbefreiung (BT-120/BT-121) fehlt in ' + bad.length + ' Aufschlüsselung(en).'));
+        else if (bad.length) out.push(item('nr8', 'fehlt', werte, 'Steuersatz/Steuerbetrag (BT-119/BT-117) oder Hinweis auf die Steuerbefreiung (BT-120/BT-121) fehlt in ' + plural(bad.length, 'Aufschlüsselung', 'Aufschlüsselungen') + '.'));
         else if (foreign && !(val('BT-6') === 'EUR' && has('BT-111'))) out.push(item('nr8', 'prüfen', werte, 'Rechnung in ' + val('BT-5') + ': Der Steuerbetrag ist in Euro anzugeben (Art. 230 MwStSystRL) – im strukturierten Teil fehlt die Steuer in Euro (BT-6 = EUR mit BT-111).'));
         else out.push(item('nr8', 'vorhanden', werte));
       }
       // Nr. 9: reference to the recipient's retention obligation (§ 14b Abs. 1 Satz 5 UStG)
       out.push(/aufzubewahren|Aufbewahrungspflicht/i.test(notes)
         ? item('nr9', 'vorhanden', [['BG-1', 'Hinweis in einer Bemerkung']])
-        : item('nr9', 'nicht zutreffend', [], 'Nur in den Fällen des § 14 Abs. 2 Satz 2 Nr. 3 UStG erforderlich (steuerpflichtige Werklieferung oder sonstige Leistung im Zusammenhang mit einem Grundstück an einen Nichtunternehmer oder für den nichtunternehmerischen Bereich, § 14b Abs. 1 Satz 5 UStG); kein solcher Hinweis im strukturierten Teil.'));
+        : item('nr9', 'nicht zutreffend', [], 'Nur in den Fällen des § 14 Abs. 2 Satz 2 Nr. 3 UStG erforderlich (steuerpflichtige Werklieferung oder sonstige Leistung im Zusammenhang mit einem Grundstück an einen Nichtunternehmer, der keine juristische Person ist (z. B. eine Privatperson), oder an einen Unternehmer für seinen nichtunternehmerischen Bereich; § 14b Abs. 1 Satz 5 UStG); kein solcher Hinweis im strukturierten Teil.'));
       // Nr. 10: "Gutschrift" when the recipient issues the invoice
       {
         const gs = /gutschrift/i.test(notes);
         const werte = [['BT-3', code]].concat(gs ? [['BG-1', 'Bemerkung mit „Gutschrift“']] : []);
         if (!has('BT-3')) out.push(item('nr10', 'prüfen', werte, 'Rechnungsart (BT-3) fehlt: Ob es sich um eine Gutschrift handelt, ist nicht erkennbar.'));
-        else if (SELF_BILLED.has(code)) out.push(item('nr10', gs ? 'vorhanden' : 'prüfen', werte, gs ? 'Vom Leistungsempfänger ausgestellte Rechnung (Code ' + code + '); die Angabe „Gutschrift“ steht in einer Bemerkung.' : 'Vom Leistungsempfänger ausgestellte Rechnung (Code ' + code + '): die Angabe „Gutschrift“ ist Pflicht (§ 14 Abs. 4 Satz 1 Nr. 10 UStG); im strukturierten Teil (Bemerkung, BG-1) nicht gefunden – prüfen.'));
-        else if (code === '381') out.push(item('nr10', gs ? 'vorhanden' : 'nicht zutreffend', werte, gs ? 'Code 381 mit Bemerkung „Gutschrift“ (so die Zuordnung von KoSIT/FeRD für Gutschriften).' : 'Code 381 (Credit Note) ohne die Angabe „Gutschrift“: als Gutschrift im Sinne des § 14 Abs. 2 Satz 5 UStG – vom Leistungsempfänger ausgestellt – müsste das Dokument die Angabe „Gutschrift“ enthalten.'));
+        else if (SELF_BILLED.has(code)) out.push(item('nr10', gs ? 'vorhanden' : 'prüfen', werte, gs ? 'Vom Leistungsempfänger ausgestellte Rechnung (Code ' + code + '); die Angabe „Gutschrift“ steht in einer Bemerkung.' : 'Vom Leistungsempfänger ausgestellte Rechnung (Code ' + code + '): Die Angabe „Gutschrift“ ist Pflicht (§ 14 Abs. 4 Satz 1 Nr. 10 UStG); im strukturierten Teil (Bemerkung, BG-1) nicht gefunden – prüfen.'));
+        else if (code === '381') out.push(item('nr10', gs ? 'vorhanden' : 'nicht zutreffend', werte, gs ? 'Code 381 mit Bemerkung „Gutschrift“ (so die Zuordnung von KoSIT/FeRD für Gutschriften).' : 'Code 381 (Credit Note) ohne die Angabe „Gutschrift“: Als Gutschrift im Sinne des § 14 Abs. 2 Satz 5 UStG – vom Leistungsempfänger ausgestellt – müsste das Dokument die Angabe „Gutschrift“ enthalten.'));
         else out.push(item('nr10', 'nicht zutreffend', werte, 'Keine vom Leistungsempfänger ausgestellte Rechnung (Code ' + code + ').'));
       }
       // § 14 Abs. 5 Satz 2: final invoice after advance payments
       {
         const paid = nonZero('BT-113');
         const embedded = (fx.bt['BT-125'] || []).length;
-        const werte = [['BT-113', val('BT-113')], ['BT-115', val('BT-115')], ['BT-3', code], ['BT-22', has('BT-22') ? 'Bemerkung vorhanden' : ''], ['BG-24', embedded ? embedded + ' eingebettete Anlage(n)' : '']];
-        if (paid || code === '877' || code === '876') out.push(item('14-5', 'prüfen', werte, 'Mögliche Endrechnung' + (paid ? ' (bereits gezahlter Betrag BT-113)' : ' (Code ' + code + ')') + ': die vor Ausführung der Leistung vereinnahmten Teilentgelte und die darauf entfallenden Steuerbeträge sind abzusetzen (§ 14 Abs. 5 Satz 2 UStG). Nicht beanstandet wird bis 30.06.2030 die Absetzung als Summe in BT-113 mit den Einzelheiten zu den Teilentgelten in einer Bemerkung (BT-22) (BMF-Schreiben vom 15.10.2026, Rn. 3) oder die Absetzung in einem eingebetteten, unstrukturierten Anhang nach Abschn. 14.8 Abs. 8 Nr. 2 UStAE, auf den der strukturierte Teil ausdrücklich hinweist (Rn. 4). Im strukturierten Teil: ' + (has('BT-22') ? 'eine Bemerkung (BT-22)' : 'keine Bemerkung (BT-22)') + ', ' + (embedded ? embedded + ' eingebettete Anlage(n) (BG-24)' : 'keine eingebettete Anlage (BG-24)') + ' – prüfen.'));
+        const werte = [['BT-113', val('BT-113')], ['BT-115', val('BT-115')], ['BT-3', code], ['BT-22', has('BT-22') ? 'Bemerkung vorhanden' : ''], ['BG-24', embedded ? plural(embedded, 'eingebettete Anlage', 'eingebettete Anlagen') : '']];
+        if (paid || code === '877' || code === '876') out.push(item('14-5', 'prüfen', werte, 'Mögliche Endrechnung' + (paid ? ' (bereits gezahlter Betrag BT-113)' : ' (Code ' + code + ')') + ': Die vor Ausführung der Leistung vereinnahmten Teilentgelte und die darauf entfallenden Steuerbeträge sind abzusetzen, wenn über die Teilentgelte Rechnungen ausgestellt worden sind (§ 14 Abs. 5 Satz 2 UStG). Nicht beanstandet wird bis 30.06.2030 die Absetzung als Summe in BT-113 mit den Einzelheiten zu den Teilentgelten in einer Bemerkung (BT-22) (BMF-Schreiben vom 15.10.2026, Rn. 3) oder die Absetzung in einem eingebetteten, unstrukturierten Anhang nach Abschn. 14.8 Abs. 8 Nr. 2 UStAE, auf den der strukturierte Teil ausdrücklich hinweist (Rn. 4). In der E-Rechnung: ' + (has('BT-22') ? 'eine Bemerkung (BT-22)' : 'keine Bemerkung (BT-22)') + ', ' + (embedded ? plural(embedded, 'eingebettete Anlage', 'eingebettete Anlagen') + ' (BG-24)' : 'keine eingebettete Anlage (BG-24)') + ' – prüfen.'));
         else out.push(item('14-5', 'nicht zutreffend', [], 'Kein bereits gezahlter Betrag (BT-113) – keine Endrechnung erkennbar.'));
       }
       // § 14a UStG
@@ -389,7 +393,7 @@
         const ae = vat.filter((v) => v.cat === 'AE'), ic = vat.filter((v) => v.cat === 'K');
         const margin = MARGIN_CODES.test(reasons) || MARGIN_TEXT.test(reasons + '\n' + notes);
         const werte = [['BT-31', val('BT-31')], ['BT-48', val('BT-48')], ['BT-120/121', vat.filter((v) => v.reason || v.reasonCode).map((v) => [v.reasonCode, v.reason].filter(Boolean).join(' – ')).join(' | ')]];
-        if (!ae.length && !ic.length && !margin) out.push(item('14a', 'nicht zutreffend', [], 'Keine Steuerschuldnerschaft des Leistungsempfängers (AE), keine innergemeinschaftliche Lieferung (K) und kein Hinweis auf eine Sonderregelung (§ 25, § 25a UStG). Nicht erkennbar sind die Lieferung neuer Fahrzeuge (§ 14a Abs. 4) und das Dreiecksgeschäft (§ 14a Abs. 7).'));
+        if (!ae.length && !ic.length && !margin) out.push(item('14a', 'nicht zutreffend', [], 'Keine Steuerschuldnerschaft des Leistungsempfängers (AE), keine innergemeinschaftliche Lieferung (K) und kein Hinweis auf eine Sonderregelung (§ 25, § 25a UStG). Nicht erkennbar sind die Lieferung neuer Fahrzeuge (§ 14a Abs. 4 UStG) und das Dreiecksgeschäft (§ 14a Abs. 7 UStG).'));
         else {
           const fehlt = [], doubt = [];
           if (ae.some((v) => !(v.reason || v.reasonCode))) fehlt.push('Hinweis „Steuerschuldnerschaft des Leistungsempfängers“ (BT-120/BT-121)');
@@ -398,7 +402,7 @@
           if (ae.length && has('BT-55') && val('BT-55') !== 'DE' && !(has('BT-31') && has('BT-48'))) doubt.push('bei sonstigen Leistungen an Unternehmer im übrigen Gemeinschaftsgebiet die USt-IdNrn. beider Beteiligten (BT-31, BT-48; § 14a Abs. 1 UStG)');
           if (margin) doubt.push('bei Reiseleistungen bzw. Differenzbesteuerung der Hinweis „Sonderregelung für Reisebüros“ bzw. „Gebrauchtgegenstände/Sonderregelung“, „Kunstgegenstände/Sonderregelung“ oder „Sammlungsstücke und Antiquitäten/Sonderregelung“ (§ 14a Abs. 6 UStG)');
           if (ic.length) doubt.push('bei neuen Fahrzeugen deren Merkmale (§ 14a Abs. 4 UStG, BG-32) und beim Dreiecksgeschäft der Hinweis darauf und auf die Steuerschuldnerschaft des letzten Abnehmers (§ 14a Abs. 7 UStG)');
-          if (fehlt.length) out.push(item('14a', 'fehlt', werte, 'Fehlt: ' + fehlt.join(', ') + '.' + (doubt.length ? ' Außerdem prüfen: ' + doubt.join('; ') + '.' : '')));
+          if (fehlt.length) out.push(item('14a', 'fehlt', werte, 'Fehlende Angaben: ' + fehlt.join(', ') + '.' + (doubt.length ? ' Außerdem prüfen: ' + doubt.join('; ') + '.' : '')));
           else if (doubt.length && (margin || ae.length && has('BT-55') && val('BT-55') !== 'DE' && !(has('BT-31') && has('BT-48')) || ic.length && !has('BT-31'))) out.push(item('14a', 'prüfen', werte, 'Prüfen: ' + doubt.join('; ') + '.'));
           else out.push(item('14a', 'vorhanden', werte, doubt.length ? 'Gegebenenfalls zusätzlich: ' + doubt.join('; ') + '.' : ''));
         }
@@ -414,7 +418,7 @@
           const fehlt = missing(['BT-62', 'BT-63'], ['Name', 'USt-IdNr.']);
           if (!has('BT-66') && !has('BT-67')) fehlt.push('Ort und Postleitzahl (BT-66, BT-67)');
           const doubt = (has('BT-66') !== has('BT-67')) ? [has('BT-66') ? 'Postleitzahl (BT-67)' : 'Ort (BT-66)'] : [];
-          if (fehlt.length) out.push(item('22c', 'fehlt', werte, 'Fehlt: ' + fehlt.concat(doubt).join(', ') + ' des Fiskalvertreters (§ 22c Nr. 2 und 3 UStG).'));
+          if (fehlt.length) out.push(item('22c', 'fehlt', werte, 'Fehlende Angaben: ' + fehlt.concat(doubt).join(', ') + ' des Fiskalvertreters (§ 22c Nr. 2 und 3 UStG).'));
           else out.push(item('22c', 'prüfen', werte, (doubt.length ? 'Nicht angegeben: ' + doubt.join(', ') + '. ' : '') + 'Den Hinweis auf die Fiskalvertretung (§ 22c Nr. 1 UStG) prüft das Werkzeug nicht.'));
         }
       }
@@ -422,11 +426,11 @@
       {
         const werte = [['BT-25', val('BT-25')], ['BT-26', val('BT-26')], ['BT-3', code]];
         // BMF-Schreiben vom 15.10.2026, Rn. 20, 21; Abschn. 14.11 Abs. 2 Satz 7 UStAE in its version (correction by the recipient)
-        const art = 'Die Berichtigung ist als E-Rechnung mit einem Rechnungstyp für eine Berichtigung zu übermitteln; derzeit kann jede in der Praxis taugliche Art der Rechnungskorrektur mit einem tauglichen Rechnungstyp übermittelt werden, wenn sich aus ursprünglicher Rechnung und Berichtigungen die maßgeblichen Angaben klar und eindeutig ergeben (BMF-Schreiben vom 15.10.2026, Rn. 20 und 21).';
+        const art = 'Besteht eine Pflicht zur Ausstellung einer E-Rechnung, ist auch die Berichtigung als E-Rechnung mit einem Rechnungstyp für eine Berichtigung zu übermitteln; derzeit kann jede in der Praxis taugliche Art der Rechnungskorrektur mit einem tauglichen Rechnungstyp übermittelt werden, wenn sich aus ursprünglicher Rechnung und Berichtigungen die maßgeblichen Angaben klar und eindeutig ergeben (BMF-Schreiben vom 15.10.2026, Rn. 20 und 21).';
         const durchGutschrift = SELF_BILLED.has(code) ? ' Berichtigung durch Gutschrift des Leistungsempfängers: nur bei vorheriger Vereinbarung und spezifischer, eindeutiger Bezugnahme auf die ursprüngliche Rechnung (Abschn. 14.11 Abs. 2 Satz 7 UStAE in der Fassung des BMF-Schreibens vom 15.10.2026).' : '';
         if (CORRECTIVE.has(code)) out.push(item('31-5', has('BT-25') ? 'vorhanden' : 'prüfen', werte, (has('BT-25') ? art : 'Berichtigte Rechnung (Code ' + code + ') ohne Verweis auf die ursprüngliche Rechnung (BT-25). Die Berichtigung muss spezifisch und eindeutig auf die Rechnung bezogen sein (§ 31 Abs. 5 Satz 2 UStDV) – prüfen, ob der Bezug an anderer Stelle steht (z. B. in einer Bemerkung, BT-22). ' + art) + durchGutschrift));
         else if (code === '381' && has('BT-25')) out.push(item('31-5', 'vorhanden', werte, 'Gutschrift/Korrektur (Code 381) mit Bezug auf die Rechnung (BT-25). ' + art));
-        else out.push(item('31-5', 'nicht zutreffend', has('BT-25') ? werte : [], has('BT-25') ? 'Verweis auf vorausgegangene Rechnung(en) (BT-25), z. B. bei einer Endrechnung; keine berichtigte Rechnung (Code ' + code + ').' : 'Keine Rechnungsberichtigung.'));
+        else out.push(item('31-5', 'nicht zutreffend', has('BT-25') ? werte : [], has('BT-25') ? 'Verweis auf ' + ((fx.bt['BT-25'] || []).length === 1 ? 'eine vorausgegangene Rechnung' : (fx.bt['BT-25'] || []).length + ' vorausgegangene Rechnungen') + ' (BT-25), z. B. bei einer Endrechnung; keine berichtigte Rechnung (Code ' + code + ').' : 'Keine Rechnungsberichtigung.'));
       }
       return { items: out, kleinbetrag, kleinunternehmer };
     }
