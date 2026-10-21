@@ -41,6 +41,12 @@ const scenarios = JSON.parse(read('build/scenarios.json'));
 const rulesets = JSON.parse(read('build/rulesets.json'));
 // umsatzsteuerliche Einordnung: legal table + syntax binding (only the parts the program uses)
 const vatLegal = JSON.parse(read('legal/ust-pflichtangaben.json'));
+/** the dates of the BMF letters among the sources of the legal table: '15.10.2024, 15.10.2025 und 15.10.2026' */
+function vatLetters(legal) {
+  const dates = legal.quellen.map((q) => (/^BMF-Schreiben vom (\d{2}\.\d{2}\.\d{4})/.exec(q.titel) || [])[1]).filter(Boolean);
+  if (!dates.length) throw new Error('legal/ust-pflichtangaben.json: no BMF letter among the sources');
+  return dates.length === 1 ? dates[0] : dates.slice(0, -1).join(', ') + ' und ' + dates[dates.length - 1];
+}
 const btPaths = JSON.parse(read('build/bt-paths.json'));
 const vat = { legal: vatLegal, paths: { syntax: btPaths.syntax, groups: btPaths.groups } };
 const manifest = JSON.parse(read('build/STANDARDS_MANIFEST.json'));
@@ -115,7 +121,7 @@ const build = {
     { name: 'UN/CEFACT Cross Industry Invoice – XML-Schemata', version: 'D16B (100pD16B, „uncoupled“)', detail: 'über phax/ph-cii Commit ' + c8(cii), licence: 'UN/CEFACT-Hinweis (siehe Lizenzen)', sha256: xsd['CII-D16B'] ? xsd['CII-D16B'].sources[0].sha256 : null },
     { name: 'Peppol BIS Billing 3.0 (vollständig)', version: '3.0.21', detail: 'nicht eingebettet (keine Weitergabelizenz) – vom Benutzer zu laden; geprüfte Fassung: Commit ' + c8(pep), licence: 'OpenPeppol AISBL', sha256: importable['PEPPOL-UBL'].sha256 },
     { name: 'KoSIT XRechnung-Visualisierung – Syntaxbindung der Geschäftsbegriffe', version: xrv.describe || c8(xrv), detail: 'Pfad jedes BT/BG in UBL und CII, abgeleitet aus den KoSIT-Stylesheets über den Testkorpus (build/bt-paths.json); Commit ' + c8(xrv), licence: 'Apache-2.0', sha256: sha(read('build/bt-paths.json')) },
-    { name: 'Umsatzsteuerliche Einordnung (Deutschland)', version: 'Stand ' + vatLegal.stand, detail: '§ 14 Abs. 4, § 14a, § 22c UStG; §§ 31, 33 UStDV; BMF-Schreiben vom 15.10.2024 und 15.10.2025 (legal/ust-pflichtangaben.json, docs/UST-EINORDNUNG.md)', licence: 'EUPL-1.2', sha256: sha(read('legal/ust-pflichtangaben.json')) },
+    { name: 'Umsatzsteuerliche Einordnung (Deutschland)', version: 'Stand ' + vatLegal.stand, detail: '§§ 14, 14a, 15, 22c UStG; §§ 31, 33, 34a UStDV; BMF-Schreiben vom ' + vatLetters(vatLegal) + '; Zuordnungstabelle KoSIT/FeRD (legal/ust-pflichtangaben.json, docs/UST-EINORDNUNG.md)', licence: 'EUPL-1.2', sha256: sha(read('legal/ust-pflichtangaben.json')) },
   ],
   importable,
   schemas: Object.fromEntries(Object.keys(schemas).map((id) => [id, { stats: schemas[id].stats, sources: schemas[id].sources }])),

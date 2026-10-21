@@ -25,7 +25,7 @@ Original (Abschnitt „Nachweise“). Darüber hinaus ordnet der Prüfer jeden B
 | Factur-X / ZUGFeRD (MINIMUM, BASIC WL, BASIC, EN 16931, EXTENDED) | FNFE-MPE/FeRD-Schematron und -Schemata (über Mustangproject) | Factur-X 1.09.2 / ZUGFeRD 2.5.2 |
 | Hybride PDF (ZUGFeRD/Factur-X): eingebettete XML, PDF/A-3-Container (Anhang, AF, XMP, Dateiname) | ISO 19005-3, Factur-X/ZUGFeRD-Spezifikation; `docs/PDFA3-CHECKS.md` | – |
 | Peppol BIS Billing 3.0 (vollständig) | OpenPeppol – **nicht mitgeliefert**, die offiziellen `.sch` lädt der Benutzer selbst | geprüft: 3.0.21 |
-| Umsatzsteuerliche Einordnung jedes Befunds, Gesamturteil, Übersicht der Pflichtangaben (Deutschland) | §§ 14, 14a, 15, 22c, 27 Abs. 38 UStG, §§ 31, 33, 34a UStDV, BMF-Schreiben vom 15.10.2024, 15.10.2025, 15.10.2026, Zuordnung nach KoSIT/FeRD; `docs/UST-EINORDNUNG.md` | Rechtsstand 20.10.2026 |
+| Umsatzsteuerliche Einordnung jedes Befunds, Gesamturteil, Übersicht der Pflichtangaben (Deutschland) | §§ 14, 14a, 15, 22c, 27 Abs. 38 UStG, §§ 31, 33, 34a UStDV, BMF-Schreiben vom 15.10.2024, 15.10.2025, 15.10.2026 (am Original geprüft), Zuordnungstabelle von KoSIT/FeRD (von der Finanzverwaltung empfohlen, BMF-Schreiben vom 15.10.2026, Rn. 8); `docs/UST-EINORDNUNG.md` | Rechtsstand 21.10.2026 |
 | Rechnungsdaten (alle Geschäftsbegriffe der EN 16931) | Syntaxbindung der KoSIT-Visualisierung (`build/bt-paths.json`) | xrechnung-visualization v2026-08-31 |
 
 Rechtsstand (geprüft 2026-10-20, `xeinkauf.de/xrechnung/versionen-und-bundles`): XRechnung 3.0 ist seit
@@ -140,7 +140,7 @@ npx playwright install --with-deps chromium webkit firefox   # Browser vom offiz
 node tools/fetch-sources.cjs ext                    # alle Quellen in den gepinnten Ständen (SHA-256 geprüft)
 sh tools/merge-xrechnung-sch.sh ext                 # KoSIT-Merge-Schritt (XRechnung + Peppol-Whitelist)
 sh tools/compile-rules.sh ext                       # Regelwerke (byte-gleich mit build/schemas; Peppol nur lokal)
-node tools/build-standalone.cjs --version 0.3.0     # dist/E-Rechnung-Pruefer.html + dist/BUILD_INFO.json
+node tools/build-standalone.cjs --version 0.3.1     # dist/E-Rechnung-Pruefer.html + dist/BUILD_INFO.json
 node tools/verify-all.cjs --ext ext --skip pdfa-verapdf   # vollständige Prüfung (veraPDF: CI-Job pdfa-verapdf)
 node tools/verify-manifest.cjs ext --reports --strict     # Freigabe
 node tools/pruefer-cli.cjs rechnung.xml             # dieselbe Prüfung auf der Kommandozeile (JSON)

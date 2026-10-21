@@ -1,5 +1,29 @@
 # Changelog
 
+## 0.3.1 (2026-10-21)
+
+Umsatzsteuerliche Einordnung – Abgleich mit dem Original des BMF-Schreibens vom 15.10.2026
+- Das Original (GZ III C 5 - S 7287-a/00019/021/017, DOK COO.7005.100.3.15923106, 10 Seiten) ist vollständig gelesen;
+  0.3.0 stützte sich auf Fachveröffentlichungen. Entfernt: die Aussagen „Validierung keine rechtliche Voraussetzung,
+  kein staatliches Validierungswerkzeug, keine Empfehlung bestimmter Anwendungen“ – sie stehen weder in diesem noch
+  im Schreiben vom 15.10.2025. Der Hinweis zum Validierungsbericht gibt jetzt Rn. 35a des Schreibens vom 15.10.2025
+  wieder (gelesen in einer Kopie mit Kopfzeile, GZ und DOK).
+- Mit Randnummern belegt: Geschäftsregelfehler nur mit Bezug zu einer Pflichtangabe ein Inhaltsfehler, die Datei
+  bleibt umsatzsteuerlich prinzipiell eine E-Rechnung (Rn. 22, 23); Endrechnung mit BT-113 und BT-22 oder
+  eingebettetem Anhang bis 30.06.2030 (Rn. 3, 4); Empfehlung der Zuordnungstabelle von KoSIT und FeRD (Rn. 8, 9,
+  Fundstellen in `legal/ust-pflichtangaben.json`); allgemeiner Hinweis auf Entgeltminderungen (Rn. 15, 16);
+  Berichtigung (Rn. 20, 21); Leistungsbeschreibung (Rn. 10–12, nicht geprüft – Hinweis in der Übersicht).
+- Neu: Folge für den Vorsteuerabzug nach Abschn. 15.11 Abs. 3 Satz 2 UStAE n. F. im Urteil „Pflichtangabe fehlt“;
+  Hinweis zu Anlagen (BG-24: Pflichtangaben im strukturierten Teil, Anlagen bei Endrechnung, Bauleistung,
+  Bruttopreisrechnung – BMF-Schreiben vom 15.10.2025, Rn. 35; vom 15.10.2026, Rn. 4, 14, 19); bei einer möglichen
+  Endrechnung zeigt die Übersicht, ob eine Bemerkung (BT-22) und eingebettete Anlagen vorhanden sind; Berichtigung durch
+  Gutschrift des Leistungsempfängers (Abschn. 14.11 Abs. 2 Satz 7 UStAE n. F.).
+- § 14 Abs. 4 Satz 1 Nr. 6a UStG: erstmals für Rechnungen, die nach dem 31.12.2027 ausgestellt werden (§ 27 Abs. 41
+  UStG n. F.; übereinstimmend EY, Ebner Stolz, FGS, NWB) – unverändert umgesetzt, Quellenlage in
+  `docs/UST-EINORDNUNG.md`.
+- Tests: jedes im Programm zitierte BMF-Schreiben ist eine Quelle der Tabelle; jede zitierte Randnummer des
+  Schreibens vom 15.10.2026 existiert (1–28); neue Fälle für Anlagen, Endrechnung und Berichtigung.
+
 ## 0.3.0 (2026-10-20)
 
 Umsatzsteuerliche Einordnung (Deutschland) – `docs/UST-EINORDNUNG.md`

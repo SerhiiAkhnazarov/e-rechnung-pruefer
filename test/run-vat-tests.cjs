@@ -74,13 +74,22 @@ for (const [id, r] of Object.entries(legal.regeln)) {
 for (const k of ['format', 'pflicht', 'unbestimmt', 'ohne-bezug', 'zusatz', 'container']) check('legal: class ' + k, !!(legal.klassen[k] && legal.klassen[k].kurz && legal.klassen[k].text));
 for (const k of ['keine-xml', 'nicht-pruefbar', 'format', 'kein-profil', 'pflicht', 'luecke', 'technisch', 'ok', 'unvollstaendig']) check('legal: verdict ' + k, !!(legal.urteile[k] && legal.urteile[k].kurz && legal.urteile[k].text));
 check('legal: verdict texts luecke.zusatzTechnisch, ok.zusatzPruefen', !!(legal.urteile.luecke.zusatzTechnisch && legal.urteile.ok.zusatzPruefen));
-for (const k of ['geltung', 'uebergang', 'ausnahmen', 'ausland', 'kaeuferAusland', 'kleinbetrag', 'kleinunternehmer', 'reverseCharge', 'hybrid', 'kodierung', 'validierungsbericht']) check('legal: hint ' + k, typeof legal.hinweise[k] === 'string' && legal.hinweise[k].length > 20);
+for (const k of ['geltung', 'uebergang', 'ausnahmen', 'ausland', 'kaeuferAusland', 'kleinbetrag', 'kleinunternehmer', 'reverseCharge', 'hybrid', 'anlagen', 'kodierung', 'validierungsbericht']) check('legal: hint ' + k, typeof legal.hinweise[k] === 'string' && legal.hinweise[k].length > 20);
 const qids = legal.quellen.map((q) => q.id);
 check('legal: source ids unique', new Set(qids).size === qids.length);
 for (const q of legal.quellen) check('legal: source ' + q.id + ' has title and https URL', !!q.titel && /^https:\/\//.test(q.url));
 // every BMF reference in the texts names a letter that is listed as a source
 const texts = JSON.stringify([legal.klassen, legal.urteile, legal.hinweise, legal.regeln]);
 for (const m of new Set(texts.match(/BMF-Schreiben vom \d{2}\.\d{2}\.\d{4}/g))) check('legal: ' + m + ' listed as a source', legal.quellen.some((q) => q.titel.includes(m)));
+// the same for the texts of the checklist in the program
+const programText = fs.readFileSync(path.join(root, 'src', 'vat-relevance.js'), 'utf8');
+for (const m of new Set(programText.match(/BMF-Schreiben vom \d{2}\.\d{2}\.\d{4}/g))) check('program: ' + m + ' listed as a source', legal.quellen.some((q) => q.titel.includes(m)));
+// margin numbers cited for the letter of 15.10.2026 exist in it (Rn. 1 to 28; read from the original, docs/UST-EINORDNUNG.md)
+{
+  const cited = [];
+  for (const t of [texts, programText]) for (const m of t.matchAll(/BMF-Schreiben vom 15\.10\.2026, Rn\. ([0-9 ,undbis]+)/g)) cited.push(...m[1].match(/\d+/g).map(Number));
+  check('legal: margin numbers of the letter of 15.10.2026 cited (' + [...new Set(cited)].sort((a, b) => a - b).join(', ') + ') exist (1 to 28)', cited.length > 0 && cited.every((n) => n >= 1 && n <= 28));
+}
 
 // ---------------------------------------------------------------------------------------------------------------
 // 2. classification
@@ -271,6 +280,13 @@ S('commercial invoice 380', inv(), 'nr10', 'nicht zutreffend');
 S('paid amount (possible final invoice)', inv({ 'BT-113': ['500.00'] }), '14-5', 'prüfen');
 S('final construction invoice 877', inv({ 'BT-3': ['877'] }), '14-5', 'prüfen');
 S('paid amount 0', inv({ 'BT-113': ['0.00'] }), '14-5', 'nicht zutreffend');
+{
+  const hint = (m, id) => (vat.checklist(m).items.find((i) => i.id === id) || {}).hinweis || '';
+  const h1 = hint(inv({ 'BT-113': ['500.00'], 'BT-22': ['Abschlag 1 vom 01.08.2026: 500,00 EUR netto'], 'BT-122': ['Anlage 1'], 'BT-125': ['QUJD'] }), '14-5');
+  check('checklist 14-5: final invoice – BMF-Schreiben vom 15.10.2026, Rn. 3 und 4, note and embedded attachment named', h1.includes('Rn. 3 und 4') && h1.includes('eine Bemerkung (BT-22)') && h1.includes('1 eingebettete Anlage(n) (BG-24)'), h1);
+  const h2 = hint(inv({ 'BT-113': ['500.00'] }), '14-5');
+  check('checklist 14-5: final invoice without note and attachment says so', h2.includes('keine Bemerkung (BT-22)') && h2.includes('keine eingebettete Anlage (BG-24)'), h2);
+}
 // § 14a
 const AE = { cat: 'AE', rate: '0', taxable: '1000.00', tax: '0.00', reason: 'Steuerschuldnerschaft des Leistungsempfängers', reasonCode: 'VATEX-EU-AE' };
 const K = { cat: 'K', rate: '0', taxable: '1000.00', tax: '0.00', reason: 'Steuerfreie innergemeinschaftliche Lieferung', reasonCode: 'VATEX-EU-IC' };
@@ -293,6 +309,13 @@ S('corrected invoice 384 with reference', inv({ 'BT-3': ['384'], 'BT-25': ['R-20
 S('corrected invoice 384 without reference', inv({ 'BT-3': ['384'] }), '31-5', 'prüfen');
 S('credit note 381 with reference', inv({ 'BT-3': ['381'], 'BT-25': ['R-2026-000'] }), '31-5', 'vorhanden');
 S('invoice 380 referring to earlier invoices (final invoice)', inv({ 'BT-25': ['A-1'] }), '31-5', 'nicht zutreffend');
+S('self-billed corrective invoice 471 with reference', inv({ 'BT-3': ['471'], 'BT-25': ['G-2026-000'], 'BT-22': ['Gutschrift'] }), '31-5', 'vorhanden');
+{
+  const it = (m) => vat.checklist(m).items.find((i) => i.id === '31-5');
+  check('checklist 31-5: correction – BMF-Schreiben vom 15.10.2026, Rn. 20 und 21', it(inv({ 'BT-3': ['384'], 'BT-25': ['R-2026-000'] })).hinweis.includes('Rn. 20 und 21'));
+  check('checklist 31-5: correction by the recipient (self-billed 471) – Abschn. 14.11 Abs. 2 Satz 7 UStAE', it(inv({ 'BT-3': ['471'], 'BT-25': ['G-2026-000'] })).hinweis.includes('Abschn. 14.11 Abs. 2 Satz 7 UStAE'));
+  check('checklist 31-5: correction by the supplier (384) without the self-billing note', !it(inv({ 'BT-3': ['384'], 'BT-25': ['R-2026-000'] })).hinweis.includes('14.11'));
+}
 
 // verdicts
 const R = (o) => Object.assign({ kind: 'xml', xml: { encoding: 'UTF-8' }, syntax: 'UBL-Invoice', profile: { family: 'XRechnung', en16931: true }, legalStatus: 'e-invoice', allFindings: [], processingErrors: [], missingRuleSets: [], model: inv() }, o);
@@ -321,6 +344,10 @@ V('foreign seller: hint', R({ model: inv({ 'BT-40': ['FR'] }) }), 'ok', (v) => v
 V('foreign buyer: hint', R({ model: inv({ 'BT-55': ['AT'] }) }), 'ok', (v) => v.hinweise.includes(legal.hinweise.kaeuferAusland));
 V('hybrid invoice: hint', R({ kind: 'pdf' }), 'ok', (v) => v.hinweise.includes(legal.hinweise.hybrid));
 V('Kleinbetrag: hint', R({ model: inv({ 'BT-112': ['119.00'] }) }), 'ok', (v) => v.hinweise.includes(legal.hinweise.kleinbetrag));
+V('embedded attachment: hint (BMF-Schreiben vom 15.10.2025, Rn. 35; 15.10.2026, Rn. 4, 14, 19)', R({ model: inv({ 'BT-122': ['Anlage 1'], 'BT-125': ['QUJD'] }) }), 'ok', (v) => v.hinweise.includes(legal.hinweise.anlagen));
+V('external attachment link: hint', R({ model: inv({ 'BT-122': ['Anlage 1'], 'BT-124': ['https://example.org/anlage.pdf'] }) }), 'ok', (v) => v.hinweise.includes(legal.hinweise.anlagen));
+V('no attachment: no attachment hint', R({}), 'ok', (v) => !v.hinweise.includes(legal.hinweise.anlagen));
+V('attachment, but a format error (no e-invoice): no attachment hint', R({ allFindings: [err('cvc-x', 'format', [], 'xsd')], schematronSkipped: 'xsd-invalid', model: inv({ 'BT-122': ['Anlage 1'], 'BT-125': ['QUJD'] }) }), 'format', (v) => !v.hinweise.includes(legal.hinweise.anlagen));
 
 // ---------------------------------------------------------------------------------------------------------------
 // 4. the corpus

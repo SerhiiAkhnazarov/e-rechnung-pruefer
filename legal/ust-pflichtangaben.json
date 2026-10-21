@@ -1,7 +1,7 @@
 {
-  "_comment": "Umsatzsteuerliche Einordnung der Befunde (Deutschland). Daten, keine Programmlogik: welche Geschäftsbegriffe (BT/BG) der EN 16931 welche Rechnungspflichtangabe tragen, welche Regeln abweichend vom Wortlaut ihrer Meldung einzuordnen sind, und die Texte der Einordnung. Ausgewertet von src/vat-relevance.js; Herleitung und Grenzen: docs/UST-EINORDNUNG.md. Die Zuordnung folgt den Empfehlungen von KoSIT und FeRD zu den Pflichtangaben in einer E-Rechnung (Quelle „zuordnung“), auf die das BMF-Schreiben vom 15.10.2026 verweist, und ist bewusst vorsichtig: Ein Geschäftsbegriff, der eine Pflichtangabe trägt oder zu ihrer Berechnung gehört, wird ihr zugeordnet; im Zweifel gilt ein Befund als „prüfen“, nie als „unbeachtlich“.",
+  "_comment": "Umsatzsteuerliche Einordnung der Befunde (Deutschland). Daten, keine Programmlogik: welche Geschäftsbegriffe (BT/BG) der EN 16931 welche Rechnungspflichtangabe tragen, welche Regeln abweichend vom Wortlaut ihrer Meldung einzuordnen sind, und die Texte der Einordnung. Ausgewertet von src/vat-relevance.js; Herleitung und Grenzen: docs/UST-EINORDNUNG.md. Die Zuordnung folgt den Empfehlungen von KoSIT und FeRD zu den Pflichtangaben in einer E-Rechnung (Quelle „zuordnung“), deren Zuordnungstabelle die Finanzverwaltung zu verwenden empfiehlt (BMF-Schreiben vom 15.10.2026, Rn. 8 und 9), und ist bewusst vorsichtig: Ein Geschäftsbegriff, der eine Pflichtangabe trägt oder zu ihrer Berechnung gehört, wird ihr zugeordnet; im Zweifel gilt ein Befund als „prüfen“, nie als „unbeachtlich“.",
   "version": 2,
-  "stand": "2026-10-20",
+  "stand": "2026-10-21",
   "rechtsraum": "Deutschland",
   "quellen": [
     {
@@ -51,7 +51,7 @@
     },
     {
       "id": "jstg2024",
-      "titel": "Jahressteuergesetz 2024 vom 2.12.2024 (BGBl. 2024 I Nr. 387): § 14 Abs. 4 Satz 1 Nr. 6a UStG – Angabe „Versteuerung nach vereinnahmten Entgelten“ – mit Wirkung ab 1.1.2028 (die Fassung auf gesetze-im-internet.de zeigt den heute geltenden Text)",
+      "titel": "Jahressteuergesetz 2024 vom 2.12.2024 (BGBl. 2024 I Nr. 387): § 14 Abs. 4 Satz 1 Nr. 6a UStG – Angabe „Versteuerung nach vereinnahmten Entgelten“ – erstmals für Rechnungen, die nach dem 31.12.2027 ausgestellt werden (§ 27 Abs. 41 UStG n. F.); die Fassung auf gesetze-im-internet.de zeigt den heute geltenden Text",
       "url": "https://www.gesetze-im-internet.de/ustg_1980/__14.html"
     },
     {
@@ -61,23 +61,23 @@
     },
     {
       "id": "bmf2025",
-      "titel": "BMF-Schreiben vom 15.10.2025, GZ III C 2 - S 7287-a/00019/007/243, BStBl 2025 I S. 1806 (ergänzt das Schreiben vom 15.10.2024): Rn. 6a (Formatfehler: keine E-Rechnung, sondern sonstige Rechnung), Rn. 6b (Geschäftsregelfehler), Rn. 35 (alle Pflichtangaben im strukturierten Teil; ein bloßer Verweis auf eine Anlage genügt nicht), Rn. 35a (Verstoß gegen Pflichtangaben = nicht ordnungsmäßige Rechnung; Geschäftsregelfehler zu anderen Inhalten sind umsatzsteuerlich unbeachtlich; Verlass auf das Ergebnis einer geeigneten Validierungsanwendung bei Wahrung der Sorgfaltspflichten)",
+      "titel": "BMF-Schreiben vom 15.10.2025, GZ III C 2 - S 7287-a/00019/007/243, DOK COO.7005.100.4.13163130, BStBl 2025 I S. 1806 (ergänzt das Schreiben vom 15.10.2024): Rn. 6a (Formatfehler: keine E-Rechnung, sondern sonstige Rechnung; prüfbar mit einer geeigneten Validierungsanwendung), Rn. 6b (Geschäftsregelfehler), Rn. 35 (alle Pflichtangaben im strukturierten Teil; ein bloßer Verweis auf eine Anlage oder ein Link auf ein externes Ziel genügt nicht; ergänzende Angaben in einem enthaltenen Anhang), Rn. 35a (Verstoß gegen die Pflichtangaben = nicht ordnungsmäßige Rechnung; Geschäftsregelfehler zu anderen Inhalten sind umsatzsteuerlich unbeachtlich; eine Validierung ersetzt nicht die Prüfung durch den Empfänger; bei Beachtung der Sorgfaltspflichten Verlass auf das technische Ergebnis einer geeigneten Validierungsanwendung; Aufbewahrung des Validierungsberichts zum Nachweis)",
       "url": "https://www.bundesfinanzministerium.de/Content/DE/Downloads/BMF_Schreiben/Steuerarten/Umsatzsteuer/Umsatzsteuer-Anwendungserlass/2025-10-15-einfuehrung-obligatorische-e-rechnung.html"
     },
     {
       "id": "bmf2026",
-      "titel": "BMF-Schreiben vom 15.10.2026, GZ III C 5 - S 7287-a/00019/021/017 (ergänzende Regelungen zur E-Rechnung): Verweis auf die Zuordnungstabellen von KoSIT und FeRD; Geschäftsregelfehler nur bei Bezug zu einer Pflichtangabe umsatzsteuerlich von Bedeutung; Validierung keine rechtliche Voraussetzung, kein staatliches Validierungswerkzeug und keine Empfehlung bestimmter Anwendungen; Endrechnung: Absetzung der Teilentgelte in BT-113 mit Einzelheiten in BT-22 oder in einer eingebetteten, ausdrücklich referenzierten Anlage (nicht beanstandet bis 30.06.2030); Nichtbeanstandung für E-Rechnungen bis 31.12.2026 nach den früheren Schreiben. Inhalt nach Fachveröffentlichungen vom 16.10.2026 (Haufe, PwC, Baker Tilly); der Wortlaut des Schreibens war für die Prüfung nicht abrufbar.",
-      "url": "https://www.bundesfinanzministerium.de/Content/DE/Downloads/BMF_Schreiben/Steuerarten/Umsatzsteuer/Umsatzsteuer-Anwendungserlass/2026-10-15-obligatorische-elektronische-rechnung.pdf",
-      "sekundaer": [
-        "https://www.haufe.de/steuern/finanzverwaltung/bmf-ergaenzende-regelungen-zur-e-rechnung_164_700638.html",
-        "https://blogs.pwc.de/de/steuern-und-recht/article/257354/bmf-ergaenzende-regelungen-zur-elektronischen-rechnung"
-      ]
+      "titel": "BMF-Schreiben vom 15.10.2026, GZ III C 5 - S 7287-a/00019/021/017, DOK COO.7005.100.3.15923106 (ergänzende Regelungen zu den Schreiben vom 15.10.2024 und 15.10.2025): Rn. 3 und 4 (Endrechnung: Absetzung der Teilentgelte als Summe in BT-113 mit den Einzelheiten in BT-22 oder in einem eingebetteten, unstrukturierten Anhang, auf den der strukturierte Teil ausdrücklich hinweist – nicht beanstandet bis 30.06.2030), Rn. 8 und 9 (die Finanzverwaltung empfiehlt, die Zuordnungstabelle von KoSIT und FeRD in der jeweils aktuellen Version zugrunde zu legen), Rn. 10 bis 12 (Leistungsbeschreibung: Leistungsart, Leistungsumfang, Leistungsgehalt und ggf. Leistungsort eindeutig im strukturierten Teil), Rn. 13 und 14 (Bauleistungen), Rn. 15 und 16 (Entgeltminderungen), Rn. 17 bis 19 (Bruttopreisrechnungen), Rn. 20 und 21 (Berichtigung als E-Rechnung), Rn. 22 und 23 (ein Geschäftsregelfehler hat nur dann einen Inhaltsfehler zur Folge, wenn er eine Pflichtangabe betrifft; umsatzsteuerlich bleibt die Datei prinzipiell eine E-Rechnung), Abschnitt II Nr. 3 (Abschn. 14.11 Abs. 2 Satz 7 UStAE: Berichtigung durch Gutschrift), Abschnitt II Nr. 4 (Abschn. 15.11 Abs. 3 Satz 2 UStAE: Vorsteuerabzug nur mit den vollständigen Angaben nach § 14 Abs. 4 Satz 1 Nr. 1 bis 8 und 10 UStG), Anwendungsregelung (für bis 31.12.2026 ausgestellte E-Rechnungen nach den früheren Schreiben werden die zusätzlichen Vorgaben – auch für den Vorsteuerabzug – nicht beanstandet)",
+      "url": "https://www.bundesfinanzministerium.de/Content/DE/Downloads/BMF_Schreiben/Steuerarten/Umsatzsteuer/Umsatzsteuer-Anwendungserlass/2026-10-15-obligatorische-elektronische-rechnung.html"
     },
     {
       "id": "zuordnung",
-      "titel": "KoSIT / FeRD: Empfehlungen zu Pflichtangaben in einer E-Rechnung gemäß UStG – Zuordnung der Pflichtangaben zu den Geschäftsbegriffen der EN 16931 (Online-Fassung, geändert 18.09.2026; PDF-Fassung vom 25.07.2025)",
+      "titel": "KoSIT / FeRD: Empfehlungen zu Pflichtangaben in einer E-Rechnung gemäß UStG – Zuordnungstabelle der Pflichtangaben zu den Geschäftsbegriffen der EN 16931 (Online-Fassung, geändert 18.09.2026; PDF-Fassung vom 25.07.2025). Die Finanzverwaltung empfiehlt, sie in der jeweils aktuellen Version zugrunde zu legen (BMF-Schreiben vom 15.10.2026, Rn. 8; Fundstellen nach Rn. 9 in „fundstellen“)",
       "url": "https://xeinkauf.de/xrechnung/ustg/",
-      "pdf": "https://www.ferd-net.de/fileadmin/user_upload/FeRD/Downloads/Empfehlungen_zu_Pflichtangaben_in_einer_E-Rechnung/Empfehlungen_Pflichtangaben_E-Rechnung_gem_UStG_20250725.pdf"
+      "pdf": "https://www.ferd-net.de/fileadmin/user_upload/FeRD/Downloads/Empfehlungen_zu_Pflichtangaben_in_einer_E-Rechnung/Empfehlungen_Pflichtangaben_E-Rechnung_gem_UStG_20250725.pdf",
+      "fundstellen": [
+        "https://xeinkauf.de/aktuelles/xrechnung/pflichtangaben-nach-ustg-en16931",
+        "https://www.ferd-net.de/faqs/pflichtangaben-in-e-rechnungen"
+      ]
     },
     {
       "id": "bfh2008",
@@ -203,7 +203,7 @@
       ],
       "kleinbetrag": true,
       "gueltigAb": "2028-01-01",
-      "hinweis": "Eingefügt durch das Jahressteuergesetz 2024 mit Wirkung ab 1.1.2028; Zuordnung nach KoSIT/FeRD: Bemerkung (BG-1) und BT-7 oder BT-8."
+      "hinweis": "Eingefügt durch das Jahressteuergesetz 2024; erstmals für Rechnungen, die nach dem 31.12.2027 ausgestellt werden; Zuordnung nach KoSIT/FeRD: Bemerkung (BG-1) und BT-7 oder BT-8."
     },
     {
       "id": "nr7",
@@ -374,7 +374,7 @@
           "angaben": [
             "14-5"
           ],
-          "grund": "mit bereits gezahltem Betrag (BT-113) kann die Rechnung eine Endrechnung sein, in der die vereinnahmten Teilentgelte abzusetzen sind (§ 14 Abs. 5 Satz 2 UStG; BMF-Schreiben vom 15.10.2026: Absetzung über BT-113)"
+          "grund": "mit bereits gezahltem Betrag (BT-113) kann die Rechnung eine Endrechnung sein, in der die vereinnahmten Teilentgelte abzusetzen sind (§ 14 Abs. 5 Satz 2 UStG; BMF-Schreiben vom 15.10.2026, Rn. 3: Absetzung als Summe über BT-113)"
         }
       ],
       "grund": "prüft den fälligen Zahlungsbetrag (BT-115 = BT-112 − BT-113 + BT-114); ohne bereits gezahlten Betrag ist der Zahlbetrag keine Pflichtangabe"
@@ -399,7 +399,7 @@
           "angaben": [
             "14-5"
           ],
-          "grund": "mit bereits gezahltem Betrag (BT-113) kann die Rechnung eine Endrechnung sein, in der die vereinnahmten Teilentgelte abzusetzen sind (§ 14 Abs. 5 Satz 2 UStG; BMF-Schreiben vom 15.10.2026: Absetzung über BT-113)"
+          "grund": "mit bereits gezahltem Betrag (BT-113) kann die Rechnung eine Endrechnung sein, in der die vereinnahmten Teilentgelte abzusetzen sind (§ 14 Abs. 5 Satz 2 UStG; BMF-Schreiben vom 15.10.2026, Rn. 3: Absetzung als Summe über BT-113)"
         }
       ],
       "grund": "prüft den fälligen Zahlungsbetrag einschließlich Fremdforderungen (XRechnung Extension), wie BR-CO-16"
@@ -834,7 +834,7 @@
     },
     "pflicht": {
       "kurz": "Pflichtangabe",
-      "text": "Die Regel betrifft nach der Zuordnung des Werkzeugs eine umsatzsteuerliche Pflichtangabe (oder eine Größe, aus der sie sich ergibt). Fehlt die Angabe oder ist sie unrichtig, ist die Rechnung nicht ordnungsmäßig (BMF-Schreiben vom 15.10.2025, Rn. 35a) – prüfen und gegebenenfalls eine Berichtigung (§ 31 Abs. 5 UStDV) anfordern."
+      "text": "Die Regel betrifft nach der Zuordnung des Werkzeugs eine umsatzsteuerliche Pflichtangabe (oder eine Größe, aus der sie sich ergibt). Ein Geschäftsregelfehler, der eine Pflichtangabe betrifft, hat einen Inhaltsfehler zur Folge (BMF-Schreiben vom 15.10.2026, Rn. 22): Fehlt die Angabe oder ist sie unrichtig, ist die Rechnung nicht ordnungsmäßig (BMF-Schreiben vom 15.10.2025, Rn. 35a) – prüfen und gegebenenfalls eine Berichtigung (§ 31 Abs. 5 UStDV) anfordern."
     },
     "unbestimmt": {
       "kurz": "prüfen",
@@ -842,7 +842,7 @@
     },
     "ohne-bezug": {
       "kurz": "keine Pflichtangabe",
-      "text": "Die Regel betrifft nach der Zuordnung des Werkzeugs keine umsatzsteuerliche Pflichtangabe. Geschäftsregelfehler zu anderen Inhalten als den Rechnungspflichtangaben sind umsatzsteuerlich unbeachtlich (BMF-Schreiben vom 15.10.2025, Rn. 35a; BMF-Schreiben vom 15.10.2026); technisch ist die Rechnung dennoch fehlerhaft (öffentliche Auftraggeber können sie zurückweisen)."
+      "text": "Die Regel betrifft nach der Zuordnung des Werkzeugs keine umsatzsteuerliche Pflichtangabe. Ein Geschäftsregelfehler hat nur dann einen Inhaltsfehler zur Folge, wenn er eine umsatzsteuerliche Pflichtangabe betrifft (BMF-Schreiben vom 15.10.2026, Rn. 22); Geschäftsregelfehler zu anderen Inhalten sind umsatzsteuerlich unbeachtlich (BMF-Schreiben vom 15.10.2025, Rn. 35a). Technisch ist die Rechnung dennoch fehlerhaft (öffentliche Auftraggeber können sie zurückweisen)."
     },
     "zusatz": {
       "kurz": "keine Pflichtangabe",
@@ -876,16 +876,16 @@
     },
     "luecke": {
       "kurz": "Pflichtangabe fehlt",
-      "text": "E-Rechnung, aber im strukturierten Teil fehlt mindestens eine Rechnungspflichtangabe (siehe „Pflichtangaben“), ohne dass eine Geschäftsregel zu dieser Angabe verletzt ist. Alle Pflichtangaben müssen im strukturierten Teil enthalten sein (BMF-Schreiben vom 15.10.2025, Rn. 35). Bei einem Verstoß gegen die Pflichtangaben der §§ 14 Abs. 4 und 14a UStG liegt eine nicht ordnungsmäßige Rechnung vor (BMF-Schreiben vom 15.10.2025, Rn. 35a); der Vorsteuerabzug setzt eine nach §§ 14, 14a UStG ausgestellte Rechnung voraus (§ 15 Abs. 1 Satz 1 Nr. 1 Satz 2 UStG). Die Angaben prüfen und gegebenenfalls eine berichtigte E-Rechnung anfordern (§ 31 Abs. 5 UStDV); die Berichtigung wirkt unter den übrigen Voraussetzungen auf den Zeitpunkt der ursprünglichen Ausstellung zurück (BMF-Schreiben vom 15.10.2024, Rz. 49).",
+      "text": "E-Rechnung, aber im strukturierten Teil fehlt mindestens eine Rechnungspflichtangabe (siehe „Pflichtangaben“), ohne dass eine Geschäftsregel zu dieser Angabe verletzt ist. Alle Pflichtangaben müssen im strukturierten Teil enthalten sein (BMF-Schreiben vom 15.10.2025, Rn. 35). Bei einem Verstoß gegen die Pflichtangaben der §§ 14 Abs. 4 und 14a UStG liegt eine nicht ordnungsmäßige Rechnung vor (BMF-Schreiben vom 15.10.2025, Rn. 35a); der Vorsteuerabzug setzt eine nach §§ 14, 14a UStG ausgestellte Rechnung voraus (§ 15 Abs. 1 Satz 1 Nr. 1 Satz 2 UStG); Rechnungen, die die Angaben nach § 14 Abs. 4 Satz 1 Nr. 1 bis 8 und 10 UStG nicht vollständig enthalten, berechtigen nicht zum Vorsteuerabzug, es sei denn, sie werden nachträglich vervollständigt (Abschn. 15.11 Abs. 3 Satz 2 UStAE in der Fassung des BMF-Schreibens vom 15.10.2026). Die Angaben prüfen und gegebenenfalls eine berichtigte E-Rechnung anfordern (§ 31 Abs. 5 UStDV); die Berichtigung wirkt unter den übrigen Voraussetzungen auf den Zeitpunkt der ursprünglichen Ausstellung zurück (BMF-Schreiben vom 15.10.2024, Rz. 49).",
       "zusatzTechnisch": "Daneben bestehen technische Fehler ohne Bezug zu einer Pflichtangabe."
     },
     "technisch": {
       "kurz": "Fehler ohne USt-Bedeutung",
-      "text": "E-Rechnung. Nach der Zuordnung des Werkzeugs betrifft keiner der Fehler eine umsatzsteuerliche Pflichtangabe; Geschäftsregelfehler zu anderen Inhalten als den Rechnungspflichtangaben sind umsatzsteuerlich unbeachtlich (BMF-Schreiben vom 15.10.2025, Rn. 35a; BMF-Schreiben vom 15.10.2026). Technisch ist die Rechnung fehlerhaft; ob sie angenommen wird, ist eine Frage der Vereinbarung mit dem Aussteller (öffentliche Auftraggeber können sie zurückweisen)."
+      "text": "E-Rechnung. Nach der Zuordnung des Werkzeugs betrifft keiner der Fehler eine umsatzsteuerliche Pflichtangabe. Umsatzsteuerlich ist eine Datei mit Geschäftsregelfehlern (aber ohne Formatfehler) prinzipiell eine E-Rechnung; dass sie technisch nicht der EN 16931 entspricht, ist für umsatzsteuerliche Fragen – z. B. den Vorsteuerabzug – nicht maßgebend (BMF-Schreiben vom 15.10.2026, Rn. 22 und 23; Geschäftsregelfehler zu anderen Inhalten sind umsatzsteuerlich unbeachtlich: BMF-Schreiben vom 15.10.2025, Rn. 35a). Ordnungsmäßig ist sie, wenn sie die Pflichtangaben richtig und vollständig enthält (BMF-Schreiben vom 15.10.2026, Rn. 23). Ob sie angenommen wird, ist eine Frage der Vereinbarung mit dem Aussteller (öffentliche Auftraggeber können sie zurückweisen)."
     },
     "ok": {
       "kurz": "Keine Format- oder Regelfehler",
-      "text": "E-Rechnung ohne Format- und Geschäftsregelfehler. Die inhaltliche Prüfung bleibt Aufgabe des Empfängers: Pflichtangaben können auch ohne Regelverstoß fehlen oder unrichtig sein (BMF-Schreiben vom 15.10.2025, Rn. 35a).",
+      "text": "E-Rechnung ohne Format- und Geschäftsregelfehler. Die inhaltliche Prüfung bleibt Aufgabe des Empfängers: Pflichtangaben können auch ohne Regelverstoß fehlen oder unrichtig sein, und eine Validierung ersetzt nicht die Prüfung der Rechnung auf Vollständigkeit und Richtigkeit (BMF-Schreiben vom 15.10.2025, Rn. 35a).",
       "zusatzPruefen": "Einzelne Pflichtangaben sind zu prüfen (siehe „Pflichtangaben“)."
     },
     "unvollstaendig": {
@@ -894,7 +894,7 @@
     }
   },
   "hinweise": {
-    "geltung": "Einordnung nach deutschem Umsatzsteuerrecht (§§ 14, 14a, 15 UStG, UStDV; BMF-Schreiben vom 15.10.2024, 15.10.2025 und 15.10.2026; Zuordnung der Pflichtangaben zu den Geschäftsbegriffen nach den Empfehlungen von KoSIT und FeRD). Sie ersetzt keine Steuerberatung und keine inhaltliche Rechnungsprüfung.",
+    "geltung": "Einordnung nach deutschem Umsatzsteuerrecht (§§ 14, 14a, 15 UStG, UStDV; BMF-Schreiben vom 15.10.2024, 15.10.2025 und 15.10.2026; Zuordnung der Pflichtangaben zu den Geschäftsbegriffen nach der Zuordnungstabelle von KoSIT und FeRD, deren Verwendung die Finanzverwaltung empfiehlt – BMF-Schreiben vom 15.10.2026, Rn. 8). Sie ersetzt keine Steuerberatung und keine inhaltliche Rechnungsprüfung.",
     "uebergang": "Übergangsregelung (§ 27 Abs. 38 UStG): Für Umsätze, die vor dem 1.1.2027 ausgeführt werden, darf bis zum 31.12.2026 statt einer E-Rechnung eine Papierrechnung oder – mit Zustimmung des Empfängers – eine sonstige elektronische Rechnung ausgestellt werden; für Umsätze im Jahr 2027 bis zum 31.12.2027, wenn der Gesamtumsatz des Ausstellers (§ 19 Abs. 2 UStG) im Vorjahr höchstens 800 000 Euro betrug; im EDI-Verfahren mit Zustimmung des Empfängers für Umsätze bis Ende 2027. Der Empfänger verliert den Vorsteuerabzug nicht allein wegen des falschen Formats, wenn er annehmen durfte, dass der Aussteller die Übergangsregelung nutzen darf (BMF-Schreiben vom 15.10.2024, Rz. 59).",
     "ausnahmen": "Keine E-Rechnung ist vorgeschrieben bei Kleinbetragsrechnungen bis 250 Euro, Fahrausweisen und Rechnungen von Kleinunternehmern (§§ 33, 34, 34a UStDV), bei steuerfreien Umsätzen nach § 4 Nr. 8 bis 29 UStG und wenn Leistender oder Leistungsempfänger nicht im Inland ansässig ist (§ 14 Abs. 2 Satz 2 Nr. 1 UStG).",
     "ausland": "Der Verkäufer hat keinen Ländercode DE (BT-40). Eine E-Rechnungspflicht besteht nur, wenn Leistender und Leistungsempfänger im Inland ansässig sind (§ 14 Abs. 2 Satz 2 Nr. 1 UStG); schuldet der Leistungsempfänger die Steuer nach § 13b UStG und ist der Leistende im Inland nicht ansässig, gelten für die Rechnung die Vorschriften seines Mitgliedstaats (§ 14 Abs. 7 UStG; Art. 219a MwStSystRL). Die Einordnung gilt nur, soweit deutsches Recht anzuwenden ist.",
@@ -903,7 +903,8 @@
     "kleinunternehmer": "Rechnung eines Kleinunternehmers (§ 19 UStG, Hinweis in BT-120): Nach § 34a UStDV genügen Name und Anschrift beider Beteiligten, Steuernummer, USt-IdNr. oder Kleinunternehmer-Identifikationsnummer, Ausstellungsdatum, Menge und Art der Leistung, das Entgelt als Gesamtbetrag mit Hinweis auf die Steuerbefreiung und bei Gutschriften die Angabe „Gutschrift“; Rechnungsnummer und Leistungszeitpunkt sind nicht erforderlich. Solche Rechnungen dürfen stets als sonstige Rechnung übermittelt werden.",
     "reverseCharge": "Steuerschuldnerschaft des Leistungsempfängers (Kategorie AE): Für den Vorsteuerabzug nach § 15 Abs. 1 Satz 1 Nr. 4 UStG ist keine Rechnung erforderlich.",
     "hybrid": "Hybride Rechnung (PDF mit XML): Maßgeblich ist der XML-Teil (BMF-Schreiben vom 15.10.2024, Rz. 31). Zeigt der PDF-Teil abweichende Rechnungsdaten, kann er eine weitere (sonstige) Rechnung darstellen (Rz. 32, § 14c UStG); der Vorsteuerabzug richtet sich nur nach dem strukturierten Teil. Ob PDF und XML übereinstimmen, prüft das Werkzeug nicht.",
+    "anlagen": "Die Rechnung enthält Anlagen (BG-24). Alle Pflichtangaben müssen im strukturierten Teil stehen; ein bloßer Verweis auf eine Anlage oder ein Link auf ein externes Ziel genügt nicht, ergänzende Angaben dürfen in einem enthaltenen Anhang stehen (BMF-Schreiben vom 15.10.2025, Rn. 35). Eingebettete Anlagen mit den Einzelheiten werden derzeit bei Endrechnungen (bis 30.06.2030), Bauleistungen (im strukturierten Teil die Gewerke mit Summen) und Bruttopreisrechnungen (bis 31.12.2027) nicht beanstandet, wenn der strukturierte Teil ausdrücklich bzw. eindeutig auf sie hinweist (BMF-Schreiben vom 15.10.2026, Rn. 4, 14 und 19). Den Inhalt der Anlagen prüft das Werkzeug nicht.",
     "kodierung": "Die Zeichenkodierung ist nach den XML-Regeln lesbar, XRechnung verlangt jedoch UTF-8 (Spezifikation XRechnung 3.0.2, Abschnitt 6.1). Die Einordnung dieses Verstoßes als Formatfehler ist eine Einschätzung des Werkzeugs; der KoSIT-Validator meldet ihn nicht.",
-    "validierungsbericht": "Die Validierung ist keine rechtliche Voraussetzung einer E-Rechnung; das BMF stellt kein Validierungswerkzeug bereit und empfiehlt keine bestimmten Anwendungen (BMF-Schreiben vom 15.10.2026). Wer eine geeignete Validierungsanwendung einsetzt, darf sich bei Wahrung der Sorgfaltspflichten auf deren technisches Ergebnis verlassen und sollte den Validierungsbericht aufbewahren (BMF-Schreiben vom 15.10.2025, Rn. 35a). Dieses Protokoll dokumentiert die Prüfung; ob das Werkzeug für Ihre Zwecke geeignet ist, beurteilen Sie selbst (die Übereinstimmung mit dem KoSIT-Validator ist im Quellcode-Repository nachgewiesen)."
+    "validierungsbericht": "Eine Validierung ersetzt nicht die Pflicht des Empfängers, die Rechnung auf Vollständigkeit und Richtigkeit zu prüfen, sondern unterstützt ihn dabei; bei Beachtung der Sorgfaltspflichten eines ordentlichen Kaufmanns kann er sich auf das technische Ergebnis einer Validierung (Format und Geschäftsregeln) durch eine geeignete Validierungsanwendung verlassen; zum Nachweis bietet es sich an, den Validierungsbericht aufzubewahren (BMF-Schreiben vom 15.10.2025, Rn. 35a). Dieses Protokoll dokumentiert die Prüfung; ob das Werkzeug für Ihre Zwecke geeignet ist, beurteilen Sie selbst (die Übereinstimmung mit dem KoSIT-Validator ist im Quellcode-Repository nachgewiesen)."
   }
 }

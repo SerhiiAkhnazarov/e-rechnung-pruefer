@@ -321,7 +321,7 @@
         const werte = [['BG-25', lines.length + ' Position(en)'], ['BT-153', lines.slice(0, 3).map((l) => l.name).filter(Boolean).join(' | ') + (lines.length > 3 ? ' | …' : '')]];
         if (!lines.length) out.push(item('nr5', 'fehlt', werte, 'Keine Rechnungsposition (BG-25).'));
         else if (noName || noQty) out.push(item('nr5', 'fehlt', werte, [noName ? noName + ' Position(en) ohne Bezeichnung (BT-153)' : '', noQty ? noQty + ' Position(en) ohne Menge (BT-129)' : ''].filter(Boolean).join(', ') + '.'));
-        else out.push(item('nr5', 'vorhanden', werte, 'Ob die Bezeichnung handelsüblich und hinreichend genau ist (Art, Umfang und Gehalt der Leistung), prüft das Werkzeug nicht; ein bloßer Verweis auf einen Vertrag genügt nicht.'));
+        else out.push(item('nr5', 'vorhanden', werte, 'Ob die Leistungsbeschreibung die Kontrollfunktion erfüllt – Leistungsart, Leistungsumfang, Leistungsgehalt und ggf. Leistungsort eindeutig im strukturierten Teil (BMF-Schreiben vom 15.10.2026, Rn. 10 bis 12) –, prüft das Werkzeug nicht; ein bloßer Verweis auf eine Anlage genügt nicht (BMF-Schreiben vom 15.10.2025, Rn. 35).'));
       }
       // Nr. 6: time of supply (BT-72, BG-14, BG-26); BT-7 only for the receipt of advance payments (Abs. 5 Satz 1)
       {
@@ -349,7 +349,7 @@
         const skonto = fx.skonto.filter((s) => s.type === 'SKONTO');
         if (!vat.length) out.push(item('nr7', 'fehlt', [['BG-23', '']], 'Keine Umsatzsteuer-Aufschlüsselung (BG-23).'));
         else if (vat.some((v) => !v.taxable || !v.cat)) out.push(item('nr7', 'fehlt', [['BG-23', rows.join(' | ')]], 'Aufschlüsselung ohne Bemessungsgrundlage (BT-116) oder Kategorie (BT-118).'));
-        else out.push(item('nr7', 'vorhanden', [['BG-23', rows.join(' | ')], ['BT-20', skonto.length ? 'Skonto: ' + skonto.map((s) => s.days + ' Tage ' + s.percent + ' %').join(', ') : '']], 'Im Voraus vereinbarte Minderungen (z. B. Skonto, Boni, Rabatte) müssen angegeben sein, sofern sie nicht bereits im Entgelt berücksichtigt sind; ein allgemeiner Hinweis auf die Vereinbarung genügt (z. B. in BT-20).'));
+        else out.push(item('nr7', 'vorhanden', [['BG-23', rows.join(' | ')], ['BT-20', skonto.length ? 'Skonto: ' + skonto.map((s) => s.days + ' Tage ' + s.percent + ' %').join(', ') : '']], 'Im Voraus vereinbarte Minderungen (z. B. Skonto, Boni, Rabatte) müssen angegeben sein, sofern sie nicht bereits im Entgelt berücksichtigt sind (z. B. in BT-20); auf eine schriftliche Vereinbarung genügt ein allgemeiner Hinweis, wenn die Unterlagen kurzfristig vorgelegt und leicht geprüft werden können (BMF-Schreiben vom 15.10.2026, Rn. 15 und 16).'));
       }
       // Nr. 8: rate and tax amount, or reference to the exemption; Art. 230 MwStSystRL: VAT in euros
       {
@@ -379,8 +379,9 @@
       // § 14 Abs. 5 Satz 2: final invoice after advance payments
       {
         const paid = nonZero('BT-113');
-        const werte = [['BT-113', val('BT-113')], ['BT-115', val('BT-115')], ['BT-3', code]];
-        if (paid || code === '877' || code === '876') out.push(item('14-5', 'prüfen', werte, 'Mögliche Endrechnung' + (paid ? ' (bereits gezahlter Betrag BT-113)' : ' (Code ' + code + ')') + ': die vor Ausführung der Leistung vereinnahmten Teilentgelte und die darauf entfallenden Steuerbeträge sind abzusetzen (§ 14 Abs. 5 Satz 2 UStG). Nicht beanstandet wird bis 30.06.2030 die Absetzung als Summe in BT-113 mit Einzelheiten in einer Bemerkung (BT-22) oder in einer eingebetteten Anlage, auf die der strukturierte Teil ausdrücklich verweist (BMF-Schreiben vom 15.10.2026; zuvor Rz. 48 des Schreibens vom 15.10.2024) – prüfen.'));
+        const embedded = (fx.bt['BT-125'] || []).length;
+        const werte = [['BT-113', val('BT-113')], ['BT-115', val('BT-115')], ['BT-3', code], ['BT-22', has('BT-22') ? 'Bemerkung vorhanden' : ''], ['BG-24', embedded ? embedded + ' eingebettete Anlage(n)' : '']];
+        if (paid || code === '877' || code === '876') out.push(item('14-5', 'prüfen', werte, 'Mögliche Endrechnung' + (paid ? ' (bereits gezahlter Betrag BT-113)' : ' (Code ' + code + ')') + ': die vor Ausführung der Leistung vereinnahmten Teilentgelte und die darauf entfallenden Steuerbeträge sind abzusetzen (§ 14 Abs. 5 Satz 2 UStG). Nicht beanstandet wird bis 30.06.2030 die Absetzung als Summe in BT-113 mit den Einzelheiten zu den Teilentgelten in einer Bemerkung (BT-22) oder in einem eingebetteten Anhang, auf den der strukturierte Teil ausdrücklich hinweist (BMF-Schreiben vom 15.10.2026, Rn. 3 und 4). Im strukturierten Teil: ' + (has('BT-22') ? 'eine Bemerkung (BT-22)' : 'keine Bemerkung (BT-22)') + ', ' + (embedded ? embedded + ' eingebettete Anlage(n) (BG-24)' : 'keine eingebettete Anlage (BG-24)') + ' – prüfen.'));
         else out.push(item('14-5', 'nicht zutreffend', [], 'Kein bereits gezahlter Betrag (BT-113) – keine Endrechnung erkennbar.'));
       }
       // § 14a UStG
@@ -420,8 +421,11 @@
       // § 31 Abs. 5 UStDV: a correction refers specifically and unambiguously to the corrected invoice
       {
         const werte = [['BT-25', val('BT-25')], ['BT-26', val('BT-26')], ['BT-3', code]];
-        if (CORRECTIVE.has(code)) out.push(item('31-5', has('BT-25') ? 'vorhanden' : 'prüfen', werte, has('BT-25') ? '' : 'Berichtigte Rechnung (Code ' + code + ') ohne Verweis auf die ursprüngliche Rechnung (BT-25). Die Berichtigung muss spezifisch und eindeutig auf die Rechnung bezogen sein (§ 31 Abs. 5 Satz 2 UStDV) – prüfen, ob der Bezug an anderer Stelle steht (z. B. in einer Bemerkung, BT-22).'));
-        else if (code === '381' && has('BT-25')) out.push(item('31-5', 'vorhanden', werte, 'Gutschrift/Korrektur (Code 381) mit Bezug auf die Rechnung (BT-25).'));
+        // BMF-Schreiben vom 15.10.2026, Rn. 20, 21; Abschn. 14.11 Abs. 2 Satz 7 UStAE in its version (correction by the recipient)
+        const art = 'Derzeit genügt jede in der Praxis taugliche Art der Korrektur mit einem tauglichen Rechnungstyp, wenn sich aus ursprünglicher Rechnung und Berichtigung die maßgeblichen Angaben klar und eindeutig ergeben (BMF-Schreiben vom 15.10.2026, Rn. 20 und 21).';
+        const durchGutschrift = SELF_BILLED.has(code) ? ' Berichtigung durch Gutschrift des Leistungsempfängers: nur bei vorheriger Vereinbarung und spezifischer, eindeutiger Bezugnahme auf die ursprüngliche Rechnung (Abschn. 14.11 Abs. 2 Satz 7 UStAE in der Fassung des BMF-Schreibens vom 15.10.2026).' : '';
+        if (CORRECTIVE.has(code)) out.push(item('31-5', has('BT-25') ? 'vorhanden' : 'prüfen', werte, (has('BT-25') ? art : 'Berichtigte Rechnung (Code ' + code + ') ohne Verweis auf die ursprüngliche Rechnung (BT-25). Die Berichtigung muss spezifisch und eindeutig auf die Rechnung bezogen sein (§ 31 Abs. 5 Satz 2 UStDV) – prüfen, ob der Bezug an anderer Stelle steht (z. B. in einer Bemerkung, BT-22). ' + art) + durchGutschrift));
+        else if (code === '381' && has('BT-25')) out.push(item('31-5', 'vorhanden', werte, 'Gutschrift/Korrektur (Code 381) mit Bezug auf die Rechnung (BT-25). ' + art));
         else out.push(item('31-5', 'nicht zutreffend', has('BT-25') ? werte : [], has('BT-25') ? 'Verweis auf vorausgegangene Rechnung(en) (BT-25), z. B. bei einer Endrechnung; keine berichtigte Rechnung (Code ' + code + ').' : 'Keine Rechnungsberichtigung.'));
       }
       return { items: out, kleinbetrag, kleinunternehmer };
@@ -472,6 +476,8 @@
       if (liste && liste.kleinunternehmer) hinweise.push(H.kleinunternehmer);
       if ((id === 'pflicht' || id === 'luecke') && uniq((bt['BT-118'] || []).concat(bt['BT-151'] || [])).includes('AE')) hinweise.push(H.reverseCharge);
       if (r.kind === 'pdf' && r.xml) hinweise.push(H.hybrid);
+      // attachments (BG-24): embedded document (BT-125), external location (BT-124) or a supporting document reference (BT-122)
+      if (eInvoice && ['BT-122', 'BT-124', 'BT-125'].some((id) => (bt[id] || []).length)) hinweise.push(H.anlagen);
       if (id !== 'unvollstaendig' && ((r.processingErrors || []).length || (r.missingRuleSets || []).length)) hinweise.push(U.unvollstaendig.text);
       return {
         id, kurz: U[id].kurz, text,
