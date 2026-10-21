@@ -72,15 +72,17 @@ async function run(env, bytes, name) {
   };
 
   // --- XML -------------------------------------------------------------------------------------------------
-  await T('billion laughs (entity expansion)', billionLaughs(), { verdict: 'format', test: (r) => !!(r.xml && r.xml.parseError), testName: 'refused by the parser' });
-  await T('quadratic blow-up (100 kB entity × 20 000)', quadraticBlowup(), { maxRss: 1536 * 1048576 });
+  // a document type declaration is refused before parsing, as by the KoSIT validator (disallow-doctype-decl)
+  const DOCTYPE = (r) => /Dokumenttyp-Deklaration \(DOCTYPE\)/.test(r.xml && r.xml.parseError || '');
+  await T('billion laughs (entity expansion)', billionLaughs(), { verdict: 'format', test: DOCTYPE, testName: 'refused before parsing (DOCTYPE)' });
+  await T('quadratic blow-up (100 kB entity × 20 000)', quadraticBlowup(), { verdict: 'format', test: DOCTYPE, testName: 'refused before parsing (DOCTYPE)', maxRss: 512 * 1048576 });
   {
     let connections = 0;
     const server = net.createServer((s) => { connections++; s.destroy(); });
     await new Promise((res) => server.listen(0, '127.0.0.1', res));
     const port = server.address().port;
     await T('external entities (XXE: local file, network)', xxe(port), {
-      test: (r) => !LEAK.test(JSON.stringify(r) + String(r.xml && r.xml.text)), testName: 'no content of a local file in the result',
+      verdict: 'format', test: (r) => DOCTYPE(r) && !LEAK.test(JSON.stringify(r) + String(r.xml && r.xml.text)), testName: 'refused before parsing (DOCTYPE), no content of a local file in the result',
     });
     await new Promise((res) => setTimeout(res, 200));
     check('attack XXE: no network connection opened (local listener saw ' + connections + ')', connections === 0);
@@ -99,6 +101,20 @@ async function run(env, bytes, name) {
   if (seedXml) {
     const b = fs.readFileSync(seedXml);
     await T('truncated XML (half of ' + path.basename(seedXml) + ')', new Uint8Array(b.subarray(0, b.length >> 1)), { verdict: 'format' });
+    // the same invoice with a harmless DOCTYPE (no entities): the KoSIT validator rejects it ("DOCTYPE is disallowed")
+    const t = b.toString('utf8');
+    const m = /^(\ufeff?<\?xml[^>]*\?>)/.exec(t);
+    const head = m ? m[1] : '', rest = t.slice(head.length);
+    const rootName = /<([A-Za-z_][\w.:-]*)/.exec(rest)[1];
+    const original = await run(env, new Uint8Array(b), path.basename(seedXml));
+    await T('harmless DOCTYPE in ' + path.basename(seedXml), utf8(head + '\n<!DOCTYPE ' + rootName + '>' + rest), { verdict: 'format', test: DOCTYPE, testName: 'refused like the KoSIT validator' });
+    await T('DOCTYPE after a comment and a processing instruction', utf8(head + '\n<!-- Rechnung --><?pi x?>\n<!DOCTYPE ' + rootName + ' [<!ENTITY e "x">]>' + rest), { verdict: 'format', test: DOCTYPE, testName: 'refused like the KoSIT validator' });
+    await T('"<!DOCTYPE" only inside a comment of the prolog', utf8(head + '\n<!-- <!DOCTYPE ' + rootName + '> -->' + rest), {
+      test: (r) => !DOCTYPE(r) && r.ust && original.r && r.ust.id === original.r.ust.id, testName: 'processed like the original (verdict ' + (original.r && original.r.ust && original.r.ust.id) + ')',
+    });
+  }
+  for (const [text, at] of [['<!DOCTYPE r><r/>', 0], ['\ufeff<?xml version="1.0"?>\r\n<!DOCTYPE r><r/>', 24], ['<!-- x --><!DOCTYPE r><r/>', 10], ['<r/><!DOCTYPE r>', -1], ['<!-- <!DOCTYPE r> --><r/>', -1], ['<r><![CDATA[<!DOCTYPE r>]]></r>', -1], ['  \t\n<?pi ?><!DOCTYPE r>', 11]]) {
+    check('doctypeAt(' + JSON.stringify(text) + ') = ' + at, PrueferCore.doctypeAt(text) === at, 'got ' + PrueferCore.doctypeAt(text));
   }
 
   // --- PDF -------------------------------------------------------------------------------------------------

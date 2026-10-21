@@ -282,6 +282,21 @@
     }
   }
 
+  /**
+   * Position of a document type declaration in the prolog of `text` (after the optional XML declaration, comments,
+   * processing instructions and white space), or -1. A DOCTYPE can only stand there; a "<!DOCTYPE" anywhere else is
+   * character data, a comment or a well-formedness error, which the parser reports.
+   */
+  function doctypeAt(text) {
+    let i = text.charCodeAt(0) === 0xfeff ? 1 : 0;
+    for (;;) {
+      while (i < text.length) { const c = text.charCodeAt(i); if (c === 0x20 || c === 0x09 || c === 0x0d || c === 0x0a) i++; else break; }
+      if (text.startsWith('<?', i)) { const e = text.indexOf('?>', i + 2); if (e < 0) return -1; i = e + 2; continue; }
+      if (text.startsWith('<!--', i)) { const e = text.indexOf('-->', i + 4); if (e < 0) return -1; i = e + 3; continue; }
+      return text.startsWith('<!DOCTYPE', i) ? i : -1;
+    }
+  }
+
   // the deepest element nesting Chromium's XML parser accepts (5000 elements; 5001 is "Excessive node nesting")
   const MAX_DEPTH = 5000;
   /** maximum element nesting depth of a document (root element = 1), iteratively; stops once `cap` is exceeded */
@@ -387,6 +402,19 @@
     if (!dec.ok || dec.text === null) { result.timing.parse = Math.round(now() - tParse); return finish('not-processable'); }
     const text = dec.text.charCodeAt(0) === 0xfeff ? dec.text.slice(1) : dec.text;
     Object.defineProperty(result.xml, 'text', { value: text, enumerable: false, writable: true });
+    // a document type declaration is refused before parsing, as by the KoSIT validator (its XML parser runs with
+    // http://apache.org/xml/features/disallow-doctype-decl: "DOCTYPE is disallowed"): e-invoices use no DTD, and
+    // entity expansion or external entities never reach a parser – in no browser and not in Node
+    const dt = doctypeAt(text);
+    if (dt >= 0) {
+      const before = text.slice(0, dt);
+      const line = before.split('\n').length, column = dt - before.lastIndexOf('\n');
+      const msg = 'Dokumenttyp-Deklaration (DOCTYPE) in Zeile ' + line + ', Spalte ' + column + ' – nicht zulässig, wie im KoSIT-Validator (XML-Parser mit disallow-doctype-decl); E-Rechnungen verwenden keine DTD';
+      result.timing.parse = Math.round(now() - tParse);
+      result.xml.parseError = msg;
+      result.warnings.push('XML ist nicht verarbeitbar: ' + msg);
+      return finish('not-processable');
+    }
     const parsed = env.parseXml(text);
     result.timing.parse = Math.round(now() - tParse);
     if (!parsed.doc) { result.xml.parseError = parsed.error; result.warnings.push('XML ist nicht wohlgeformt: ' + parsed.error); return finish('not-processable'); }
@@ -457,5 +485,5 @@
     return finish(assessment);
   }
 
-  return { analyzeBytes, analyzeDocument, profileFor, rulesetEntry, elementLineIndex, elementsInDocumentOrder, maxElementDepth, MAX_DEPTH, LEVEL_ORDER };
+  return { analyzeBytes, analyzeDocument, profileFor, rulesetEntry, elementLineIndex, elementsInDocumentOrder, maxElementDepth, MAX_DEPTH, doctypeAt, LEVEL_ORDER };
 });

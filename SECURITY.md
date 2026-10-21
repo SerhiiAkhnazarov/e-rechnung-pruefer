@@ -42,10 +42,12 @@ aktualisiert – Liste der Komponenten: `sbom.cdx.json`, `NOTICE` Teil A).
   `default-src 'none'`, `form-action 'none'`); keine Cookies, keine Telemetrie, keine Daten an Dritte. Geprüft wird
   nur im Browser.
 * **Keine Ausführung von Inhalten:** Inhalte der Rechnung werden als Text dargestellt, nie als HTML.
-* **Feindliche Dateien:** Grenzen für Verschachtelung (5 000 Ebenen), entpackte PDF-Datenströme (64 MiB je Strom,
-  256 MiB je Dokument) und Dateigröße (100 MB); Entity-Expansion und externe Entitäten werden vom XML-Parser
-  abgewiesen bzw. nicht aufgelöst. Nachweis: `test/robustness-browser.cjs` in Chromium, WebKit, Firefox, Edge und
-  Chrome, `test/run-robustness-tests.cjs` mit Mutations-Fuzzing (Check-Run „verification report“, „Windows report“).
+* **Feindliche Dateien:** Dokumente mit Dokumenttyp-Deklaration (DOCTYPE) werden vor dem Parsen abgewiesen – wie im
+  KoSIT-Validator (`disallow-doctype-decl`); Entity-Expansion und externe Entitäten erreichen damit keinen XML-Parser.
+  Grenzen für Verschachtelung (5 000 Ebenen), entpackte PDF-Datenströme (64 MiB je Strom, 256 MiB je Dokument) und
+  Dateigröße (100 MB). Nachweis: `test/robustness-browser.cjs` in Chromium, WebKit, Firefox, Edge und Chrome,
+  `test/run-robustness-tests.cjs` mit Mutations-Fuzzing, Vergleich mit dem offiziellen KoSIT-Validator (Check-Runs
+  „verification report“, „Windows report“).
 * **Lieferkette:** Jede Quelle ist mit Commit und SHA-256 festgelegt (`build/STANDARDS_MANIFEST.json`); die Seite ist
   reproduzierbar gebaut (`programSha256`), jede Datei eines Releases steht mit SHA-256 in `SHA256SUMS.txt`.
 * **Stückliste:** `sbom.cdx.json` (CycloneDX 1.6) – auf GitHub Pages und an jedem Release.

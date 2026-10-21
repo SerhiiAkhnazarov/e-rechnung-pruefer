@@ -17,7 +17,7 @@ Original (Abschnitt „Nachweise“). Darüber hinaus ordnet der Prüfer jeden B
 
 | Schritt | Grundlage | Stand |
 |---|---|---|
-| Zeichenkodierung (BOM, Deklaration, unzulässige Bytefolgen) | XML 1.0 (5th ed.) §4.3.3 und Anhang F | – |
+| Zeichenkodierung (BOM, Deklaration, unzulässige Bytefolgen); Dokumenttyp-Deklaration (DOCTYPE) abgewiesen wie vom KoSIT-Validator | XML 1.0 (5th ed.) §4.3.3 und Anhang F; KoSIT-Validator 1.6.3 (`disallow-doctype-decl`) | – |
 | XML Schema (XSD 1.0) | OASIS UBL 2.1 (Invoice, CreditNote), UN/CEFACT CII D16B, Factur-X-/ZUGFeRD-Profilschemata | UBL 2.1, CII D16B, ZF 2.5.2 |
 | Geschäftsregeln EN 16931 (UBL, CII, Codelisten) | CEN eInvoicing-EN16931, Schematron | validation-1.3.16 |
 | XRechnung-Regeln (inkl. der von KoSIT übernommenen Peppol-Regeln) | KoSIT xrechnung-schematron | v2.6.0 = XRechnung 3.0.2 |
@@ -90,7 +90,7 @@ Check-Run „verification report“):
 
 | Testreihe | Ergebnis |
 |---|---|
-| **Offizieller KoSIT-Validator 1.6.3** (Release-JAR) + Konfiguration v2026-08-31 (Release-ZIP), 4 158 Dokumente | **0 Abweichungen**: Szenario und Annahme unter einem KoSIT-Szenario 4 158 / 4 158; XSD-Urteil 1 891 / 1 891 (Dokumente mit Szenario), XSD-Fehlercodes 89 / 89 (schemaungültige); Meldungen – Code, Stufe, Position – 1 802 / 1 802 (schemagültige mit Schematron); Bewertung 1 891 / 1 891 (`docs/KOSIT-REFERENCE.md` 5.2) |
+| **Offizieller KoSIT-Validator 1.6.3** (Release-JAR) + Konfiguration v2026-08-31 (Release-ZIP), 4 166 Dokumente (4 158 aus den Korpora, 8 mit Dokumenttyp-Deklaration) | **0 Abweichungen**: Szenario 4 166 / 4 166, Annahme unter einem KoSIT-Szenario 4 158 / 4 158; Verarbeitungsfehler (DOCTYPE) 8 / 8 auf beiden Seiten; XSD-Urteil 1 891 / 1 891 (Dokumente mit Szenario), XSD-Fehlercodes 89 / 89 (schemaungültige); Meldungen – Code, Stufe, Position – 1 802 / 1 802 (schemagültige mit Schematron); Bewertung 1 891 / 1 891 (`docs/KOSIT-REFERENCE.md` 5.2) |
 | KoSIT-Nachbau `test/kosit-reference/` (JDK 21 + Saxon), Selbsttests der Konfiguration + 4 158 Dokumente | 325/325 Zusicherungen, 0 Abweichungen |
 | CEN-Unit-Tests EN 16931 | 1 140 / 1 140 |
 | KoSIT XML-Mutate-Tests XRechnung | 1 754 / 1 754 |
@@ -106,8 +106,8 @@ Check-Run „verification report“):
 | Dateien: CSV, JSON, Prüfprotokoll und Lesefassung (PDF), Anlagen | 1 977 Dokumente, 3 952 PDF: `qpdf --check`, Text über poppler (`pdftotext`, `pdfinfo`) und pdf.js; CSV mit strengem Leser gegen die Daten; 173 Anlagen gleich dem Base64-Decoder von Node; 20 702 / 20 702 Prüfungen |
 | Zeilennummern der Befunde gegen libexpat (Python) | 7 795 Dokumente, 878 914 Elemente, 4 646 Befunde: 0 Abweichungen |
 | SHA-256 (`src/sha256.js`) gegen OpenSSL | 8 928 / 8 928 Eingaben (172 MiB) |
-| Feindliche und beschädigte Dateien (`test/run-robustness-tests.cjs`) | 228 / 228 Prüfungen: Entity-Expansion (Billion Laughs, quadratisch), externe Entitäten (lokale Datei, Netzadresse eines lokalen Servers: keine Verbindung), Verschachtelung 5 000 / 5 001 / 200 000 Ebenen, PDF-Dekompressionsbomben (200 MiB in einem Strom, 6 × 60 MiB), PDF-Arrays 100 000 tief, falsche `/Length`, abgeschnittene XML und PDF, Zufallsbytes; 192 mutierte Fassungen von 8 Dokumenten (Fuzzing mit festem Startwert): jede mit Urteil, ohne Ausnahme, unter 60 s |
-| Dieselben feindlichen Dateien in der Seite (`test/robustness-browser.cjs`), fünf Browser | je 34 / 34 Prüfungen: Ergebnis zu jeder Datei, Seite bleibt bedienbar, keine Anfrage außer der Seite selbst, keine Verbindung zum lokalen Server, kein Dateiinhalt, keine Ausnahme in der Seite; Datei über 100 MB nicht gelesen |
+| Feindliche und beschädigte Dateien (`test/run-robustness-tests.cjs`) | 246 / 246 Prüfungen: Dokumenttyp-Deklarationen vor dem Parsen abgewiesen – Entity-Expansion (Billion Laughs, quadratisch), externe Entitäten (lokale Datei, Netzadresse eines lokalen Servers: keine Verbindung), harmlose DOCTYPE wie bei KoSIT; „<!DOCTYPE“ in einem Kommentar wird nicht abgewiesen; Verschachtelung 5 000 / 5 001 / 200 000 Ebenen, PDF-Dekompressionsbomben (200 MiB in einem Strom, 6 × 60 MiB), PDF-Arrays 100 000 tief, falsche `/Length`, abgeschnittene XML und PDF, Zufallsbytes; 192 mutierte Fassungen von 8 Dokumenten (Fuzzing mit festem Startwert): jede mit Urteil, ohne Ausnahme, unter 60 s |
+| Dieselben feindlichen Dateien in der Seite (`test/robustness-browser.cjs`), fünf Browser | je 44 / 44 Prüfungen: Ergebnis zu jeder Datei, der Tab bleibt offen und bedienbar, keine Anfrage außer der Seite selbst, keine Verbindung zum lokalen Server, kein Dateiinhalt, keine Ausnahme in der Seite; Datei über 100 MB nicht gelesen |
 | Stückliste `sbom.cdx.json` (`test/run-sbom-tests.cjs`) | 67 / 67 Prüfungen: gültig nach dem offiziellen CycloneDX-1.6-Schema (Python jsonschema; Gegenprobe mit fehlerhaftem Dokument), 15 Komponenten = NOTICE Teil A mit Commit und SHA-256 jeder verwendeten Quelldatei, reproduzierbar |
 | Browser: Linux – Chromium, WebKit (Engine von Safari), Firefox; Windows – Microsoft Edge, Google Chrome | XSD-Prüfung im Browser 1 053 / 1 053 identisch mit Node (Urteil, Codes, Fundstellen); Ende-zu-Ende-Prüfung im Browser = Node; jede Datei der Seite (Protokoll, Lesefassung, CSV, JSON, XML, Anlagen) byte-gleich mit Node, SHA-256 der Seite gleich OpenSSL; Peppol-Import im Browser inhaltsgleich mit dem Node-Build (JSON ohne die Herkunftsfelder `sources`/`importedFrom`) |
 | Reproduzierbarkeit | Engine-Bundles aus Upstream + Patches, alle Regelwerke, XSD-Modelle, Szenarien, Syntaxbindung (`build/bt-paths.json`), Zeichenbreiten (`src/pdf-fonts.js`): byte-gleich; die Seite: unter Linux und Windows dasselbe Programm (`programSha256` in `BUILD_INFO.json` = SHA-256 der Seite ohne den Build-Vermerk mit Datum und Prüfstatus) |

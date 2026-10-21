@@ -447,6 +447,8 @@
     const dec = XmlEncoding.decode(bytes);
     if (!dec.ok) throw new Error(dec.errors.map((e) => e.message).join(' '));
     const text = dec.text.charCodeAt(0) === 0xfeff ? dec.text.slice(1) : dec.text;
+    // like every invoice (src/pruefer-core.js): no document type declaration (the official files have none)
+    if (PrueferCore.doctypeAt(text) >= 0) throw new Error('Die Datei enthält eine Dokumenttyp-Deklaration (DOCTYPE) – nicht zulässig; die offiziellen Peppol-Regeldateien enthalten keine.');
     const spec = Object.entries(BUILD.importable || {}).find(([, v]) => v.file === file.name);
     if (!spec) throw new Error('Unbekannte Datei „' + file.name + '“. Erwartet: ' + Object.values(BUILD.importable || {}).map((v) => v.file).join(', '));
     const [id, info] = spec;

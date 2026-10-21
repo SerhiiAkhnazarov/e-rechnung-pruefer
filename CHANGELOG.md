@@ -33,6 +33,10 @@ Sicherheit – `SECURITY.md`, `docs/SICHERHEIT.md`
 - Meldeweg für Schwachstellen (vertraulich über GitHub), Ziele für Antwort und Korrektur, koordinierte Offenlegung,
   unterstützte Version; Einordnung nach der Verordnung (EU) 2024/2847 (Cyber Resilience Act), Risikobewertung und
   Abgleich mit Anhang I.
+- Dokumente mit Dokumenttyp-Deklaration (DOCTYPE) werden vor dem Parsen abgewiesen – wie im offiziellen
+  KoSIT-Validator (`disallow-doctype-decl`: „DOCTYPE is disallowed“). Bisher prüfte der Prüfer solche Dokumente, die
+  KoSIT ablehnt (Abweichung, ohne Fall im Korpus); im CI schloss Firefox 142 den Tab bei einer Datei mit
+  Entity-Expansion („Billion Laughs“). Neuer Vergleichssatz `doctype` in der Testreihe `kosit-official`.
 - Robustheit gegen feindliche Dateien: Elemente tiefer als 5 000 Ebenen werden abgewiesen (Grenze wie Chromium; zuvor
   Stapelüberlauf in Node bei 100 000 Ebenen), die Dokumentreihenfolge der Schematron-Auswertung ohne Rekursion,
   entpackte PDF-Datenströme höchstens 64 MiB je Strom und 256 MiB je Dokument (Dekompressionsbomben), Dateien über

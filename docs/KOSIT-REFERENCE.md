@@ -554,6 +554,13 @@ Ergebnis über dieselben 4 158 Dokumente: **identisch mit 5.1 in allen Feldern, 
 (Szenario 4 158/4 158, XSD-Urteil 1 891/1 891, XSD-Fehlercodes 89/89, Meldungen 1 802/1 802,
 Konfigurationsurteil 4 158/4 158, Verarbeitungsfehler 0/0).
 
+Dokumenttyp-Deklarationen (seit 0.3.1): Der XML-Parser des Validators läuft mit
+`http://apache.org/xml/features/disallow-doctype-decl` (`impl/xml/ProcessorProvider.java`) und lehnt jedes
+Dokument mit DOCTYPE ab („SXXP0003 … DOCTYPE is disallowed“, Verarbeitungsfehler, REJECT) – auch eines ohne
+Entitäten. `test/kosit-official.cjs` prüft das zusätzlich an 8 Dokumenten (Verzeichnis `doctype`: das erste
+XRechnung-UBL- und -CII-Original mit DOCTYPE, mit interner Entität, nach einem Kommentar; Entity-Expansion; externe
+Entitäten): KoSIT und Prüfer melden beide einen Verarbeitungsfehler (8/8), Szenario 4 166/4 166.
+
 Korrektur einer früheren Aussage: In 0.1.0 hieß es, das Original-JAR sei nur über Maven Central
 erhältlich und daher nur im CI prüfbar. Die GitHub-Release-Dateien sind erreichbar; der Vergleich
 läuft deshalb lokal und in CI. Der CI-Job `kosit-jar-maven` prüft zusätzlich, dass das GitHub-JAR

@@ -43,11 +43,15 @@ const check = (name, ok, detail) => { if (ok) pass++; else { fail++; failures.pu
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'pruefer-robustness-'));
   const bomb200 = I.zeroBomb(200 * 1048576), bomb60 = I.zeroBomb(60 * 1048576);
   const six = {}; for (let i = 1; i <= 6; i++) six['anlage-' + i + '.bin'] = { deflated: bomb60 };
+  // a document type declaration is refused before parsing (src/pruefer-core.js, as the KoSIT validator does):
+  // entity expansion and external entities never reach the XML parser of the browser
+  const DOCTYPE = (r) => /Dokumenttyp-Deklaration \(DOCTYPE\)/.test(r.xml && r.xml.parseError || '');
   const cases = [
     // [file name, bytes, expectation: { verdict, test(result) + testName }]
-    ['billion-laughs.xml', I.billionLaughs(), {}],
-    ['quadratic-blowup.xml', I.quadraticBlowup(), {}],
-    ['xxe.xml', I.xxe(port), { test: (r) => !I.LEAK.test(JSON.stringify(r)), testName: 'no content of a local file in the result' }],
+    ['billion-laughs.xml', I.billionLaughs(), { verdict: 'format', test: DOCTYPE, testName: 'refused before parsing (DOCTYPE)' }],
+    ['quadratic-blowup.xml', I.quadraticBlowup(), { verdict: 'format', test: DOCTYPE, testName: 'refused before parsing (DOCTYPE)' }],
+    ['xxe.xml', I.xxe(port), { verdict: 'format', test: (r) => DOCTYPE(r) && !I.LEAK.test(JSON.stringify(r)), testName: 'refused before parsing (DOCTYPE), no content of a local file in the result' }],
+    ['doctype-harmless.xml', I.utf8('<?xml version="1.0"?>\n<!DOCTYPE Invoice>\n<Invoice xmlns="' + I.UBL + '"><Note xmlns="' + I.CBC + '">x</Note></Invoice>'), { verdict: 'format', test: DOCTYPE, testName: 'refused like the KoSIT validator' }],
     ['nesting-5001.xml', I.nested(5001), { verdict: 'format' }],
     ['nesting-200000.xml', I.nested(200000), { verdict: 'format' }],
     ['nesting-5000.xml', I.nested(5000), {}],
@@ -75,15 +79,19 @@ const check = (name, ok, detail) => { if (ok) pass++; else { fail++; failures.pu
   console.log(label + ' ' + browser.version() + ' (' + process.platform + '): page loaded');
 
   const verdicts = {};
+  let closed = null; // the page or the browser went away (a crash of the tab): every further case is a failure
+  page.on('close', () => { closed = closed || 'page closed'; });
+  page.on('crash', () => { closed = 'page crashed'; });
   const runCase = async (name, file, expect) => {
     const t0 = Date.now();
-    const before = await page.locator('section.result').count();
+    if (closed) { check(name + ': result card within 180 s', false, 'not run – ' + closed); return; }
     let ok = true;
     try {
+      const before = await page.locator('section.result').count();
       await page.setInputFiles('#file', file);
       await page.waitForFunction((n) => document.querySelectorAll('section.result').length > n && document.getElementById('status').hidden, before, { timeout: 180000 });
-    } catch (e) { ok = false; check(name + ': result card within 180 s', false, e.message.split('\n')[0]); }
-    if (!ok) return;
+    } catch (e) { ok = false; check(name + ': result card within 180 s', false, (closed ? closed + ': ' : '') + e.message.split('\n')[0]); }
+    if (!ok) { console.log('  ' + name + ': NO RESULT' + (closed ? ' (' + closed + ')' : '')); return; }
     check(name + ': result card within 180 s', true);
     const r = await page.evaluate(() => { const x = window.PrueferApp.results[0]; return JSON.parse(JSON.stringify(x)); });
     const v = r && r.ust ? r.ust.id : null;
@@ -98,13 +106,14 @@ const check = (name, ok, detail) => { if (ok) pass++; else { fail++; failures.pu
 
   // the page as a whole: no request but the page itself, no connection to the listener, no page error
   await new Promise((res) => setTimeout(res, 500));
+  check('the page stayed open (no crash of the tab)', !closed, closed || '');
   const foreign = requests.filter((u) => u !== pageUrl && !u.startsWith('data:') && !u.startsWith('blob:'));
   check('no request other than the page (' + requests.length + ' requests recorded)', foreign.length === 0, foreign.slice(0, 5).join(', '));
   check('no connection to the local listener (external entities, DTD)', connections === 0, connections + ' connection(s)');
   check('no uncaught exception in the page', pageErrors.length === 0, pageErrors.slice(0, 3).join(' | '));
-  check('page text shows no content of a local file', !I.LEAK.test(await page.evaluate(() => document.body.innerText)));
+  if (!closed) check('page text shows no content of a local file', !I.LEAK.test(await page.evaluate(() => document.body.innerText)));
 
-  await browser.close();
+  await browser.close().catch(() => {});
   server.close();
   fs.rmSync(dir, { recursive: true, force: true });
   for (const f of failures) console.log('FAIL ' + f);
