@@ -14,8 +14,9 @@
  *     { risk: 'ok'|'caution'|'danger', type: string (German), detected: id, extension, reasons: [German],
  *       safeName, downloadName (safeName, or safeName + '.gesperrt' when risk is danger) }
  *   safeFileName(name, fallback?) -> a file name without control and formatting characters (bidirectional overrides
- *     such as U+202E, which can disguise ".exe" as ".pdf"), path separators, characters reserved on Windows, reserved
- *     device names (CON, NUL, …) and leading/trailing dots or spaces; whitespace becomes '_'; at most 120 characters
+ *     such as U+202E, which can disguise ".exe" as ".pdf"), unpaired surrogates, path separators, characters reserved
+ *     on Windows, reserved device names (CON, NUL, …) and leading/trailing dots or spaces; whitespace becomes '_'; at most
+ *     120 characters
  *   addPdfFindings(classification, PdfA3Checks.activeContent(doc)) -> the classification of a PDF attachment with its
  *     JavaScript, Launch and other active content
  *   csvFormulaRisk(text) -> true when a CSV text has a cell that a spreadsheet program would evaluate as a formula
@@ -77,7 +78,8 @@
         if (p + 46 > b.length || u32(b, p) !== 0x02014b50) return names.length ? names : null;
         const nl = u16(b, p + 28), xl = u16(b, p + 30), cl = u16(b, p + 32);
         let n = '';
-        try { n = new TextDecoder('utf-8', { fatal: false }).decode(b.subarray(p + 46, p + 46 + nl)); } catch (x) { n = latin1(b, p + 46, p + 46 + nl); }
+        // ignoreBOM: a U+FEFF at the start of a name is part of the name
+        try { n = new TextDecoder('utf-8', { fatal: false, ignoreBOM: true }).decode(b.subarray(p + 46, p + 46 + nl)); } catch (x) { n = latin1(b, p + 46, p + 46 + nl); }
         names.push(n);
         p += 46 + nl + xl + cl;
       }
@@ -210,15 +212,19 @@
   }
 
   function safeFileName(name, fallback) {
-    let s = String(name === null || name === undefined ? '' : name).normalize('NFC');
-    // control (Cc), formatting incl. bidirectional overrides and zero-width characters (Cf), line/paragraph separators
-    s = s.replace(/[\p{Cc}\p{Cf}\p{Zl}\p{Zp}\u115F\u1160\u3164\uFFA0]/gu, '');
+    let s = String(name === null || name === undefined ? '' : name);
+    // control (Cc), formatting incl. bidirectional overrides and zero-width characters (Cf), line/paragraph separators,
+    // unpaired surrogates (Cs: no character, not representable in a file name); then composed (NFC) – after the
+    // removal, so that the result is in canonical order and a second application changes nothing
+    s = s.replace(/[\p{Cc}\p{Cf}\p{Zl}\p{Zp}\p{Cs}\u115F\u1160\u3164\uFFA0]/gu, '').normalize('NFC');
     // path separators and characters reserved on Windows; whitespace
     s = s.replace(/[\\/:*?"<>|]+/g, '_').replace(/\s+/g, '_').replace(/_+/g, '_');
     // leading/trailing dots, underscores and spaces (hidden files, Windows trims trailing dots)
     s = s.replace(/^[._\s]+|[._\s]+$/g, '');
     if (RESERVED_DEVICE.test(s)) s = '_' + s;
-    if (s.length > 120) { const ext = extOf(s); s = ext && ext.length < 20 ? s.slice(0, 119 - ext.length).replace(/[._]+$/, '') + '.' + ext : s.slice(0, 120); }
+    // shortened: never inside a surrogate pair, never ending with a dot or underscore
+    const cut = (t, n) => t.slice(0, n).replace(/[\uD800-\uDBFF]$/, '').replace(/[._]+$/, '');
+    if (s.length > 120) { const ext = extOf(s); s = ext && ext.length < 20 ? cut(s, 119 - ext.length) + '.' + ext : cut(s, 120); }
     return s || (fallback === undefined ? 'Datei' : fallback);
   }
 

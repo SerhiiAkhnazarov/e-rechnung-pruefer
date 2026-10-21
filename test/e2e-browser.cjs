@@ -50,6 +50,16 @@ async function nodeFindings(file) {
   await page.waitForSelector('#drop');
   console.log(`${label} ${browser.version()} (${process.platform}): page loaded in ${Date.now() - t0} ms, title "${await page.title()}"`);
   let fails = 0;
+  // the stylesheet of the page is applied (the Content-Security-Policy allows it by its SHA-256)
+  const ownStyle = await page.evaluate(() => getComputedStyle(document.getElementById('drop')).borderTopStyle);
+  if (ownStyle !== 'dashed') { fails++; console.log('the stylesheet of the page is not applied (border of #drop: ' + ownStyle + ')'); }
+  // Playwright's screenshots in WebKit append a style element for a moment (to synchronise animations); the policy of
+  // the page refuses it, as it refuses every style the page does not contain itself (test/security-browser.cjs). Such
+  // refusals are expected in WebKit once screenshots are taken; before the first screenshot, and in every other browser,
+  // every console error is a problem (the one stylesheet of the page is checked above)
+  const STYLE_REFUSED = /^Refused to apply a stylesheet because its hash, its nonce, or 'unsafe-inline' does not appear in the style-src directive/;
+  let shots = 0, errorsBeforeShots = null;
+  const shot = async (file, fullPage) => { if (errorsBeforeShots === null) errorsBeforeShots = consoleErrors.length; await page.screenshot({ path: file, fullPage, caret: 'initial' }); shots++; };
   for (const file of files) {
     const t1 = Date.now();
     const before = await page.locator('section.result').count();
@@ -64,10 +74,15 @@ async function nodeFindings(file) {
     if (same.startsWith('DIFFERS')) { fails++; console.log('   browser:', shown.sort().join(','), '\n   node:   ', expected.join(',')); }
     const timing = await page.evaluate(() => { const r = window.PrueferApp && window.PrueferApp.results && window.PrueferApp.results[0]; return r ? JSON.stringify(r.timing) : ''; }).catch(() => '');
     console.log(`  ${path.basename(file)}: ${badge} · ${counts.join(', ')} · ${shown.length} findings ${same} · ${Date.now() - t1} ms${timing ? ' · stages ' + timing : ''}`);
-    if (shotDir) { fs.mkdirSync(shotDir, { recursive: true }); await page.screenshot({ path: path.join(shotDir, label + '-' + path.basename(file) + '.png'), fullPage: true }); }
+    if (shotDir) { fs.mkdirSync(shotDir, { recursive: true }); await shot(path.join(shotDir, label + '-' + path.basename(file) + '.png'), true); }
   }
-  if (shotDir && files.length) await page.screenshot({ path: path.join(shotDir, label + '-overview.png'), fullPage: false });
-  if (consoleErrors.length) { console.log('console errors:', consoleErrors.slice(0, 5)); fails++; }
+  if (shotDir && files.length) await shot(path.join(shotDir, label + '-overview.png'), false);
+  await page.waitForTimeout(200); // console messages of the last screenshot
+  const toolStyle = (m, i) => browserName === 'webkit' && !channel && errorsBeforeShots !== null && i >= errorsBeforeShots && STYLE_REFUSED.test(m);
+  const refused = consoleErrors.filter(toolStyle).length;
+  const problems = consoleErrors.filter((m, i) => !toolStyle(m, i));
+  if (refused) console.log('  ' + refused + ' style element(s) of the screenshot tool refused by the policy of the page (' + shots + ' screenshots)');
+  if (problems.length) { console.log('console errors:', problems.slice(0, 5)); fails++; }
   await browser.close();
   console.log(fails ? `E2E ${label}: ${fails} problem(s)` : `E2E ${label}: OK`);
   process.exit(fails ? 1 : 0);

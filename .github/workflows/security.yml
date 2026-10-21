@@ -1,7 +1,10 @@
 # security.yml — static security analysis and the weekly vulnerability scan (SECURITY.md, docs/SICHERHEIT.md):
 #   - CodeQL (GitHub code scanning, query suite security-extended) over the JavaScript of the program, its tools and
 #     tests, and over the workflows themselves (language "actions": injection, untrusted checkout, permissions);
-#     findings appear in the Security tab of the repository and fail pull requests through code scanning;
+#     findings appear in the Security tab of the repository and fail pull requests through code scanning; every
+#     result is also published as check run "code scanning (<language>)" of the commit (.github/scripts/sarif-summary.cjs:
+#     rule, severity, location, message – readable with GET /repos/{owner}/{repo}/commits/{sha}/check-runs), failing
+#     when a result is open;
 #   - every Tuesday and by hand: OSV-Scanner over the program (dist/sbom.cdx.json, flattened with the upstream releases
 #     it derives from) and over the build and test environment as the repository states it (pinned actions,
 #     package-lock.json, release artefacts of the manifest) – new advisories appear without any change of the
@@ -28,6 +31,7 @@ jobs:
       contents: read         # checkout
       security-events: write # code scanning results
       actions: read          # workflow information for CodeQL
+      checks: write          # check run "code scanning (<language>)"
     strategy:
       fail-fast: false
       matrix:
@@ -47,8 +51,32 @@ jobs:
               - build/**
               - dist/**
       - uses: github/codeql-action/analyze@9b3254085494b55a0f7c4c2b3d2d52cc712ce370 # v4.39.1
+        id: analyze
         with:
           category: /language:${{ matrix.language }}
+          output: sarif-results
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        if: always()
+        with:
+          node-version: '22'
+          check-latest: true
+      - name: Publish the results as check run "code scanning (${{ matrix.language }})"
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          LANGUAGE: ${{ matrix.language }}
+          ANALYZE: ${{ steps.analyze.outcome }}
+        run: |
+          summary=0
+          node .github/scripts/sarif-summary.cjs sarif-results > code-scanning.txt || summary=$?
+          outcome=failure
+          if [ "${ANALYZE}" = success ] && [ "${summary}" = 0 ]; then outcome=success; fi
+          rc=0
+          node .github/scripts/check-run.cjs --name "code scanning (${LANGUAGE})" --sha "${GITHUB_SHA}" \
+            --gate "${outcome}" --gate-label "CodeQL ${LANGUAGE} (security-extended), Analyse ${ANALYZE}; $(head -n 1 code-scanning.txt)" \
+            --attach code-scanning.txt > check-run.json || rc=$?
+          gh api -X POST "repos/${GITHUB_REPOSITORY}/check-runs" --input check-run.json > /dev/null || echo "::warning::check run could not be published"
+          exit "${rc}"
 
   osv-weekly:
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'

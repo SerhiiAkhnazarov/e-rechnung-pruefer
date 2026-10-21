@@ -3,7 +3,8 @@
  * security-browser.cjs — the protections of the page in a real browser (dist/E-Rechnung-Pruefer.html from file://):
  *
  *  1. Content-Security-Policy and Trusted Types: no request leaves the page (fetch, image), eval and new Function are
- *     refused, a script element created by script does not run, and – in browsers with Trusted Types – a string
+ *     refused, a script element created by script does not run, the stylesheet of the page applies but a style element
+ *     or style attribute created by script does not, and – in browsers with Trusted Types – a string
  *     assigned to an HTML or script sink throws a TypeError;
  *  2. a dangerous attachment (the EICAR test file of the ZUGFeRD corpus, other/eicar.ubl.xml): marked "Gefährlich",
  *     offered only after a second click and under the name "….gesperrt";
@@ -90,7 +91,16 @@ const check = (name, ok, detail) => { if (ok) pass++; else { fail++; failures.pu
       window.__injected = false;
       try { const s = document.createElement('script'); s.textContent = 'window.__injected = true'; document.head.append(s); o.scriptText = 'set'; } catch (e) { o.scriptText = e.name; }
       const img = new Image(); img.src = 'https://example.org/pixel.png'; document.body.append(img);
+      // styles: the stylesheet of the page applies (its SHA-256 is in the policy), a style element or a style attribute
+      // created by script does not (no 'unsafe-inline' in style-src)
+      const drop = document.getElementById('drop');
+      o.ownStyle = getComputedStyle(drop).borderTopStyle;
+      await later(() => { const st = document.createElement('style'); st.textContent = '#drop { border-top-style: dotted !important; }'; document.head.append(st); return 'appended'; });
+      await later(() => { drop.setAttribute('style', 'border-left-style: dotted !important'); return 'set'; });
       await new Promise((res) => setTimeout(res, 400));
+      o.foreignStyle = getComputedStyle(drop).borderTopStyle;
+      o.attrStyle = getComputedStyle(drop).borderLeftStyle;
+      drop.removeAttribute('style');
       o.injected = window.__injected;
       // the policy of the Prüfer passes XML to DOMParser
       try { o.xml = PrueferXml.parse('<a><b>1</b></a>').documentElement.nodeName; } catch (e) { o.xml = e.name + ': ' + e.message; }
@@ -101,6 +111,9 @@ const check = (name, ok, detail) => { if (ok) pass++; else { fail++; failures.pu
     check("CSP: eval refused (no 'unsafe-eval')", r.eval !== '2', r.eval);
     check("CSP: new Function refused (no 'unsafe-eval')", r.fn !== '2', r.fn);
     check('CSP/Trusted Types: a script element created by script does not run', r.injected === false, r.scriptText);
+    check('CSP: the stylesheet of the page applies (allowed by its SHA-256)', r.ownStyle === 'dashed', r.ownStyle);
+    check("CSP: a style element created by script does not apply (no 'unsafe-inline' in style-src)", r.foreignStyle === 'dashed', r.foreignStyle);
+    check('CSP: a style attribute set by script does not apply', r.attrStyle === 'dashed', r.attrStyle);
     if (r.tt) {
       check('Trusted Types: string to innerHTML throws TypeError', r.innerHTML === 'TypeError', r.innerHTML);
       check('Trusted Types: string to insertAdjacentHTML throws TypeError', r.insertAdjacentHTML === 'TypeError', r.insertAdjacentHTML);

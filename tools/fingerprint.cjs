@@ -80,11 +80,14 @@ function compute(opts) {
     xsdModels: filesIn('build/xsd', (f) => f.endsWith('.json')),
     scenarios: ['build/scenarios.json'].concat(fs.existsSync(path.join(root, 'build', 'rulesets.json')) ? ['build/rulesets.json'] : []),
     // umsatzsteuerliche Einordnung: the legal table and the syntax binding derived from the KoSIT visualization
-    legal: filesIn('legal', (f) => f.endsWith('.json')).concat(['build/bt-paths.json']),
+    // and the legal texts the page and the site show (Impressum, privacy notice, licences and notices of the rights holders)
+    legal: filesIn('legal', (f) => /\.(json|txt)$/.test(f)).concat(['build/bt-paths.json', 'NOTICE', 'LICENSE']),
     // texts and data rendered into the page and the static pages of the site (security information, CVD policy,
-    // security.txt), the VEX statements and the hashes of the importable Peppol rule sets (integrity of stored rule sets)
-    content: ['SECURITY.md'].concat(filesIn('docs', (f) => /^(BENUTZERINFORMATION|SCHWACHSTELLE-MELDEN|DANKSAGUNGEN)\.md$/.test(f)), filesIn('security', (f) => f.endsWith('.json')), ['build/importable.json']),
-    tools:filesIn('tools', (f) => /\.(cjs|sh)$/.test(f)).concat(filesUnder('tools/verapdf')),
+    // security.txt, the version from CHANGELOG.md), the VEX statements and CSAF advisories, the hashes of the importable Peppol rule sets
+    // (integrity of stored rule sets)
+    content: ['SECURITY.md', 'CHANGELOG.md'].concat(filesIn('docs', (f) => /^(BENUTZERINFORMATION|SCHWACHSTELLE-MELDEN|DANKSAGUNGEN)\.md$/.test(f)), filesUnder('security', (f) => f.endsWith('.json')), ['build/importable.json']),
+    // the tools, and the exact versions of the test tools (Playwright, pdf.js, esbuild, fast-check) the results depend on
+    tools:filesIn('tools', (f) => /\.(cjs|sh)$/.test(f)).concat(filesUnder('tools/verapdf'), ['package.json', 'package-lock.json']),
     tests: filesUnder('test', (f) => !f.endsWith('.class')),  // scripts, oracles' sources, expectations, test schemas
     // dist/ is not an input: it is generated from the groups above by tools/build-standalone.cjs and
     // embeds the verification status itself (it would otherwise change the fingerprint it reports)

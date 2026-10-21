@@ -15,7 +15,9 @@
  *  4. the sources (src/*.js) and the engine bundle: no HTML or code injection sinks, no network APIs, storage only in
  *     the user interface, XML parsing only through the Trusted Types policy;
  *  5. the static pages of the site (dist/site-pages): no script, Content-Security-Policy with the hash of their style,
- *     every link to the site resolves to a published file;
+ *     every link to the site resolves to a published file; the workflows (.github/workflows): no trigger that gives
+ *     write permissions to code of others, read-only top-level permissions, no checkout of a ref from the event, no
+ *     expression inside a run script, the publication only after the complete verification of the same commit;
  *  6. security.txt (RFC 9116, BSI TR-03183-3 4.2): fields, values, Expires more than 30 days and at most a year ahead;
  *  7. CSAF 2.0 (tools/make-csaf.cjs): every document and the provider metadata against the official schemas (Python
  *     jsonschema, test/sbom-oracle/validate_csaf.py), the mandatory tests of CSAF 2.0 section 6.1 that apply to them and
@@ -322,11 +324,12 @@ const EVALUATED = (cell) => /^\s*[=+\-@＝＋－＠]|^[\t\r]/.test(cell) && !/^[
   const siteDir = path.join(root, 'dist', 'site-pages');
   const siteFiles = [];
   (function walk(d) { for (const e of fs.readdirSync(d, { withFileTypes: true })) { const p = path.join(d, e.name); if (e.isDirectory()) walk(p); else siteFiles.push(path.relative(siteDir, p).split(path.sep).join('/')); } })(siteDir);
-  // the files pages.yml publishes beside the site pages (root of the site)
+  // the files the job pages of verify.yml publishes beside the site pages (root of the site)
   const ROOT_FILES = ['index.html', 'E-Rechnung-Pruefer.html', 'BUILD_INFO.json', 'sbom.cdx.json', 'vex.cdx.json', 'STANDARDS_MANIFEST.json', 'VERIFICATION.json', 'test-environment.cdx.json'];
-  const pagesYml = read('.github/workflows/pages.yml');
-  for (const f of ROOT_FILES) check('pages.yml publishes ' + f, new RegExp('site/' + f.replace(/\./g, '\\.') + '\\b').test(pagesYml));
-  check('pages.yml publishes the site pages including .well-known (hidden files)', /cp -R dist\/site-pages\/\. site\//.test(pagesYml) && /include-hidden-files: true|\.well-known/.test(pagesYml));
+  const verifyYml = read('.github/workflows/verify.yml');
+  const pagesJob = (/\n  pages:\n([\s\S]*?)(?=\n  [a-z][\w-]*:\n|$)/.exec(verifyYml) || [null, ''])[1];
+  for (const f of ROOT_FILES) check('the job pages publishes ' + f, new RegExp('site/' + f.replace(/\./g, '\\.') + '\\b').test(pagesJob));
+  check('the job pages publishes the site pages including .well-known (hidden files)', /cp -R dist\/site-pages\/\. site\//.test(pagesJob) && /include-hidden-files: true/.test(pagesJob));
   const published = new Set(siteFiles.concat(ROOT_FILES));
   const resolves = (u) => { const rel = u.slice(sec.site.length).split('#')[0]; return rel === '' || published.has(rel) || published.has(rel.replace(/\/?$/, '/index.html')) || (rel.endsWith('/') && published.has(rel + 'index.html')); };
   for (const f of siteFiles.filter((x) => x.endsWith('.html'))) {
@@ -345,6 +348,43 @@ const EVALUATED = (cell) => /^\s*[=+\-@＝＋－＠]|^[\t\r]/.test(cell) && !/^[
     const relBroken = relative.filter((u) => !published.has(target(u)));
     check(f + ': relative links resolve (' + relative.length + ')', relBroken.length === 0, relBroken.join(' '));
   }
+
+  // =============================================================================================================
+  section = 'workflows';
+  // =============================================================================================================
+  // the build and publication path (GitHub Actions): no workflow runs with write permissions on code it did not check
+  // out from a push of this repository, values reach scripts only through environment variables, the publication
+  // happens only after the complete verification of the same commit
+  /** the run scripts of a workflow (block scalars and one-line values) */
+  const runScripts = (y) => {
+    const lines = y.split('\n');
+    const out = [];
+    for (let i = 0; i < lines.length; i++) {
+      const m = /^(\s*)(?:- )?run:\s*(.*)$/.exec(lines[i]);
+      if (!m) continue;
+      const indent = m[1].length + (/^\s*- /.test(lines[i]) ? 2 : 0);
+      if (!/^[|>][-+]?\s*$/.test(m[2])) { out.push(m[2]); continue; }
+      const body = [];
+      for (let j = i + 1; j < lines.length && (lines[j].trim() === '' || lines[j].search(/\S/) > indent); j++) body.push(lines[j]);
+      out.push(body.join('\n'));
+    }
+    return out;
+  };
+  const workflows = fs.readdirSync(path.join(root, '.github', 'workflows')).filter((f) => /\.ya?ml$/.test(f)).sort();
+  for (const f of workflows) {
+    const y = read('.github/workflows/' + f);
+    const on = (/^on:\n([\s\S]*?)^\S/m.exec(y) || [null, ''])[1];
+    check(f + ': no trigger that gives write permissions to code of others (pull_request_target, workflow_run)', !/^\s+(pull_request_target|workflow_run):/m.test(on));
+    check(f + ': top-level permissions none or read-only', /^permissions: (\{\}|read-all)/m.test(y) || /^permissions:\n  contents: read\n(?! )/m.test(y));
+    check(f + ': no checkout of a ref taken from the event', !/^\s+ref: \$\{\{\s*github\.(event|head_ref)/m.test(y));
+    const scripts = runScripts(y);
+    const injected = scripts.filter((r) => /\$\{\{/.test(r));
+    check(f + ': no expression inside a run script (' + scripts.length + ' scripts; values only through env)', injected.length === 0, injected.map((r) => r.trim().slice(0, 80)).join(' | '));
+  }
+  check('the publication is a job of verify.yml (no separate pages workflow started by another one)', !workflows.includes('pages.yml') && pagesJob.length > 0);
+  check('the job pages runs only after every verification job and only for a push to main', /needs: \[verify, kosit-jar-maven, pdfa-verapdf, windows, platforms\]/.test(pagesJob) && /if: github\.event_name == 'push' && github\.ref == 'refs\/heads\/main'/.test(pagesJob));
+  check('the job pages builds the page that the job verify tested (programSha256 compared)', /a\.programSha256 !== t\.programSha256/.test(pagesJob) && /download-artifact@[0-9a-f]{40}/.test(pagesJob));
+  check('every published file is attested and read back after the deployment', /attest-build-provenance@[0-9a-f]{40}/.test(pagesJob) && /attest-sbom@[0-9a-f]{40}/.test(pagesJob) && /check-published\.cjs "\$\{PAGE_URL\}" --commit "\$\{GITHUB_SHA\}" --local site/.test(pagesJob));
 
   // =============================================================================================================
   section = 'security.txt';

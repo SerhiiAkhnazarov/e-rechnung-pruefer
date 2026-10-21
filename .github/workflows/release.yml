@@ -7,8 +7,11 @@
 #     "veraPDF report", "KoSIT JAR vs. Maven Central", "vulnerability scan", "pages report";
 #   - the version (first "## x.y.z" of CHANGELOG.md) has no release yet (tag vx.y.z).
 # Assets: E-Rechnung-Pruefer.html, BUILD_INFO.json, VERIFICATION.json, STANDARDS_MANIFEST.json, sbom.cdx.json, vex.cdx.json,
-# test-environment.cdx.json, SHA256SUMS.txt (GitHub adds the source code of the tag as zip and tar.gz); their build
-# provenance was attested when pages.yml published them (same bytes: gh attestation verify <file> -R <repository>).
+# test-environment.cdx.json, SHA256SUMS.txt (GitHub adds the source code of the tag as zip and tar.gz), and
+# E-Rechnung-Pruefer-<version>.intoto.jsonl: the Sigstore bundles of the attestations made when the job "pages" of
+# verify.yml published these files (build provenance, SLSA v1, of every file; SBOM attestation of the program), so that
+# they can be verified without the GitHub API: gh attestation verify <file> -R <repository> --bundle <that file>. Every
+# asset is verified against these bundles (signer: verify.yml of this repository) before the release is created.
 # Release notes: the CHANGELOG section of the version.
 # The result is recorded as check run "release report" of the commit.
 name: release
@@ -23,9 +26,10 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     permissions:
-      contents: write # the release and its tag
-      checks: write   # check run "release report"
-      pages: read     # URL of the site
+      contents: write    # the release and its tag
+      checks: write      # check run "release report"
+      pages: read        # URL of the site
+      attestations: read # the attestations of the published files
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -68,6 +72,30 @@ jobs:
         run: |
           set -o pipefail
           node tools/check-published.cjs "${PAGE_URL}" --commit "${SHA}" --out release --retries 3 --wait 20 | tee published-check.txt
+      - name: Attestations of the release files (Sigstore bundles), every file verified against them
+        id: attestations
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.pre.outputs.version }}
+        run: |
+          set -e -o pipefail
+          mkdir -p attestations
+          for f in E-Rechnung-Pruefer.html BUILD_INFO.json VERIFICATION.json STANDARDS_MANIFEST.json sbom.cdx.json vex.cdx.json test-environment.cdx.json; do
+            rm -f attestations/*.jsonl
+            (cd attestations && gh attestation download "../release/${f}" -R "${GITHUB_REPOSITORY}")
+            cat attestations/*.jsonl >> attestations/all.txt
+          done
+          # one line per bundle (the build provenance covers every file, the SBOM attestation the program)
+          awk 'NF && !seen[$0]++' attestations/all.txt > "release/E-Rechnung-Pruefer-${VERSION}.intoto.jsonl"
+          echo "$(wc -l < "release/E-Rechnung-Pruefer-${VERSION}.intoto.jsonl") bundles in E-Rechnung-Pruefer-${VERSION}.intoto.jsonl"
+          for f in E-Rechnung-Pruefer.html BUILD_INFO.json VERIFICATION.json STANDARDS_MANIFEST.json sbom.cdx.json vex.cdx.json test-environment.cdx.json; do
+            gh attestation verify "release/${f}" -R "${GITHUB_REPOSITORY}" --bundle "release/E-Rechnung-Pruefer-${VERSION}.intoto.jsonl" \
+              --signer-workflow "${GITHUB_REPOSITORY}/.github/workflows/verify.yml" > /dev/null
+            echo "${f}: build provenance verified (Sigstore bundle, signer workflow verify.yml)"
+          done
+          gh attestation verify release/E-Rechnung-Pruefer.html -R "${GITHUB_REPOSITORY}" --bundle "release/E-Rechnung-Pruefer-${VERSION}.intoto.jsonl" \
+            --signer-workflow "${GITHUB_REPOSITORY}/.github/workflows/verify.yml" --predicate-type https://cyclonedx.org/bom > /dev/null
+          echo "E-Rechnung-Pruefer.html: SBOM attestation verified (CycloneDX)"
       - name: Release notes (CHANGELOG section of the version)
         env:
           PAGE_URL: ${{ steps.pre.outputs.page_url }}
@@ -80,7 +108,7 @@ jobs:
             echo
             echo "---"
             echo "Prüfnachweise dieses Stands (Commit ${SHA}): Check-Runs „verification report“, „Windows report“, „platform comparison“, „veraPDF report“, „KoSIT JAR vs. Maven Central“, „vulnerability scan“, „pages report“ – \`GET /repos/${GITHUB_REPOSITORY}/commits/${SHA}/check-runs\`."
-            echo "Die Datei E-Rechnung-Pruefer.html ist byte-gleich mit ${PAGE_URL} (SHA-256 in SHA256SUMS.txt). Herkunftsnachweis: \`gh attestation verify E-Rechnung-Pruefer.html -R ${GITHUB_REPOSITORY}\`."
+            echo "Die Datei E-Rechnung-Pruefer.html ist byte-gleich mit ${PAGE_URL} (SHA-256 in SHA256SUMS.txt). Herkunftsnachweis: \`gh attestation verify E-Rechnung-Pruefer.html -R ${GITHUB_REPOSITORY}\`, ohne Abruf über die GitHub-API mit \`--bundle E-Rechnung-Pruefer-${VERSION}.intoto.jsonl\` (Sigstore-Bundles der Nachweise: Herkunft jeder Datei nach SLSA v1, Stückliste des Programms)."
           } > release-notes.md
           cat release-notes.md
       - name: Create the release
@@ -94,6 +122,7 @@ jobs:
           set -e
           gh release create "${TAG}" release/E-Rechnung-Pruefer.html release/BUILD_INFO.json release/VERIFICATION.json \
             release/STANDARDS_MANIFEST.json release/sbom.cdx.json release/vex.cdx.json release/test-environment.cdx.json release/SHA256SUMS.txt \
+            "release/E-Rechnung-Pruefer-${VERSION}.intoto.jsonl" \
             --target "${SHA}" --title "E-Rechnung Prüfer ${VERSION}" --notes-file release-notes.md
           gh release view "${TAG}" --json url,tagName,assets --jq '"release: " + .url, (.assets[] | .name + " " + (.size | tostring) + " bytes")' | tee release-view.txt
       - name: Publish the result as check run "release report"

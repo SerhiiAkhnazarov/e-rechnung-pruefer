@@ -13,7 +13,7 @@
  *      test-environment.cdx.json is the environment of this commit;
  *   6. .well-known/security.txt (RFC 9116): served directly (no redirect), Content-Type text/plain; charset=utf-8,
  *      Expires more than 30 days ahead; .well-known/csaf/provider-metadata.json served directly (CSAF requirement 6);
- *   7. with --local <dir> (the directory that was deployed, pages.yml): every file of it is served byte for byte.
+ *   7. with --local <dir> (the directory that was deployed, job pages of verify.yml): every file of it is served byte for byte.
  * GitHub Pages answers through a CDN (cached for up to 10 minutes): every request carries ?commit=<sha>, and the
  * check is repeated (--retries, --wait seconds) until the files of that commit are served.
  * --out <dir>: writes the files of the release and SHA256SUMS.txt there (the assets of a release, release.yml).

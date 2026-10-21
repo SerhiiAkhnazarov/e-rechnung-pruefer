@@ -100,6 +100,10 @@ const SUITES = [
   // hostile and damaged files (entity expansion, external entities, nesting, PDF decompression bombs, mutation
   // fuzzing of the E2E documents): a result without exception, no file or network access, bounded memory (0.3.1)
   { name: 'robustness', cmd: [node, 'test/run-robustness-tests.cjs', '--mutations', '24', ...E2E_FILES], summary: /^fuzzing:|^robustness tests:/, all: true },
+  // property-based fuzzing (fast-check, test tool of package.json): CSV cells, file names, classification of
+  // attachments, Base64, ZIP, XML encodings, damaged PDFs, damaged invoices, and arbitrary invoice texts through the
+  // whole processing into the CSV files (0.4.1); stopped after 30 minutes (a hang is a failure)
+  { name: 'fuzz', cmd: [node, 'test/fuzz-properties.js', ...E2E_FILES], summary: /^fuzz tests:/, timeout: 30 * 60 * 1000, needs: ['node_modules/fast-check/package.json'] },
   { name: 'xsd-selftest', cmd: [node, 'test/xsd-selftest.cjs'], summary: /^instances/ },
   ...browsers((b) => ({ name: 'xsd-browser-' + b, browser: b, cmd: [node, 'test/xsd-browser.cjs', '--browser', b], summary: /identical|differences/ })),
   { name: 'kosit-reference', cmd: [node, 'test/kosit-reference/verify.cjs'], summary: /configuration self-tests|MISMATCHES|fresh run/, all: true, needs: ['build/corpus/xr-ubl', E('saxon') + '/saxon-he-12.8.jar'] },
@@ -207,9 +211,10 @@ for (const s of SUITES) {
     continue;
   }
   const t0 = Date.now();
-  const r = spawnSync(s.cmd[0], s.cmd.slice(1), { cwd: root, encoding: 'utf8', maxBuffer: 1 << 30, env: suiteEnv });
+  const r = spawnSync(s.cmd[0], s.cmd.slice(1), { cwd: root, encoding: 'utf8', maxBuffer: 1 << 30, env: suiteEnv, timeout: s.timeout });
   const ms = Date.now() - t0;
-  const output = machineIndependent((r.stdout || '') + (r.stderr ? '\n' + r.stderr : ''));
+  const stopped = r.error && r.error.code === 'ETIMEDOUT' ? '\n' + s.name + ': stopped after ' + Math.round(s.timeout / 60000) + ' minutes (time limit of the suite)' : '';
+  const output = machineIndependent((r.stdout || '') + (r.stderr ? '\n' + r.stderr : '') + stopped);
   const lines = output.split('\n').filter((l) => l.trim());
   const matched = lines.filter((l) => s.summary.test(l.trim()));
   const summary = s.all ? matched.join(' | ') : (matched.pop() || lines[lines.length - 1] || '');

@@ -107,7 +107,8 @@ D. Used only for building and verification (fetched by tools/fetch-sources.cjs o
   ph-schematron Apache License 2.0
 - Playwright 1.64.1: Apache License 2.0; the browser builds it installs from the Playwright CDN (Chromium,
   WebKit, Firefox) are used under their own licences and are not redistributed
-- pdf.js (pdfjs-dist 6.4.299): Apache License 2.0; esbuild 0.28.2 (the build tool): MIT
+- pdf.js (pdfjs-dist 6.4.299): Apache License 2.0; esbuild 0.28.2 (the build tool): MIT; fast-check 4.10.2 and its
+  dependency pure-rand (property-based fuzzing, test/fuzz-properties.js): MIT
   (the npm test tools are listed with every dependency in package.json / package-lock.json and in
   test-environment.cdx.json)
 - matplotlib 3.10.7 (source of the AFM files of A.12; only lib/matplotlib/mpl-data/fonts/pdfcorefonts is

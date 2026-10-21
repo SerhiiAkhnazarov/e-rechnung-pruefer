@@ -29,6 +29,15 @@ Sicherheit – Schwachstellen gesucht und beseitigt
   gespeicherten Fassungen, die älter als sechs Monate sind.
 - Unabhängige Sicherheitsprüfung vor der Veröffentlichung: zwei Funde behoben, keine veröffentlichte Version betroffen
   (aktive Inhalte ohne lesbare Querverweistabelle nicht erkannt; EICAR-Erkennung auf 128 Byte begrenzt).
+- **Eigenschaftsbasiertes Fuzzing** (fast-check, neue Testreihe `fuzz`, `test/fuzz-properties.js`): 13 Eigenschaften
+  mit über 22 000 erzeugten Eingaben je Lauf (fester Startwert, reproduzierbar; ein Fehlschlag wird auf ein minimales
+  Gegenbeispiel verkleinert) – CSV-Dateien (kein eingeschleuster Zellen- oder Zeilenumbruch, keine ausführbare Formel,
+  auch für beliebige Texte in einer echten Rechnung durch die ganze Verarbeitung), angebotene Dateinamen, Einstufung
+  von Anlagen, Base64, ZIP-Inhaltsverzeichnisse, Zeichenkodierungen, beschädigte PDF-Dateien und Rechnungen. Dabei
+  gefunden und behoben (ohne Sicherheitsauswirkung): Angebotene Dateinamen konnten ungepaarte Surrogate enthalten (aus
+  UTF-16-Namen eingebetteter PDF-Dateien), nach dem Kürzen auf 120 Zeichen mit einem Punkt enden oder ein
+  Surrogatpaar trennen, und eine zweite Bereinigung änderte manche Namen erneut; Namen in ZIP-Archiven verloren ein
+  führendes U+FEFF.
 
 Sicherheitsinformationen, Stücklisten, Cyber Resilience Act
 - Richtlinie zur koordinierten Offenlegung nach BSI TR-03183-3 und ISO/IEC 29147 (`SECURITY.md`), Meldeseite,
@@ -47,12 +56,24 @@ Sicherheitsinformationen, Stücklisten, Cyber Resilience Act
 Lieferkette und Prüfumgebung
 - Alle GitHub Actions auf Commits festgelegt, Checkout ohne gespeicherte Anmeldedaten, geringste Rechte je Job;
   Node 22 und Java 21 in der jeweils neuesten Fassung; Testwerkzeuge in festen Versionen aus `package.json`, ohne
-  Installationsskripte (Playwright 1.64.1, pdf.js 6.4.299, esbuild 0.28.2).
+  Installationsskripte (Playwright 1.64.1, pdf.js 6.4.299, esbuild 0.28.2, fast-check 4.10.2).
+- Veröffentlichung ohne `workflow_run`: Die Seite auf GitHub Pages veröffentlicht der Job `pages` des Workflows
+  `verify` – nur bei einem Push auf main und nur, wenn alle Prüfjobs desselben Laufs bestanden sind (kein Workflow mit
+  Schreibrechten, den ein anderer startet; OpenSSF Scorecard „Dangerous-Workflow“). Die Testreihe `security` prüft alle
+  Workflows: keine Auslöser mit Schreibrechten für fremden Code, nur lesende Rechte auf oberster Ebene, kein Checkout
+  einer Referenz aus dem Ereignis, keine Ausdrücke in Skripten.
+- CodeQL-Ergebnisse jedes Commits als Check-Runs „code scanning (javascript-typescript)“ und „code scanning (actions)“
+  (Regel, Schwere, Fundstelle), über die REST-API lesbar.
+- Releases enthalten die Sigstore-Bundles der Herkunftsnachweise (`E-Rechnung-Pruefer-<Version>.intoto.jsonl`); jede
+  Datei wird vor dem Release dagegen geprüft (signiert vom Workflow `verify`), die Prüfung gelingt auch ohne GitHub-API.
+- Der Fingerabdruck der Prüfeingaben umfasst auch NOTICE, LICENSE, die Rechtstexte, CHANGELOG.md, die CSAF-Dokumente
+  und die Versionen der Testwerkzeuge.
 - Schwachstellensuche mit OSV-Scanner bei jedem Push und wöchentlich (Programm samt Vorläufern und Prüfumgebung;
   unbewertete Funde des Programms brechen ab; Check-Run „vulnerability scan“, Voraussetzung für ein Release); CodeQL
   für Programm und Workflows; OpenSSF Scorecard; Dependabot mit sieben Tagen Wartezeit.
-- Neue Testreihen `security` (441 Prüfungen) und `security-browser-*` (fünf Browser); `sbom` erweitert (494 Prüfungen);
-  `peppol-import-*` verlangt das dauerhafte Speichern der offiziellen Regelwerke.
+- Neue Testreihen `security` (465 Prüfungen), `security-browser-*` (fünf Browser) und `fuzz`; `sbom` erweitert
+  (494 Prüfungen); `peppol-import-*` verlangt das dauerhafte Speichern der offiziellen Regelwerke; `e2e-*` prüft,
+  dass das Stylesheet der Seite angewendet wird.
 
 ## 0.3.1 (2026-10-21)
 

@@ -3,7 +3,7 @@
  * make-sbom.cjs — the software bill of materials of the program (dist/E-Rechnung-Pruefer.html): CycloneDX 1.6 JSON,
  * dist/sbom.cdx.json, according to BSI TR-03183-2 v2.1.0 (2025-08-20) "Software Bill of Materials" and the NTIA
  * minimum elements; the SBOM of Annex I Part II No. 1 of Regulation (EU) 2024/2847. Called by
- * tools/build-standalone.cjs after the page is written; published with the page (pages.yml) and every release.
+ * tools/build-standalone.cjs after the page is written; published with the page (job pages of verify.yml) and every release.
  *
  * Level of detail: "delivery item SBOM" (TR 8.3.4, the minimum of TR 5.1): every component of the scope of delivery
  * (everything inside the HTML file) fully described and resolved recursively, the first component outside the scope of
