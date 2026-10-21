@@ -4,18 +4,17 @@
 # (page = BUILD_INFO.json, verification report of this commit from GitHub Actions with every suite passed,
 # standards manifest). Preconditions, checked before anything is created:
 #   - every check run of the commit passed: "verification report", "Windows report", "platform comparison",
-#     "veraPDF report", "KoSIT JAR vs. Maven Central", "pages report";
+#     "veraPDF report", "KoSIT JAR vs. Maven Central", "vulnerability scan", "pages report";
 #   - the version (first "## x.y.z" of CHANGELOG.md) has no release yet (tag vx.y.z).
-# Assets: E-Rechnung-Pruefer.html, BUILD_INFO.json, VERIFICATION.json, STANDARDS_MANIFEST.json, sbom.cdx.json, SHA256SUMS.txt
-# (GitHub adds the source code of the tag as zip and tar.gz). Release notes: the CHANGELOG section of the version.
+# Assets: E-Rechnung-Pruefer.html, BUILD_INFO.json, VERIFICATION.json, STANDARDS_MANIFEST.json, sbom.cdx.json, vex.cdx.json,
+# test-environment.cdx.json, SHA256SUMS.txt (GitHub adds the source code of the tag as zip and tar.gz); their build
+# provenance was attested when pages.yml published them (same bytes: gh attestation verify <file> -R <repository>).
+# Release notes: the CHANGELOG section of the version.
 # The result is recorded as check run "release report" of the commit.
 name: release
 on:
   workflow_dispatch:
-permissions:
-  contents: write
-  checks: write
-  pages: read
+permissions: {}
 concurrency:
   group: release
   cancel-in-progress: false
@@ -23,13 +22,19 @@ jobs:
   release:
     runs-on: ubuntu-24.04
     timeout-minutes: 20
+    permissions:
+      contents: write # the release and its tag
+      checks: write   # check run "release report"
+      pages: read     # URL of the site
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          persist-credentials: false
           ref: main
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: '22'
+          check-latest: true
       - name: Version, commit and preconditions
         id: pre
         env:
@@ -46,7 +51,7 @@ jobs:
           gh api "repos/${GITHUB_REPOSITORY}/commits/${SHA}/check-runs?per_page=100" --paginate \
             --jq '.check_runs[] | [.name, .conclusion, .completed_at, .html_url] | @tsv' > check-runs.tsv
           missing=0
-          for name in "verification report" "Windows report" "platform comparison" "veraPDF report" "KoSIT JAR vs. Maven Central" "pages report"; do
+          for name in "verification report" "Windows report" "platform comparison" "veraPDF report" "KoSIT JAR vs. Maven Central" "vulnerability scan" "pages report"; do
             row="$(awk -F '\t' -v n="${name}" '$1 == n' check-runs.tsv | sort -t "$(printf '\t')" -k3 | tail -n 1)"
             conclusion="$(printf '%s' "${row}" | cut -f2)"
             echo "${name}: ${conclusion:-missing} $(printf '%s' "${row}" | cut -f4)"
@@ -57,37 +62,51 @@ jobs:
           { echo "sha=${SHA}"; echo "version=${VERSION}"; echo "tag=${TAG}"; echo "page_url=${PAGE_URL}"; } >> "${GITHUB_OUTPUT}"
       - name: The published files of this commit (read back over HTTPS and checked)
         id: published
+        env:
+          PAGE_URL: ${{ steps.pre.outputs.page_url }}
+          SHA: ${{ steps.pre.outputs.sha }}
         run: |
           set -o pipefail
-          node tools/check-published.cjs "${{ steps.pre.outputs.page_url }}" --commit "${{ steps.pre.outputs.sha }}" --out release --retries 3 --wait 20 | tee published-check.txt
+          node tools/check-published.cjs "${PAGE_URL}" --commit "${SHA}" --out release --retries 3 --wait 20 | tee published-check.txt
       - name: Release notes (CHANGELOG section of the version)
+        env:
+          PAGE_URL: ${{ steps.pre.outputs.page_url }}
+          SHA: ${{ steps.pre.outputs.sha }}
+          VERSION: ${{ steps.pre.outputs.version }}
         run: |
           set -e
           {
-            awk -v v="${{ steps.pre.outputs.version }}" '/^## / { if (p) exit; if ($2 == v) { p = 1; next } } p' CHANGELOG.md
+            awk -v v="${VERSION}" '/^## / { if (p) exit; if ($2 == v) { p = 1; next } } p' CHANGELOG.md
             echo
             echo "---"
-            echo "Prüfnachweise dieses Stands (Commit ${{ steps.pre.outputs.sha }}): Check-Runs „verification report“, „Windows report“, „platform comparison“, „veraPDF report“, „KoSIT JAR vs. Maven Central“, „pages report“ – \`GET /repos/${GITHUB_REPOSITORY}/commits/${{ steps.pre.outputs.sha }}/check-runs\`."
-            echo "Die Datei E-Rechnung-Pruefer.html ist byte-gleich mit ${{ steps.pre.outputs.page_url }} (SHA-256 in SHA256SUMS.txt)."
+            echo "Prüfnachweise dieses Stands (Commit ${SHA}): Check-Runs „verification report“, „Windows report“, „platform comparison“, „veraPDF report“, „KoSIT JAR vs. Maven Central“, „vulnerability scan“, „pages report“ – \`GET /repos/${GITHUB_REPOSITORY}/commits/${SHA}/check-runs\`."
+            echo "Die Datei E-Rechnung-Pruefer.html ist byte-gleich mit ${PAGE_URL} (SHA-256 in SHA256SUMS.txt). Herkunftsnachweis: \`gh attestation verify E-Rechnung-Pruefer.html -R ${GITHUB_REPOSITORY}\`."
           } > release-notes.md
           cat release-notes.md
       - name: Create the release
         id: release
         env:
           GH_TOKEN: ${{ github.token }}
+          SHA: ${{ steps.pre.outputs.sha }}
+          VERSION: ${{ steps.pre.outputs.version }}
+          TAG: ${{ steps.pre.outputs.tag }}
         run: |
           set -e
-          gh release create "${{ steps.pre.outputs.tag }}" release/E-Rechnung-Pruefer.html release/BUILD_INFO.json release/VERIFICATION.json \
-            release/STANDARDS_MANIFEST.json release/sbom.cdx.json release/SHA256SUMS.txt \
-            --target "${{ steps.pre.outputs.sha }}" --title "E-Rechnung Prüfer ${{ steps.pre.outputs.version }}" --notes-file release-notes.md
-          gh release view "${{ steps.pre.outputs.tag }}" --json url,tagName,assets --jq '"release: " + .url, (.assets[] | .name + " " + (.size | tostring) + " bytes")' | tee release-view.txt
+          gh release create "${TAG}" release/E-Rechnung-Pruefer.html release/BUILD_INFO.json release/VERIFICATION.json \
+            release/STANDARDS_MANIFEST.json release/sbom.cdx.json release/vex.cdx.json release/test-environment.cdx.json release/SHA256SUMS.txt \
+            --target "${SHA}" --title "E-Rechnung Prüfer ${VERSION}" --notes-file release-notes.md
+          gh release view "${TAG}" --json url,tagName,assets --jq '"release: " + .url, (.assets[] | .name + " " + (.size | tostring) + " bytes")' | tee release-view.txt
       - name: Publish the result as check run "release report"
         if: always()
         env:
           GH_TOKEN: ${{ github.token }}
+          SHA: ${{ steps.pre.outputs.sha || github.sha }}
+          VERSION: ${{ steps.pre.outputs.version }}
+          TAG: ${{ steps.pre.outputs.tag }}
+          OUTCOME: ${{ steps.release.outcome }}
         run: |
           {
-            echo "commit: ${{ steps.pre.outputs.sha }}, version ${{ steps.pre.outputs.version }}, tag ${{ steps.pre.outputs.tag }}"
+            echo "commit: ${SHA}, version ${VERSION}, tag ${TAG}"
             cat check-runs.tsv 2>/dev/null | cut -f1,2 || true
             echo
             cat published-check.txt 2>/dev/null || true
@@ -96,7 +115,7 @@ jobs:
             cat release-view.txt 2>/dev/null || echo "no release created"
           } > release-report.txt
           rc=0
-          node .github/scripts/check-run.cjs --name "release report" --sha "${{ steps.pre.outputs.sha || github.sha }}" \
-            --gate "${{ steps.release.outcome }}" --gate-label "Release (gh release create)" --attach release-report.txt > check-run.json || rc=$?
+          node .github/scripts/check-run.cjs --name "release report" --sha "${SHA}" \
+            --gate "${OUTCOME}" --gate-label "Release (gh release create)" --attach release-report.txt > check-run.json || rc=$?
           gh api -X POST "repos/${GITHUB_REPOSITORY}/check-runs" --input check-run.json > /dev/null || echo "::warning::check run could not be published"
           exit "${rc}"

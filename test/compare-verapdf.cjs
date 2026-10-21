@@ -53,6 +53,11 @@ const PAIRS = [
   { id: 'embedded-file-mime', mode: 'exact', ours: ['PDFA3-EF-SUBTYPE'], levels: ['error'], match: (r) => r.clause === '6.8' && /Subtype|MIME/i.test(txt(r)) },
   { id: 'embedded-file-moddate', mode: 'report', ours: ['PDFA3-EF-PARAMS-MODDATE'], levels: ['warning'], match: (r) => r.clause === '6.8' && /ModDate|Params/.test(txt(r)) },
   { id: 'associated-files', mode: 'report', ours: ['PDFA3-AF-CATALOG', 'PDFA3-NAMETREE'], levels: ['error', 'warning'], match: (r) => r.clause === '6.8' && /\bAF\b|associat/i.test(txt(r)) && !/AFRelationship/.test(txt(r)) },
+  // active content (test/active-pdfs.cjs adds synthetic PDFs to the corpus of this comparison): ISO 19005-3 6.5.1 actions,
+  // 6.5.2 / 6.4.1 additional actions and widget/field actions; document JavaScript (name tree) has no veraPDF rule
+  { id: 'actions', mode: 'exact', ours: ['PDFA3-ACTIONS'], levels: ['error'], match: (r) => r.clause === '6.5.1' },
+  { id: 'additional-actions', mode: 'exact', ours: ['PDFA3-AA'], levels: ['error'], match: (r) => r.clause === '6.5.2' || r.clause === '6.4.1' },
+  { id: 'document-javascript', mode: 'report', ours: ['PDF-JAVASCRIPT'], levels: ['error'], match: () => false },
 ];
 
 function* desc(el) { for (const c of el.children) { yield c; yield* desc(c); } }
@@ -190,10 +195,13 @@ else if (opt('--flavour-lists')) {
   const dir = opt('--flavour-lists'), root = opt('--root') || '.';
   fs.mkdirSync(dir, { recursive: true });
   const lists = { '3b': [], '3u': [], '3a': [] };
+  // keys "<extra-root-name>/<file>" (test/run-pdfa3-tests.cjs Part 4: build/corpus/active-content) live outside the corpus
+  const extra = ours.extraRoots || {};
+  const fileOf = (k) => { const top = k.split('/')[0]; return extra[top] ? path.join(extra[top], k.slice(top.length + 1)) : path.join(root, k); };
   for (const [k, v] of Object.entries(ours.corpus)) {
-    lists['3b'].push(path.join(root, k)); // every PDF is validated as PDF/A-3B (the minimum ZUGFeRD/Factur-X requires)
+    lists['3b'].push(fileOf(k)); // every PDF is validated as PDF/A-3B (the minimum ZUGFeRD/Factur-X requires)
     const c = v.facts && v.facts.pdfaid && v.facts.pdfaid.part === '3' ? String(v.facts.pdfaid.conformance || '').toLowerCase() : '';
-    if (c === 'u' || c === 'a') lists['3' + c].push(path.join(root, k));
+    if (c === 'u' || c === 'a') lists['3' + c].push(fileOf(k));
   }
   for (const [f, l] of Object.entries(lists)) { fs.writeFileSync(path.join(dir, f + '.list'), l.map((x) => x + '\0').join('')); console.log(f + ': ' + l.length + ' PDFs' + (f === '3b' ? ' (all)' : ' claim PDF/A-' + f.toUpperCase())); }
 } else {

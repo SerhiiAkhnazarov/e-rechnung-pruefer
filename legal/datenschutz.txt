@@ -20,6 +20,15 @@ Privacy Framework teil (Angemessenheitsbeschluss der Europäischen Kommission vo
 Näheres: Datenschutzerklärung von GitHub, docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement.
 Die heruntergeladene Datei E-Rechnung-Pruefer.html arbeitet ohne Netzwerkverbindung.
 
+Meldungen von Schwachstellen und andere Anfragen: Wenn Sie uns per E-Mail schreiben oder eine Schwachstelle über
+GitHub melden („Report a vulnerability“), verarbeiten wir Ihre Angaben (Name oder Pseudonym, E-Mail-Adresse oder
+Telefonnummer, Inhalt der Meldung) nur, um die Meldung zu bearbeiten und den Vorgang zu dokumentieren (Art. 6 Abs. 1
+lit. f DSGVO: berechtigtes Interesse an der Sicherheit des Prüfers), und geben sie ohne Ihre ausdrückliche Zustimmung
+nicht an Dritte weiter; genannt werden Sie in den Danksagungen nur mit Ihrer Einwilligung (Art. 6 Abs. 1 lit. a
+DSGVO). Wir speichern die Angaben, solange es für die Bearbeitung und Dokumentation des Vorgangs nötig ist. E-Mails an
+die angegebene Adresse stellt der Dienst Gmail zu (Google Ireland Limited, Gordon House, Barrow Street, Dublin 4,
+Irland; Google nimmt am EU-U.S. Data Privacy Framework teil), Meldungen über GitHub verarbeitet GitHub (siehe oben).
+
 Ihre Rechte: Sie haben das Recht auf Auskunft (Art. 15 DSGVO), Berichtigung (Art. 16), Löschung (Art. 17),
 Einschränkung der Verarbeitung (Art. 18), Datenübertragbarkeit (Art. 20) und Widerspruch (Art. 21). Sie können
 sich bei einer Datenschutz-Aufsichtsbehörde beschweren, insbesondere in dem Mitgliedstaat Ihres gewöhnlichen Aufenthaltsorts, Ihres Arbeitsplatzes oder des Orts des mutmaßlichen

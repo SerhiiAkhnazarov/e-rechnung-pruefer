@@ -22,4 +22,6 @@ for p in MINIMUM BASIC-WL BASIC EN16931 EXTENDED; do $C "$ZF/FACTUR-X_$p.sch" "$
 if [ -d "$EXT/peppol-bis-invoice-3" ]; then
   $C "$EXT/peppol-bis-invoice-3/rules/sch/PEPPOL-EN16931-UBL.sch" "$O/PEPPOL-UBL.json" --id PEPPOL-UBL
   $C "$EXT/peppol-bis-invoice-3/rules/sch/PEPPOL-EN16931-CII.sch" "$O/PEPPOL-CII.json" --id PEPPOL-CII
+  # hashes of the compiled Peppol rule sets for the integrity check of stored rule sets in the page (committed)
+  [ -n "$OUT_DIR" ] || node "$HERE/tools/importable-hashes.cjs"
 fi

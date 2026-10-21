@@ -105,9 +105,11 @@ D. Used only for building and verification (fetched by tools/fetch-sources.cjs o
 - KoSIT validator 1.6.3 (standalone JAR, reference): Apache License 2.0, https://github.com/itplr-kosit/validator
 - ISO Schematron XSLT2 skeleton 2010-07-10 (via phax/ph-schematron): MIT-style licence of the skeleton,
   ph-schematron Apache License 2.0
-- Playwright 1.56.0: Apache License 2.0; the browser builds it installs from the Playwright CDN (Chromium,
+- Playwright 1.64.1: Apache License 2.0; the browser builds it installs from the Playwright CDN (Chromium,
   WebKit, Firefox) are used under their own licences and are not redistributed
-- pdf.js (pdfjs-dist 6.2.108): Apache License 2.0; esbuild 0.28.2 (the build tool): MIT
+- pdf.js (pdfjs-dist 6.4.299): Apache License 2.0; esbuild 0.28.2 (the build tool): MIT
+  (the npm test tools are listed with every dependency in package.json / package-lock.json and in
+  test-environment.cdx.json)
 - matplotlib 3.10.7 (source of the AFM files of A.12; only lib/matplotlib/mpl-data/fonts/pdfcorefonts is
   fetched): matplotlib licence (PSF-based), https://github.com/matplotlib/matplotlib; the AFM files carry
   Adobe's own terms (E.14)
@@ -119,7 +121,14 @@ D. Used only for building and verification (fetched by tools/fetch-sources.cjs o
   code: Apache License 2.0
 - CycloneDX specification 1.6.2 (JSON schemas bom-1.6, spdx, jsf-0.82; https://github.com/CycloneDX/specification):
   Apache License 2.0; Python package jsonschema (MIT) – validation of the software bill of materials
-  (dist/sbom.cdx.json, tools/make-sbom.cjs) in the test suite sbom
+  (dist/sbom.cdx.json, tools/make-sbom.cjs) and of the VEX document in the test suite sbom
+- OASIS CSAF 2.0 JSON schemas (csaf_json_schema, provider_json_schema; https://github.com/oasis-tcs/csaf): OASIS IPR
+  Policy (Non-Assertion Mode); FIRST CVSS JSON schemas 2.0, 3.0, 3.1 (FIRST.ORG, Inc., BSD-style licence in the
+  files) – validation of the security advisories (security/csaf/, tools/make-csaf.cjs) in the test suite security
+- OSV-Scanner 2.7.0 (https://github.com/google/osv-scanner, release binary, SHA-256 checked): Apache License 2.0 –
+  search for known vulnerabilities in the workflows verify and security (tools/osv-scan.cjs)
+- GitHub Actions of the workflows (actions/*, github/codeql-action, ossf/scorecard-action; MIT / Apache License 2.0),
+  pinned to commits (listed in test-environment.cdx.json)
 - Test corpora: KoSIT xrechnung-testsuite (Apache 2.0), ZUGFeRD/corpus (Apache 2.0), CEN test files (EUPL-1.2),
   Peppol examples and unit tests (used as test input only, not redistributed)
 

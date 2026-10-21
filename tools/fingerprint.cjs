@@ -81,7 +81,10 @@ function compute(opts) {
     scenarios: ['build/scenarios.json'].concat(fs.existsSync(path.join(root, 'build', 'rulesets.json')) ? ['build/rulesets.json'] : []),
     // umsatzsteuerliche Einordnung: the legal table and the syntax binding derived from the KoSIT visualization
     legal: filesIn('legal', (f) => f.endsWith('.json')).concat(['build/bt-paths.json']),
-    tools: filesIn('tools', (f) => /\.(cjs|sh)$/.test(f)).concat(filesUnder('tools/verapdf')),
+    // texts and data rendered into the page and the static pages of the site (security information, CVD policy,
+    // security.txt), the VEX statements and the hashes of the importable Peppol rule sets (integrity of stored rule sets)
+    content: ['SECURITY.md'].concat(filesIn('docs', (f) => /^(BENUTZERINFORMATION|SCHWACHSTELLE-MELDEN|DANKSAGUNGEN)\.md$/.test(f)), filesIn('security', (f) => f.endsWith('.json')), ['build/importable.json']),
+    tools:filesIn('tools', (f) => /\.(cjs|sh)$/.test(f)).concat(filesUnder('tools/verapdf')),
     tests: filesUnder('test', (f) => !f.endsWith('.class')),  // scripts, oracles' sources, expectations, test schemas
     // dist/ is not an input: it is generated from the groups above by tools/build-standalone.cjs and
     // embeds the verification status itself (it would otherwise change the fingerprint it reports)

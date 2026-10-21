@@ -1,0 +1,17 @@
+{
+  "_comment": "tools/importable-hashes.cjs: SHA-256 of the official Peppol BIS rule files (manifest) and of the rule sets compiled from them (canonical JSON without sources/importedFrom); used by the page to verify a stored rule set",
+  "ruleSets": {
+    "PEPPOL-UBL": {
+      "file": "PEPPOL-EN16931-UBL.sch",
+      "sourceSha256": "62e5b67892f12755352d78b06f63229a02cc2eccc748677c56efbc8dbcb336e3",
+      "compiledSha256": "2619243085246fb89e50d136f6a5da0de897f1e4962f93492f4c479d50f49b2e",
+      "asserts": 165
+    },
+    "PEPPOL-CII": {
+      "file": "PEPPOL-EN16931-CII.sch",
+      "sourceSha256": "7678c3cd4a219095ef5d4f2ece17e5d447eb92655e57a7d52290b35acfdc9dd8",
+      "compiledSha256": "9bcfee19e89a9d6f7a27b62897fb9ec8239b7ccf08f5cdaca8bb02fcc68d6a83",
+      "asserts": 91
+    }
+  }
+}

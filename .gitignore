@@ -1,4 +1,6 @@
 node_modules/
+# (also a symbolic link to an installation elsewhere)
+/node_modules
 build/corpus/
 build/oracle/
 build/shots/

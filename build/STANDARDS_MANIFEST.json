@@ -1,5 +1,5 @@
 {
-  "generated": "2026-10-21T07:35:40.131Z",
+  "generated": "2026-10-21T17:38:56.328Z",
   "generator": "tools/make-manifest.cjs",
   "sources": {
     "CEN eInvoicing-EN16931 (validation artefacts 1.3.16)": {
@@ -608,7 +608,48 @@
           "bytes": 11341
         }
       ],
-      "note": "test/run-sbom-tests.cjs validates dist/sbom.cdx.json (tools/make-sbom.cjs) against bom-1.6.schema.json with the Python package jsonschema (test/sbom-oracle/validate_cdx.py, Draft 7 with format checks); the schemas are not contained in the program or the repository."
+      "note": "test/run-sbom-tests.cjs validates dist/sbom.cdx.json (tools/make-sbom.cjs) and dist/vex.cdx.json (tools/make-vex.cjs) against bom-1.6.schema.json with the Python package jsonschema (test/sbom-oracle/validate_cdx.py, Draft 7 with format checks); the schemas are not contained in the program or the repository."
+    },
+    "OASIS CSAF 2.0 (JSON schemas of the OASIS Standard incl. Errata 01 and the FIRST CVSS schemas they reference; validation of the security advisories in the tests only, not shipped)": {
+      "path": "csaf",
+      "remote": "https://github.com/oasis-tcs/csaf",
+      "commit": "161045c5d2c753498de986a016c7c78e753da441",
+      "describe": "csaf-2.1-csd-03-20260911-rc1-74-g161045c5",
+      "commitDate": "2026-10-12T09:55:15+02:00",
+      "licence": "OASIS IPR Policy (Non-Assertion Mode), csaf_2.0/LICENSE.md; CVSS JSON schemas: FIRST.ORG, Inc. (BSD-style licence in the files)",
+      "files": [
+        {
+          "file": "csaf/csaf_2.0/json_schema/csaf_json_schema.json",
+          "sha256": "29c114b35b0a30831f1674f2ab8b3ed9b2890cfeaa63b924ac6ed9d70ef44262",
+          "bytes": 57152
+        },
+        {
+          "file": "csaf/csaf_2.0/json_schema/provider_json_schema.json",
+          "sha256": "0270d0cfadf5202ff83a63502012a407e0e8ec3194a07296f13641c9f5630aba",
+          "bytes": 7365
+        },
+        {
+          "file": "csaf/csaf_2.0/referenced_schema/first/cvss-v2.0.json",
+          "sha256": "cd1a7c0815b7a47dc12fb7dded10622b96d562841f7bc6d2d8765c5d937a28f2",
+          "bytes": 5662
+        },
+        {
+          "file": "csaf/csaf_2.0/referenced_schema/first/cvss-v3.0.json",
+          "sha256": "b2b587e5dfa6d9a4be89e25cb593df04f14e7ffbe8fe5b167ceee17b6097d919",
+          "bytes": 7587
+        },
+        {
+          "file": "csaf/csaf_2.0/referenced_schema/first/cvss-v3.1.json",
+          "sha256": "77ff3df106e4588e2bb5c9cf0237f962c62d35c5002443c4bf7cc7ca16ee171f",
+          "bytes": 7588
+        },
+        {
+          "file": "csaf/csaf_2.0/LICENSE.md",
+          "sha256": "12619b43b0c131326b650cef0eb32db016ab9e2d6c0bd83c537fd39bb24ed94e",
+          "bytes": 1372
+        }
+      ],
+      "note": "test/run-security-tests.cjs validates every CSAF document of security/csaf/ and the generated provider-metadata.json (tools/make-csaf.cjs) against these schemas (test/sbom-oracle/validate_csaf.py, JSON Schema 2020-12 with format checks) and runs the mandatory tests of CSAF 2.0 section 6.1 that apply to them; the schemas are not contained in the program or the repository."
     },
     "Release artefacts (fetched by tools/fetch-sources.cjs, SHA-256 checked before use; local runs and CI)": {
       "artefacts": [

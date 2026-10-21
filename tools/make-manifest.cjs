@@ -137,7 +137,12 @@ const sources = {
   'CycloneDX specification 1.6.2 (JSON schemas; validation of the SBOM in the tests only, not shipped)': Object.assign(repoInfo(E('cyclonedx-specification')), {
     licence: 'Apache-2.0',
     files: ['schema/bom-1.6.schema.json', 'schema/spdx.schema.json', 'schema/jsf-0.82.schema.json', 'LICENSE'].map((f) => fileEntry(E('cyclonedx-specification') + '/' + f)),
-    note: 'test/run-sbom-tests.cjs validates dist/sbom.cdx.json (tools/make-sbom.cjs) against bom-1.6.schema.json with the Python package jsonschema (test/sbom-oracle/validate_cdx.py, Draft 7 with format checks); the schemas are not contained in the program or the repository.',
+    note: 'test/run-sbom-tests.cjs validates dist/sbom.cdx.json (tools/make-sbom.cjs) and dist/vex.cdx.json (tools/make-vex.cjs) against bom-1.6.schema.json with the Python package jsonschema (test/sbom-oracle/validate_cdx.py, Draft 7 with format checks); the schemas are not contained in the program or the repository.',
+  }),
+  'OASIS CSAF 2.0 (JSON schemas of the OASIS Standard incl. Errata 01 and the FIRST CVSS schemas they reference; validation of the security advisories in the tests only, not shipped)': Object.assign(repoInfo(E('csaf')), {
+    licence: 'OASIS IPR Policy (Non-Assertion Mode), csaf_2.0/LICENSE.md; CVSS JSON schemas: FIRST.ORG, Inc. (BSD-style licence in the files)',
+    files: ['csaf_2.0/json_schema/csaf_json_schema.json', 'csaf_2.0/json_schema/provider_json_schema.json', 'csaf_2.0/referenced_schema/first/cvss-v2.0.json', 'csaf_2.0/referenced_schema/first/cvss-v3.0.json', 'csaf_2.0/referenced_schema/first/cvss-v3.1.json', 'csaf_2.0/LICENSE.md'].map((f) => fileEntry(E('csaf') + '/' + f)),
+    note: 'test/run-security-tests.cjs validates every CSAF document of security/csaf/ and the generated provider-metadata.json (tools/make-csaf.cjs) against these schemas (test/sbom-oracle/validate_csaf.py, JSON Schema 2020-12 with format checks) and runs the mandatory tests of CSAF 2.0 section 6.1 that apply to them; the schemas are not contained in the program or the repository.',
   }),
   'Release artefacts (fetched by tools/fetch-sources.cjs, SHA-256 checked before use; local runs and CI)': {
     artefacts: [

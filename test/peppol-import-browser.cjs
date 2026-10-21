@@ -81,6 +81,10 @@ const check = (ok, msg) => { console.log((ok ? '  ok   ' : '  FAIL ') + msg); if
   await page.waitForSelector('#ruleimport input[type=file]', { state: 'attached' });
   const persisted = await page.evaluate(() => Object.keys(window.PrueferApp.imported).sort().join(','));
   console.log('  info persisted after reload: ' + (persisted || '(none – browser has no localStorage for file:// pages)'));
+  // where the browser offers storage to file:// pages, the official rule sets are kept: the rule set compiled in the
+  // browser is byte for byte the one compiled by Node (its SHA-256 is in the page, build/importable.json)
+  const storage = await page.evaluate(() => { try { localStorage.setItem('__probe', '1'); localStorage.removeItem('__probe'); return true; } catch (e) { return false; } });
+  if (storage) check(persisted === 'PEPPOL-CII,PEPPOL-UBL', 'official rule sets kept in the browser storage across a reload (compiled in the browser = compiled by Node, integrity check of src/app.js)');
 
   // documents with the imported rules = Node with all rule sets
   if (persisted !== 'PEPPOL-CII,PEPPOL-UBL') {

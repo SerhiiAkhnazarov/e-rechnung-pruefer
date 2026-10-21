@@ -369,7 +369,35 @@
       result.kind = 'xml';
       xmlBytes = bytes;
     }
-    const finish = (assessment) => {
+    // files offered for download (embedded in the PDF, attachments BG-24): classified once (src/file-safety.js), the
+    // decoded attachment bytes are kept with the model (not serialised) for the download in the app
+    const classifyFiles = async () => {
+      const FS = env.FileSafety;
+      if (!FS) return;
+      const active = async (bytes) => {
+        if (!env.PdfA3Checks || !env.PdfA3Checks.activeContent || bytes.length > 64 * 1024 * 1024) return null;
+        try { return env.PdfA3Checks.activeContent(await env.PdfEmbedded.loadDocument(bytes, [])); } catch (e) { return null; }
+      };
+      const judge = async (bytes, name, mime) => {
+        const c = FS.classify(bytes, name, mime);
+        if (c.detected === 'pdf') FS.addPdfFindings(c, await active(bytes));
+        return { risk: c.risk, type: c.type, detected: c.detected, reasons: c.reasons, downloadName: c.downloadName };
+      };
+      if (result.pdf && result.pdf.files) {
+        for (let i = 0; i < result.pdf.files.length; i++) result.pdf.attachments[i].safety = await judge(result.pdf.files[i].bytes, result.pdf.files[i].name, result.pdf.files[i].mimeType);
+      }
+      if (result.model && result.model.attachments && result.model.attachments.length) {
+        result.attachmentSafety = [];
+        for (const [i, a] of result.model.attachments.entries()) {
+          if (!a.base64) { result.attachmentSafety.push(null); continue; }
+          const bytes = FS.decodeBase64(a.base64);
+          Object.defineProperty(a, 'bytes', { value: bytes, enumerable: false, configurable: true });
+          result.attachmentSafety.push(await judge(bytes, a.file || ('Anlage_' + (i + 1)), a.mime));
+        }
+      }
+    };
+    const finish = async (assessment) => {
+      await classifyFiles();
       result.assessment = assessment;
       result.findings = result.findings || [];
       result.processingErrors = result.processingErrors || [];

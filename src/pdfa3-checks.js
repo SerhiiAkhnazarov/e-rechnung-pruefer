@@ -3,8 +3,8 @@
  * XRechnung in PDF): the requirements of the ZUGFeRD / Factur-X specification and of PDF/A-3
  * (ISO 19005-3) that can be decided from the PDF object structure and the XMP metadata alone.
  *
- * NOT a PDF/A validator: fonts, colour spaces, transparency, annotations, actions, the complete XMP
- * rules etc. need veraPDF (see docs/PDFA3-CHECKS.md and the CI job "pdfa-verapdf"); every report
+ * NOT a PDF/A validator: fonts, colour spaces, transparency, annotations, the complete XMP rules etc.
+ * need veraPDF (actions and additional actions, ISO 19005-3 6.4.1 / 6.5, are checked here) (see docs/PDFA3-CHECKS.md and the CI job "pdfa-verapdf"); every report
  * says so in the info item PDFA3-FULL-VALIDATION.
  *
  * Sources of every rule (file/line citations): docs/PDFA3-CHECKS.md and the `reference` field of
@@ -103,6 +103,11 @@
     'PDFA3-DESC': { level: 'info', title: 'Dateispezifikation mit /Desc (optional)', reference: 'ISO 32000-1, 7.11.3 (Desc optional); Mustang setzt /Desc: ' + ME + ' Z. 409' },
     'PDFA3-EF-SUBTYPE': { level: 'error', title: 'EmbeddedFile-Strom mit /Subtype (MIME-Typ); Rechnung: text/xml (/text#2Fxml)', reference: REF.iso + ', 6.8 (MIME-Typ Pflicht); text/xml: ' + REF.spec + ', Mustang ' + ME + ' Z. 707–708 und Z. 415' },
     'PDFA3-EF-PARAMS-MODDATE': { level: 'warning', title: 'EmbeddedFile-Strom mit /Params /ModDate', reference: REF.spec + ' (Änderungsdatum der Anlage); Mustang setzt ModDate immer: ' + ME + ' Z. 419; ob ISO 19005-3 dies verlangt, zeigt der veraPDF-Vergleich im CI' },
+    // active content: ISO 19005-3 6.5.1 (veraPDF PDFA-3 rules 6.5.1-1, 6.5.1-2), 6.5.2 (6.5.2-1, 6.5.2-2) and 6.4.1 (6.4.1-1, 6.4.1-2);
+    // security-relevant as well: JavaScript runs and Launch starts programs when the PDF is opened in a reader that allows it
+    'PDFA3-ACTIONS': { level: 'error', title: 'Keine unzulässigen Aktionen (u. a. JavaScript, Launch, ImportData, ResetForm; benannte Aktionen nur NextPage, PrevPage, FirstPage, LastPage)', reference: REF.iso + ', 6.5.1 (veraPDF-Regeln 6.5.1-1 und 6.5.1-2); erfasst werden die Aktionen, die vom Dokumentkatalog aus erreichbar sind: /OpenAction, /AA, Namensbaum /JavaScript, Seiten, Annotationen, Lesezeichen, Formularfelder, /Next-Ketten' },
+    'PDF-JAVASCRIPT': { level: 'error', title: 'Kein JavaScript auf Dokumentebene (Namensbaum /Names /JavaScript)', reference: REF.iso + ', 6.5.1 verbietet JavaScript-Aktionen; veraPDF erfasst den Namensbaum /JavaScript nicht (Objektmodell PDDocument ohne /Names), daher eigene Prüfung; ISO 32000-1, 7.7.4 (Name dictionary, JavaScript)' },
+    'PDFA3-AA': { level: 'error', title: 'Keine Zusatzaktionen (/AA) in Katalog, Seiten und Formularfeldern; Widget-Annotationen ohne /A und /AA', reference: REF.iso + ', 6.5.2 (veraPDF-Regeln 6.5.2-1, 6.5.2-2) und 6.4.1 (6.4.1-1, 6.4.1-2)' },
     'PDFA3-FULL-VALIDATION': { level: 'info', title: 'Keine vollständige Prüfung gegen ISO 19005-3', reference: 'docs/PDFA3-CHECKS.md, Abschnitt „Nicht geprüft“; vollständige Prüfung: veraPDF (CI-Job pdfa-verapdf); Mustang verwendet dafür veraPDF: ' + MV + ' Z. 97–137' },
   };
 
@@ -252,6 +257,129 @@
   // ---------------------------------------------------------------------------------------------
   // Main
   // ---------------------------------------------------------------------------------------------
+  // ---------------------------------------------------------------------------------------------
+  // Active content: the actions reachable from the document catalog (as veraPDF's PDAction objects)
+  // ---------------------------------------------------------------------------------------------
+  // veraPDF PDFA-3 profile, rule 6.5.1-1: S == "GoTo" || "GoToR" || "GoToE" || "Thread" || "URI" || "Named" || "SubmitForm"
+  const ALLOWED_ACTIONS = new Set(['GoTo', 'GoToR', 'GoToE', 'Thread', 'URI', 'Named', 'SubmitForm']);
+  // rule 6.5.1-2
+  const ALLOWED_NAMED = new Set(['NextPage', 'PrevPage', 'FirstPage', 'LastPage']);
+  const LIMIT = 100000;
+  /**
+   * activeContent(doc) -> { actions: [{type, where}], forbidden: [{type, where}], named: [{name, where}],
+   *   aa: [where], widgetA: [where], nameTreeJavaScript: [name], javascript, launch, submitForm, openAction }
+   * The actions are those of veraPDF's object model (PDDocument: OpenAction, AA, Outlines, Pages -> Annots (A, AA),
+   * AcroForm -> fields (AA, Kids); PDAction: Next); the JavaScript name tree is collected separately.
+   * doc = PdfEmbedded.loadDocument(bytes). Bounded (cycles, depth, number of objects).
+   */
+  /** the document catalog: /Root of the trailer, or – scan fallback without a usable cross-reference table, as
+   * PdfEmbedded.loadDocument does it – the last object with /Type /Catalog */
+  function catalogOf(doc) {
+    const resolve = doc.resolve;
+    if (doc.trailer) return resolve(doc.trailer.get('Root'));
+    let best = null;
+    for (const o of doc.objects.values()) if (o.dict && nameOf(resolve(o.dict.get('Type'))) === 'Catalog' && (!best || o.offset > best.offset)) best = o;
+    return best ? best.dict : null;
+  }
+
+  function activeContent(doc) {
+    const resolve = doc.resolve;
+    const out = { actions: [], forbidden: [], named: [], aa: [], widgetA: [], nameTreeJavaScript: [], javascript: false, launch: false, submitForm: false, openAction: null };
+    const seenActions = new Set();
+    let budget = LIMIT;
+    const visitAction = (v, where, depth) => {
+      depth = depth || 0;
+      if (depth > 64 || budget-- <= 0) return;
+      const a = resolve(v);
+      if (Array.isArray(a)) { for (const x of a.slice(0, 1000)) visitAction(x, where, depth + 1); return; }
+      if (!(a instanceof Map) || seenActions.has(a)) return;
+      seenActions.add(a);
+      const type = nameOf(resolve(a.get('S')));
+      if (!type) return;
+      out.actions.push({ type, where });
+      if (type === 'JavaScript') out.javascript = true;
+      if (type === 'Launch') out.launch = true;
+      if (type === 'SubmitForm') out.submitForm = true;
+      if (!ALLOWED_ACTIONS.has(type)) out.forbidden.push({ type, where });
+      else if (type === 'Named') { const n = nameOf(resolve(a.get('N'))); if (!ALLOWED_NAMED.has(n)) out.named.push({ name: n || '?', where }); }
+      if (a.has('Next')) visitAction(a.get('Next'), where + ' → /Next', depth + 1);
+    };
+    const visitAA = (dict, where, record) => {
+      const aa = resolve(dict.get('AA'));
+      if (!(aa instanceof Map)) return;
+      if (record) out.aa.push(where);
+      for (const [k, v] of aa) visitAction(v, where + ' /AA /' + k);
+    };
+    // also without a usable cross-reference table (scan fallback): active content must not escape the check
+    const catalog = catalogOf(doc);
+    if (!(catalog instanceof Map)) return out;
+    const oa = resolve(catalog.get('OpenAction'));
+    if (oa instanceof Map) { out.openAction = nameOf(resolve(oa.get('S'))); visitAction(oa, 'Katalog /OpenAction'); }
+    if (catalog.has('AA')) visitAA(catalog, 'Katalog', true);
+    // page tree (inherited nodes: /Kids), with the annotations of every page
+    const pages = [];
+    const seenNodes = new Set();
+    const walkPages = (node, depth) => {
+      const n = resolve(node);
+      if (!(n instanceof Map) || seenNodes.has(n) || depth > 64 || pages.length >= LIMIT) return;
+      seenNodes.add(n);
+      const kids = resolve(n.get('Kids'));
+      if (Array.isArray(kids)) { for (const k of kids) walkPages(k, depth + 1); return; }
+      pages.push(n);
+    };
+    walkPages(catalog.get('Pages'), 0);
+    pages.forEach((page, i) => {
+      const label = 'Seite ' + (i + 1);
+      if (page.has('AA')) visitAA(page, label, true);
+      const annots = resolve(page.get('Annots'));
+      if (!Array.isArray(annots)) return;
+      for (const an of annots.slice(0, 10000)) {
+        const d = resolve(an);
+        if (!(d instanceof Map)) continue;
+        const sub = nameOf(resolve(d.get('Subtype'))) || '?';
+        const where = label + ', Annotation /' + sub;
+        if (d.has('A')) { if (sub === 'Widget') out.widgetA.push(where); visitAction(d.get('A'), where); }
+        if (d.has('AA')) visitAA(d, where, sub === 'Widget');
+      }
+    });
+    // outline (bookmarks)
+    const outlines = resolve(catalog.get('Outlines'));
+    const seenOutline = new Set();
+    const walkOutline = (item, depth) => {
+      let it = resolve(item);
+      let guard = 0;
+      while (it instanceof Map && !seenOutline.has(it) && guard++ < 10000 && depth <= 64) {
+        seenOutline.add(it);
+        if (it.has('A')) visitAction(it.get('A'), 'Lesezeichen');
+        if (it.has('First')) walkOutline(it.get('First'), depth + 1);
+        it = resolve(it.get('Next'));
+      }
+    };
+    if (outlines instanceof Map) walkOutline(outlines.get('First'), 0);
+    // interactive form fields (6.4.1-2: no /AA in field dictionaries)
+    const acro = resolve(catalog.get('AcroForm'));
+    const seenFields = new Set();
+    const walkFields = (f, depth, path) => {
+      const d = resolve(f);
+      if (!(d instanceof Map) || seenFields.has(d) || depth > 64 || seenFields.size > LIMIT) return;
+      seenFields.add(d);
+      const nm = pdfString(resolve(d.get('T')));
+      const where = 'Formularfeld ' + (path ? path + '.' : '') + (nm || '?');
+      if (d.has('AA')) visitAA(d, where, true);
+      const kids = resolve(d.get('Kids'));
+      if (Array.isArray(kids)) for (const k of kids) walkFields(k, depth + 1, (path ? path + '.' : '') + (nm || '?'));
+    };
+    if (acro instanceof Map) { const fields = resolve(acro.get('Fields')); if (Array.isArray(fields)) for (const f of fields.slice(0, 10000)) walkFields(f, 0, ''); }
+    // document-level JavaScript (name tree /Names /JavaScript): runs when the document is opened. Not part of veraPDF's
+    // object model (PDDocument links OpenAction, AA, Outlines, Pages, AcroForm – no Names), so it is a check of its own
+    const names = resolve(catalog.get('Names'));
+    if (names instanceof Map && names.has('JavaScript')) {
+      for (const [key] of nameTreeEntries(names.get('JavaScript'), resolve).slice(0, 1000)) out.nameTreeJavaScript.push(key || '?');
+      if (out.nameTreeJavaScript.length) out.javascript = true;
+    }
+    return out;
+  }
+
   async function checkContainer(bytes, opts) {
     opts = opts || {};
     if (!(bytes instanceof Uint8Array)) bytes = new Uint8Array(bytes);
@@ -286,13 +414,10 @@
     const doc = await PdfEmbedded.loadDocument(bytes, []);
     const resolve = doc.resolve;
     facts.method = doc.method;
-    let catalog = doc.trailer ? resolve(doc.trailer.get('Root')) : null;
+    // scan fallback (no trailer dictionary through the xref): the last /Type /Catalog object (catalogOf)
+    let catalog = catalogOf(doc);
     let encrypted = !!(doc.trailer && doc.trailer.has('Encrypt'));
     if (!doc.trailer) {
-      // scan fallback: no trailer dictionary through the xref; take the last /Type /Catalog object
-      let best = null;
-      for (const o of doc.objects.values()) if (o.dict && nameOf(resolve(o.dict.get('Type'))) === 'Catalog' && (!best || o.offset > best.offset)) best = o;
-      catalog = best ? best.dict : null;
       // trailer dictionaries ("trailer << ... >>") are searched textually
       encrypted = /trailer\s*<<[\s\S]{0,4096}?\/Encrypt\b/.test(U.latin1(bytes, Math.max(0, bytes.length - 65536), bytes.length));
       for (const o of doc.objects.values()) if (o.dict && nameOf(resolve(o.dict.get('Type'))) === 'XRef' && o.dict.has('Encrypt')) encrypted = true;
@@ -535,11 +660,29 @@
       else pass('PDFA3-EF-PARAMS-MODDATE');
     }
 
-    add('PDFA3-FULL-VALIDATION', 'info', 'Geprüft wurden nur die Container-Anforderungen von ZUGFeRD/Factur-X und die strukturell entscheidbaren PDF/A-3-Regeln. Eine vollständige Prüfung gegen ISO 19005-3 (Schriften, Farbräume, Transparenz, Annotationen, Aktionen, vollständige XMP-Regeln u. a.) wurde NICHT durchgeführt; dafür ist ein PDF/A-Validator wie veraPDF nötig.');
+    // --- active content (actions) ------------------------------------------------------------------
+    const active = activeContent(doc);
+    facts.active = { javascript: active.javascript, launch: active.launch, submitForm: active.submitForm, openAction: active.openAction, actions: active.actions.length, forbidden: active.forbidden.map((x) => x.type), aa: active.aa.length + active.widgetA.length, nameTreeJavaScript: active.nameTreeJavaScript.length };
+    const listOf = (arr, f) => { const shown = arr.slice(0, 5).map(f); return shown.join('; ') + (arr.length > 5 ? '; … (insgesamt ' + arr.length + ')' : ''); };
+    if (!catalog) { na('PDFA3-ACTIONS'); na('PDFA3-AA'); na('PDF-JAVASCRIPT'); }
+    else {
+      if (active.forbidden.length || active.named.length) {
+        const js = active.javascript ? ' Das PDF enthält JavaScript, das ein PDF-Programm beim Öffnen oder bei Bedienung ausführen kann.' : '';
+        const la = active.launch ? ' Eine Launch-Aktion kann ein Programm starten oder eine Datei öffnen.' : '';
+        add('PDFA3-ACTIONS', 'error', 'Unzulässige Aktionen: ' + listOf(active.forbidden.map((x) => '/' + x.type + ' (' + x.where + ')').concat(active.named.map((x) => 'benannte Aktion /' + x.name + ' (' + x.where + ')')), (x) => x) + '.' + js + la);
+      } else pass('PDFA3-ACTIONS');
+      if (active.nameTreeJavaScript.length) add('PDF-JAVASCRIPT', 'error', 'Der Dokumentkatalog enthält JavaScript auf Dokumentebene (Namensbaum /JavaScript: ' + listOf(active.nameTreeJavaScript, (x) => '„' + x + '“') + '). PDF-Programme, die JavaScript zulassen, führen es beim Öffnen aus.');
+      else pass('PDF-JAVASCRIPT');
+      const aaWhere = active.aa.concat(active.widgetA.map((w) => w + ' mit /A'));
+      if (aaWhere.length) add('PDFA3-AA', 'error', 'Zusatzaktionen bzw. Aktionen von Formularfeldern: ' + listOf(aaWhere, (x) => x) + '.');
+      else pass('PDFA3-AA');
+    }
+
+    add('PDFA3-FULL-VALIDATION', 'info', 'Geprüft wurden nur die Container-Anforderungen von ZUGFeRD/Factur-X und die strukturell entscheidbaren PDF/A-3-Regeln. Eine vollständige Prüfung gegen ISO 19005-3 (Schriften, Farbräume, Transparenz, Annotationen, vollständige XMP-Regeln u. a.) wurde NICHT durchgeführt; dafür ist ein PDF/A-Validator wie veraPDF nötig.');
 
     const checks = Object.keys(CHECKS).map((id) => ({ id, status: status[id] || 'n/a', level: CHECKS[id].level, title: CHECKS[id].title, reference: CHECKS[id].reference }));
     return { results, checks, facts };
   }
 
-  return { checkContainer, CHECKS, _internal: { parseXml, xmpProperty, extensionSchemas, profileIdOf, expectedLevels } };
+  return { checkContainer, activeContent, CHECKS, _internal: { parseXml, xmpProperty, extensionSchemas, profileIdOf, expectedLevels } };
 });

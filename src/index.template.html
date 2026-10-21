@@ -3,7 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; connect-src 'none'; form-action 'none'; base-uri 'none'">
+<meta http-equiv="Content-Security-Policy" content="__CSP__">
+<meta name="referrer" content="no-referrer">
 <title>E-Rechnung Prüfer – XRechnung / ZUGFeRD / Factur-X offline prüfen</title>
 <style>/*__CSS__*/</style>
 </head>
@@ -13,6 +14,7 @@
   <p>XRechnung, ZUGFeRD / Factur-X und EN-16931-Rechnungen offline prüfen – vollständig in diesem Browserfenster, ohne Upload. Version __VERSION__ · Regelstand __RULES_DATE__</p>
 </header>
 <main>
+  <div id="lifecycle" class="card" hidden></div>
   <section id="drop" class="card">
     <p class="big">XML- oder PDF-Datei hierher ziehen</p>
     <p>oder <label for="file">Datei auswählen</label> (mehrere Dateien möglich)</p>
@@ -57,13 +59,18 @@
     <summary>Regelwerke laden (Peppol BIS Billing 3.0)</summary>
     <div id="ruleimport"></div>
   </details>
+  <details class="card about" id="sicherheit">
+    <summary>Sicherheit, Unterstützung und Herstellerangaben</summary>
+__SECURITY_INFO__
+  </details>
   <details class="card about">
     <summary>Lizenzen und Hinweise der Rechteinhaber</summary>
     <p class="small">Der E-Rechnung Prüfer ist eine Anwendung der Veröffentlichung ZUGFeRD 2.5.2 / Factur-X 1.09.2 und der Europäischen Norm EN 16931. Die Wiedergabe von Inhalten der EN 16931 erfolgt mit Erlaubnis von CEN und DIN (Inhaber der Urheberrechte).</p>
     <div id="notices"></div>
   </details>
 </main>
-<footer>E-Rechnung Prüfer __VERSION__ · lizenziert unter EUPL-1.2 · Quellcode: <a href="https://github.com/SerhiiAkhnazarov/e-rechnung-pruefer" rel="noopener noreferrer">github.com/SerhiiAkhnazarov/e-rechnung-pruefer</a> · keine Datenübertragung, keine Cookies, keine Telemetrie<br>Der E-Rechnung Prüfer ist eine Anwendung der Veröffentlichung ZUGFeRD 2.5.2 / Factur-X 1.09.2 und der Europäischen Norm EN 16931. Die Wiedergabe von Inhalten der EN 16931 erfolgt mit Erlaubnis von CEN und DIN (Inhaber der Urheberrechte).__IMPRESSUM__</footer>
+<footer>E-Rechnung Prüfer __VERSION__ · lizenziert unter EUPL-1.2 · Quellcode: <a href="https://github.com/SerhiiAkhnazarov/e-rechnung-pruefer" rel="noopener noreferrer">github.com/SerhiiAkhnazarov/e-rechnung-pruefer</a> · keine Datenübertragung, keine Cookies, keine Telemetrie<br>__FOOTER_LINKS__<br>Der E-Rechnung Prüfer ist eine Anwendung der Veröffentlichung ZUGFeRD 2.5.2 / Factur-X 1.09.2 und der Europäischen Norm EN 16931. Die Wiedergabe von Inhalten der EN 16931 erfolgt mit Erlaubnis von CEN und DIN (Inhaber der Urheberrechte).__IMPRESSUM__</footer>
+<script>/*__XMLPARSE__*/</script>
 <script>/*__VENDOR_FONTOXPATH__*/</script>
 <script>/*__SCHEMATRON__*/</script>
 <script>/*__PDF__*/</script>
@@ -76,6 +83,7 @@
 <script>/*__VATJS__*/</script>
 <script>/*__PDFFONTS__*/</script>
 <script>/*__PDFWRITER__*/</script>
+<script>/*__FILESAFETY__*/</script>
 <script>/*__REPORTS__*/</script>
 <script>/*__CORE__*/</script>
 <script>window.PRUEFER_SCHEMAS = /*__SCHEMAS__*/;</script>
@@ -84,7 +92,8 @@
 <script>window.PRUEFER_XSD = /*__XSDMODELS__*/;</script>
 <script>window.PRUEFER_NOTICES = /*__NOTICES__*/;</script>
 <script>window.PRUEFER_VAT = /*__VAT__*/;</script>
-<script>window.PRUEFER_BUILD = /*__BUILD__*/;</script>
+<script type="application/json" id="pruefer-security">/*__SECURITYJSON__*/</script>
+<script type="application/json" id="pruefer-build">/*__BUILD__*/</script>
 <script>/*__APP__*/</script>
 </body>
 </html>

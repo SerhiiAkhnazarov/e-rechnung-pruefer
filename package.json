@@ -1,0 +1,12 @@
+{
+  "name": "e-rechnung-pruefer-test-tools",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Test tools of the E-Rechnung Prüfer, not part of the program and never shipped: Playwright (browsers of the end-to-end tests), pdf.js (an independent PDF reader as test oracle) and esbuild (reproduction of the engine bundle). Installed by the workflows (npm ci --ignore-scripts with package-lock.json); the program itself has no npm dependencies.",
+  "license": "EUPL-1.2",
+  "devDependencies": {
+    "esbuild": "0.28.2",
+    "pdfjs-dist": "6.4.299",
+    "playwright": "1.64.1"
+  }
+}

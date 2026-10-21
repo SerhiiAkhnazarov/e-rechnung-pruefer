@@ -76,6 +76,9 @@ const SUITES = [
   { name: 'page-build', cmd: [node, 'tools/build-standalone.cjs', '--version', changelogVersion()], summary: /SHA-256/ },
   // the SBOM of that page (tools/make-sbom.cjs, written by the page build): official CycloneDX 1.6 schema, NOTICE part A
   { name: 'sbom', cmd: [node, 'test/run-sbom-tests.cjs', E('cyclonedx-specification')], summary: /^SBOM tests:/, needs: [E('cyclonedx-specification') + '/schema/bom-1.6.schema.json'] },
+  // security properties of the page, its sources and the published security information (CSV injection, downloads,
+  // CSP hashes, sinks, site pages, security.txt, CSAF 2.0 with the official schemas, consistency, privacy)
+  { name: 'security', cmd: [node, 'test/run-security-tests.cjs', E('xrechnung-testsuite'), E('csaf')], summary: /^security tests:/, needs: [E('csaf') + '/csaf_2.0/json_schema/csaf_json_schema.json', E('xrechnung-testsuite') + '/src/test/technical-cases/cius/01.01_comprehensive_test_ubl.xml'] },
   { name: 'xpath-conformance', cmd: [node, 'test/xpath-conformance/run-fontoxpath.cjs'], summary: /^XPath conformance/ },
   { name: 'xpath-document', cmd: [node, 'test/xpath-conformance/run-fontoxpath-doc.cjs'], summary: /^XPath document battery/, all: true },
   { name: 'batch-compile', cmd: [node, 'test/check-batches.cjs'], summary: /^batches/ },
@@ -112,6 +115,7 @@ const SUITES = [
   ...browsers((b) => ({ name: 'e2e-' + b, browser: b, cmd: [node, 'test/e2e-browser.cjs', '--browser', b, '--screenshot', 'build/shots/' + b, ...E2E_FILES], summary: new RegExp('^E2E ' + b) })),
   ...browsers((b) => ({ name: 'reports-browser-' + b, browser: b, cmd: [node, 'test/e2e-reports-browser.cjs', '--browser', b, ...REPORT_FILES], summary: new RegExp('^E2E reports ' + b) })),
   ...browsers((b) => ({ name: 'robustness-browser-' + b, browser: b, cmd: [node, 'test/robustness-browser.cjs', '--browser', b], summary: new RegExp('^verdicts in |^E2E robustness ' + b), all: true })),
+  ...browsers((b) => ({ name: 'security-browser-' + b, browser: b, cmd: [node, 'test/security-browser.cjs', '--browser', b, E('zugferd-corpus')], summary: new RegExp('^E2E security ' + b + '|^  note:'), all: true, needs: [E('zugferd-corpus') + '/other/eicar.ubl.xml'] })),
   ...browsers((b) => ({ name: 'peppol-import-' + b, browser: b, cmd: [node, 'test/peppol-import-browser.cjs', '--browser', b, E('peppol-bis-invoice-3'),
     ...['base-example.xml', 'Allowance-example.xml', 'vat-category-E.xml', 'base-creditnote-correction.xml'].map((f) => E('peppol-bis-invoice-3') + '/rules/examples/' + f)],
     summary: /^PEPPOL IMPORT/, needs: ['build/schemas/PEPPOL-UBL.json', 'build/schemas/PEPPOL-CII.json'] })),
@@ -123,6 +127,7 @@ const SUITES = [
   ...windows((id, ch) => ({ name: 'e2e-' + id + '-win', cmd: [node, 'test/e2e-browser.cjs', '--browser', 'chromium', '--channel', ch, '--screenshot', 'build/shots/' + id + '-win', ...E2E_FILES], summary: new RegExp('^E2E ' + ch) })),
   ...windows((id, ch) => ({ name: 'reports-browser-' + id + '-win', cmd: [node, 'test/e2e-reports-browser.cjs', '--browser', 'chromium', '--channel', ch, ...REPORT_FILES], summary: new RegExp('^E2E reports ' + ch) })),
   ...windows((id, ch) => ({ name: 'robustness-browser-' + id + '-win', cmd: [node, 'test/robustness-browser.cjs', '--browser', 'chromium', '--channel', ch], summary: new RegExp('^verdicts in |^E2E robustness ' + ch), all: true })),
+  ...windows((id, ch) => ({ name: 'security-browser-' + id + '-win', cmd: [node, 'test/security-browser.cjs', '--browser', 'chromium', '--channel', ch, E('zugferd-corpus')], summary: new RegExp('^E2E security ' + ch + '|^  note:'), all: true, needs: [E('zugferd-corpus') + '/other/eicar.ubl.xml'] })),
   ...windows((id, ch) => ({ name: 'peppol-import-' + id + '-win', cmd: [node, 'test/peppol-import-browser.cjs', '--browser', 'chromium', '--channel', ch, E('peppol-bis-invoice-3'),
     ...['base-example.xml', 'Allowance-example.xml', 'vat-category-E.xml', 'base-creditnote-correction.xml'].map((f) => E('peppol-bis-invoice-3') + '/rules/examples/' + f)],
     summary: /^PEPPOL IMPORT/, needs: ['build/schemas/PEPPOL-UBL.json', 'build/schemas/PEPPOL-CII.json'] })),

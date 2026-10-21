@@ -1,8 +1,8 @@
 /*
  * resolve-tool.cjs — locates the test-only npm packages (Playwright, pdf.js) without hard-coded paths:
  * 1. the directory in the environment variable (PLAYWRIGHT_MODULE / PDFJS_MODULE),
- * 2. node_modules of the project (npm install --no-save playwright@1.56.0 pdfjs-dist@6.2.108 esbuild@0.28.2,
- *    as in .github/workflows/verify.yml).
+ * 2. node_modules of the project (npm ci --ignore-scripts: package.json / package-lock.json, as in
+ *    .github/workflows/verify.yml).
  * Licence: EUPL-1.2
  */
 'use strict';

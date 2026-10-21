@@ -69,10 +69,15 @@ Stufe = Stufe des Befunds bei Verletzung. „Mustang-Validator“ = gleiche Rege
 | `PDFA3-DESC` | `/Desc` vorhanden (optional) | ISO 32000-1 7.11.3; Erzeuger Z. 409 | info |
 | `PDFA3-EF-SUBTYPE` | EmbeddedFile-Strom hat `/Subtype` als MIME-Typ (sonst error); Rechnung `text/xml` = `/text#2Fxml` (sonst warning) | ISO 19005-3 6.8; text/xml: Spezifikation, Erzeuger Z. 707-708, 415 | error / warning |
 | `PDFA3-EF-PARAMS-MODDATE` | EmbeddedFile-Strom hat `/Params` mit `/ModDate` | Spezifikation; Erzeuger Z. 419; ob ISO 19005-3 es verlangt, zeigt der veraPDF-Vergleich (Paar `embedded-file-moddate`, Modus report) | warning |
+| `PDFA3-ACTIONS` | nur Aktionen, die PDF/A-3 erlaubt (GoTo, GoToR, GoToE, Thread, URI, SubmitForm, benannte Aktionen NextPage, PrevPage, FirstPage, LastPage) – an `/OpenAction` und `/AA` des Katalogs, an Seiten, Annotationen (`/A`, `/AA`), Lesezeichen und Formularfeldern, mit `/Next`-Ketten; JavaScript und Launch werden zusätzlich als Sicherheitshinweis genannt | ISO 19005-3 6.5.1 (veraPDF 6.5.1-1, 6.5.1-2) | error |
+| `PDFA3-AA` | keine Zusatzaktionen (`/AA`) in Katalog, Seiten, Annotationen und Formularfeldern; Widget-Annotationen ohne `/A` und `/AA` | ISO 19005-3 6.5.2, 6.4.1 (veraPDF 6.5.2-1, 6.5.2-2, 6.4.1-1, 6.4.1-2) | error |
+| `PDF-JAVASCRIPT` | kein JavaScript im Namensbaum `/Names /JavaScript` (Dokument-JavaScript, läuft beim Öffnen) | ISO 32000-1 12.6.4.16; nicht im Objektmodell von veraPDF – Vergleich im Modus `report` | error |
 | `PDFA3-FULL-VALIDATION` | Hinweis: keine vollständige ISO-19005-3-Prüfung | — | info |
 
 Die Rechnungs-XML ist die Anlage, die `fx:DocumentFileName` benennt; fehlt sie, die per Name bzw.
-Wurzelelement erkannte (`PdfEmbedded.pickInvoiceXml`). `PDFA3-FILESPEC-F-UF`, `PDFA3-AFRELATIONSHIP`,
+Wurzelelement erkannte (`PdfEmbedded.pickInvoiceXml`). Die aktiven Inhalte (`PdfA3Checks.activeContent`) werden
+auch ermittelt, wenn die Querverweistabelle unbrauchbar ist und der Leser die Objekte durchsucht (Katalog = letztes
+Objekt mit `/Type /Catalog`); dieselbe Auswertung stuft PDF-Anlagen für den Download ein (`src/file-safety.js`). `PDFA3-FILESPEC-F-UF`, `PDFA3-AFRELATIONSHIP`,
 `PDFA3-DESC`, `PDFA3-EF-SUBTYPE`, `PDFA3-EF-PARAMS-MODDATE` gelten für jede Anlage des Namensbaums.
 
 ## 3. Profil → ConformanceLevel, Dateinamen
@@ -93,9 +98,10 @@ Dateinamen: `factur-x.xml` (Factur-X 1.0x / ZUGFeRD 2.1+), `zugferd-invoice.xml`
 
 ## 4. Nicht geprüft und warum
 
-* Schriften (Einbettung, Glyphenbreiten, CIDSet), Farbräume und OutputIntent, Transparenz, Annotationen,
-  Aktionen/JavaScript, Formularfelder, optionale Inhalte, Tagged PDF (PDF/A-3A) — das verlangt die
-  Auswertung aller Inhaltsströme und Ressourcen, also einen vollständigen PDF/A-Validator (veraPDF).
+* Schriften (Einbettung, Glyphenbreiten, CIDSet), Farbräume und OutputIntent, Transparenz, übrige Eigenschaften
+  von Annotationen und Formularfeldern, optionale Inhalte, Tagged PDF (PDF/A-3A) — das verlangt die
+  Auswertung aller Inhaltsströme und Ressourcen, also einen vollständigen PDF/A-Validator (veraPDF). Aktionen,
+  Zusatzaktionen und Dokument-JavaScript prüfen `PDFA3-ACTIONS`, `PDFA3-AA` und `PDF-JAVASCRIPT`.
 * XMP vollständig nach ISO 19005-3 6.6 (Typprüfung aller Eigenschaften, Synchronisation mit dem
   Info-Dictionary, `xpacket`-Attribute) — veraPDF.
 * Ob der Inhalt der XML der sichtbaren Rechnung entspricht — nicht automatisch entscheidbar.
@@ -232,9 +238,12 @@ Job führt aus:
    wenn der Bericht kein `</report>` enthält); die Zusammenfassung geht nach `build/reports/verapdf.txt`.
 5. `tools/verify-all.cjs --only pdfa-verapdf` = `test/compare-verapdf.cjs`: Abgleich je Regelpaar
    (veraPDF-Regel nach Klausel + Text ↔ unsere Prüfung) mit Modus
-   `exact` (Verschlüsselung, Trailer-ID, Dateikopf, F/UF, MIME-Typ), `ours-implies-vera` (pdfaid, XMP im
-   Katalog, Erweiterungsschema: veraPDF prüft mehr), `vera-implies-ours` (AFRelationship: wir sind für die
-   Rechnung strenger), `report` (ModDate, AF-Zuordnung). Abweichungen in den ersten drei Modi ⇒ Exit-Code 1.
+   `exact` (Verschlüsselung, Trailer-ID, Dateikopf, F/UF, MIME-Typ, Aktionen 6.5.1 ↔ `PDFA3-ACTIONS`,
+   Zusatzaktionen 6.5.2/6.4.1 ↔ `PDFA3-AA`), `ours-implies-vera` (pdfaid, XMP im Katalog, Erweiterungsschema:
+   veraPDF prüft mehr), `vera-implies-ours` (AFRelationship: wir sind für die Rechnung strenger), `report` (ModDate,
+   AF-Zuordnung, Dokument-JavaScript). Zum Korpus kommen die synthetischen PDFs mit aktiven Inhalten aus
+   `test/active-pdfs.cjs` (`build/corpus/active-content`; ohne die Fälle mit unbrauchbarer Querverweistabelle, die nur
+   den Leser des Prüfers betreffen). Abweichungen in den ersten drei Modi ⇒ Exit-Code 1.
    veraPDF-Fehler außerhalb der Container-Regeln (Schriften usw.) werden je Regel gezählt.
 6. Artefakt `pdfa-verapdf`: `verapdf.txt`, `verapdf-artifacts.txt`, `pdfa-verapdf.txt`
    (Vergleich, mit Fingerprint), MRR-Dateien, `pdfa3-results.json`, `VERIFICATION.json`. Zusätzlich

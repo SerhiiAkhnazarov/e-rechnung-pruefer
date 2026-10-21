@@ -515,7 +515,8 @@
 
   function parseXmlDefault(xml) {
     if (typeof DOMParser !== 'undefined') {
-      const doc = new DOMParser().parseFromString(xml, 'application/xml');
+      // in the page: src/xml-parse.js (the Trusted Types policy of the Prüfer); elsewhere DOMParser directly
+      const doc = typeof PrueferXml !== 'undefined' ? PrueferXml.parse(xml) : new DOMParser().parseFromString(xml, 'application/xml');
       if (doc.getElementsByTagName('parsererror').length) throw new Error('embedded document is not well-formed');
       return doc;
     }

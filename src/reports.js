@@ -7,16 +7,19 @@
  *   jsonReport(results, ctx)        everything, machine-readable (including the data model)
  *   protocolPdf(result, ctx)        Prüfprotokoll of one file (PDF): what was checked with which rules, when, result
  *   invoicePdf(result, ctx)         Lesefassung (PDF): the invoice data in readable form; the XML stays authoritative
- *   attachmentFiles(result)         embedded attachments (BG-24) as {name, mime, bytes}
- * CSV: UTF-8 with byte order mark, ';', CRLF, decimal comma, dates TT.MM.JJJJ — for German spreadsheet programs.
+ *   attachmentFiles(result)         embedded attachments (BG-24) as {name, mime, bytes, safety}
+ * CSV: UTF-8 with byte order mark, ';', CRLF, decimal comma, dates TT.MM.JJJJ — for German spreadsheet programs. A cell
+ * that a spreadsheet program would evaluate as a formula (it begins with =, +, -, @, also in full width, or with a tab
+ * or carriage return – text from the invoice, e.g. =HYPERLINK(…) in a seller name) is written with a leading
+ * apostrophe, so that it stays text (OWASP "CSV Injection", CWE-1236); plain numbers such as -12,50 stay numbers.
  * ctx: { build: window.PRUEFER_BUILD, now: Date }
  *
  * Licence: EUPL-1.2
  */
 (function (root, factory) {
-  if (typeof module === 'object' && module.exports) module.exports = factory(require('./pdf-writer.js'));
-  else root.Reports = factory(root.PdfWriter);
-})(typeof self !== 'undefined' ? self : this, function (PdfWriter) {
+  if (typeof module === 'object' && module.exports) module.exports = factory(require('./pdf-writer.js'), require('./file-safety.js'));
+  else root.Reports = factory(root.PdfWriter, root.FileSafety);
+})(typeof self !== 'undefined' ? self : this, function (PdfWriter, FileSafety) {
   'use strict';
 
   // ---------- code lists (labels for display; the code itself is always shown as well) ----------
@@ -84,8 +87,14 @@
   }
 
   // ---------- CSV ----------
-  const csvCell = (v) => { const s = String(v === null || v === undefined ? '' : v); return /[";\n\r]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; };
-  const csv = (rows) => '﻿' + rows.map((r) => r.map(csvCell).join(';')).join('\r\n') + '\r\n';
+  const FORMULA_START = /^\s*[=+\-@\uFF1D\uFF0B\uFF0D\uFF20]|^[\t\r]/;
+  const PLAIN_NUMBER = /^[-+]?\d+(?:,\d+)?$/;
+  const csvCell = (v) => {
+    let s = String(v === null || v === undefined ? '' : v);
+    if (FORMULA_START.test(s) && !PLAIN_NUMBER.test(s)) s = "'" + s;
+    return /[";\n\r\t]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+  };
+  const csv = (rows) => '\uFEFF' + rows.map((r) => r.map(csvCell).join(';')).join('\r\n') + '\r\n';
   const routeLabel = (r) => (r.scenario ? 'KoSIT: ' + r.scenario.name : r.rulesetFamily || '');
 
   function findingsCsv(results, vat) {
@@ -138,7 +147,7 @@
       const m = r.model;
       for (const l of m.lines) {
         rows.push([r.name, first(m, 'BT-1'), date(first(m, 'BT-2')), first(m, 'BT-27'), first(m, 'BT-5'), l.id, l.sellerId, l.buyerId, l.name, l.desc, decimalComma(l.qty), l.unit, label(UNITS, l.unit), decimalComma(l.price), decimalComma(l.baseQty), decimalComma(l.grossPrice), decimalComma(l.discount),
-          l.allowances.map((x) => (x.indicator === 'true' ? '+' : '-') + decimalComma(x.amount) + (x.reason || x.reasonCode ? ' (' + [x.reasonCode, x.reason].filter(Boolean).join(' ') + ')' : '')).join(' | '),
+          l.allowances.map((x) => (x.indicator === 'true' ? 'Zuschlag ' : 'Nachlass ') + decimalComma(x.amount) + (x.reason || x.reasonCode ? ' (' + [x.reasonCode, x.reason].filter(Boolean).join(' ') + ')' : '')).join(' | '),
           decimalComma(l.net), l.vatCat, decimalComma(l.vatRate), date(l.period), date(l.periodEnd), l.orderLine, l.accounting, l.note]);
       }
     }
@@ -156,12 +165,13 @@
   };
   function jsonReport(results, ctx) {
     const build = (ctx && ctx.build) || {};
-    const out = results.map((r) => ({ file: r.name, size: r.size, sha256: r.sha256, xmlSha256: r.xmlSha256 || null, kind: r.kind, xml: r.xml, syntax: r.syntax || null, profile: r.profile || null, route: r.route || null, scenario: r.scenario ? r.scenario.name : null, kositScenario: r.kositScenario || null, xsd: r.xsd ? { schema: r.xsd.schema, valid: r.xsd.valid, errorCount: r.xsd.errorCount } : null, ruleSets: r.ruleSets || [], missingRuleSets: r.missingRuleSets || [], assessment: r.assessment, legalStatus: r.legalStatus || null, ust: r.ust || null, counts: r.counts || null, findings: (r.allFindings || []).map((f) => ({ source: f.source, level: f.level, originalLevel: f.originalLevel, id: f.id, schema: f.schema, text: f.text, location: f.location, line: f.line, ust: f.ust || null })), processingErrors: r.processingErrors || [], warnings: r.warnings || [], pdf: r.pdf ? { attachments: r.pdf.attachments, xmp: r.pdf.xmp, method: r.pdf.method, container: r.pdf.container ? r.pdf.container.checks : null } : null, model: plainModel(r.model), timing: r.timing }));
+    const out = results.map((r) => ({ file: r.name, size: r.size, sha256: r.sha256, xmlSha256: r.xmlSha256 || null, kind: r.kind, xml: r.xml, syntax: r.syntax || null, profile: r.profile || null, route: r.route || null, scenario: r.scenario ? r.scenario.name : null, kositScenario: r.kositScenario || null, xsd: r.xsd ? { schema: r.xsd.schema, valid: r.xsd.valid, errorCount: r.xsd.errorCount } : null, ruleSets: r.ruleSets || [], missingRuleSets: r.missingRuleSets || [], assessment: r.assessment, legalStatus: r.legalStatus || null, ust: r.ust || null, counts: r.counts || null, findings: (r.allFindings || []).map((f) => ({ source: f.source, level: f.level, originalLevel: f.originalLevel, id: f.id, schema: f.schema, text: f.text, location: f.location, line: f.line, ust: f.ust || null })), processingErrors: r.processingErrors || [], warnings: r.warnings || [], pdf: r.pdf ? { attachments: r.pdf.attachments, xmp: r.pdf.xmp, method: r.pdf.method, container: r.pdf.container ? r.pdf.container.checks : null, activeContent: r.pdf.container && r.pdf.container.facts ? r.pdf.container.facts.active || null : null } : null, attachmentSafety: r.attachmentSafety || [], model: plainModel(r.model), timing: r.timing }));
     return JSON.stringify({ tool: build.name, version: build.version, fingerprint: build.fingerprint || null, standards: build.standards, generated: ((ctx && ctx.now) || new Date()).toISOString(), results: out }, null, 2);
   }
 
   // ---------- file names ----------
-  const safe = (s) => String(s || '').replace(/[\\/:*?"<>|\u0000-\u001f]+/g, '_').replace(/\s+/g, '_').replace(/_+/g, '_').replace(/^[._]+|[._]+$/g, '').slice(0, 80);
+  // file names: FileSafety.safeFileName (no control or bidirectional formatting characters, no reserved characters), at most 80 characters
+  const safe = (s) => FileSafety.safeFileName(s, '').slice(0, 80).replace(/[._]+$/, '');
   function fileName(r, kind, now) {
     const base = safe(first(r.model, 'BT-1')) || safe(String(r.name || '').replace(/\.[^.]+$/, '')) || 'Rechnung';
     const day = (now || new Date()).toISOString().slice(0, 10);
@@ -169,22 +179,24 @@
   }
 
   // ---------- attachments ----------
-  function base64Bytes(b64) {
-    const clean = String(b64 || '').replace(/[^A-Za-z0-9+/=]/g, '');
-    const A = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
-    const out = [];
-    let buf = 0, bits = 0;
-    for (const ch of clean) {
-      if (ch === '=') break;
-      buf = (buf << 6) | A.indexOf(ch); bits += 6;
-      if (bits >= 8) { bits -= 8; out.push((buf >> bits) & 0xff); }
-    }
-    return new Uint8Array(out);
-  }
-  /** the binary attachments of BG-24 (base64 in the XML) as files */
+  const base64Bytes = (b64) => FileSafety.decodeBase64(b64);
+  /** the binary attachments of BG-24 (base64 in the XML) as files, with the classification of src/file-safety.js
+   * (computed once in src/pruefer-core.js: r.attachmentSafety; the decoded bytes are kept with the attachment) */
   function attachmentFiles(r) {
     if (!r.model) return [];
-    return r.model.attachments.map((a, i) => (a.base64 ? { index: i, id: a.id, name: safe(a.file) || ('Anlage_' + (i + 1)), mime: a.mime || 'application/octet-stream', bytes: base64Bytes(a.base64), desc: a.desc } : null)).filter(Boolean);
+    return r.model.attachments.map((a, i) => {
+      if (!a.base64) return null;
+      const bytes = a.bytes || base64Bytes(a.base64);
+      const safety = (r.attachmentSafety && r.attachmentSafety[i]) || FileSafety.classify(bytes, a.file || ('Anlage_' + (i + 1)), a.mime);
+      return { index: i, id: a.id, name: safety.downloadName || safe(a.file) || ('Anlage_' + (i + 1)), mime: a.mime || 'application/octet-stream', bytes, desc: a.desc, safety };
+    }).filter(Boolean);
+  }
+  /** the files of a result that are not plainly safe to open (attachments BG-24 and files embedded in the PDF) */
+  function riskyFiles(r) {
+    const out = [];
+    for (const [i, s] of (r.attachmentSafety || []).entries()) if (s && s.risk !== 'ok') out.push({ where: 'Anlage (BG-24)', name: (r.model && r.model.attachments[i] && r.model.attachments[i].file) || ('Anlage ' + (i + 1)), safety: s });
+    for (const a of (r.pdf && r.pdf.attachments) || []) if (a.safety && a.safety.risk !== 'ok') out.push({ where: 'im PDF eingebettet', name: a.name, safety: a.safety });
+    return out;
   }
 
   // ---------- PDF documents ----------
@@ -218,6 +230,16 @@
   }
   const metaOf = (r, ctx, title) => ({ title, subject: r.name, creator: ((ctx.build && ctx.build.name) || 'E-Rechnung Prüfer') + ' ' + ((ctx.build && ctx.build.version) || ''), producer: 'E-Rechnung Prüfer (src/pdf-writer.js)', date: ctx.now, id: (r.sha256 || '').slice(0, 32), lang: 'de-DE' });
 
+  /** the security notes of a result (active content of the PDF, risky attachments): first line = summary; [] if none */
+  function securityNotes(r) {
+    const notes = [];
+    const act = r.pdf && r.pdf.container && r.pdf.container.facts ? r.pdf.container.facts.active : null;
+    if (act && (act.javascript || act.launch)) notes.push('Das PDF enthält ' + [act.javascript ? 'JavaScript' : '', act.launch ? 'eine Launch-Aktion (Programmstart)' : ''].filter(Boolean).join(' und ') + '. Der Prüfer führt nichts davon aus; öffnen Sie die Datei nur in einem PDF-Programm, in dem JavaScript abgeschaltet ist.');
+    for (const x of riskyFiles(r)) notes.push((x.safety.risk === 'danger' ? 'Gefährlich' : 'Vorsicht') + ' – ' + x.where + ' „' + x.name + '“ (' + x.safety.type + '): ' + x.safety.reasons.join(' ') + (x.safety.risk === 'danger' ? ' Der Prüfer bietet sie nur unter dem Namen „' + x.safety.downloadName + '“ an.' : ''));
+    if (notes.length && !(act && (act.javascript || act.launch))) notes.unshift('Anlagen mit möglichen Gefahren beim Öffnen:');
+    return notes;
+  }
+
   function protocolPdf(r, ctx) {
     ctx = ctx || {};
     const build = ctx.build || {};
@@ -243,6 +265,11 @@
     fl.heading('Ergebnis der technischen Prüfung', 2);
     fl.box([{ text: (ASSESSMENT[r.assessment] || r.assessment) + ': ' + (ASSESS_TEXT[r.assessment] || ''), font: 'F2' }, { text: r.counts ? r.counts.error + ' Fehler, ' + plural(r.counts.warning, 'Warnung', 'Warnungen') + ', ' + plural(r.counts.information, 'Hinweis', 'Hinweise') + ((r.processingErrors || []).length ? ', ' + r.processingErrors.length + ' Verarbeitungsfehler' : '') : '' }].filter((p) => p.text), BG[tone], C[tone]);
     for (const w of r.warnings || []) fl.text('Hinweis: ' + w, { size: 8.5, color: C.warn });
+    const sec = securityNotes(r);
+    if (sec.length) {
+      fl.heading('Sicherheitshinweise', 2);
+      fl.box(sec.map((t, i) => ({ text: t, font: i === 0 ? 'F2' : 'F1' })), BG.warn, C.warn);
+    }
 
     if (r.ust) {
       const t = VERDICT_TONE[r.ust.id] || 'neutral';
@@ -328,5 +355,5 @@
     return doc.finish(footer(doc, fl.left, 'Lesefassung von „' + r.name + '“ (SHA-256 ' + (r.sha256 || '').slice(0, 16) + '…) · erstellt am ' + stamp(now).slice(0, 10) + ' mit ' + (((ctx.build || {}).name) || 'E-Rechnung Prüfer') + ' ' + (((ctx.build || {}).version) || '')));
   }
 
-  return { findingsCsv, invoicesCsv, linesCsv, jsonReport, protocolPdf, invoicePdf, attachmentFiles, fileName, base64Bytes, amount, quantity, canonicalDecimal, date, decimalComma, ustLabel, stamp, kindLabel, TYPE_CODES, VAT_CATEGORIES, PAYMENT_MEANS, UNITS, UNIT_FORMS, ASSESS_TEXT };
+  return { findingsCsv, invoicesCsv, linesCsv, jsonReport, protocolPdf, invoicePdf, attachmentFiles, riskyFiles, securityNotes, fileName, base64Bytes, amount, quantity, canonicalDecimal, date, decimalComma, ustLabel, stamp, kindLabel, TYPE_CODES, VAT_CATEGORIES, PAYMENT_MEANS, UNITS, UNIT_FORMS, ASSESS_TEXT };
 });

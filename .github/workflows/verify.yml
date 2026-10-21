@@ -15,8 +15,8 @@
 #   org.verapdf:validation-model-jakarta from Maven Central via tools/verapdf/VeraMrr.java, strict
 #   checksums; = the veraPDF version of Mustangproject), compared with the container checks
 #   (src/pdfa3-checks.js). Procedure and rule mapping: docs/PDFA3-CHECKS.md.
-# Job "windows": Windows, the platform the product is made for — the six browser suites (XSD in the browser,
-#   end to end, files written by the page, hostile files, Peppol import, run time) in Microsoft Edge and Google Chrome as installed on the runner image
+# Job "windows": Windows, the platform the product is made for — the seven browser suites (XSD in the browser,
+#   end to end, files written by the page, hostile files, security protections, Peppol import, run time) in Microsoft Edge and Google Chrome as installed on the runner image
 #   (Playwright channels msedge / chrome), with the corpus, the Xerces reference and the page built on Windows
 #   from byte-identical inputs (checkout without line-ending conversion).
 # Job "platforms": the Linux and the Windows run verified the same inputs (filesId) and the same program
@@ -31,25 +31,33 @@ on:
   workflow_dispatch:
 permissions:
   contents: read
+concurrency:
+  group: verify-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   verify:
     runs-on: ubuntu-24.04
     timeout-minutes: 240
     permissions:
-      contents: read
-      checks: write
+      contents: read # checkout
+      checks: write  # check runs with the results
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-node@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: '22'
-      - uses: actions/setup-java@v6
+          check-latest: true
+      - uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
         with:
           distribution: temurin
           java-version: '21'
-      - name: Test tools (exact versions; browsers from the official Playwright CDN; qpdf and poppler for the PDF files)
+          check-latest: true
+      - name: Test tools (package.json / package-lock.json, no install scripts; browsers from the official Playwright CDN; qpdf and poppler for the PDF files)
         run: |
-          npm install --no-save --no-audit --no-fund playwright@1.56.0 pdfjs-dist@6.2.108 esbuild@0.28.2
+          if [ -f package-lock.json ]; then npm ci --ignore-scripts --no-audit --no-fund; else npm install --no-save --ignore-scripts --no-audit --no-fund; fi
+          npm ls --all --omit=optional || true
           npx playwright install --with-deps chromium webkit firefox
           sudo apt-get install -y --no-install-recommends qpdf poppler-utils python3-jsonschema
           qpdf --version | head -n 1; pdftotext -v 2>&1 | head -n 1; python3 -c 'import pyexpat; print(pyexpat.EXPAT_VERSION)'
@@ -61,7 +69,9 @@ jobs:
           set -e
           sh tools/merge-xrechnung-sch.sh ext
           sh tools/compile-rules.sh ext
-          git diff --exit-code --stat -- build/schemas   # shipped rule sets reproduced byte-identically
+          # shipped rule sets reproduced byte-identically; hashes of the compiled Peppol rule sets (integrity check of
+          # stored rule sets in the page) unchanged
+          git diff --exit-code --stat -- build/schemas build/importable.json
       - name: Build the standalone page
         run: node tools/build-standalone.cjs --version "$(sed -n -E 's/^## ([0-9]+\.[0-9]+\.[0-9]+) .*/\1/p' CHANGELOG.md | head -n 1)"
       - name: Full verification (references, reproducibility, all suites, official KoSIT validator, 3 browsers)
@@ -76,15 +86,40 @@ jobs:
         if: always()
         env:
           GH_TOKEN: ${{ github.token }}
+          GATE: ${{ steps.gate.outcome }}
         run: |
           rc=0
           node .github/scripts/check-run.cjs --name "verification report" --sha "${GITHUB_SHA}" \
             --verification build/reports/VERIFICATION.json \
-            --gate "${{ steps.gate.outcome }}" --gate-label "Freigabe (verify-manifest --reports --strict)" \
+            --gate "${GATE}" --gate-label "Freigabe (verify-manifest --reports --strict)" \
             --attach build/reports/VERIFICATION.json > check-run.json || rc=$?
           gh api -X POST "repos/${GITHUB_REPOSITORY}/check-runs" --input check-run.json > /dev/null || echo "::warning::check run could not be published"
           echo "check run published (payload exit code ${rc})"
-      - uses: actions/upload-artifact@v7
+      - name: Bill of materials of this build and test environment (test-environment.cdx.json; every action pinned to a commit)
+        if: always()
+        run: node tools/make-test-bom.cjs --require-pinned --out build/reports/test-environment.cdx.json
+      - name: Known vulnerabilities of the program and of this environment (OSV-Scanner 2.7.0, release binary, SHA-256 checked)
+        id: osv
+        run: |
+          set -e
+          curl -sSfL -o osv-scanner https://github.com/google/osv-scanner/releases/download/v2.7.0/osv-scanner_linux_amd64
+          echo "160c6253e2922e9e0a6a9771c5c4c40a4b3c6090b34a3cdd5e80c96cc2e4218b  osv-scanner" | sha256sum -c -
+          chmod +x osv-scanner
+          node tools/osv-scan.cjs --scanner ./osv-scanner --env build/reports/test-environment.cdx.json --out build/reports/osv-scan.txt
+      - name: Publish the result as check run "vulnerability scan"
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          OSV: ${{ steps.osv.outcome }}
+        run: |
+          [ -f build/reports/osv-scan.txt ] || echo "osv-scan.txt missing" > build/reports/osv-scan.txt
+          rc=0
+          node .github/scripts/check-run.cjs --name "vulnerability scan" --sha "${GITHUB_SHA}" \
+            --gate "${OSV}" --gate-label "OSV-Scanner: Programm (Stückliste mit Herkunft) und Prüfumgebung, Bewertung in security/vex.json" \
+            --attach build/reports/osv-scan.txt > check-run.json || rc=$?
+          gh api -X POST "repos/${GITHUB_REPOSITORY}/check-runs" --input check-run.json > /dev/null || echo "::warning::check run could not be published"
+          exit "${rc}"
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
         with:
           name: verification
@@ -100,13 +135,16 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     permissions:
-      contents: read
-      checks: write
+      contents: read # checkout
+      checks: write  # check runs with the results
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-node@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: '22'
+          check-latest: true
       - name: GitHub release asset vs. Maven Central
         id: compare
         run: |
@@ -125,11 +163,12 @@ jobs:
       - name: Publish the result as check run "KoSIT JAR vs. Maven Central"
         if: always()
         env:
+          OUTCOME_COMPARE: ${{ steps.compare.outcome }}
           GH_TOKEN: ${{ github.token }}
         run: |
           rc=0
           node .github/scripts/check-run.cjs --name "KoSIT JAR vs. Maven Central" --sha "${GITHUB_SHA}" \
-            --gate "${{ steps.compare.outcome }}" --gate-label "Vergleich (sha1sum -c, cmp)" --attach jar-compare.txt > check-run.json || rc=$?
+            --gate "${OUTCOME_COMPARE}" --gate-label "Vergleich (sha1sum -c, cmp)" --attach jar-compare.txt > check-run.json || rc=$?
           gh api -X POST "repos/${GITHUB_REPOSITORY}/check-runs" --input check-run.json > /dev/null || echo "::warning::check run could not be published"
           exit "${rc}"
 
@@ -137,19 +176,23 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 60
     permissions:
-      contents: read
-      checks: write
+      contents: read # checkout
+      checks: write  # check runs with the results
     env:
       VERAPDF_VERSION: '1.30.3'
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-node@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: '22'
-      - uses: actions/setup-java@v6
+          check-latest: true
+      - uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
         with:
           distribution: temurin
           java-version: '21'
+          check-latest: true
       - name: Fetch the pinned ZUGFeRD corpus and Mustangproject
         run: node tools/fetch-sources.cjs ext --only zugferd-corpus,mustangproject
       - name: Resolve veraPDF ${{ env.VERAPDF_VERSION }} (validation-model-jakarta, as used by Mustangproject) and build the runner
@@ -201,7 +244,7 @@ jobs:
             --attach build/reports/verapdf-compare.txt --attach build/reports/verapdf-artifacts.txt > check-run.json || rc=$?
           gh api -X POST "repos/${GITHUB_REPOSITORY}/check-runs" --input check-run.json > /dev/null || echo "::warning::check run could not be published"
           exit "${rc}"
-      - uses: actions/upload-artifact@v7
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
         with:
           name: pdfa-verapdf
@@ -214,30 +257,35 @@ jobs:
     runs-on: windows-2025
     timeout-minutes: 120
     permissions:
-      contents: read
-      checks: write
+      contents: read # checkout
+      checks: write  # check runs with the results
     defaults:
       run:
         shell: bash
     env:
-      WINDOWS_SUITES: manifest,ref-corpus,ref-xerces,xml-encoding,page-build,xsd-browser-edge-win,xsd-browser-chrome-win,e2e-edge-win,e2e-chrome-win,reports-browser-edge-win,reports-browser-chrome-win,robustness-browser-edge-win,robustness-browser-chrome-win,peppol-import-edge-win,peppol-import-chrome-win,performance-edge-win,performance-chrome-win
+      WINDOWS_SUITES: manifest,ref-corpus,ref-xerces,xml-encoding,page-build,xsd-browser-edge-win,xsd-browser-chrome-win,e2e-edge-win,e2e-chrome-win,reports-browser-edge-win,reports-browser-chrome-win,robustness-browser-edge-win,robustness-browser-chrome-win,security-browser-edge-win,security-browser-chrome-win,peppol-import-edge-win,peppol-import-chrome-win,performance-edge-win,performance-chrome-win
     steps:
       - name: Check out without line-ending conversion (inputs byte-identical with the repository, same filesId as on Linux)
         run: |
           git config --global core.autocrlf false
           git config --global core.eol lf
-      - uses: actions/checkout@v7
-      - uses: actions/setup-node@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: '22'
-      - uses: actions/setup-java@v6
+          check-latest: true
+      - uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
         with:
           distribution: temurin
           java-version: '21'
+          check-latest: true
       - name: Working tree = repository (line endings of every file as committed)
         run: git ls-files --eol | awk '{ i = substr($1, 3); w = substr($2, 3); if (i != w) { n++; print } } END { print (n + 0) " files with line endings other than in the repository"; exit (n > 0) }'
-      - name: Test tools (exact versions; Microsoft Edge and Google Chrome of the runner image, no browser download)
-        run: npm install --no-save --no-audit --no-fund playwright@1.56.0 pdfjs-dist@6.2.108 esbuild@0.28.2
+      - name: Test tools (package.json / package-lock.json, no install scripts; Microsoft Edge and Google Chrome of the runner image, no browser download)
+        run: |
+          if [ -f package-lock.json ]; then npm ci --ignore-scripts --no-audit --no-fund; else npm install --no-save --ignore-scripts --no-audit --no-fund; fi
       - name: Fetch all pinned sources and release artefacts (SHA-256 checked)
         run: node tools/fetch-sources.cjs ext
       - name: Peppol rule sets for the Peppol import test (compiled from the pinned source, never shipped)
@@ -254,17 +302,18 @@ jobs:
       - name: Publish the result as check run "Windows report"
         if: always()
         env:
+          OUTCOME_GATE: ${{ steps.gate.outcome }}
           GH_TOKEN: ${{ github.token }}
         run: |
           rc=0
           node .github/scripts/check-run.cjs --name "Windows report" --sha "${GITHUB_SHA}" \
             --verification build/reports/VERIFICATION.json --require "${WINDOWS_SUITES}" \
-            --gate "${{ steps.gate.outcome }}" --gate-label "Freigabe (verify-manifest --reports --strict)" \
+            --gate "${OUTCOME_GATE}" --gate-label "Freigabe (verify-manifest --reports --strict)" \
             --attach build/reports/VERIFICATION.json > check-run.json || rc=$?
           gh api -X POST "repos/${GITHUB_REPOSITORY}/check-runs" --input check-run.json > /dev/null || echo "::warning::check run could not be published"
           echo "check run published (payload exit code ${rc})"
           exit "${rc}"
-      - uses: actions/upload-artifact@v7
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
         with:
           name: verification-windows
@@ -279,18 +328,21 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     permissions:
-      contents: read
-      checks: write
+      contents: read # checkout
+      checks: write  # check runs with the results
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-node@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: '22'
-      - uses: actions/download-artifact@v8
+          check-latest: true
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: verification
           path: linux
-      - uses: actions/download-artifact@v8
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: verification-windows
           path: windows
@@ -302,10 +354,41 @@ jobs:
       - name: Publish the result as check run "platform comparison"
         if: always()
         env:
+          OUTCOME_COMPARE: ${{ steps.compare.outcome }}
           GH_TOKEN: ${{ github.token }}
         run: |
           rc=0
           node .github/scripts/check-run.cjs --name "platform comparison" --sha "${GITHUB_SHA}" \
-            --gate "${{ steps.compare.outcome }}" --gate-label "Vergleich Linux / Windows (.github/scripts/compare-platforms.cjs)" --attach platform-comparison.txt > check-run.json || rc=$?
+            --gate "${OUTCOME_COMPARE}" --gate-label "Vergleich Linux / Windows (.github/scripts/compare-platforms.cjs)" --attach platform-comparison.txt > check-run.json || rc=$?
           gh api -X POST "repos/${GITHUB_REPOSITORY}/check-runs" --input check-run.json > /dev/null || echo "::warning::check run could not be published"
           exit "${rc}"
+
+  test-tools-lock:
+    # the lock file of the test tools (package-lock.json: exact versions and SHA-512 integrity of every package) as long
+    # as the repository has none: generated from package.json by npm, to be reviewed and committed; the jobs above then
+    # install with npm ci
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read # checkout
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '22'
+          check-latest: true
+      - name: package-lock.json from package.json (npm, no install scripts) and npm audit
+        if: hashFiles('package-lock.json') == ''
+        id: lock
+        run: |
+          set -e
+          npm install --package-lock-only --ignore-scripts --no-audit --no-fund
+          node -e "const l = require('./package-lock.json'); const p = Object.entries(l.packages).filter(([k]) => k); console.log('lockfileVersion ' + l.lockfileVersion + ', ' + p.length + ' packages, ' + p.filter(([, v]) => /^sha512-/.test(v.integrity || '')).length + ' with SHA-512 integrity'); for (const [k, v] of p) console.log('  ' + k.replace(/^node_modules\//, '') + ' ' + v.version + (v.optional ? ' (optional)' : ''))"
+          npm audit --package-lock-only --audit-level=low || echo "::warning::npm audit reports known vulnerabilities in the test tools"
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: steps.lock.outcome == 'success'
+        with:
+          name: test-tools-lock
+          path: package-lock.json

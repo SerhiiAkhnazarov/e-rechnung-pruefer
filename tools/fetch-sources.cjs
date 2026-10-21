@@ -44,6 +44,7 @@ const SPARSE = {
   'ph-ubl': ['docs/UBL-2.1.zip'],
   'matplotlib': ['lib/matplotlib/mpl-data/fonts/pdfcorefonts'],
   'cyclonedx-specification': ['schema/bom-1.6.schema.json', 'schema/spdx.schema.json', 'schema/jsf-0.82.schema.json', 'LICENSE'],
+  'csaf': ['csaf_2.0/json_schema/csaf_json_schema.json', 'csaf_2.0/json_schema/provider_json_schema.json', 'csaf_2.0/referenced_schema/first/cvss-v2.0.json', 'csaf_2.0/referenced_schema/first/cvss-v3.0.json', 'csaf_2.0/referenced_schema/first/cvss-v3.1.json', 'csaf_2.0/LICENSE.md'],
 };
 const repos = [];
 for (const src of Object.values(manifest.sources)) for (const r of src.repos || [src]) if (r.remote && r.commit && r.path) repos.push(r);

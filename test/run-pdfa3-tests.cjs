@@ -11,11 +11,14 @@
  *         with the verdicts that Mustang's own tests assert (PDFValidatorTest.java,
  *         ZUGFeRDValidatorTest.java; file and line in MUSTANG_EXPECTATIONS).
  * Part 3  Mutations: same-length byte edits of corpus PDFs (cross-reference offsets stay valid) that
- *         break exactly one requirement; the target check must change to the expected level on every
- *         mutated file and no other check may change except the declared consequences.
+ *         break exactly one requirement, and insertions (trailer /Encrypt; active content in the catalog);
+ *         the target check must change to the expected level on every mutated file and no other check may
+ *         change except the declared consequences.
+ * Part 4  Active content: the synthetic PDFs of test/active-pdfs.cjs (expected status of PDFA3-ACTIONS, PDFA3-AA,
+ *         PDF-JAVASCRIPT); written to build/corpus/active-content for the veraPDF comparison in CI.
  *
  * Usage: node test/run-pdfa3-tests.cjs <zugferd-corpus> [--mustang <mustangproject>] [--json <out.json>] [--verbose]
- * Exit code 0 only if all three parts pass.
+ * Exit code 0 only if all four parts pass.
  */
 'use strict';
 const fs = require('fs');
@@ -108,6 +111,42 @@ async function graph(bytes) {
   const cat = d.trailer ? d.trailer.get('Root') : null;
   return { d, r, catObj: cat instanceof P.util.Ref ? d.objects.get(cat.num) : null };
 }
+/** the dictionary text "<< … >>" of an object "N G obj << … >> endobj" (null for streams or other objects) */
+function dictText(objText) {
+  const m = /^\s*\d+\s+\d+\s+obj\s*/.exec(objText);
+  if (!m) return null;
+  const body = objText.slice(m[0].length).replace(/\s+$/, '');
+  return body.startsWith('<<') && body.endsWith('>>') && !/\bstream\s*$/.test(body) ? body : null;
+}
+const insertAfterOpen = (d, text) => d.slice(0, 2) + text + d.slice(2);
+/** append an incremental update with a new version of the catalog (transform(dictText) -> new dict text or null) */
+function appendCatalog(buf, g, transform) {
+  const o = g.catObj;
+  const r = objRange(buf, o);
+  if (!r) return 0;
+  const s = latin1(buf);
+  const sx = s.lastIndexOf('startxref');
+  const prevM = sx >= 0 ? /startxref\s+(\d+)/.exec(s.slice(sx)) : null;
+  if (!prevM) return 0;
+  const prev = Number(prevM[1]);
+  if (s.slice(prev, prev + 4) !== 'xref') return 0; // cross-reference stream: not handled by this mutation
+  const lastTrailer = s.lastIndexOf('trailer');
+  const tr = lastTrailer >= 0 ? s.slice(lastTrailer, sx) : '';
+  const size = /\/Size\s+(\d+)/.exec(tr), id = /\/ID\s*\[\s*(<[0-9A-Fa-f\s]*>|\([^)]*\))\s*(<[0-9A-Fa-f\s]*>|\([^)]*\))\s*\]/.exec(tr);
+  if (!size || !id) return 0;
+  const d = dictText(buf.toString('latin1', r[0], r[1]));
+  if (!d) return 0;
+  const nd = transform(d);
+  if (!nd) return 0;
+  const gen = o.gen || 0;
+  const head = '\n';
+  const objAt = buf.length + head.length;
+  const obj = o.num + ' ' + gen + ' obj\n' + nd + '\nendobj\n';
+  const xrefAt = objAt + Buffer.byteLength(obj, 'latin1');
+  const xref = 'xref\n0 1\n0000000000 65535 f \n' + o.num + ' 1\n' + String(objAt).padStart(10, '0') + ' ' + String(gen).padStart(5, '0') + ' n \n';
+  const trailer = 'trailer\n<< /Size ' + size[1] + ' /Root ' + o.num + ' ' + gen + ' R /Prev ' + prev + ' /ID [' + id[1] + ' ' + id[2] + '] >>\nstartxref\n' + xrefAt + '\n%%EOF\n';
+  return { at: buf.length, text: head + obj + xref + trailer };
+}
 const objRange = (buf, o) => { if (!o || o.inObjStm !== undefined) return null; const e = buf.indexOf('endobj', o.offset, 'latin1'); return e < 0 ? null : [o.offset, e]; };
 const xmpRange = (g) => { const m = g.catObj && g.catObj.dict ? g.catObj.dict.get('Metadata') : null; const o = m ? g.d.objects.get(m.num) : null; return o && o.streamStart >= 0 && o.resolvedLength === undefined && !o.dict.has('Filter') ? [o.streamStart, o.streamStart + (typeof g.r(o.dict.get('Length')) === 'number' ? g.r(o.dict.get('Length')) : 0)] : null; };
 async function invoiceObjs(buf, g) {
@@ -157,6 +196,21 @@ const MUTATIONS = [
   { name: 'EmbeddedFile /Subtype removed', target: 'PDFA3-EF-SUBTYPE', level: 'error', apply: async (buf, g) => { const { ef } = await invoiceObjs(buf, g); if (!ef || ef.inObjStm !== undefined) return 0; return replaceIn(buf, ef.offset, ef.streamStart, /\/Subtype(?=[\s\/])/g, () => '/Subtypx'); } },
   { name: 'EmbeddedFile /Subtype text/xml -> text/xmx', target: 'PDFA3-EF-SUBTYPE', level: 'warning', apply: async (buf, g) => { const { ef } = await invoiceObjs(buf, g); if (!ef || ef.inObjStm !== undefined) return 0; return replaceIn(buf, ef.offset, ef.streamStart, /\/text#2Fxml\b/g, () => '/text#2Fxmx'); } },
   { name: 'EmbeddedFile /Params /ModDate removed', target: 'PDFA3-EF-PARAMS-MODDATE', level: 'warning', apply: async (buf, g) => { const { ef } = await invoiceObjs(buf, g); if (!ef || ef.inObjStm !== undefined) return 0; let n = replaceIn(buf, ef.offset, ef.streamStart, /\/ModDate(?=[\s(<])/g, () => '/ModDatx'); if (!n) { const pr = ef.dict.get('Params'); const po = pr instanceof P.util.Ref ? g.d.objects.get(pr.num) : null; const rr = objRange(buf, po); if (rr) n = replaceIn(buf, rr[0], rr[1], /\/ModDate(?=[\s(<])/g, () => '/ModDatx'); } return n; } },
+  // active content (ISO 19005-3 6.5.1, 6.5.2; document JavaScript), added to corpus PDFs by an incremental update
+  // (ISO 32000-1, 7.5.6: a new version of the catalog object, a cross-reference section and a trailer with /Prev are
+  // appended – as an attacker would add JavaScript to a genuine invoice); PDFs with a classic cross-reference table
+  // and a catalog that is a plain object
+  { name: 'catalog /OpenAction JavaScript (incremental update)', target: 'PDFA3-ACTIONS', level: 'error', insert: true, apply: async (buf, g) => appendCatalog(buf, g, (d) => (/\/OpenAction\b/.test(d) ? null : insertAfterOpen(d, ' /OpenAction << /S /JavaScript /JS (app.alert\\(1\\)) >> '))) },
+  { name: 'catalog /AA (incremental update)', target: 'PDFA3-AA', level: 'error', insert: true, apply: async (buf, g) => appendCatalog(buf, g, (d) => (/\/AA\b/.test(d) ? null : insertAfterOpen(d, ' /AA << /WC << /S /URI /URI (https://example.com/) >> >> '))) },
+  { name: 'name tree /JavaScript (incremental update)', target: 'PDF-JAVASCRIPT', level: 'error', insert: true, apply: async (buf, g) => appendCatalog(buf, g, (d) => {
+    // a /Names dictionary of its own that keeps /EmbeddedFiles (and every other name tree) of the original
+    const names = g.catObj && g.catObj.dict ? g.r(g.catObj.dict.get('Names')) : null;
+    if (names instanceof Map && names.has('JavaScript')) return null;
+    const m = /\/Names\s*(<<|\d+\s+\d+\s+R)/.exec(d);
+    if (!m) return insertAfterOpen(d, ' /Names << /JavaScript << /Names [(x) << /S /JavaScript /JS (1) >>] >> >> ');
+    if (m[1] !== '<<') { const no = Number(/^(\d+)/.exec(m[1])[1]); const nr = objRange(buf, g.d.objects.get(no)); if (!nr) return null; const nd = dictText(buf.toString('latin1', nr[0], nr[1])); if (!nd) return null; return d.slice(0, m.index) + '/Names ' + insertAfterOpen(nd, ' /JavaScript << /Names [(x) << /S /JavaScript /JS (1) >>] >> ') + d.slice(m.index + m[0].length); }
+    return d.slice(0, m.index + m[0].length) + ' /JavaScript << /Names [(x) << /S /JavaScript /JS (1) >>] >> ' + d.slice(m.index + m[0].length);
+  }) },
   { name: 'trailer /Encrypt inserted', target: 'PDFA3-ENCRYPT', level: 'error', insert: true, apply: async (buf) => { const s = latin1(buf); const t = s.lastIndexOf('trailer'); const sx = s.lastIndexOf('startxref'); if (t < 0 || sx < t) return 0; const lt = s.indexOf('<<', t); if (lt < 0 || lt > sx) return 0; return { at: lt + 2, text: ' /Encrypt 999999 0 R ' }; } },
 ];
 
@@ -257,10 +311,33 @@ async function statuses(bytes) { const r = await C.checkContainer(bytes); const 
     for (const b of bad.slice(0, verbose ? 1000 : 5)) console.log('         ' + b);
   }
 
+  // ---------------- Part 4 ----------------
+  // synthetic PDFs with active content (test/active-pdfs.cjs): the expected status of PDFA3-ACTIONS, PDFA3-AA and
+  // PDF-JAVASCRIPT; written to build/corpus/active-content and recorded in the JSON report, so that the veraPDF job
+  // validates them as well (test/compare-verapdf.cjs, rule pairs "actions" and "additional-actions")
+  console.log('\nPart 4 — active content (synthetic PDFs, test/active-pdfs.cjs)');
+  const activeDir = path.join(__dirname, '..', 'build', 'corpus', 'active-content');
+  fs.mkdirSync(activeDir, { recursive: true });
+  let aOk = 0;
+  const activeCases = require(path.join(__dirname, 'active-pdfs.cjs')).cases();
+  report.extraRoots = { 'active-content': activeDir };
+  for (const c of activeCases) {
+    const res = await C.checkContainer(c.bytes);
+    // the scan-fallback cases test this reader, not PDF/A: not part of the corpus given to veraPDF
+    if (!c.brokenXref) {
+      fs.writeFileSync(path.join(activeDir, c.name), c.bytes);
+      report.corpus['active-content/' + c.name] = { class: 'active-content', results: res.results, checks: res.checks.map((x) => ({ id: x.id, status: x.status })), facts: res.facts };
+    }
+    const got = Object.fromEntries(Object.keys(c.expect).map((id) => [id, res.results.some((x) => x.id === id && x.level === 'error') ? 'error' : (res.checks.find((x) => x.id === id) || {}).status]));
+    const ok = Object.entries(c.expect).every(([id, v]) => got[id] === v) && res.facts.active && res.facts.active.javascript === c.javascript && res.facts.active.launch === c.launch && (!c.method || res.facts.method === c.method);
+    if (ok) aOk++; else failures++;
+    console.log('  ' + (ok ? 'ok  ' : 'FAIL') + ' ' + c.name.padEnd(24) + ' ' + Object.entries(got).map(([k, v]) => k + '=' + v).join(', ') + ' — ' + c.why);
+  }
+
   if (jsonOut) { fs.mkdirSync(path.dirname(path.resolve(jsonOut)), { recursive: true }); fs.writeFileSync(jsonOut, JSON.stringify(report, null, 1)); }
   const nErr = Object.values(EXPECTED_CORPUS).length;
   console.log(`\nPDF/A-3 container checks: ${files.length} corpus PDFs, ${failures ? 'FAILED' : 'expectations met'} (${nErr} PDFs with error/warning findings as expected)` +
     (mustang ? `; Mustang parity ${mOk}/${mOk + mFail} (${mDev} documented deviation)` : '') +
-    `; mutations ${mutDetected}/${mutApplied} detected in ${MUTATIONS.length} mutation types; ${failures} failures in ${Date.now() - t0} ms`);
+    `; mutations ${mutDetected}/${mutApplied} detected in ${MUTATIONS.length} mutation types; active content ${aOk}/${activeCases.length}; ${failures} failures in ${Date.now() - t0} ms`);
   process.exit(failures ? 1 : 0);
 })().catch((e) => { console.error(e); process.exit(1); });

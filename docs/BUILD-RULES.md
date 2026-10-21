@@ -65,13 +65,15 @@ und prüft deren SHA-256, bündelt mit esbuild 0.28.2 (fontoxpath `--target=es20
 ## 4. Browser für die Browser-Testreihen
 
 ```sh
-npm install --no-save --no-audit --no-fund playwright@1.56.0 pdfjs-dist@6.2.108 esbuild@0.28.2
-npx playwright install --with-deps chromium webkit firefox   # Playwright 1.56.0
+npm ci --ignore-scripts --no-audit --no-fund                 # package.json / package-lock.json
+npx playwright install --with-deps chromium webkit firefox   # Playwright 1.64.1
 ```
 
-installiert die Testwerkzeuge in `node_modules/` (wie der CI-Job `verify`; liegen sie an anderer Stelle:
-`PLAYWRIGHT_MODULE`, `PDFJS_MODULE`, `ESBUILD_BINARY`) und lädt die Browser-Builds vom offiziellen Playwright-CDN (Chromium 141.0.7390.37 / Revision 1194, WebKit 26.0 /
-2215, Firefox 142.0.1 / 1495; `playwright-core/browsers.json`) – lokal und in CI (`verify.yml`) gleich. Das
+installiert die Testwerkzeuge in festen Versionen (`package.json`: Playwright 1.64.1, pdf.js 6.4.299, esbuild 0.28.2;
+`package-lock.json` mit der SHA-512 jedes Pakets) ohne Installationsskripte in `node_modules/` (wie der CI-Job
+`verify`; liegen sie an anderer Stelle: `PLAYWRIGHT_MODULE`, `PDFJS_MODULE`, `ESBUILD_BINARY`) und lädt die
+Browser-Builds vom offiziellen Playwright-CDN (Versionen in `playwright-core/browsers.json`; die eines Laufs stehen in
+`test-environment.cdx.json`) – lokal und in CI (`verify.yml`) gleich. Das
 Repository enthält und verbreitet keine Browser-Builds. Ist ein Browser nicht installiert, markiert
 `verify-all` seine Testreihen als „nicht gelaufen“, und die Freigabe mit `--strict` schlägt fehl.
 

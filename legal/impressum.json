@@ -1,8 +1,8 @@
 {
-  "_comment": "Anbieterkennzeichnung für die öffentliche Seite (GitHub Pages) nach dem Recht des Staates, in dem der Anbieter niedergelassen ist (Herkunftslandprinzip, Art. 3 RL 2000/31/EG; § 3 Abs. 2 DDG): Österreich – § 5 E-Commerce-Gesetz (ECG) und § 25 Mediengesetz (Offenlegung). Leere Felder werden nicht angezeigt; solange 'name' leer ist, enthält das Programm weder Impressum noch Datenschutzhinweise (legal/datenschutz.txt). Ausfüllen durch den Anbieter (Lizenzgeber) – die Angaben sind seine Entscheidung.",
-  "name": "",
-  "address": "",
-  "email": "",
+  "_comment": "Anbieterkennzeichnung der öffentlichen Seite (GitHub Pages) nach dem Recht des Staates, in dem der Anbieter niedergelassen ist (Herkunftslandprinzip, Art. 3 RL 2000/31/EG; § 3 Abs. 2 DDG): Österreich. Fassung B, gewählt vom Anbieter am 21.10.2026: nicht kommerzielle Website ohne Geschäftstätigkeit – Offenlegung nach § 25 Abs. 5 MedienG (Name und Wohnort des Medieninhabers); kein Telefon, keine Gewerbeberechtigung, keine UID. Sobald eine Geschäftstätigkeit hinzukommt (Preis, kostenpflichtige Ausgabe oder Unterstützung, Werbung), sind die vollständige geografische Anschrift (§ 5 Abs. 1 Z 2 ECG) und die Herstellerangaben nach Art. 13 Abs. 16 und Anhang II Nr. 1 der Verordnung (EU) 2024/2847 (Postanschrift) nötig – docs/SICHERHEIT.md, Abschnitt 1. Leere Felder werden nicht angezeigt.",
+  "name": "Serhii Akhnazarov",
+  "address": "Wien, Österreich",
+  "email": "ahnazarovser@gmail.com",
   "phone": "",
   "uid": "",
   "business": "",

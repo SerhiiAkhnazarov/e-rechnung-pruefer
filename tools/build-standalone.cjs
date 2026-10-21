@@ -9,6 +9,11 @@
  * copyright notices of legal/ and NOTICE, and the verification fingerprint (tools/fingerprint.cjs:
  * the version axis — which inputs the published test results belong to).
  *
+ * Security (docs/SICHERHEIT.md): the Content-Security-Policy of the page allows exactly the inline scripts and the
+ * style of the page – their SHA-256 hashes are computed here after assembling – and enforces Trusted Types; the build
+ * note is a JSON data block (not executed), so the policy and the program (programSha256) do not depend on it.
+ * Also written: the static pages of the site and security.txt (tools/build-site-pages.cjs, dist/site-pages/).
+ *
  * Usage: node build-standalone.cjs [--version 0.2.0]
  */
 'use strict';
@@ -24,6 +29,8 @@ const read = (f) => fs.readFileSync(path.join(root, f), 'utf8');
 const sha = (s) => crypto.createHash('sha256').update(s).digest('hex');
 
 const NOT_REDISTRIBUTABLE = /^PEPPOL-/;
+const { execFileSync } = require('child_process');
+const sitePages = require('./build-site-pages.cjs');
 
 // engine bundle: built by tools/build-engine.sh from the patched fontoxpath checkout
 const fx = read('vendor/fontoxpath.iife.min.js');
@@ -100,15 +107,27 @@ try {
 
 const peppolFiles = (pep.files || []);
 const importable = {};
+// SHA-256 of the rule sets compiled from the official files (tools/importable-hashes.cjs): integrity of stored rule sets
+const importableHashes = JSON.parse(read('build/importable.json')).ruleSets;
 for (const [id, base] of [['PEPPOL-UBL', 'PEPPOL-EN16931-UBL.sch'], ['PEPPOL-CII', 'PEPPOL-EN16931-CII.sch']]) {
   const f = peppolFiles.find((x) => x.file.endsWith(base));
-  importable[id] = { file: base, title: 'Peppol BIS Billing 3.0 (' + (id.endsWith('UBL') ? 'UBL' : 'CII') + ')', version: '3.0.21, Commit ' + c8(pep), sha256: f ? f.sha256 : null, source: 'https://docs.peppol.eu/poacc/billing/3.0/ bzw. github.com/OpenPEPPOL/peppol-bis-invoice-3 (rules/sch/' + base + ')' };
+  const hashes = importableHashes[id] || {};
+  if (!f || hashes.sourceSha256 !== f.sha256) throw new Error('build/importable.json does not belong to the Peppol files of the manifest (' + id + '): node tools/importable-hashes.cjs');
+  importable[id] = { file: base, title: 'Peppol BIS Billing 3.0 (' + (id.endsWith('UBL') ? 'UBL' : 'CII') + ')', version: '3.0.21, Commit ' + c8(pep), sha256: f.sha256, compiledSha256: hashes.compiledSha256, source: 'https://docs.peppol.eu/poacc/billing/3.0/ bzw. github.com/OpenPEPPOL/peppol-bis-invoice-3 (rules/sch/' + base + ')' };
 }
+// the commit of the sources (identification of the build, Anhang II Nr. 3 CRA); not part of the program
+let commit = process.env.GITHUB_SHA || null, commitDate = null;
+try {
+  commit = execFileSync('git', ['rev-parse', 'HEAD'], { cwd: root, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim() || commit;
+  commitDate = execFileSync('git', ['log', '-1', '--format=%cI', 'HEAD'], { cwd: root, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim() || null;
+} catch (e) { /* not a git checkout */ }
 
 const build = {
   name: 'E-Rechnung Prüfer',
   version: VERSION,
   date: new Date().toISOString().slice(0, 10),
+  commit,
+  commitDate,
   fontoxpath: '3.34.0 (aus dem Quelltext, mit Prüfer-Patch)',
   fingerprint,
   verification,
@@ -144,16 +163,29 @@ let impressumHtml = '';
 const imp = JSON.parse(read('legal/impressum.json'));
 if (imp.name) {
   const esc = (t) => String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;');
-  const lines = [imp.name, imp.address, imp.email ? 'E-Mail: ' + imp.email : '', imp.phone ? 'Telefon: ' + imp.phone : '', imp.uid ? 'UID: ' + imp.uid : '', imp.business, imp.authority ? 'Aufsichtsbehörde: ' + imp.authority : '', imp.chamber, imp.mediaOwnerPurpose ? 'Blattlinie (§ 25 MedienG): ' + imp.mediaOwnerPurpose : ''].filter(Boolean);
+  const lines = ['Medieninhaber: ' + imp.name, imp.address ? 'Wohnort: ' + imp.address : '', imp.email ? 'E-Mail: ' + imp.email : '', imp.phone ? 'Telefon: ' + imp.phone : '', imp.uid ? 'UID: ' + imp.uid : '', imp.business, imp.authority ? 'Aufsichtsbehörde: ' + imp.authority : '', imp.chamber, imp.mediaOwnerPurpose ? 'Grundlegende Richtung (§ 25 MedienG): ' + imp.mediaOwnerPurpose : ''].filter(Boolean);
   impressumHtml = '<br><details class="impressum"><summary>Impressum / Offenlegung</summary><p>' + lines.map(esc).join('<br>') + '</p></details>';
   const controller = [imp.name, imp.address, imp.email ? 'E-Mail: ' + imp.email : ''].filter(Boolean).join(', ');
   const [title, ...paras] = read('legal/datenschutz.txt').replace(/\r\n/g, '\n').split(/\n[ \t]*\n/).map((p) => p.replace(/\s*\n\s*/g, ' ').trim()).filter(Boolean);
   impressumHtml += ' <details class="datenschutz"><summary>' + esc(title) + '</summary>' + paras.map((p) => '<p>' + esc(p.split('{{Verantwortlicher}}').join(controller)) + '</p>').join('') + '</details>';
 }
 
+// security data of the program (legal/security.json) and the section "Sicherheit, Unterstützung und Herstellerangaben"
+// (docs/BENUTZERINFORMATION.md, the same text as the static page benutzerinformation/)
+const security = JSON.parse(read('legal/security.json'));
+const securityData = { product: security.product, manufacturer: security.manufacturer, contactEmail: security.contactEmail, reportForm: security.reportForm, site: security.site, releases: security.releases, supportEnd: security.supportEnd, securityContact: security.site + 'security-contact/', cvdPolicy: security.site + 'cvd-policy/' };
+const securityInfoHtml = sitePages.renderMarkdown(read('docs/BENUTZERINFORMATION.md'), { headingOffset: 1, resolve: sitePages.resolver(security) }).replace(/^<h2[^>]*>.*?<\/h2>\n?/, '');
+const footerLinks = [['security-contact/', 'Schwachstelle melden'], ['cvd-policy/', 'Richtlinie zur Offenlegung von Schwachstellen'], ['benutzerinformation/', 'Informationen für Nutzer'], ['impressum/', 'Impressum'], ['datenschutz/', 'Datenschutz']]
+  .map(([p, t]) => '<a href="' + security.site + p + '" rel="noopener noreferrer">' + t + '</a>').join(' · ');
+
 let html = read('src/index.template.html');
 const parts = {
   '/*__CSS__*/': read('src/app.css'),
+  '/*__XMLPARSE__*/': safeJs(read('src/xml-parse.js'), 'xml-parse.js'),
+  '/*__FILESAFETY__*/': safeJs(read('src/file-safety.js'), 'file-safety.js'),
+  '/*__SECURITYJSON__*/': safeJson(securityData),
+  '__SECURITY_INFO__': securityInfoHtml,
+  '__FOOTER_LINKS__': footerLinks,
   '/*__VENDOR_FONTOXPATH__*/': safeJs(fx, 'fontoxpath'),
   '/*__SCHEMATRON__*/': safeJs(read('src/schematron.js'), 'schematron.js'),
   '/*__PDF__*/': safeJs(read('src/pdf-embedded.js'), 'pdf-embedded.js'),
@@ -187,17 +219,38 @@ const parts = {
 const BUILD_KEY = '/*__BUILD__*/';
 for (const [k, v] of Object.entries(parts)) {
   if (!html.includes(k)) throw new Error('placeholder missing: ' + k);
-  if (k !== BUILD_KEY) html = html.split(k).join(v);
+  if (k !== BUILD_KEY && k !== '__CSP__') html = html.split(k).join(v);
 }
+// Content-Security-Policy: the SHA-256 of every inline script (data blocks of type application/json are not scripts)
+// and of the inline style; nothing else may run or style the page, no connection, no form, no plug-in; Trusted Types
+const scriptHashes = [], styleHashes = [];
+const b64 = (t) => "'sha256-" + crypto.createHash('sha256').update(t, 'utf8').digest('base64') + "'";
+for (const m of html.matchAll(/<script(\s[^>]*)?>([\s\S]*?)<\/script>/g)) {
+  const attrs = m[1] || '';
+  if (/\stype="application\/json"/.test(attrs)) continue;
+  if (attrs.trim()) throw new Error('inline script with attributes other than type="application/json": ' + attrs);
+  scriptHashes.push(b64(m[2]));
+}
+for (const m of html.matchAll(/<style>([\s\S]*?)<\/style>/g)) styleHashes.push(b64(m[1]));
+if (/\sstyle="/.test(html) || /\son[a-z]+="/i.test(html.replace(/<script[\s\S]*?<\/script>/g, ''))) throw new Error('inline style attribute or event handler attribute in the page (not allowed by the Content-Security-Policy)');
+const CSP = "default-src 'none'; script-src " + scriptHashes.join(' ') + '; style-src ' + styleHashes.join(' ') + "; connect-src 'none'; form-action 'none'; base-uri 'none'; object-src 'none'; require-trusted-types-for 'script'; trusted-types pruefer-xml";
+html = html.split('__CSP__').join(CSP);
 const programSha256 = sha(html);
 html = html.split(BUILD_KEY).join(parts[BUILD_KEY]);
 fs.mkdirSync(path.join(root, 'dist'), { recursive: true });
 const outFile = path.join(root, 'dist', 'E-Rechnung-Pruefer.html');
 fs.writeFileSync(outFile, html);
 const comps = {};
-for (const f of ['vendor/fontoxpath.iife.min.js', 'src/schematron.js', 'src/pdf-embedded.js', 'src/invoice-model.js', 'src/sha256.js', 'src/xml-encoding.js', 'src/xsd-validator.js', 'src/pdfa3-checks.js', 'src/sch-compiler.js', 'src/vat-relevance.js', 'src/pdf-fonts.js', 'src/pdf-writer.js', 'src/reports.js', 'src/pruefer-core.js', 'src/app.js', 'legal/ust-pflichtangaben.json', 'build/bt-paths.json']) comps[path.basename(f)] = { bytes: fs.statSync(path.join(root, f)).size, sha256: sha(read(f)) };
-const info = Object.assign({}, build, { file: path.basename(outFile), bytes: Buffer.byteLength(html), sha256: sha(html), programSha256, embeddedRuleSets: Object.keys(schemas), embeddedXsdModels: Object.keys(xsd), components: comps });
+for (const f of ['src/xml-parse.js', 'vendor/fontoxpath.iife.min.js', 'src/file-safety.js', 'src/schematron.js', 'src/pdf-embedded.js', 'src/invoice-model.js', 'src/sha256.js', 'src/xml-encoding.js', 'src/xsd-validator.js', 'src/pdfa3-checks.js', 'src/sch-compiler.js', 'src/vat-relevance.js', 'src/pdf-fonts.js', 'src/pdf-writer.js', 'src/reports.js', 'src/pruefer-core.js', 'src/app.js', 'legal/ust-pflichtangaben.json', 'build/bt-paths.json']) comps[path.basename(f)] = { bytes: fs.statSync(path.join(root, f)).size, sha256: sha(read(f)) };
+const info = Object.assign({}, build, { file: path.basename(outFile), bytes: Buffer.byteLength(html), sha256: sha(html), programSha256, contentSecurityPolicy: { scripts: scriptHashes.length, styles: styleHashes.length, policy: CSP.replace(/'sha256-[^']+'( 'sha256-[^']+')*/g, (x) => x.split(' ').length + ' SHA-256-Prüfsummen') }, embeddedRuleSets: Object.keys(schemas), embeddedXsdModels: Object.keys(xsd), components: comps });
 fs.writeFileSync(path.join(root, 'dist', 'BUILD_INFO.json'), JSON.stringify(info, null, 2));
 // software bill of materials of this page (CycloneDX 1.6, tools/make-sbom.cjs; published with the page and the release)
-fs.writeFileSync(path.join(root, 'dist', 'sbom.cdx.json'), require('./make-sbom.cjs').makeSbom(info, JSON.parse(read('build/STANDARDS_MANIFEST.json'))));
-console.log(`${outFile}: ${(info.bytes / 1024 / 1024).toFixed(2)} MB, SHA-256 ${info.sha256}, program SHA-256 ${programSha256}; rule sets ${Object.keys(schemas).join(', ')}; XSD ${Object.keys(xsd).join(', ')}`);
+const sbomText = require('./make-sbom.cjs').makeSbom(info, JSON.parse(read('build/STANDARDS_MANIFEST.json')));
+fs.writeFileSync(path.join(root, 'dist', 'sbom.cdx.json'), sbomText);
+// assessment of the known vulnerabilities of its components (CycloneDX 1.6 VEX, a document of its own, BOM-Links to the SBOM)
+const vexText = require('./make-vex.cjs').makeVex(sbomText, JSON.parse(read('security/vex.json')).statements);
+fs.writeFileSync(path.join(root, 'dist', 'vex.cdx.json'), vexText);
+// static pages of the site (no JavaScript) and security.txt
+fs.rmSync(path.join(root, 'dist', 'site-pages'), { recursive: true, force: true });
+const pages = sitePages.buildPages(path.join(root, 'dist', 'site-pages'), info);
+console.log(`${outFile}: ${(info.bytes / 1024 / 1024).toFixed(2)} MB, SHA-256 ${info.sha256}, program SHA-256 ${programSha256}; rule sets ${Object.keys(schemas).join(', ')}; XSD ${Object.keys(xsd).join(', ')}; CSP ${scriptHashes.length} script and ${styleHashes.length} style hashes; SBOM ${JSON.parse(sbomText).components.length} components, VEX ${JSON.parse(vexText).vulnerabilities.length} statements; site pages ${Object.keys(pages).length}`);

@@ -2,39 +2,55 @@
 # (tools/check-drift.cjs: git ls-remote of every source in build/STANDARDS_MANIFEST.json; reviewed and
 # deliberately deferred versions are listed with their reason in build/drift-acknowledged.json).
 # A red run means: review the new version (applicability date, KoSIT configuration), then re-pin
-# (docs/BUILD-RULES.md) or acknowledge it with a reason. The report is also recorded as check run
-# "drift report" of the checked commit.
+# (docs/BUILD-RULES.md) or acknowledge it with a reason – or renew security.txt (Expires within 30 days,
+# tools/check-security-txt.cjs). The report is also recorded as check run "drift report" of the checked commit.
 name: drift
 on:
   schedule:
     - cron: '17 5 * * 1'   # Mondays 05:17 UTC
   workflow_dispatch:
-permissions:
-  contents: read
-  checks: write
+permissions: {}
+concurrency:
+  group: drift
+  cancel-in-progress: false
 jobs:
   drift:
     runs-on: ubuntu-24.04
     timeout-minutes: 15
+    permissions:
+      contents: read # checkout
+      checks: write  # check run "drift report"
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-node@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: '22'
+          check-latest: true
       - name: Upstream versions vs. pinned versions
         id: drift
         run: node tools/check-drift.cjs --out build/reports/drift.txt
+      - name: Published security.txt (RFC 9116) – served, not expiring within 30 days
+        id: securitytxt
+        if: always()
+        run: |
+          rc=0
+          node tools/check-security-txt.cjs --out build/reports/security-txt.txt || rc=$?
+          { echo; cat build/reports/security-txt.txt; } >> build/reports/drift.txt
+          exit "${rc}"
       - name: Publish the result as check run "drift report"
         if: always()
         env:
           GH_TOKEN: ${{ github.token }}
+          OUTCOME: ${{ (steps.drift.outcome == 'success' && steps.securitytxt.outcome == 'success') && 'success' || 'failure' }}
         run: |
           rc=0
           node .github/scripts/check-run.cjs --name "drift report" --sha "${GITHUB_SHA}" \
-            --gate "${{ steps.drift.outcome }}" --gate-label "Versionsabgleich (tools/check-drift.cjs)" --attach build/reports/drift.txt > check-run.json || rc=$?
+            --gate "${OUTCOME}" --gate-label "Versionsabgleich (tools/check-drift.cjs) und security.txt (tools/check-security-txt.cjs)" --attach build/reports/drift.txt > check-run.json || rc=$?
           gh api -X POST "repos/${GITHUB_REPOSITORY}/check-runs" --input check-run.json > /dev/null || echo "::warning::check run could not be published"
           exit "${rc}"
-      - uses: actions/upload-artifact@v7
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
         with:
           name: drift

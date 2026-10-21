@@ -1,0 +1,302 @@
+{
+  "document": {
+    "category": "csaf_security_advisory",
+    "csaf_version": "2.0",
+    "distribution": {
+      "text": "Öffentlich, ohne Einschränkung der Weitergabe.",
+      "tlp": {
+        "label": "WHITE",
+        "url": "https://www.first.org/tlp/"
+      }
+    },
+    "lang": "de",
+    "notes": [
+      {
+        "category": "summary",
+        "text": "Die CSV-Exporte des E-Rechnung Prüfers (Prüfbericht, Rechnungsdaten, Positionen) der Versionen 0.2.0 bis 0.3.1 schrieben Werte aus den geprüften Dateien ohne Schutz vor Formeln in die Zellen: den Dateinamen jeder geprüften Datei und ab Version 0.3.0 die Rechnungsdaten (zum Beispiel Namen, Anschriften, Positionsbezeichnungen, Bemerkungen). Eine präparierte E-Rechnung oder eine Datei mit präpariertem Namen konnte so eine Formel in die Tabelle einer Person einschleusen, die die Datei prüft, das Ergebnis als CSV exportiert und den Export in einer Tabellenkalkulation öffnet. Behoben in Version 0.4.0.",
+        "title": "Zusammenfassung"
+      },
+      {
+        "category": "general",
+        "text": "Gefunden bei der eigenen Sicherheitsprüfung des Herstellers; keine Meldung Dritter, keine Hinweise auf eine Ausnutzung.",
+        "title": "Herkunft der Meldung"
+      },
+      {
+        "category": "legal_disclaimer",
+        "text": "Die Angaben beruhen auf dem Kenntnisstand zum Zeitpunkt der Veröffentlichung und werden ohne Gewähr bereitgestellt. Der E-Rechnung Prüfer ist freie Software unter der EUPL-1.2 (Haftung und Gewährleistung: Artikel 7 und 8 der Lizenz).",
+        "title": "Haftungsausschluss"
+      }
+    ],
+    "publisher": {
+      "category": "vendor",
+      "contact_details": "E-Mail: ahnazarovser@gmail.com; vertrauliche Meldungen: https://github.com/SerhiiAkhnazarov/e-rechnung-pruefer/security/advisories/new; Meldewege und Fristen: https://serhiiakhnazarov.github.io/e-rechnung-pruefer/security-contact/",
+      "issuing_authority": "Hersteller des E-Rechnung Prüfers (Serhii Akhnazarov, natürliche Person, Wien, Österreich); Richtlinie zur koordinierten Offenlegung: https://serhiiakhnazarov.github.io/e-rechnung-pruefer/cvd-policy/",
+      "name": "Serhii Akhnazarov",
+      "namespace": "https://serhiiakhnazarov.github.io/e-rechnung-pruefer/"
+    },
+    "references": [
+      {
+        "category": "self",
+        "summary": "Kanonische URL dieses Dokuments",
+        "url": "https://serhiiakhnazarov.github.io/e-rechnung-pruefer/.well-known/csaf/white/2026/e-rechnung-pruefer-sa-2026-001.json"
+      },
+      {
+        "category": "external",
+        "summary": "Sicherheitshinweise des E-Rechnung Prüfers (Übersicht)",
+        "url": "https://serhiiakhnazarov.github.io/e-rechnung-pruefer/advisories/"
+      },
+      {
+        "category": "external",
+        "summary": "Richtlinie zur koordinierten Offenlegung von Schwachstellen",
+        "url": "https://serhiiakhnazarov.github.io/e-rechnung-pruefer/cvd-policy/"
+      },
+      {
+        "category": "external",
+        "summary": "Änderungsprotokoll (Version 0.4.0)",
+        "url": "https://github.com/SerhiiAkhnazarov/e-rechnung-pruefer/blob/main/CHANGELOG.md"
+      }
+    ],
+    "title": "E-Rechnung Prüfer: CSV-Formelinjektion in den CSV-Exporten (Versionen 0.2.0 bis 0.3.1)",
+    "tracking": {
+      "current_release_date": "2026-10-21T19:00:00Z",
+      "id": "E-RECHNUNG-PRUEFER-SA-2026-001",
+      "initial_release_date": "2026-10-21T19:00:00Z",
+      "revision_history": [
+        {
+          "date": "2026-10-21T19:00:00Z",
+          "number": "1",
+          "summary": "Erstveröffentlichung"
+        }
+      ],
+      "status": "final",
+      "version": "1"
+    }
+  },
+  "product_tree": {
+    "branches": [
+      {
+        "branches": [
+          {
+            "branches": [
+              {
+                "category": "product_version",
+                "name": "0.2.0",
+                "product": {
+                  "name": "E-Rechnung Prüfer 0.2.0",
+                  "product_id": "CSAFPID-0001",
+                  "product_identification_helper": {
+                    "hashes": [
+                      {
+                        "file_hashes": [
+                          {
+                            "algorithm": "sha256",
+                            "value": "43b7f545216ab5d1dcb03b2578c59334204f8b5a24b42b18d291c274144a2c31"
+                          }
+                        ],
+                        "filename": "E-Rechnung-Pruefer.html"
+                      },
+                      {
+                        "file_hashes": [
+                          {
+                            "algorithm": "sha256",
+                            "value": "76f7a67bfce73702d064bf5d2f13b834fc79bfa69b57ea5e3badce68bfe1629d"
+                          }
+                        ],
+                        "filename": "E-Rechnung-Pruefer.html"
+                      },
+                      {
+                        "file_hashes": [
+                          {
+                            "algorithm": "sha256",
+                            "value": "c6913004c7d51a601141fb11c8f3d582a40c74f8764d7ab69d8e2140c3b9d50a"
+                          }
+                        ],
+                        "filename": "E-Rechnung-Pruefer.html"
+                      }
+                    ]
+                  }
+                }
+              },
+              {
+                "category": "product_version",
+                "name": "0.3.0",
+                "product": {
+                  "name": "E-Rechnung Prüfer 0.3.0",
+                  "product_id": "CSAFPID-0002",
+                  "product_identification_helper": {
+                    "hashes": [
+                      {
+                        "file_hashes": [
+                          {
+                            "algorithm": "sha256",
+                            "value": "7d95656145a929cbbec4a90890e8ed5013552163ee83a8c479a7a48460fae795"
+                          }
+                        ],
+                        "filename": "E-Rechnung-Pruefer.html"
+                      }
+                    ]
+                  }
+                }
+              },
+              {
+                "category": "product_version",
+                "name": "0.3.1",
+                "product": {
+                  "name": "E-Rechnung Prüfer 0.3.1",
+                  "product_id": "CSAFPID-0003",
+                  "product_identification_helper": {
+                    "hashes": [
+                      {
+                        "file_hashes": [
+                          {
+                            "algorithm": "sha256",
+                            "value": "4afe70a5a8ec83cad3449baa725c13f2882047004ac7f660a7c4985a72e8eefa"
+                          }
+                        ],
+                        "filename": "E-Rechnung-Pruefer.html"
+                      },
+                      {
+                        "file_hashes": [
+                          {
+                            "algorithm": "sha256",
+                            "value": "4a82cf04a655ad0f92e6a4eaa5cb3f721d1adc67a26ad2b48c93264197d279c5"
+                          }
+                        ],
+                        "filename": "E-Rechnung-Pruefer.html"
+                      },
+                      {
+                        "file_hashes": [
+                          {
+                            "algorithm": "sha256",
+                            "value": "b98e721b9aef1f236ddf75288e78c51bbc1e4437c19da369474e264038f7381e"
+                          }
+                        ],
+                        "filename": "E-Rechnung-Pruefer.html"
+                      }
+                    ]
+                  }
+                }
+              },
+              {
+                "category": "product_version",
+                "name": "0.4.0",
+                "product": {
+                  "name": "E-Rechnung Prüfer 0.4.0",
+                  "product_id": "CSAFPID-0004",
+                  "product_identification_helper": {
+                    "purl": "pkg:github/serhiiakhnazarov/e-rechnung-pruefer@v0.4.0"
+                  }
+                }
+              }
+            ],
+            "category": "product_name",
+            "name": "E-Rechnung Prüfer"
+          }
+        ],
+        "category": "vendor",
+        "name": "Serhii Akhnazarov"
+      }
+    ]
+  },
+  "vulnerabilities": [
+    {
+      "cwe": {
+        "id": "CWE-1236",
+        "name": "Improper Neutralization of Formula Elements in a CSV File"
+      },
+      "discovery_date": "2026-10-21T14:48:00Z",
+      "notes": [
+        {
+          "category": "description",
+          "text": "Die CSV-Exporte (Prüfbericht, Rechnungsdaten, Positionen) übernahmen Werte aus den geprüften Dateien unverändert in die Zellen; nur Anführungszeichen, Semikolon und Zeilenumbrüche wurden maskiert. Tabellenkalkulationen wie Microsoft Excel oder LibreOffice Calc lesen eine Zelle, die mit =, +, -, @, einem Tabulator oder einem Wagenrücklauf beginnt, beim Öffnen der CSV-Datei als Formel. In Version 0.2.0 betraf das die Spalte mit dem Dateinamen des Prüfberichts, ab Version 0.3.0 zusätzlich alle Rechnungsdaten der Exporte Rechnungsdaten und Positionen.",
+          "title": "Beschreibung"
+        },
+        {
+          "category": "details",
+          "text": "Die angegriffene Person muss eine präparierte Datei mit einer betroffenen Version prüfen, das Ergebnis als CSV exportieren und den Export in einer Tabellenkalkulation öffnen; für das Abfließen von Daten muss sie zusätzlich einen eingeschleusten Link anklicken oder Warnungen der Tabellenkalkulation bestätigen.",
+          "title": "Voraussetzungen der Ausnutzung"
+        }
+      ],
+      "product_status": {
+        "fixed": [
+          "CSAFPID-0004"
+        ],
+        "known_affected": [
+          "CSAFPID-0001",
+          "CSAFPID-0002",
+          "CSAFPID-0003"
+        ]
+      },
+      "references": [
+        {
+          "category": "external",
+          "summary": "CWE-1236: Improper Neutralization of Formula Elements in a CSV File",
+          "url": "https://cwe.mitre.org/data/definitions/1236.html"
+        },
+        {
+          "category": "external",
+          "summary": "OWASP: CSV Injection",
+          "url": "https://owasp.org/www-community/attacks/CSV_Injection"
+        }
+      ],
+      "release_date": "2026-10-21T19:00:00Z",
+      "remediations": [
+        {
+          "category": "vendor_fix",
+          "date": "2026-10-21T19:00:00Z",
+          "details": "Aktualisierung auf Version 0.4.0: Zellen, die eine Tabellenkalkulation als Formel lesen würde (Beginn mit =, +, -, @, deren Vollbreitenformen, Tabulator oder Wagenrücklauf), werden mit vorangestelltem Apostroph als Text geschrieben, wie von OWASP empfohlen; reine Zahlen bleiben Zahlen. Die Web-Fassung erhält die Korrektur durch Neuladen der Seite; eine gespeicherte Datei ist durch die aktuelle Datei zu ersetzen (Web-Fassung oder neuestes Release). Die Version steht in der Fußzeile der Seite.",
+          "product_ids": [
+            "CSAFPID-0001",
+            "CSAFPID-0002",
+            "CSAFPID-0003"
+          ],
+          "url": "https://serhiiakhnazarov.github.io/e-rechnung-pruefer/"
+        },
+        {
+          "category": "workaround",
+          "details": "CSV-Dateien, die eine betroffene Version aus Rechnungen unbekannter Herkunft exportiert hat, nicht in einer Tabellenkalkulation öffnen oder nur mit allen Spalten als Text importieren (Excel: Daten > Aus Text/CSV, Datentyp Text). Solche Exporte löschen und mit Version 0.4.0 neu erstellen.",
+          "product_ids": [
+            "CSAFPID-0001",
+            "CSAFPID-0002",
+            "CSAFPID-0003"
+          ]
+        }
+      ],
+      "scores": [
+        {
+          "cvss_v3": {
+            "attackComplexity": "LOW",
+            "attackVector": "NETWORK",
+            "availabilityImpact": "NONE",
+            "baseScore": 6.1,
+            "baseSeverity": "MEDIUM",
+            "confidentialityImpact": "LOW",
+            "integrityImpact": "LOW",
+            "privilegesRequired": "NONE",
+            "scope": "CHANGED",
+            "userInteraction": "REQUIRED",
+            "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:C/C:L/I:L/A:N",
+            "version": "3.1"
+          },
+          "products": [
+            "CSAFPID-0001",
+            "CSAFPID-0002",
+            "CSAFPID-0003"
+          ]
+        }
+      ],
+      "threats": [
+        {
+          "category": "impact",
+          "details": "Beim Öffnen einer betroffenen CSV-Datei in einer Tabellenkalkulation kann eine eingeschleuste Formel zum Beispiel als Link beim Anklicken Inhalte anderer Zellen (Daten anderer Rechnungen desselben Exports) an einen Server des Angreifers senden oder irreführende Werte anzeigen. Tabellenkalkulationen, die noch Dynamic Data Exchange (DDE) zulassen, könnten zusätzlich Programme starten; aktuelle Excel-Versionen blockieren das standardmäßig. Der Prüfer selbst öffnet keine CSV-Dateien und überträgt keine Daten; die übrigen Exporte (Prüfprotokoll als PDF, JSON, XML, Anlagen) sind nicht betroffen. Bewertung nach CVSS 4.0: 5.1 (CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:A/VC:N/VI:N/VA:N/SC:L/SI:L/SA:N).",
+          "product_ids": [
+            "CSAFPID-0001",
+            "CSAFPID-0002",
+            "CSAFPID-0003"
+          ]
+        }
+      ],
+      "title": "CSV-Formelinjektion in den CSV-Exporten"
+    }
+  ]
+}

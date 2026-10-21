@@ -1,0 +1,118 @@
+{
+  "_comment": "Bewertung bekannter Schwachstellen von Komponenten, aus denen der E-Rechnung Prüfer abgeleitet ist oder die er enthält (Art. 13 Abs. 6 und 7 der Verordnung (EU) 2024/2847: Schwachstellen systematisch dokumentieren). Quelle von vex.cdx.json (tools/make-vex.cjs; CycloneDX 1.6 VEX, getrennt von der Stückliste, BSI TR-03183-2 3.1 und 8.1.14). Jeder Eintrag: Kennung, betroffene Komponente (bom-ref der Stückliste), Zustand und Begründung nach CycloneDX (impactAnalysisState, impactAnalysisJustification), Prüfung. Neue Meldungen der Schwachstellenprüfung (Workflow security, OSV-Scanner) werden hier bewertet. Stand der Prüfung: firstIssued/lastUpdated. csafRevisions: Revisionen des CSAF-VEX-Dokuments je Version (tools/make-csaf.cjs); jede Änderung einer Bewertung braucht eine neue Revision der aktuellen Version.",
+  "csafRevisions": {
+    "0.4.0": [
+      {
+        "date": "2026-10-21T19:00:00Z",
+        "number": "1",
+        "summary": "Initial version"
+      }
+    ]
+  },
+  "statements": [
+    {
+      "id": "CVE-2020-14338",
+      "aliases": [
+        "GHSA-w4jq-qh47-hvjq",
+        "CVE-2020-14621"
+      ],
+      "source": {
+        "name": "GitHub Advisory Database",
+        "url": "https://github.com/advisories/GHSA-w4jq-qh47-hvjq"
+      },
+      "affects": "file:src/xsd-validator.js",
+      "ancestor": "Apache Xerces-J (XMLSchemaValidator)",
+      "description": "XMLSchemaValidator of Xerces (JAXP) did not enforce the feature use-grammar-pool-only: a crafted document could make the validator load and use a schema grammar named by the document (same flaw as CVE-2020-14621 in OpenJDK).",
+      "cwes": [
+        20
+      ],
+      "state": "not_affected",
+      "justification": "code_not_present",
+      "detail": "src/xsd-validator.js follows the assessment order of XMLSchemaValidator but contains no grammar loading at all: it validates only against the schema models compiled from the official XSDs and embedded in the page; xsi:schemaLocation and xsi:noNamespaceSchemaLocation are accepted and never followed (no resolver, no network access – Content-Security-Policy connect-src 'none'). A root element without declaration is reported as cvc-elt.1.a, as by the fixed Xerces with use-grammar-pool-only. The OpenJDK 21 sources it follows contain the fix of CVE-2020-14621.",
+      "firstIssued": "2026-10-21T00:00:00Z",
+      "lastUpdated": "2026-10-21T00:00:00Z"
+    },
+    {
+      "id": "CVE-2022-23437",
+      "aliases": [
+        "GHSA-h65f-jvqw-m9fj"
+      ],
+      "source": {
+        "name": "GitHub Advisory Database",
+        "url": "https://github.com/advisories/GHSA-h65f-jvqw-m9fj"
+      },
+      "affects": "file:src/xsd-validator.js",
+      "ancestor": "Apache Xerces-J (XML parser)",
+      "description": "The Xerces-J XML parser enters an infinite loop on specially crafted XML document payloads.",
+      "cwes": [
+        91
+      ],
+      "state": "not_affected",
+      "justification": "code_not_present",
+      "detail": "The flaw is in the XML scanner of Xerces. src/xsd-validator.js contains no XML parser: it validates a DOM that the browser's own parser (DOMParser) or, in the Node tests, slimdom produced; no code of the Xerces scanner was translated. Hostile XML is additionally bounded by the refusal of document type declarations and the nesting limit (src/pruefer-core.js, suite robustness).",
+      "firstIssued": "2026-10-21T00:00:00Z",
+      "lastUpdated": "2026-10-21T00:00:00Z"
+    },
+    {
+      "id": "CVE-2013-4002",
+      "aliases": [
+        "GHSA-7j4h-8wpf-rqfh"
+      ],
+      "source": {
+        "name": "GitHub Advisory Database",
+        "url": "https://github.com/advisories/GHSA-7j4h-8wpf-rqfh"
+      },
+      "affects": "file:src/xsd-validator.js",
+      "ancestor": "Apache Xerces-J (XMLScanner)",
+      "description": "XMLscanner.java in Apache Xerces2 Java Parser before 2.12.0 allows a denial of service via vectors related to XML attribute names.",
+      "cwes": [
+        112
+      ],
+      "state": "not_affected",
+      "justification": "code_not_present",
+      "detail": "The flaw is in XMLScanner (parsing of attribute names). src/xsd-validator.js contains no XML scanner or parser; it validates an already parsed DOM.",
+      "firstIssued": "2026-10-21T00:00:00Z",
+      "lastUpdated": "2026-10-21T00:00:00Z"
+    },
+    {
+      "id": "CVE-2012-0881",
+      "aliases": [
+        "GHSA-vmqm-g3vh-847m"
+      ],
+      "source": {
+        "name": "GitHub Advisory Database",
+        "url": "https://github.com/advisories/GHSA-vmqm-g3vh-847m"
+      },
+      "affects": "file:src/xsd-validator.js",
+      "ancestor": "Apache Xerces-J (SymbolTable)",
+      "description": "Apache Xerces2 Java Parser before 2.12.0 allows a denial of service (CPU consumption) via a crafted message that triggers hash table collisions.",
+      "cwes": [
+        400
+      ],
+      "state": "not_affected",
+      "justification": "code_not_present",
+      "detail": "The flaw is in the parser's symbol table (hash collisions of names). src/xsd-validator.js contains neither the parser nor its symbol table; names are compared as JavaScript strings in Map objects of the JavaScript engine.",
+      "firstIssued": "2026-10-21T00:00:00Z",
+      "lastUpdated": "2026-10-21T00:00:00Z"
+    },
+    {
+      "id": "CVE-2009-2625",
+      "aliases": [
+        "GHSA-334p-wv2m-w3vp"
+      ],
+      "source": {
+        "name": "GitHub Advisory Database",
+        "url": "https://github.com/advisories/GHSA-334p-wv2m-w3vp"
+      },
+      "affects": "file:src/xsd-validator.js",
+      "ancestor": "Apache Xerces-J (XMLScanner)",
+      "description": "XMLScanner.java in Apache Xerces2 Java allows a denial of service (infinite loop and application hang) via malformed XML input.",
+      "cwes": [],
+      "state": "not_affected",
+      "justification": "code_not_present",
+      "detail": "The flaw is in XMLScanner. src/xsd-validator.js contains no XML scanner or parser; malformed XML is rejected by the browser's parser before validation (suite robustness, robustness-browser-*).",
+      "firstIssued": "2026-10-21T00:00:00Z",
+      "lastUpdated": "2026-10-21T00:00:00Z"
+    }
+  ]
+}

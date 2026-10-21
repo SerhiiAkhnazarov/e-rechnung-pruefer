@@ -1,0 +1,33 @@
+# dependabot.yml — version updates of what the repository pins (SECURITY.md, docs/KOMPONENTEN.md):
+#   - the GitHub Actions of the workflows (pinned to commits; Dependabot updates the commit and the version comment),
+#   - the npm test tools (package.json / package-lock.json: Playwright, pdf.js, esbuild).
+# The program itself has no package dependencies: its components (rule sets, schemas, the XPath engine) are pinned in
+# build/STANDARDS_MANIFEST.json and watched by the workflow drift. New releases are adopted after a waiting period of
+# seven days (cooldown), so that a compromised release that is withdrawn within days is never proposed.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    cooldown:
+      default-days: 7
+    groups:
+      actions:
+        patterns: ['*']
+    commit-message:
+      prefix: CI
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    cooldown:
+      default-days: 7
+    versioning-strategy: increase
+    groups:
+      test-tools:
+        patterns: ['*']
+    commit-message:
+      prefix: Test tools

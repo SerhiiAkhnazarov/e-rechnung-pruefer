@@ -1,0 +1,19 @@
+{
+  "_comment": "Sicherheitsangaben des E-Rechnung Prüfers – eine Quelle für die Seite (Abschnitt „Sicherheit, Unterstützung und Herstellerangaben“, Hinweis bei Ende des Unterstützungszeitraums), die statischen Sicherheitsseiten auf GitHub Pages (security-contact/, cvd-policy/, security-acknowledgements/), security.txt (RFC 9116, BSI TR-03183-3 Abschnitt 4.2) und die Stückliste (sbom.cdx.json). Gelesen von tools/build-standalone.cjs, tools/build-site-pages.cjs und tools/make-sbom.cjs; geprüft von test/run-security-tests.cjs. securityTxtExpires: höchstens ein Jahr in der Zukunft (RFC 9116 2.5.5, TR-03183-3 4.2.9 b); die Angaben werden mindestens vierteljährlich geprüft (TR-03183-3 4.2.9 c: Workflow drift, wöchentlich). supportEnd: Ende des Unterstützungszeitraums (Monat und Jahr, Art. 13 Abs. 8 und 19 der Verordnung (EU) 2024/2847), mindestens fünf Jahre.",
+  "product": "E-Rechnung Prüfer",
+  "manufacturer": "Serhii Akhnazarov",
+  "residence": "Wien, Österreich",
+  "contactEmail": "ahnazarovser@gmail.com",
+  "reportForm": "https://github.com/SerhiiAkhnazarov/e-rechnung-pruefer/security/advisories/new",
+  "advisories": "https://github.com/SerhiiAkhnazarov/e-rechnung-pruefer/security/advisories",
+  "repository": "https://github.com/SerhiiAkhnazarov/e-rechnung-pruefer",
+  "site": "https://serhiiakhnazarov.github.io/e-rechnung-pruefer/",
+  "releases": "https://github.com/SerhiiAkhnazarov/e-rechnung-pruefer/releases/latest",
+  "supportEnd": "2031-12",
+  "supportStart": "2026-10",
+  "securityTxtExpires": "2027-10-20T22:00:00Z",
+  "securityTxtCanonical": ["https://serhiiakhnazarov.github.io/e-rechnung-pruefer/.well-known/security.txt", "https://serhiiakhnazarov.github.io/.well-known/security.txt"],
+  "preferredLanguages": "de, en",
+  "csirt": { "name": "CERT.at (nationales CSIRT Österreichs, Koordinator für die koordinierte Offenlegung von Schwachstellen)", "url": "https://www.cert.at/" },
+  "policyDate": "2026-10-21"
+}

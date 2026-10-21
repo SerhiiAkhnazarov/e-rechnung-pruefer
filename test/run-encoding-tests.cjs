@@ -80,7 +80,7 @@ for (const c of cases) {
   const r = XmlEncoding.decode(new Uint8Array(fs.readFileSync(path.join(dir, c.id + '.xml'))));
   let oursOk = r.ok, oursText = null;
   if (r.ok) {
-    try { const d = slimdom.parseXmlDocument(r.text.replace(/^﻿/, '')); const t = d.getElementsByTagName('t')[0]; oursText = t ? t.textContent : null; } catch (e) { oursOk = false; }
+    try { const d = slimdom.parseXmlDocument(r.text.replace(/^\uFEFF/, '')); const t = d.getElementsByTagName('t')[0]; oursText = t ? t.textContent : null; } catch (e) { oursOk = false; }
   }
   const required = specFatal.get(c.id);
   if (required) {

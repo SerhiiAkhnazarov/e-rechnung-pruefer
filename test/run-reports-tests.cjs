@@ -170,6 +170,10 @@ async function checkPdf(label, bytes, expected, title, withPdfJs) {
   }
 
   // ---- CSV ----------------------------------------------------------------------------------------------------
+  // a cell that a spreadsheet program would evaluate as a formula is written as text with a leading apostrophe
+  // (OWASP "CSV Injection"): =, +, -, @ (also full-width) after optional whitespace, or a leading tab / carriage return;
+  // plain numbers (-12,50) stay numbers – the expectation, independent of src/reports.js
+  const csvNeutral = (v) => { const t = String(v); return (/^\s*[=+\-@＝＋－＠]/.test(t) || /^[\t\r]/.test(t)) && !/^[-+]?\d+(,\d+)?$/.test(t) ? "'" + t : t; };
   const fcsv = readCsv(Reports.findingsCsv(all, legal));
   const head = fcsv[0];
   const col = (n) => head.indexOf(n);
@@ -181,8 +185,8 @@ async function checkPdf(label, bytes, expected, title, withPdfJs) {
       const list = r.allFindings && r.allFindings.length ? r.allFindings : [null];
       for (const f of list) {
         const row = fcsv[k++];
-        const ok = row[col('Datei')] === r.name && row[col('SHA-256')] === (r.sha256 || '') && row[col('USt-Einordnung')] === (r.ust ? r.ust.kurz : '') &&
-          (!f || (row[col('Regel')] === (f.id || '') && row[col('Meldung')] === f.text && row[col('Zeile')] === String(f.line || '') && row[col('USt-Bedeutung')] === Reports.ustLabel(f, legal)));
+        const ok = row[col('Datei')] === csvNeutral(r.name) && row[col('SHA-256')] === (r.sha256 || '') && row[col('USt-Einordnung')] === (r.ust ? r.ust.kurz : '') &&
+          (!f || (row[col('Regel')] === csvNeutral(f.id || '') && row[col('Meldung')] === csvNeutral(f.text) && row[col('Zeile')] === String(f.line || '') && row[col('USt-Bedeutung')] === Reports.ustLabel(f, legal)));
         if (!ok) { bad++; if (bad < 4) check('Prüfbericht CSV row ' + k + ' (' + r.name + ')', false, JSON.stringify(row).slice(0, 200)); }
       }
     }
@@ -202,7 +206,7 @@ async function checkPdf(label, bytes, expected, title, withPdfJs) {
         if (!m || /^(Bemessungsgrundlage|Steuerbetrag) /.test(ih[c])) continue;
         const id = m[1];
         const raw = ['BT-25', 'BT-84', 'BT-86', 'BT-85', 'BT-20'].includes(id) ? (r.model.bt[id] || []).join(' | ') : first(r.model, id);
-        const want = ['BT-2', 'BT-72', 'BT-73', 'BT-74', 'BT-9'].includes(id) ? Reports.date(raw) : /^BT-1(0[6-9]|1[0-5])$/.test(id) ? Reports.decimalComma(raw) : raw;
+        const want = csvNeutral(['BT-2', 'BT-72', 'BT-73', 'BT-74', 'BT-9'].includes(id) ? Reports.date(raw) : /^BT-1(0[6-9]|1[0-5])$/.test(id) ? Reports.decimalComma(raw) : raw);
         if (row[c] !== want) { bad++; if (bad < 4) check('Rechnungsdaten CSV ' + r.name + ' ' + ih[c], false, JSON.stringify(row[c]) + ' vs ' + JSON.stringify(want)); }
       }
       // the VAT columns: the sum of the taxable amounts of each category/rate column equals the breakdown
@@ -227,7 +231,7 @@ async function checkPdf(label, bytes, expected, title, withPdfJs) {
     const lh = lcsv[0];
     for (const r of withModel) for (const l of r.model.lines) {
       const row = lcsv[k++];
-      if (row[lh.indexOf('Position (BT-126)')] !== l.id || row[lh.indexOf('Bezeichnung (BT-153)')] !== l.name || row[lh.indexOf('Nettobetrag (BT-131)')] !== Reports.decimalComma(l.net) || row[lh.indexOf('Menge (BT-129)')] !== Reports.decimalComma(l.qty)) bad++;
+      if (row[lh.indexOf('Position (BT-126)')] !== csvNeutral(l.id) || row[lh.indexOf('Bezeichnung (BT-153)')] !== csvNeutral(l.name) || row[lh.indexOf('Nettobetrag (BT-131)')] !== csvNeutral(Reports.decimalComma(l.net)) || row[lh.indexOf('Menge (BT-129)')] !== csvNeutral(Reports.decimalComma(l.qty))) bad++;
     }
     check('Positionen CSV: id, name, quantity and net amount of every line', bad === 0, bad + ' rows differ');
   }

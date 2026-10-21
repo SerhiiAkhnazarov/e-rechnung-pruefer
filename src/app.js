@@ -1,7 +1,10 @@
 /*
  * app.js — E-Rechnung Prüfer (standalone, offline). UI and orchestration.
- * Depends on globals: fontoxpath, SchematronRunner, PdfEmbedded, InvoiceModel, VatRelevance, PdfWriter, Reports,
- * PrueferCore, PRUEFER_SCHEMAS, PRUEFER_SCENARIOS, PRUEFER_VAT, PRUEFER_BUILD.
+ * Depends on globals: fontoxpath, SchematronRunner, PdfEmbedded, InvoiceModel, VatRelevance, PdfWriter, Reports, FileSafety,
+ * PrueferXml, PrueferCore, PRUEFER_SCHEMAS, PRUEFER_SCENARIOS, PRUEFER_VAT; the build note is the JSON data block
+ * #pruefer-build (no script; window.PRUEFER_BUILD is set from it).
+ * Every text of a document is inserted as text (textContent, text nodes) – there is no HTML sink in this file; the
+ * page enforces this with Trusted Types (Content-Security-Policy require-trusted-types-for 'script').
  * Licence: EUPL-1.2
  */
 (function () {
@@ -13,7 +16,6 @@
     if (attrs) for (const [k, v] of Object.entries(attrs)) {
       if (k === 'class') el.className = v;
       else if (k === 'text') el.textContent = v;
-      else if (k === 'html') el.innerHTML = v;
       else if (k.startsWith('on')) el.addEventListener(k.slice(2), v);
       else if (v !== null && v !== undefined && v !== false) el.setAttribute(k, v);
     }
@@ -26,7 +28,12 @@
   const SCENARIOS = window.PRUEFER_SCENARIOS;      // KoSIT scenarios
   const RULESETS = window.PRUEFER_RULESETS;        // profile -> rule sets (build/rulesets.json)
   const VAT = window.PRUEFER_VAT;                  // umsatzsteuerliche Einordnung: legal table + syntax binding
-  const BUILD = window.PRUEFER_BUILD || {};
+  // the build note: a JSON data block (not executed; outside the hash of the program and of its Content-Security-Policy)
+  const dataBlock = (id) => { try { const el = document.getElementById(id); return el ? JSON.parse(el.textContent) : {}; } catch (e) { return {}; } };
+  const BUILD = dataBlock('pruefer-build');
+  window.PRUEFER_BUILD = BUILD;
+  // security data of the program (legal/security.json: support period, contacts) – part of the program, not of the note
+  const SECURITY = dataBlock('pruefer-security');
   const NOTICES = window.PRUEFER_NOTICES || [];
 
   const LEVEL_LABEL = { error: 'Fehler', warning: 'Warnung', information: 'Hinweis' };
@@ -35,18 +42,38 @@
   // ---------- rule sets loaded by the user (not redistributed: Peppol BIS, see docs/RULESETS.md) ----------
   const STORE_PREFIX = 'e-rechnung-pruefer.ruleset.';
   const imported = {};
+  const discarded = []; // stored rule sets that failed the integrity check on loading (and were deleted)
+  // integrity: a rule set is kept in the browser's storage, and used from it, only if it is byte for byte the rule set
+  // that the build compiled from the official file (BUILD.importable[id].compiledSha256, tools/importable-hashes.cjs) –
+  // the storage is shared with every other page of the same origin (GitHub Pages: all pages of the account; file://:
+  // in some browsers every local file), so what is read back is checked, not trusted
+  const canonicalRuleSet = (c) => { const o = Object.assign({}, c); delete o.sources; delete o.importedFrom; return JSON.stringify(o); };
+  function officialRuleSet(id, c) {
+    const spec = (BUILD.importable || {})[id];
+    return !!(spec && spec.compiledSha256 && c && typeof c === 'object' && c.importedFrom && c.importedFrom.verified === true && c.importedFrom.sha256 === spec.sha256 && Sha256.hex(canonicalRuleSet(c)) === spec.compiledSha256);
+  }
   function loadImported() {
     for (const id of Object.keys(BUILD.importable || {})) {
-      try { const t = localStorage.getItem(STORE_PREFIX + id); if (t) imported[id] = JSON.parse(t); } catch (e) { /* storage unavailable (private mode, file://): in-memory only */ }
+      let text = null;
+      try { text = localStorage.getItem(STORE_PREFIX + id); } catch (e) { continue; } // storage unavailable (private mode, file://)
+      if (text === null) continue;
+      let stored = null;
+      try { stored = JSON.parse(text); } catch (e) { stored = null; }
+      if (stored && officialRuleSet(id, stored)) imported[id] = stored;
+      else { discarded.push(id); try { localStorage.removeItem(STORE_PREFIX + id); } catch (e) { /* storage unavailable */ } }
     }
   }
   function storeImported(id, compiled) {
     imported[id] = compiled;
-    try { localStorage.setItem(STORE_PREFIX + id, JSON.stringify(compiled)); } catch (e) { /* kept for this session only */ }
+    // a deviating version is used for this session only and never stored
+    try {
+      if (officialRuleSet(id, compiled)) localStorage.setItem(STORE_PREFIX + id, JSON.stringify(compiled));
+      else localStorage.removeItem(STORE_PREFIX + id);
+    } catch (e) { /* storage unavailable: kept for this session only */ }
   }
 
   const CORE_ENV = {
-    fontoxpath, SchematronRunner, XsdValidator, PdfEmbedded, PdfA3Checks, XmlEncoding, InvoiceModel, VatRelevance,
+    fontoxpath, SchematronRunner, XsdValidator, PdfEmbedded, PdfA3Checks, XmlEncoding, InvoiceModel, VatRelevance, FileSafety,
     scenarios: SCENARIOS, rulesets: RULESETS, vatData: VAT,
     ruleSet: (id) => SCHEMAS[id] || imported[id] || null,
     xsdModel: (id) => XSD_MODELS[id] || null,
@@ -68,7 +95,7 @@
   }
 
   function parseXml(text) {
-    const doc = new DOMParser().parseFromString(text, 'application/xml');
+    const doc = PrueferXml.parse(text); // src/xml-parse.js: DOMParser with application/xml through the Trusted Types policy
     const pe = doc.getElementsByTagName('parsererror')[0];
     if (pe) return { doc: null, error: pe.textContent.replace(/\s+/g, ' ').trim() };
     return { doc, error: null };
@@ -102,7 +129,8 @@
   function download(name, content, type) {
     const blob = new Blob([content], { type });
     const url = URL.createObjectURL(blob);
-    const a = h('a', { href: url, download: name });
+    // every file name once more through FileSafety.safeFileName (no control/bidirectional characters, no path)
+    const a = h('a', { href: url, download: FileSafety.safeFileName(name, 'Datei') });
     document.body.append(a);
     a.click();
     setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 1000);
@@ -155,6 +183,9 @@
       for (const m of r.missingRuleSets || []) card.append(h('p', { class: 'note warn-note' }, 'Regelwerk ' + m.id + ' wurde nicht angewendet: ' + m.reason + '.'));
     }
     for (const w of r.warnings || []) card.append(h('p', { class: 'note warn-note' }, w));
+    // active content of the PDF and attachments that are dangerous to open (src/file-safety.js, src/pdfa3-checks.js)
+    const sec = Reports.securityNotes(r);
+    if (sec.length) card.append(h('div', { class: 'note warn-note security', 'data-security': 'notes' }, h('strong', { text: 'Sicherheitshinweise' }), h('ul', null, sec.map((t) => h('li', { text: t })))));
     if (r.pdf && r.pdf.warnings && r.pdf.warnings.length) card.append(h('details', null, h('summary', { text: 'Hinweise des PDF-Lesers (' + r.pdf.warnings.length + ')' }), h('ul', null, r.pdf.warnings.map((w) => h('li', { class: 'small', text: w })))));
 
     if (r.allFindings) {
@@ -171,7 +202,7 @@
     actions.append(h('button', { class: 'btn small-btn', type: 'button', 'data-action': 'protocol', title: 'Was mit welchen Regeln wann geprüft wurde, mit Ergebnis, Einordnung und SHA-256 – zum Aufbewahren mit der Rechnung', onclick: () => downloadProtocol(r) }, 'Prüfprotokoll (PDF)'));
     if (r.model) actions.append(h('button', { class: 'btn secondary small-btn', type: 'button', 'data-action': 'invoice-pdf', title: 'Die Rechnungsdaten in lesbarer Form; rechtlich maßgeblich bleibt die XML', onclick: () => downloadInvoicePdf(r) }, 'Lesefassung (PDF)'));
     const invXml = r.pdf && r.pdf.files ? r.pdf.files.find((f) => f.name === r.pdf.invoiceAttachment) : null;
-    if (invXml) actions.append(h('button', { class: 'btn secondary small-btn', type: 'button', 'data-action': 'xml', title: 'Die eingebettete Rechnungs-XML (strukturierter Teil) unverändert', onclick: () => download(invXml.name, invXml.bytes, 'application/xml') }, 'XML (' + invXml.name + ')'));
+    if (invXml) actions.append(h('button', { class: 'btn secondary small-btn', type: 'button', 'data-action': 'xml', title: 'Die eingebettete Rechnungs-XML (strukturierter Teil) unverändert', onclick: () => download(FileSafety.safeFileName(invXml.name, 'rechnung.xml'), invXml.bytes, 'application/xml') }, 'XML (' + FileSafety.safeFileName(invXml.name, 'rechnung.xml') + ')'));
     const att = Reports.attachmentFiles(r);
     if (att.length) actions.append(h('span', { class: 'small muted' }, plural(att.length, 'Anlage', 'Anlagen') + ' unter „Rechnungsdaten“'));
     card.append(actions);
@@ -275,6 +306,25 @@
         h('td', { class: 'small' }, i.hinweis)))))));
   }
 
+  // a file of the invoice offered for download, with the classification of src/file-safety.js: "caution" shows the
+  // reasons; "danger" (programs, scripts, HTML/SVG, macros, PDF with JavaScript …) needs a second click and the file is
+  // saved under a neutralised name ("….gesperrt"), so that neither a double click nor the browser runs it
+  const RISK_LABEL = { danger: 'Gefährlich', caution: 'Vorsicht' };
+  function fileOffer(action, bytes, safety, label) {
+    const s = safety || { risk: 'ok', reasons: [], downloadName: 'Datei' };
+    const out = h('span', { class: 'file-offer', 'data-risk': s.risk });
+    const save = () => download(s.downloadName, bytes, 'application/octet-stream');
+    if (s.risk === 'ok') { out.append(' ', h('button', { class: 'btn secondary small-btn', type: 'button', 'data-action': action, onclick: save }, label)); return out; }
+    out.append(' ', h('span', { class: 'pill ' + (s.risk === 'danger' ? 'error' : 'warning'), text: RISK_LABEL[s.risk] + ': ' + s.type }));
+    out.append(h('span', { class: 'tiny block', text: s.reasons.join(' ') }));
+    if (s.risk === 'caution') { out.append(h('button', { class: 'btn secondary small-btn', type: 'button', 'data-action': action, onclick: save }, label)); return out; }
+    const confirmBox = h('span', { class: 'tiny block', hidden: 'hidden', text: 'Die Datei wird als „' + s.downloadName + '“ gespeichert. Öffnen Sie sie nicht, wenn Sie ihrem Absender nicht vertrauen; lassen Sie sie im Zweifel von einem Virenscanner prüfen.' });
+    const confirm = h('button', { class: 'btn danger small-btn', type: 'button', 'data-action': action + '-confirm', hidden: 'hidden', onclick: save }, 'Trotzdem herunterladen');
+    const first = h('button', { class: 'btn secondary small-btn', type: 'button', 'data-action': action, onclick: () => { first.hidden = true; confirmBox.hidden = false; confirm.hidden = false; } }, label + ' …');
+    out.append(first, confirmBox, confirm);
+    return out;
+  }
+
   function renderModel(pane, r) {
     const m = r.model;
     const cur = (m.bt['BT-5'] || [])[0] || '';
@@ -317,7 +367,7 @@
       pane.append(h('ul', { class: 'attachments' }, m.attachments.map((a, i) => {
         const f = files.find((x) => x.index === i);
         return h('li', null, [a.id, a.desc, a.file, a.mime, a.uri].filter(Boolean).join(' · '),
-          f ? [' ', h('button', { class: 'btn secondary small-btn', type: 'button', 'data-action': 'attachment', onclick: () => download(f.name, f.bytes, 'application/octet-stream') }, 'Herunterladen (' + fmtBytes(f.bytes.length) + ')')] : null);
+          f ? fileOffer('attachment', f.bytes, f.safety, 'Herunterladen (' + fmtBytes(f.bytes.length) + ')') : null);
       })));
       pane.append(h('p', { class: 'tiny muted' }, 'Pflichtangaben gehören in den strukturierten Teil (BMF-Schreiben vom 15.10.2025, Rn. 35); Angaben in eingebetteten Anlagen statt im strukturierten Teil werden derzeit nur in bestimmten Fällen nicht beanstandet – Endrechnung, Bauleistung, Bruttopreisrechnung (BMF-Schreiben vom 15.10.2026, Rn. 4, 14 und 19). Anlagen werden unverändert zum Herunterladen angeboten und nicht geöffnet.'));
     }
@@ -356,7 +406,7 @@
       else pane.append(h('ul', { class: 'attachments' }, r.pdf.attachments.map((a, i) => {
         const f = r.pdf.files && r.pdf.files[i];
         return h('li', null, a.name + ' (' + fmtBytes(a.size) + (a.mimeType ? ', ' + a.mimeType : '') + (a.afRelationship ? ', AFRelationship=' + a.afRelationship : '') + ')' + (a.name === r.pdf.invoiceAttachment ? ' – Rechnungs-XML' : ''),
-          f ? [' ', h('button', { class: 'btn secondary small-btn', type: 'button', 'data-action': 'pdf-file', onclick: () => download(a.name.replace(/[\\/:*?"<>|]+/g, '_'), f.bytes, 'application/octet-stream') }, 'Herunterladen')] : null);
+          f ? fileOffer('pdf-file', f.bytes, a.safety || FileSafety.classify(f.bytes, a.name, a.mimeType), 'Herunterladen') : null);
       })));
     }
     if (r.pdf && r.pdf.container) {
@@ -386,7 +436,7 @@
 
   function renderSummary() {
     const box = $('#summary');
-    box.innerHTML = '';
+    box.replaceChildren();
     if (results.length < 2) { box.hidden = true; return; }
     box.hidden = false;
     const table = h('table', { class: 'data summary' },
@@ -466,11 +516,11 @@
   function renderRuleImport() {
     const box = $('#ruleimport');
     if (!box || !BUILD.importable) return;
-    box.innerHTML = '';
+    box.replaceChildren();
     const list = h('ul', null, Object.entries(BUILD.importable).map(([id, v]) => {
       const c = imported[id];
       return h('li', null, h('strong', { text: id }), ' – ', v.title, ': ',
-        c ? h('span', { class: c.importedFrom && c.importedFrom.verified ? 'ok-text' : 'warn-note' }, 'geladen' + (c.importedFrom ? ' (' + c.importedFrom.file + (c.importedFrom.verified ? ', SHA-256 entspricht der geprüften Version ' + v.version : ', ABWEICHENDE Version: SHA-256 ' + c.importedFrom.sha256.slice(0, 12) + '… statt ' + v.sha256.slice(0, 12) + '… – Ergebnisse nicht mit der Referenzfassung abgeglichen') + ')' : ''))
+        c ? h('span', { class: c.importedFrom && c.importedFrom.verified ? 'ok-text' : 'warn-note' }, 'geladen' + (c.importedFrom ? ' (' + c.importedFrom.file + (c.importedFrom.verified ? ', SHA-256 entspricht der geprüften Version ' + v.version : ', ABWEICHENDE Version: SHA-256 ' + c.importedFrom.sha256.slice(0, 12) + '… statt ' + v.sha256.slice(0, 12) + '… – Ergebnisse nicht mit der Referenzfassung abgeglichen; nur für diese Sitzung geladen, nicht gespeichert') + ')' : ''))
           : h('span', { class: 'muted' }, 'nicht geladen – Bezugsquelle: ' + v.source));
     }));
     const input = h('input', { type: 'file', accept: '.sch', multiple: 'multiple' });
@@ -488,11 +538,32 @@
       for (const id of Object.keys(imported)) { delete imported[id]; try { localStorage.removeItem(STORE_PREFIX + id); } catch (e) { /* storage unavailable: memory only */ } }
       renderRuleImport();
     } }, 'Geladene Regelwerke löschen') : null;
+    if (discarded.length) box.append(h('p', { class: 'note warn-note', 'data-integrity': 'discarded' }, 'Im Browser gespeicherte Regelwerke (' + discarded.join(', ') + ') stimmten nicht mit der geprüften Fassung überein (verändert oder beschädigt) und wurden gelöscht. Bitte die offiziellen Dateien erneut laden.'));
     box.append(h('p', { class: 'small' }, 'Die Regeln der Peppol BIS Billing 3.0 sind urheberrechtlich geschützt (OpenPeppol AISBL) und nicht zur Weitergabe lizenziert; sie werden deshalb nicht mitgeliefert. Laden Sie die offiziellen Dateien selbst herunter und wählen Sie sie hier aus – sie werden nur in diesem Browser gespeichert und lassen sich hier wieder löschen.'), list, h('label', { class: 'btn secondary' }, 'Regeldatei (.sch) laden …', input), clear ? ' ' : null, clear, msg);
+  }
+
+  // ---------- support period and age of a saved copy ----------
+  // Art. 13 Abs. 19 Unterabs. 2 der Verordnung (EU) 2024/2847: a notice when the support period has ended; and, as there
+  // is no network connection (and so no update check), a notice when a copy opened from disk is older than six months
+  const MONTHS = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
+  function lifecycleNotice(now) {
+    const box = $('#lifecycle');
+    const sec = SECURITY;
+    if (!box) return;
+    now = now || new Date();
+    const notes = [];
+    const m = /^(\d{4})-(\d{2})$/.exec(sec.supportEnd || '');
+    if (m && now.getTime() >= Date.UTC(Number(m[1]), Number(m[2]), 1)) notes.push(['Der Unterstützungszeitraum dieses Programms endete im ' + MONTHS[Number(m[2]) - 1] + ' ' + m[1] + '; es erhält keine Sicherheitsupdates mehr.', sec.releases]);
+    const built = /^\d{4}-\d{2}-\d{2}$/.test(BUILD.date || '') ? Date.parse(BUILD.date + 'T00:00:00Z') : NaN;
+    if (location.protocol === 'file:' && !isNaN(built) && now.getTime() - built > 183 * 864e5) notes.push(['Diese gespeicherte Fassung ist vom ' + fmtDate(BUILD.date) + ' und älter als sechs Monate. Eine neuere Version kann Sicherheitskorrekturen enthalten.', sec.releases]);
+    if (!notes.length) { box.hidden = true; return; }
+    box.replaceChildren(...notes.map(([t, url]) => h('p', null, t, url ? [' Neueste Version: ', h('a', { href: url, rel: 'noopener noreferrer' }, url)] : null)));
+    box.hidden = false;
   }
 
   function init() {
     loadImported();
+    lifecycleNotice();
     const drop = $('#drop');
     const input = $('#file');
     input.addEventListener('change', () => { handleFiles(input.files); input.value = ''; });
@@ -505,7 +576,7 @@
     $('#lines-csv').addEventListener('click', exportLinesCsv);
     $('#json').addEventListener('click', exportJson);
     $('#print').addEventListener('click', () => window.print());
-    $('#clear').addEventListener('click', () => { results.length = 0; $('#results').innerHTML = ''; renderSummary(); $('#exports').hidden = true; });
+    $('#clear').addEventListener('click', () => { results.length = 0; $('#results').replaceChildren(); renderSummary(); $('#exports').hidden = true; });
     // build info: rule sets, versions, verification fingerprint (version axis)
     const bi = $('#buildinfo');
     if (bi && BUILD.standards) {
@@ -520,5 +591,5 @@
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
-  window.PrueferApp = { analyzeFile, results, handleFiles, importRuleFile, imported, reportCtx };
+  window.PrueferApp = { analyzeFile, results, handleFiles, importRuleFile, imported, discarded, reportCtx, lifecycleNotice };
 })();

@@ -17,6 +17,7 @@ const XsdValidator = require(path.join(root, 'src', 'xsd-validator.js'));
 const PdfA3Checks = require(path.join(root, 'src', 'pdfa3-checks.js'));
 const XmlEncoding = require(path.join(root, 'src', 'xml-encoding.js'));
 const VatRelevance = require(path.join(root, 'src', 'vat-relevance.js'));
+const FileSafety = require(path.join(root, 'src', 'file-safety.js'));
 
 /** build/bt-paths.json without its provenance fields: the part the program uses (syntax binding, groups) */
 function vatPaths() {
@@ -31,7 +32,7 @@ function createEnv(opts) {
   const loadJson = (dir, id) => { const f = path.join(root, 'build', dir, id + '.json'); return fs.existsSync(f) ? JSON.parse(fs.readFileSync(f, 'utf8')) : null; };
   const ruleSetCache = {}, xsdCache = {};
   const env = {
-    fontoxpath: fx, SchematronRunner, XsdValidator, PdfEmbedded, PdfA3Checks, XmlEncoding, InvoiceModel, VatRelevance,
+    fontoxpath: fx, SchematronRunner, XsdValidator, PdfEmbedded, PdfA3Checks, XmlEncoding, InvoiceModel, VatRelevance, FileSafety,
     // the same data as the browser build (window.PRUEFER_VAT): legal table and syntax binding
     vatData: { legal: JSON.parse(fs.readFileSync(path.join(root, 'legal', 'ust-pflichtangaben.json'), 'utf8')), paths: vatPaths() },
     scenarios: JSON.parse(fs.readFileSync(path.join(root, 'build', 'scenarios.json'), 'utf8')),

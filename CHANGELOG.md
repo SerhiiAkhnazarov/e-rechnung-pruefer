@@ -1,5 +1,59 @@
 # Changelog
 
+## 0.4.0 (2026-10-21)
+
+Sicherheit – Schwachstellen gesucht und beseitigt
+- **Behoben: CSV-Formelinjektion (CWE-1236)** in den CSV-Exporten der Versionen 0.2.0 bis 0.3.1: Dateinamen und
+  Rechnungsdaten wurden ohne Schutz vor Formeln in die Zellen geschrieben; eine präparierte Rechnung konnte beim Öffnen
+  des Exports in einer Tabellenkalkulation eine Formel einschleusen. Zellen, die als Formel gelesen würden (Beginn mit
+  =, +, -, @, deren Vollbreitenformen, Tabulator oder Wagenrücklauf), beginnen jetzt mit einem Apostroph; reine Zahlen
+  bleiben Zahlen. Sicherheitshinweis E-RECHNUNG-PRUEFER-SA-2026-001 (CSAF 2.0; CVSS 4.0: 5.1, CVSS 3.1: 6.1).
+  Mit älteren Versionen erstellte CSV-Dateien aus Rechnungen unbekannter Herkunft bitte nicht ungeprüft öffnen.
+- Nur noch die eigenen Skripte laufen: Die Content-Security-Policy erlaubt jedes eingebettete Skript und den Stil nur
+  über ihre SHA-256 (kein `'unsafe-inline'`), dazu `base-uri`, `object-src` und `form-action` `'none'`; Trusted Types
+  sind erzwungen (`require-trusted-types-for 'script'`, eine Richtlinie nur für den XML-Parser); die Oberfläche baut
+  kein HTML mehr aus Zeichenketten; `referrer` `no-referrer`. Der Build bricht bei Inline-Ereignissen,
+  Stilattributen oder Skripten mit Attributen ab.
+- Anlagen und eingebettete Dateien werden vor dem Download eingestuft (`src/file-safety.js`): Programme, Skripte,
+  HTML/SVG, Office-Dokumente mit Makros, Archive mit Programmen, Verknüpfungen, Datenträgerabbilder, PDF mit JavaScript
+  oder Launch-Aktion und die EICAR-Testdatei gelten als **gefährlich** – Download erst nach einer zweiten Bestätigung,
+  unter dem Namen „….gesperrt“; Office-Dokumente, Archive, RTF und Dateien, deren Inhalt nicht zu Endung oder Typ
+  passt, mit **Vorsicht**-Hinweis und Begründung. Jeder angebotene Dateiname ist bereinigt (Steuer-, Format- und
+  Richtungszeichen, Pfadtrenner, unter Windows reservierte Namen, Länge).
+- Aktive Inhalte in PDF-Rechnungen und PDF-Anlagen werden gemeldet – JavaScript, Start- und Zusatzaktionen, auch ohne
+  lesbare Querverweistabelle: neue Prüfungen PDFA3-ACTIONS und PDFA3-AA (wie veraPDF 6.5.1, 6.5.2, 6.4.1) und
+  PDF-JAVASCRIPT; Sicherheitshinweise im Ergebnis, im Prüfprotokoll und im JSON-Bericht.
+- Selbst geladene Peppol-Regelwerke werden nur gespeichert und aus dem Browserspeicher verwendet, wenn sie byte-gleich
+  mit der geprüften Fassung sind (SHA-256 in der Seite, `build/importable.json`); veränderte werden gelöscht und gemeldet.
+- Hinweise zum Lebenszyklus (Art. 13 Abs. 19 CRA): nach dem Ende des Unterstützungszeitraums (Dezember 2031) und bei
+  gespeicherten Fassungen, die älter als sechs Monate sind.
+- Unabhängige Sicherheitsprüfung vor der Veröffentlichung: zwei Funde behoben, keine veröffentlichte Version betroffen
+  (aktive Inhalte ohne lesbare Querverweistabelle nicht erkannt; EICAR-Erkennung auf 128 Byte begrenzt).
+
+Sicherheitsinformationen, Stücklisten, Cyber Resilience Act
+- Richtlinie zur koordinierten Offenlegung nach BSI TR-03183-3 und ISO/IEC 29147 (`SECURITY.md`), Meldeseite,
+  Richtlinie, Danksagungen, Sicherheitshinweise, Informationen für Nutzer (Anhang II), Impressum und Datenschutz als
+  Seiten ohne JavaScript; `security.txt` nach RFC 9116 (mit Ablaufprüfung).
+- Sicherheitshinweise und VEX als CSAF 2.0 (`/.well-known/csaf/`, Rolle „CSAF publisher“, Prüfsummen), geprüft gegen
+  das offizielle Schema und die Pflichttests.
+- Stückliste nach BSI TR-03183-2 v2.1.0 (Lieferumfang vollständig aufgelöst: 34 Komponenten mit Ersteller, Lizenzen,
+  SHA-512, Herkunft und Abhängigkeiten), VEX `vex.cdx.json`, Stückliste der Prüfumgebung `test-environment.cdx.json`.
+- Herkunftsnachweise (GitHub Artifact Attestations, Sigstore) für jede veröffentlichte Datei; nach dem Deployment wird
+  jede veröffentlichte Datei abgerufen und byte-genau verglichen.
+- Technische Dokumentation (Anhang VII), Meldeverfahren nach Art. 14, Entwurf der EU-Konformitätserklärung (nicht
+  ausgestellt), Sorgfaltsprüfung aller Komponenten (`docs/CRA/`, `docs/KOMPONENTEN.md`); Unterstützungszeitraum bis
+  Dezember 2031; Impressum nach § 25 MedienG.
+
+Lieferkette und Prüfumgebung
+- Alle GitHub Actions auf Commits festgelegt, Checkout ohne gespeicherte Anmeldedaten, geringste Rechte je Job;
+  Node 22 und Java 21 in der jeweils neuesten Fassung; Testwerkzeuge in festen Versionen aus `package.json`, ohne
+  Installationsskripte (Playwright 1.64.1, pdf.js 6.4.299, esbuild 0.28.2).
+- Schwachstellensuche mit OSV-Scanner bei jedem Push und wöchentlich (Programm samt Vorläufern und Prüfumgebung;
+  unbewertete Funde des Programms brechen ab; Check-Run „vulnerability scan“, Voraussetzung für ein Release); CodeQL
+  für Programm und Workflows; OpenSSF Scorecard; Dependabot mit sieben Tagen Wartezeit.
+- Neue Testreihen `security` (441 Prüfungen) und `security-browser-*` (fünf Browser); `sbom` erweitert (494 Prüfungen);
+  `peppol-import-*` verlangt das dauerhafte Speichern der offiziellen Regelwerke.
+
 ## 0.3.1 (2026-10-21)
 
 Umsatzsteuerliche Einordnung – Abgleich mit dem Original des BMF-Schreibens vom 15.10.2026

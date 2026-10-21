@@ -1,0 +1,99 @@
+# security.yml — static security analysis and the weekly vulnerability scan (SECURITY.md, docs/SICHERHEIT.md):
+#   - CodeQL (GitHub code scanning, query suite security-extended) over the JavaScript of the program, its tools and
+#     tests, and over the workflows themselves (language "actions": injection, untrusted checkout, permissions);
+#     findings appear in the Security tab of the repository and fail pull requests through code scanning;
+#   - every Tuesday and by hand: OSV-Scanner over the program (dist/sbom.cdx.json, flattened with the upstream releases
+#     it derives from) and over the build and test environment as the repository states it (pinned actions,
+#     package-lock.json, release artefacts of the manifest) – new advisories appear without any change of the
+#     repository. A finding for the program that security/vex.json does not assess fails the run (check run
+#     "vulnerability scan (weekly)"); every push is scanned by the workflow verify (check run "vulnerability scan").
+name: security
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    - cron: '41 4 * * 2'   # Tuesdays 04:41 UTC
+  workflow_dispatch:
+permissions: {}
+concurrency:
+  group: security-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  codeql:
+    name: CodeQL (${{ matrix.language }})
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    permissions:
+      contents: read         # checkout
+      security-events: write # code scanning results
+      actions: read          # workflow information for CodeQL
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [javascript-typescript, actions]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: github/codeql-action/init@9b3254085494b55a0f7c4c2b3d2d52cc712ce370 # v4.39.1
+        with:
+          languages: ${{ matrix.language }}
+          build-mode: none
+          queries: security-extended
+          config: |
+            paths-ignore:
+              - vendor/**
+              - build/**
+              - dist/**
+      - uses: github/codeql-action/analyze@9b3254085494b55a0f7c4c2b3d2d52cc712ce370 # v4.39.1
+        with:
+          category: /language:${{ matrix.language }}
+
+  osv-weekly:
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: read # checkout
+      checks: write  # check run "vulnerability scan (weekly)"
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '22'
+          check-latest: true
+      - name: The page and its SBOM, built from the committed sources
+        run: node tools/build-standalone.cjs --version "$(sed -n -E 's/^## ([0-9]+\.[0-9]+\.[0-9]+) .*/\1/p' CHANGELOG.md | head -n 1)"
+      - name: Bill of materials of the environment as stated by the repository
+        run: node tools/make-test-bom.cjs --static --require-pinned --out build/reports/test-environment-static.cdx.json
+      - name: Known vulnerabilities (OSV-Scanner 2.7.0, release binary, SHA-256 checked)
+        id: osv
+        run: |
+          set -e
+          curl -sSfL -o osv-scanner https://github.com/google/osv-scanner/releases/download/v2.7.0/osv-scanner_linux_amd64
+          echo "160c6253e2922e9e0a6a9771c5c4c40a4b3c6090b34a3cdd5e80c96cc2e4218b  osv-scanner" | sha256sum -c -
+          chmod +x osv-scanner
+          node tools/osv-scan.cjs --scanner ./osv-scanner --env build/reports/test-environment-static.cdx.json --out build/reports/osv-scan.txt
+      - name: Publish the result as check run "vulnerability scan (weekly)"
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          OSV: ${{ steps.osv.outcome }}
+        run: |
+          [ -f build/reports/osv-scan.txt ] || echo "osv-scan.txt missing" > build/reports/osv-scan.txt
+          rc=0
+          node .github/scripts/check-run.cjs --name "vulnerability scan (weekly)" --sha "${GITHUB_SHA}" \
+            --gate "${OSV}" --gate-label "OSV-Scanner: Programm und Umgebung laut Repository, Bewertung in security/vex.json" \
+            --attach build/reports/osv-scan.txt > check-run.json || rc=$?
+          gh api -X POST "repos/${GITHUB_REPOSITORY}/check-runs" --input check-run.json > /dev/null || echo "::warning::check run could not be published"
+          exit "${rc}"
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: always()
+        with:
+          name: osv-weekly
+          path: |
+            build/reports/osv-scan.txt
+            build/reports/test-environment-static.cdx.json

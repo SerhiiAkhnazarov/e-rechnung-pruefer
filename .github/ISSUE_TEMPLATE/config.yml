@@ -1,0 +1,9 @@
+# Sicherheitslücken nie als öffentliches Issue (SECURITY.md)
+blank_issues_enabled: false
+contact_links:
+  - name: Sicherheitslücke melden (vertraulich)
+    url: https://github.com/SerhiiAkhnazarov/e-rechnung-pruefer/security/advisories/new
+    about: Schwachstellen bitte vertraulich melden – nicht als Issue. Alle Wege und Fristen https://serhiiakhnazarov.github.io/e-rechnung-pruefer/security-contact/
+  - name: Richtlinie zur koordinierten Offenlegung
+    url: https://serhiiakhnazarov.github.io/e-rechnung-pruefer/cvd-policy/
+    about: Was als Schwachstelle gilt, unsere Zusagen und Fristen

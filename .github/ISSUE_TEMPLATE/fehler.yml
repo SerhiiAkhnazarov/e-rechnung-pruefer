@@ -1,0 +1,35 @@
+name: Fehler oder abweichendes Prüfergebnis
+description: Das Ergebnis weicht vom offiziellen Validator ab, die Seite verhält sich falsch, ein Export ist fehlerhaft – keine Sicherheitslücken (dafür „Sicherheitslücke melden“)
+labels: [fehler]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **Sicherheitslücken bitte nicht hier melden**, sondern vertraulich: https://github.com/SerhiiAkhnazarov/e-rechnung-pruefer/security/advisories/new.
+        Rechnungen mit echten Daten bitte vor dem Hochladen schwärzen – Issues sind öffentlich.
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: Fußzeile der Seite (z. B. 0.4.0) und, wenn bekannt, die Programm-SHA-256
+    validations:
+      required: true
+  - type: input
+    id: browser
+    attributes:
+      label: Browser und Betriebssystem
+      placeholder: z. B. Microsoft Edge 141 unter Windows 11
+    validations:
+      required: true
+  - type: textarea
+    id: was
+    attributes:
+      label: Was ist passiert, was haben Sie erwartet?
+      description: Bei abweichenden Prüfergebnissen bitte das Ergebnis des offiziellen KoSIT-Validators dazuschreiben.
+    validations:
+      required: true
+  - type: textarea
+    id: datei
+    attributes:
+      label: Datei oder Schritte zum Nachvollziehen
+      description: Eine möglichst kleine, geschwärzte Datei anhängen oder die Schritte beschreiben.
