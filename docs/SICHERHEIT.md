@@ -1,6 +1,6 @@
 # Sicherheit und Verordnung (EU) 2024/2847 (Cyber Resilience Act)
 
-Stand: **21.10.2026** (Version 0.4.0). Meldeweg für Schwachstellen: `SECURITY.md`
+Stand: **25.10.2026** (Version 0.4.0, Release `v0.4.0` vom 25.10.2026). Meldeweg für Schwachstellen: `SECURITY.md`
 (https://serhiiakhnazarov.github.io/e-rechnung-pruefer/security-contact/). Informationen für Nutzer nach Anhang II:
 `docs/BENUTZERINFORMATION.md`. Technische Dokumentation nach Anhang VII: `docs/CRA/TECHNISCHE-DOKUMENTATION.md`.
 Meldeverfahren nach Art. 14: `docs/CRA/MELDEVERFAHREN-ART14.md`. Sorgfaltsprüfung der Komponenten (Art. 13 Abs. 5):
@@ -27,7 +27,10 @@ Meldeverfahren nach Art. 14: `docs/CRA/MELDEVERFAHREN-ART14.md`. Sorgfaltsprüfu
 * **Ist der Prüfer ein Produkt mit digitalen Elementen?** Die heruntergeladene oder gespeicherte Datei
   (`E-Rechnung-Pruefer.html` aus den Releases) ist Software, die auf dem Gerät des Nutzers ausgeführt wird – nach Rn. 20
   der Leitlinien ein Produkt mit digitalen Elementen. Die Seite auf GitHub Pages ist für sich genommen eine
-  Webanwendung (Rn. 21, Beispiel 5), aber byte-gleich mit dieser Datei. Maßgeblich ist daher die nächste Frage.
+  Webanwendung (Rn. 21, Beispiel 5), enthält aber dasselbe Programm wie diese Datei: bei Veröffentlichung eines Releases
+  byte-gleich, bis zur nächsten Version mit derselben Programm-Prüfsumme (`programSha256`; der Job `pages` veröffentlicht
+  für eine Version mit Release kein anderes Programm, nur einen neuen Build-Vermerk). Maßgeblich ist daher die nächste
+  Frage.
 * **Wird er auf dem Markt bereitgestellt?** Der Prüfer ist freie Software (EUPL-1.2) einer natürlichen Person, ohne
   Preis, ohne kostenpflichtige Ausgabe oder Unterstützung, ohne Spenden, ohne Werbung und ohne Erhebung
   personenbezogener Daten. Nach dieser Bewertung wird er derzeit **nicht im Rahmen einer Geschäftstätigkeit**
@@ -116,7 +119,7 @@ Meldeverfahren nach Art. 14: `docs/CRA/MELDEVERFAHREN-ART14.md`. Sorgfaltsprüfu
 
 | Kennung | Schwachstelle | betroffen | behoben | veröffentlicht |
 |---|---|---|---|---|
-| E-RECHNUNG-PRUEFER-SA-2026-001 | CSV-Formelinjektion in den CSV-Exporten (CWE-1236), CVSS 4.0: 5.1, CVSS 3.1: 6.1 | 0.2.0, 0.3.0, 0.3.1 | 0.4.0 | CSAF 2.0 mit 0.4.0; GitHub Security Advisory durch den Hersteller |
+| E-RECHNUNG-PRUEFER-SA-2026-001 | CSV-Formelinjektion in den CSV-Exporten (CWE-1236), CVSS 4.0: 5.1, CVSS 3.1: 6.1 | 0.2.0, 0.3.0, 0.3.1 | 0.4.0 | CSAF 2.0 mit 0.4.0 (21.10.2026); Release `v0.4.0` (25.10.2026); GitHub Security Advisory: ausstehend (Abschnitt 7) |
 
 Vor der Veröffentlichung von 0.4.0 gefunden und behoben (keine veröffentlichte Version betroffen, daher kein
 Sicherheitshinweis, TR-03183-3 4.4.10 a):
@@ -135,17 +138,26 @@ Sicherheitshinweis, TR-03183-3 4.4.10 a):
 
 ## 7. Maßnahmen des Anbieters (Einstellungen des Repositorys)
 
-Diese Schritte kann nur der Inhaber des Repositorys ausführen; der Stand wird über die API geprüft:
+Diese Schritte kann nur der Inhaber des Repositorys ausführen (die Entwicklungsumgebung hat für Einstellungen,
+Regelsätze und Security Advisories keine Berechtigung); der Stand wird über die API geprüft, zuletzt am 25.10.2026.
 
-* Dependabot alerts und Dependabot security updates einschalten; Secret Scanning für generische Muster
-  („non-provider patterns“) einschalten.
+Erledigt: Dependabot security updates (setzen Dependabot alerts voraus), Secret Scanning mit Push Protection, Private
+vulnerability reporting; Release `v0.4.0` (25.10.2026, `release.yml`). Entfällt: Secret Scanning für generische Muster
+(„non-provider patterns“) – nach GitHub Docs nur für Repositorys von Organisationen mit GitHub Secret Protection.
+
+Offen:
+
 * Regelsatz für `main`: kein Force-Push, kein Löschen (OpenSSF Scorecard „Branch-Protection“).
 * Den öffentlichen Spiegel `pw-webkit-mirror` auf privat stellen (nicht Teil des Projekts).
+* Den Sicherheitshinweis E-RECHNUNG-PRUEFER-SA-2026-001 als GitHub Security Advisory anlegen, eine CVE-Kennung
+  beantragen und das Advisory veröffentlichen; danach CSAF-Revision 2 mit den Kennungen (`security/csaf/`).
+* Optional: unveränderliche Releases (Settings → Releases → „Enable release immutability“). Gilt nur für künftige
+  Releases: deren Dateien und Tag lassen sich dann nicht mehr ändern, GitHub erzeugt eine Release-Bescheinigung
+  (`gh release verify`, `gh release verify-asset`). `release.yml` passt dazu: `gh release create` legt das Release als
+  Entwurf an und veröffentlicht es erst, wenn alle Dateien hochgeladen sind.
 * Optional: Benutzer-Repository `SerhiiAkhnazarov.github.io` mit `.well-known/security.txt` (gleicher Inhalt wie
   die Datei des Projekts), damit `security.txt` auch im Pfad `/.well-known/` der Domain liegt (RFC 9116) und die
   CSAF-Verteilung die Rolle „CSAF provider“ erfüllt (Anforderung 8).
-* Den Sicherheitshinweis E-RECHNUNG-PRUEFER-SA-2026-001 als GitHub Security Advisory anlegen und veröffentlichen
-  (über die Programmierschnittstelle nicht möglich).
 * Optional: OpenSSF Best Practices Badge (https://www.bestpractices.dev/, Anmeldung mit dem GitHub-Konto; OpenSSF
   Scorecard „CII-Best-Practices“).
 * Bei Aufnahme einer Geschäftstätigkeit: Postanschrift in Impressum und Herstellerangaben, ein Postfach auf eigener
@@ -154,10 +166,20 @@ Diese Schritte kann nur der Inhaber des Repositorys ausführen; der Stand wird �
 
 ## 8. OpenSSF Scorecard
 
-Ergebnis für Commit `57df27f` (21.10.2026, Scorecard 5.6.0, https://scorecard.dev/viewer/?uri=github.com/SerhiiAkhnazarov/e-rechnung-pruefer):
-5,1 von 10. Seitdem behoben: „Dangerous-Workflow“ (Veröffentlichung ohne `workflow_run`), „Pinned-Dependencies“
-(Testwerkzeuge nur mit `npm ci` aus der Lockdatei), „Fuzzing“ (fast-check). Erreicht: SAST, Token-Permissions,
-Security-Policy, License, Binary-Artifacts, Dependency-Update-Tool, Vulnerabilities (je 10). Offen, nicht durch Änderungen
-am Code zu beheben: „Branch-Protection“ und „CII-Best-Practices“ (Abschnitt 7), „Signed-Releases“ (bewertet ab dem ersten
-Release mit Bundle-Datei), „Maintained“ (Repository jünger als 90 Tage), „Code-Review“ und „Contributors“ (ein einzelner
-Entwickler; jede Änderung durchläuft stattdessen alle Testreihen und Check-Runs).
+Ergebnisse (Scorecard 5.6.0, https://scorecard.dev/viewer/?uri=github.com/SerhiiAkhnazarov/e-rechnung-pruefer):
+Commit `57df27f` 5,1 von 10; Commit `b18b6b1` (Version 0.4.0, beide 21.10.2026) **6,9 von 10**. Dazwischen behoben:
+„Dangerous-Workflow“ 0 → 10 (Veröffentlichung ohne `workflow_run`), „Pinned-Dependencies“ 7 → 10 (Testwerkzeuge nur mit
+`npm ci` aus der Lockdatei), „Fuzzing“ 0 → 10 (fast-check). Je 10 außerdem: SAST, Token-Permissions, Security-Policy,
+License, Binary-Artifacts, Dependency-Update-Tool, Vulnerabilities.
+
+„Signed-Releases“ war ohne Release nicht bewertet. Release `v0.4.0` (25.10.2026) enthält den Herkunftsnachweis
+`E-Rechnung-Pruefer-0.4.0.intoto.jsonl`; dafür vergibt Scorecard 10 Punkte (Prüfung `releasesHaveProvenance`: je Release
+10 Punkte für eine Datei mit der Endung `.intoto.jsonl`, gemittelt über die letzten fünf Releases). Der Gesamtwert
+steigt damit rechnerisch auf 7,2 (gewichtetes Mittel nach Risikostufe: kritisch 10, hoch 7,5, mittel 5, gering 2,5;
+nicht bewertete Prüfungen zählen nicht) – ab dem nächsten Lauf (bei jedem Push auf `main`, sonst mittwochs).
+
+Offen, nicht durch Änderungen am Code zu beheben: „Branch-Protection“ (Regelsatz, Abschnitt 7: Schutz vor Löschen und
+Force-Push ergibt Stufe 1 mit 3 Punkten, Gesamtwert rechnerisch 7,4; höhere Stufen verlangen Reviews durch andere
+Personen), „CII-Best-Practices“ (Abschnitt 7), „Maintained“ (Repository jünger als 90 Tage), „Code-Review“ und
+„Contributors“ (ein einzelner Entwickler; jede Änderung durchläuft stattdessen alle Testreihen und Check-Runs). Nicht
+bewertet und nicht anwendbar: „Packaging“ (kein Paket einer Registry), „CI-Tests“ (keine Pull Requests).

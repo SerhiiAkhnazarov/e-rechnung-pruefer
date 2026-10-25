@@ -1,7 +1,7 @@
 # Komponenten und Sorgfaltsprüfung (Art. 13 Abs. 5 der Verordnung (EU) 2024/2847)
 
-Stand: **21.10.2026** (Version 0.4.0). Für jede Komponente Dritter: verwendete und neueste Version, Lizenz, Pflege,
-bekannte Schwachstellen und Integrität. Die Stückliste mit allen Einzelheiten ist `sbom.cdx.json` (Programm) bzw.
+Stand: **21.10.2026** (Version 0.4.0; Funde der Prüfumgebung bewertet am 25.10.2026). Für jede Komponente Dritter:
+verwendete und neueste Version, Lizenz, Pflege, bekannte Schwachstellen und Integrität. Die Stückliste mit allen Einzelheiten ist `sbom.cdx.json` (Programm) bzw.
 `test-environment.cdx.json` (Prüfumgebung); die Bewertung bekannter Schwachstellen `security/vex.json`
 (`vex.cdx.json`, CSAF-VEX). Laufende Überwachung: OSV-Scanner bei jedem Push und wöchentlich (Check-Runs
 „vulnerability scan“, „vulnerability scan (weekly)“), neue Versionen der Quellen wöchentlich (`drift.yml`, bewusst nicht
@@ -54,6 +54,7 @@ Commit bzw. die SHA-256 jeder Quelle (`build/STANDARDS_MANIFEST.json`, geprüft 
 | Node.js | 22 (jeweils neueste 22.x) | 24 LTS | MIT | 22 wird bis April 2027 gepflegt |
 | Java (Temurin) | 21 (jeweils neueste 21.x) | 25 LTS | GPL-2.0 mit Classpath-Ausnahme | 21 ist LTS; Referenzurteile gelten für JDK 21 |
 | Python, `jsonschema` | System des Runners | – | PSF / MIT | nur Schemaprüfung |
+| git (System des Runners `ubuntu-24.04`, PPA git-core) | 2.55.0 (`1:2.55.0-0ppa1~ubuntu24.04.2`) | 2.56.0 | GPL-2.0-only | OSV-Scanner meldet UBUNTU-CVE-2018-1000021 (Ubuntu-Priorität „low“) und UBUNTU-CVE-2024-52005 („medium“, für Ubuntu 24.04 „fix deferred“): Meldungen eines Git-Servers gelangen samt Terminal-Steuersequenzen ungefiltert auf die Fehlerausgabe. Bewertung (25.10.2026): im Projekt nicht ausnutzbar – git spricht nur über HTTPS mit github.com (Checkout dieses Repositorys, `git ls-remote` der festgelegten Quellen in `drift`), die Ausgabe landet im Protokoll des Laufs statt auf einem Terminal, eine Ausnutzung setzte einen kompromittierten GitHub-Server voraus (Restrisiko „Kompromittierung von GitHub selbst“, `docs/SICHERHEIT.md` Abschnitt 3); nicht im Programm. Behebung mit dem Abbild des Runners, gemeldet in jedem Check-Run „vulnerability scan“ |
 | GitHub Actions | `actions/checkout` 7.0.1, `setup-node` 7.1.0, `setup-java` 6.1.0, `upload-artifact` 7.0.2, `download-artifact` 8.0.2, `configure-pages` 6.0.0, `upload-pages-artifact` 5.0.0, `deploy-pages` 5.0.1, `attest-build-provenance` 4.2.2, `attest-sbom` 4.1.0, `github/codeql-action` 4.39.1, `ossf/scorecard-action` 2.5.0 | jeweils neueste | MIT / Apache-2.0 | auf Commits festgelegt (Testreihe `sbom`) |
 
 ## 3. Nicht verwendet

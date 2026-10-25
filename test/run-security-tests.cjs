@@ -414,6 +414,13 @@ const EVALUATED = (cell) => /^\s*[=+\-@＝＋－＠]|^[\t\r]/.test(cell) && !/^[
   check('the job pages runs only after every verification job and only for a push to main', /needs: \[verify, kosit-jar-maven, pdfa-verapdf, windows, platforms\]/.test(pagesJob) && /if: github\.event_name == 'push' && github\.ref == 'refs\/heads\/main'/.test(pagesJob));
   check('the job pages builds the page that the job verify tested (programSha256 compared)', /a\.programSha256 !== t\.programSha256/.test(pagesJob) && /download-artifact@[0-9a-f]{40}/.test(pagesJob));
   check('every published file is attested and read back after the deployment', /attest-build-provenance@[0-9a-f]{40}/.test(pagesJob) && /attest-sbom@[0-9a-f]{40}/.test(pagesJob) && /check-published\.cjs "\$\{PAGE_URL\}" --commit "\$\{GITHUB_SHA\}" --local site/.test(pagesJob));
+  // a version with a published release keeps its program; only a missing release (HTTP 404) skips the comparison
+  check('the job pages publishes for a version with a release only the program of that release (programSha256)',
+    /gh api "repos\/\$\{GITHUB_REPOSITORY\}\/releases\/tags\/v\$\{VERSION\}"/.test(pagesJob) && /r\.programSha256 !== a\.programSha256/.test(pagesJob) &&
+    /elif grep -q 'HTTP 404' release-check\/error\.txt; then/.test(pagesJob) && /cat release-check\/error\.txt\n\s+exit 1/.test(pagesJob));
+  const releaseYml = read('.github/workflows/release.yml');
+  check('release notes: byte equality with the page stated for the time of the release (commit), the program until the next version',
+    /bei Veröffentlichung dieses Releases ausgeliefert hat \(Commit \$\{SHA\}/.test(releaseYml) && /dasselbe Programm \(\\`programSha256\\`/.test(releaseYml));
 
   // =============================================================================================================
   section = 'security.txt';

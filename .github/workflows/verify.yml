@@ -378,9 +378,12 @@ jobs:
     # verification report of the job verify of this run (artifact "verification"), so the status line in the program
     # ("… Testreihen bestanden … – GitHub Actions …") is the result of exactly these sources (tools/build-standalone.cjs
     # compares the file fingerprint), and its program (programSha256: the page without the build note) must be the one
-    # the job verify tested. Published beside the program: its SBOM and VEX, the bill of materials of the test
-    # environment of this run, the static pages (vulnerability reports, CVD policy, security advisories, information for
-    # users, Impressum, privacy) and .well-known (security.txt, the CSAF 2.0 distribution). Every published file gets a
+    # the job verify tested. A version that has a published release keeps its program: until CHANGELOG.md names a new
+    # version, the program must be the one of that release (programSha256 of its BUILD_INFO.json), so the page and the
+    # file of the release differ at most in the build note (commit, verification run, date). Published beside the
+    # program: its SBOM and VEX, the bill of materials of the test environment of this run, the static pages
+    # (vulnerability reports, CVD policy, security advisories, information for users, Impressum, privacy) and
+    # .well-known (security.txt, the CSAF 2.0 distribution). Every published file gets a
     # build provenance attestation and the program an SBOM attestation (GitHub artifact attestations, Sigstore):
     # `gh attestation verify E-Rechnung-Pruefer.html -R SerhiiAkhnazarov/e-rechnung-pruefer`. After the deployment every
     # published file is read back over HTTPS and compared byte for byte with this build (tools/check-published.cjs).
@@ -391,7 +394,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     permissions:
-      contents: read      # checkout
+      contents: read      # checkout; the release of this version (program comparison)
       pages: write        # deployment
       id-token: write     # deployment and artifact attestations (Sigstore)
       attestations: write # artifact attestations
@@ -416,6 +419,8 @@ jobs:
           name: verification
           path: ci-verification
       - name: Build the page with the CI verification status
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           set -e -o pipefail
           {
@@ -428,6 +433,19 @@ jobs:
             node -e "const b = require('./dist/BUILD_INFO.json'); console.log('version: ' + b.version + ', verification: ' + b.verification); if (!/GitHub Actions/.test(b.verification) || !/^(\d+) von \1 Testreihen bestanden, 0 fehlgeschlagen/.test(b.verification)) process.exit(1)"
             # the program to be published is the program the job verify tested (same page apart from the build note)
             node -e "const a = require('./dist/BUILD_INFO.json'), t = require('./ci-verification/dist/BUILD_INFO.json'); console.log('program SHA-256: to be published ' + a.programSha256 + ', tested ' + t.programSha256); if (!a.programSha256 || a.programSha256 !== t.programSha256) process.exit(1)"
+            # a version with a published release keeps its program (a changed program needs a new version in CHANGELOG.md):
+            # the program to be published is the program of the release of this version, if there is one
+            mkdir -p release-check
+            if gh api "repos/${GITHUB_REPOSITORY}/releases/tags/v${VERSION}" > release-check/release.json 2> release-check/error.txt; then
+              ASSET="$(node -e "const r = require('./release-check/release.json'); const a = (r.assets || []).find((x) => x.name === 'BUILD_INFO.json'); if (!a) { console.error('release ' + r.tag_name + ' has no BUILD_INFO.json'); process.exit(1); } console.log(a.id)")"
+              gh api -H 'Accept: application/octet-stream' "repos/${GITHUB_REPOSITORY}/releases/assets/${ASSET}" > release-check/BUILD_INFO.json
+              node -e "const a = require('./dist/BUILD_INFO.json'), r = require('./release-check/BUILD_INFO.json'); console.log('program SHA-256: release v' + r.version + ' ' + r.programSha256 + ', to be published ' + a.programSha256); if (r.version !== a.version || r.programSha256 !== a.programSha256) { console.log('the program differs from the release of version ' + r.version + ' – a changed program needs a new version in CHANGELOG.md'); process.exit(1); }"
+            elif grep -q 'HTTP 404' release-check/error.txt; then
+              echo "release v${VERSION}: not published yet"
+            else
+              cat release-check/error.txt
+              exit 1
+            fi
             mkdir -p site
             cp dist/E-Rechnung-Pruefer.html site/index.html
             cp dist/E-Rechnung-Pruefer.html site/E-Rechnung-Pruefer.html

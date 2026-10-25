@@ -13,7 +13,8 @@
 # verify.yml published these files (build provenance, SLSA v1, of every file; SBOM attestation of the program), so that
 # they can be verified without the GitHub API: gh attestation verify <file> -R <repository> --bundle <that file>. Every
 # asset is verified against these bundles (signer: verify.yml of this repository) before the release is created.
-# Release notes: the CHANGELOG section of the version.
+# Release notes: the CHANGELOG section of the version. Until the next version the site serves the same program
+# (the job "pages" of verify.yml compares programSha256 with the release); later commits change only the build note.
 # The result is recorded as check run "release report" of the commit.
 name: release
 on:
@@ -109,7 +110,7 @@ jobs:
             echo
             echo "---"
             echo "Prüfnachweise dieses Stands (Commit ${SHA}): Check-Runs „verification report“, „Windows report“, „platform comparison“, „veraPDF report“, „KoSIT JAR vs. Maven Central“, „vulnerability scan“, „pages report“, „code scanning (javascript-typescript)“, „code scanning (actions)“ – \`GET /repos/${GITHUB_REPOSITORY}/commits/${SHA}/check-runs\`."
-            echo "Die Datei E-Rechnung-Pruefer.html ist byte-gleich mit ${PAGE_URL} (SHA-256 in SHA256SUMS.txt). Herkunftsnachweis: \`gh attestation verify E-Rechnung-Pruefer.html -R ${GITHUB_REPOSITORY}\`, ohne Abruf über die GitHub-API mit \`--bundle E-Rechnung-Pruefer-${VERSION}.intoto.jsonl\` (Sigstore-Bundles der Nachweise: Herkunft jeder Datei nach SLSA v1, Stückliste des Programms)."
+            echo "Die Datei E-Rechnung-Pruefer.html ist byte-gleich mit der Seite, die ${PAGE_URL} bei Veröffentlichung dieses Releases ausgeliefert hat (Commit ${SHA}; SHA-256 in SHA256SUMS.txt). Bis zur nächsten Version enthält die Seite dasselbe Programm (\`programSha256\` in BUILD_INFO.json, vor jeder Veröffentlichung der Seite geprüft); spätere Commits ändern nur den Build-Vermerk (Commit, Prüflauf, Datum). Herkunftsnachweis: \`gh attestation verify E-Rechnung-Pruefer.html -R ${GITHUB_REPOSITORY}\`, ohne Abruf über die GitHub-API mit \`--bundle E-Rechnung-Pruefer-${VERSION}.intoto.jsonl\` (Sigstore-Bundles der Nachweise: Herkunft jeder Datei nach SLSA v1, Stückliste des Programms)."
           } > release-notes.md
           cat release-notes.md
       - name: Create the release
