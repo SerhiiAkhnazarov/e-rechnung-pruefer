@@ -119,7 +119,7 @@ Meldeverfahren nach Art. 14: `docs/CRA/MELDEVERFAHREN-ART14.md`. Sorgfaltsprüfu
 
 | Kennung | Schwachstelle | betroffen | behoben | veröffentlicht |
 |---|---|---|---|---|
-| E-RECHNUNG-PRUEFER-SA-2026-001 | CSV-Formelinjektion in den CSV-Exporten (CWE-1236), CVSS 4.0: 5.1, CVSS 3.1: 6.1 | 0.2.0, 0.3.0, 0.3.1 | 0.4.0 | CSAF 2.0 mit 0.4.0 (21.10.2026); Release `v0.4.0` (25.10.2026); GitHub Security Advisory: ausstehend (Abschnitt 7) |
+| E-RECHNUNG-PRUEFER-SA-2026-001 | CSV-Formelinjektion in den CSV-Exporten (CWE-1236), CVSS 4.0: 5.1, CVSS 3.1: 6.1 | 0.2.0, 0.3.0, 0.3.1 | 0.4.0 | CSAF 2.0 mit 0.4.0 (21.10.2026; Revision 2 mit der GHSA-Kennung am 25.10.2026); Release `v0.4.0` (25.10.2026); GitHub Security Advisory [GHSA-r5wj-q24m-mvg4](https://github.com/SerhiiAkhnazarov/e-rechnung-pruefer/security/advisories/GHSA-r5wj-q24m-mvg4) (25.10.2026); CVE-Kennung: offen (Abschnitt 7) |
 
 Vor der Veröffentlichung von 0.4.0 gefunden und behoben (keine veröffentlichte Version betroffen, daher kein
 Sicherheitshinweis, TR-03183-3 4.4.10 a):
@@ -142,15 +142,16 @@ Diese Schritte kann nur der Inhaber des Repositorys ausführen (die Entwicklungs
 Regelsätze und Security Advisories keine Berechtigung); der Stand wird über die API geprüft, zuletzt am 25.10.2026.
 
 Erledigt: Dependabot security updates (setzen Dependabot alerts voraus), Secret Scanning mit Push Protection, Private
-vulnerability reporting; Release `v0.4.0` (25.10.2026, `release.yml`). Entfällt: Secret Scanning für generische Muster
+vulnerability reporting; Release `v0.4.0` (25.10.2026, `release.yml`); GitHub Security Advisory GHSA-r5wj-q24m-mvg4
+veröffentlicht (25.10.2026, CSAF-Revision 2). Entfällt: Secret Scanning für generische Muster
 („non-provider patterns“) – nach GitHub Docs nur für Repositorys von Organisationen mit GitHub Secret Protection.
 
 Offen:
 
 * Regelsatz für `main`: kein Force-Push, kein Löschen (OpenSSF Scorecard „Branch-Protection“).
 * Den öffentlichen Spiegel `pw-webkit-mirror` auf privat stellen (nicht Teil des Projekts).
-* Den Sicherheitshinweis E-RECHNUNG-PRUEFER-SA-2026-001 als GitHub Security Advisory anlegen, eine CVE-Kennung
-  beantragen und das Advisory veröffentlichen; danach CSAF-Revision 2 mit den Kennungen (`security/csaf/`).
+* Im Advisory GHSA-r5wj-q24m-mvg4 den Schweregrad (CVSS 4.0: 5.1, `CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:A/VC:N/VI:N/VA:N/SC:L/SI:L/SA:N`)
+  und CWE-1236 eintragen und eine CVE-Kennung beantragen; mit der CVE-Kennung folgt CSAF-Revision 3 (`security/csaf/`).
 * Optional: unveränderliche Releases (Settings → Releases → „Enable release immutability“). Gilt nur für künftige
   Releases: deren Dateien und Tag lassen sich dann nicht mehr ändern, GitHub erzeugt eine Release-Bescheinigung
   (`gh release verify`, `gh release verify-asset`). `release.yml` passt dazu: `gh release create` legt das Release als

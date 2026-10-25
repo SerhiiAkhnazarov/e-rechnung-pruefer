@@ -208,11 +208,15 @@ function advisoriesBody(sec, csaf) {
   const date = (t) => t.slice(8, 10) + '.' + t.slice(5, 7) + '.' + t.slice(0, 4);
   const sa = csaf.documents.filter((d) => d.doc.document.category === 'csaf_security_advisory');
   const vex = csaf.documents.filter((d) => d.doc.document.category === 'csaf_vex');
+  // the identifiers of the same vulnerability in other systems: GitHub Security Advisory (repository advisory) and CVE
+  const GHSA = /^GHSA-[2-9cfghjmpqrvwx]{4}(-[2-9cfghjmpqrvwx]{4}){2}$/;
+  const otherIds = (v) => (v.ids || []).map((x) => '<br>' + (GHSA.test(x.text) ? '<a href="' + esc(sec.advisories + '/' + x.text) + '">' + esc(x.text) + '</a>' : esc(x.text))).join('') +
+    (v.cve ? '<br><a href="' + esc('https://www.cve.org/CVERecord?id=' + v.cve) + '">' + esc(v.cve) + '</a>' : '');
   const rowsSa = sa.map((d) => {
     const doc = d.doc, t = doc.document.tracking;
     return doc.vulnerabilities.map((v) => {
       const s = ((v.scores || [])[0] || {}).cvss_v3;
-      return '<tr><td>' + esc(t.id) + '</td><td>' + esc(v.title || doc.document.title) + (v.cwe ? ' (' + esc(v.cwe.id) + ')' : '') + '</td><td>' + date(t.initial_release_date) + (t.current_release_date !== t.initial_release_date ? ', aktualisiert ' + date(t.current_release_date) : '') + '</td><td>' +
+      return '<tr><td>' + esc(t.id) + otherIds(v) + '</td><td>' + esc(v.title || doc.document.title) + (v.cwe ? ' (' + esc(v.cwe.id) + ')' : '') + '</td><td>' + date(t.initial_release_date) + (t.current_release_date !== t.initial_release_date ? ', aktualisiert ' + date(t.current_release_date) : '') + '</td><td>' +
         (s ? esc(s.baseScore.toFixed(1) + ' (' + (SEVERITY[s.baseSeverity] || s.baseSeverity) + ', CVSS ' + s.version + ')') : '–') + '</td><td>' + esc(versions(doc, v.product_status.known_affected)) + '</td><td>' + esc(versions(doc, v.product_status.fixed)) + '</td><td><a href="' + esc(url(d)) + '">CSAF</a></td></tr>';
     }).join('');
   }).join('');

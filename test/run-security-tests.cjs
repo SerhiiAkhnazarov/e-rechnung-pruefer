@@ -364,6 +364,12 @@ const EVALUATED = (cell) => /^\s*[=+\-@＝＋－＠]|^[\t\r]/.test(cell) && !/^[
     const relBroken = relative.filter((u) => !published.has(target(u)));
     check(f + ': relative links resolve (' + relative.length + ')', relBroken.length === 0, relBroken.join(' '));
   }
+  // the page "Sicherheitshinweise" links the GitHub Security Advisory of every security advisory that has one
+  const advisoriesPage = fs.readFileSync(path.join(siteDir, 'advisories', 'index.html'), 'utf8');
+  const ghsaIds = fs.readdirSync(path.join(root, 'security', 'csaf')).flatMap((y) => fs.readdirSync(path.join(root, 'security', 'csaf', y)).filter((f) => f.endsWith('.json'))
+    .map((f) => JSON.parse(read('security/csaf/' + y + '/' + f)))).flatMap((doc) => doc.vulnerabilities.flatMap((v) => (v.ids || []).map((x) => x.text).filter((x) => /^GHSA-/.test(x))));
+  check('advisories page: the GitHub Security Advisory of every security advisory linked (' + ghsaIds.join(', ') + ')',
+    ghsaIds.every((g) => advisoriesPage.includes('href="' + sec.advisories + '/' + g + '"')));
 
   // =============================================================================================================
   section = 'workflows';

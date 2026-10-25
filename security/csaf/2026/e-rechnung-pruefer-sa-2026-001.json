@@ -58,7 +58,7 @@
     ],
     "title": "E-Rechnung Prüfer: CSV-Formelinjektion in den CSV-Exporten (Versionen 0.2.0 bis 0.3.1)",
     "tracking": {
-      "current_release_date": "2026-10-21T20:33:00Z",
+      "current_release_date": "2026-10-25T20:48:00Z",
       "id": "E-RECHNUNG-PRUEFER-SA-2026-001",
       "initial_release_date": "2026-10-21T20:33:00Z",
       "revision_history": [
@@ -66,10 +66,15 @@
           "date": "2026-10-21T20:33:00Z",
           "number": "1",
           "summary": "Erstveröffentlichung"
+        },
+        {
+          "date": "2026-10-25T20:48:00Z",
+          "number": "2",
+          "summary": "Kennung des GitHub Security Advisory ergänzt: GHSA-r5wj-q24m-mvg4"
         }
       ],
       "status": "final",
-      "version": "1"
+      "version": "2"
     }
   },
   "product_tree": {
@@ -205,6 +210,12 @@
         "name": "Improper Neutralization of Formula Elements in a CSV File"
       },
       "discovery_date": "2026-10-21T14:48:00Z",
+      "ids": [
+        {
+          "system_name": "GitHub Security Advisory",
+          "text": "GHSA-r5wj-q24m-mvg4"
+        }
+      ],
       "notes": [
         {
           "category": "description",
@@ -237,6 +248,11 @@
           "category": "external",
           "summary": "OWASP: CSV Injection",
           "url": "https://owasp.org/www-community/attacks/CSV_Injection"
+        },
+        {
+          "category": "external",
+          "summary": "GitHub Security Advisory GHSA-r5wj-q24m-mvg4",
+          "url": "https://github.com/SerhiiAkhnazarov/e-rechnung-pruefer/security/advisories/GHSA-r5wj-q24m-mvg4"
         }
       ],
       "release_date": "2026-10-21T20:33:00Z",
