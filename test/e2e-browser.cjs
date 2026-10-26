@@ -4,6 +4,9 @@
  * WebKit or Firefox when installed; Microsoft Edge or Google Chrome of the machine with --channel)
  * from file://, feeds documents through the file input and compares the findings shown in the page
  * with the Node engine's results for the same files.
+ * Phone width (390 × 844 CSS px): the page with the first file checked – every section open, every tab of the result –
+ * and every static page of the site (dist/site-pages) must not scroll sideways (long words and links wrap, wide
+ * tables scroll inside their own box).
  *
  * Usage: node e2e-browser.cjs [--browser chromium|webkit|firefox] [--channel msedge|chrome] [--screenshot dir] <file>...
  */
@@ -77,6 +80,32 @@ async function nodeFindings(file) {
     if (shotDir) { fs.mkdirSync(shotDir, { recursive: true }); await shot(path.join(shotDir, label + '-' + path.basename(file) + '.png'), true); }
   }
   if (shotDir && files.length) await shot(path.join(shotDir, label + '-overview.png'), false);
+  // phone width: nothing may scroll sideways (the program with a checked file, every section and tab; every site page)
+  const phone = await browser.newContext({ viewport: { width: 390, height: 844 }, ...(process.env.TZ ? { timezoneId: process.env.TZ } : {}) });
+  const ph = await phone.newPage();
+  let phoneViews = 0, phoneWide = 0;
+  const sideways = async (what) => {
+    await ph.evaluate(() => document.querySelectorAll('details').forEach((d) => { d.open = true; }));
+    const [sw, cw] = await ph.evaluate(() => [document.documentElement.scrollWidth, document.documentElement.clientWidth]);
+    phoneViews++;
+    if (sw > cw) { phoneWide++; fails++; console.log(`  phone 390 px: ${what} scrolls sideways (${sw} px content, ${cw} px wide)`); }
+  };
+  await ph.goto(tool.fileUrl(dist));
+  await ph.waitForSelector('#drop');
+  if (files.length) {
+    await ph.setInputFiles('#file', files[0]);
+    await ph.waitForFunction(() => document.querySelectorAll('section.result').length > 0 && document.getElementById('status').hidden, null, { timeout: 120000 });
+  }
+  await sideways('the program');
+  const tabs = ph.locator('section.result .tabs button');
+  for (let i = 0, n = await tabs.count(); i < n; i++) { await tabs.nth(i).click(); await sideways('the program, tab "' + (await tabs.nth(i).textContent()).trim() + '"'); }
+  const siteDir = path.join(__dirname, '..', 'dist', 'site-pages');
+  const sitePages = [];
+  if (fs.existsSync(siteDir)) (function walk(d) { for (const e of fs.readdirSync(d, { withFileTypes: true })) { const p = path.join(d, e.name); if (e.isDirectory()) walk(p); else if (e.name.endsWith('.html')) sitePages.push(p); } })(siteDir);
+  if (!sitePages.length) { fails++; console.log('  phone 390 px: no static pages in dist/site-pages'); }
+  for (const f of sitePages.sort()) { await ph.goto(tool.fileUrl(f)); await sideways(path.relative(siteDir, f).split(path.sep).join('/')); }
+  await phone.close();
+  console.log(`  phone 390 px: ${phoneViews - phoneWide} / ${phoneViews} views without sideways scrolling (the program with ${files.length ? 'a checked file' : 'no file'}, every tab; ${sitePages.length} pages of the site)`);
   await page.waitForTimeout(200); // console messages of the last screenshot
   const toolStyle = (m, i) => browserName === 'webkit' && !channel && errorsBeforeShots !== null && i >= errorsBeforeShots && STYLE_REFUSED.test(m);
   const refused = consoleErrors.filter(toolStyle).length;

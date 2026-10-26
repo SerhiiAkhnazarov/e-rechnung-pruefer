@@ -134,7 +134,7 @@ function renderMarkdown(md, opts) {
 // pages
 // ------------------------------------------------------------------------------------------------
 const STYLE = 'body{font:16px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:#1b2430;background:#f4f6f8;margin:0}' +
-  'main{max-width:860px;margin:0 auto;padding:24px 18px 48px;background:#fff;min-height:100vh}h1{font-size:26px;margin:8px 0 16px}h2{font-size:20px;margin:26px 0 8px}h3{font-size:17px;margin:20px 0 6px}' +
+  'main{max-width:860px;margin:0 auto;padding:24px 18px 48px;background:#fff;min-height:100vh;overflow-wrap:break-word}h1{font-size:26px;margin:8px 0 16px}h2{font-size:20px;margin:26px 0 8px}h3{font-size:17px;margin:20px 0 6px}' +
   'a{color:#0b5cad}code,pre{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:14px;background:#eef1f4;border-radius:4px}code{padding:1px 4px}pre{padding:10px;overflow-x:auto;white-space:pre-wrap;word-break:break-word}' +
   'div.table{overflow-x:auto}table{border-collapse:collapse;margin:8px 0;font-size:15px}th,td{border:1px solid #d9e0e7;padding:5px 8px;text-align:left;vertical-align:top}th{background:#eef1f4}' +
   'nav{font-size:14px;border-bottom:1px solid #d9e0e7;padding-bottom:10px;margin-bottom:10px}nav a{margin-right:12px;display:inline-block}footer{font-size:13px;color:#5d6b7a;border-top:1px solid #d9e0e7;margin-top:30px;padding-top:10px}';
