@@ -4,6 +4,9 @@
 hineinziehen. Kostenlos, ohne Installation, ohne Anmeldung, ohne Upload: Die Seite darf keine Netzwerkverbindung
 aufbauen, die Rechnung wird nicht übertragen.
 
+▶ **[Demo-Video auf YouTube (1:47)](https://youtu.be/-oBxsPO2DYU)**: eine XRechnung, eine fehlerhafte Rechnung und eine
+ZUGFeRD-PDF prüfen, Prüfprotokoll und CSV-Export – mit deutschen Untertiteln, synthetische Sprecherstimme.
+
 <a href="https://serhiiakhnazarov.github.io/e-rechnung-pruefer/"><img src="docs/bilder/ergebnis-xrechnung.png" width="300" alt="Ergebnis einer geprüften XRechnung im Prüfer: OK, keine Format- oder Geschäftsregelfehler, umsatzsteuerliche Einordnung, Schaltflächen „Prüfprotokoll (PDF)“ und „Lesefassung (PDF)“"></a>
 
 Offline-Prüfung elektronischer Rechnungen – XRechnung, ZUGFeRD / Factur-X, EN 16931, Peppol BIS –
