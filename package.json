@@ -7,7 +7,7 @@
   "devDependencies": {
     "esbuild": "0.28.2",
     "fast-check": "4.10.2",
-    "pdfjs-dist": "6.4.299",
+    "pdfjs-dist": "6.5.438",
     "playwright": "1.64.1"
   }
 }
